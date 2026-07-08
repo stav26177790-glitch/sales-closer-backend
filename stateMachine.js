@@ -27,14 +27,15 @@ function formatAgentReplyForChat(state, output) {
       return qs.length ? qs.join('\n') : 'Уточните, пожалуйста, недостающие детали по сделке.';
     }
     case 'DIAGNOSING': {
-      const c = output?.diagnostic_output?.criteria_assessment;
-      if (!c) return JSON.stringify(output?.diagnostic_output || output, null, 2);
+      const diag = output?.diagnostic_output || output;
+      const c = diag?.criteria_assessment || diag?.scores;
+      if (!c) return JSON.stringify(diag, null, 2);
       const lines = Object.entries(c).map(([k, v]) => {
         const status = v?.status || v;
         const comment = v?.comment || v?.explanation || '';
         return `${k}: ${status}${comment ? ' — ' + comment : ''}`;
       });
-      const conflicts = output?.diagnostic_output?.conflicts_explained || [];
+      const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
       const conflictText = conflicts.length
         ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${c.plain_explanation}`).join('\n')
         : '';
@@ -144,14 +145,14 @@ async function advance(dealId, managerInput) {
         break;
       }
 
-      const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
-      output.diagnostic_output = diagnosticResult?.diagnostic_output;
+   const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
+      output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
 
-      if (diagnosticResult?.diagnostic_output?.clarification_needed?.required) {
+      if (output.diagnostic_output?.clarification_needed?.required) {
         nextState = 'SOPRANO_INTERVIEW';
         break;
       }
-      if (diagnosticResult?.diagnostic_output?.conflicts_require_confirmation) {
+      if (output.diagnostic_output?.conflicts_require_confirmation) {
         nextState = 'CONFLICT_RESOLUTION';
         break;
       }
@@ -177,12 +178,12 @@ async function advance(dealId, managerInput) {
       break;
     }
 
-    case 'CONFLICT_RESOLUTION': {
+   case 'CONFLICT_RESOLUTION': {
       const diagnosticResult = await callAgent('diagnostic', {
         ...baseInput,
         manager_conflict_response: { new_facts: managerInput }
       });
-      output.diagnostic_output = diagnosticResult?.diagnostic_output;
+      output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
       nextState = 'DIAGNOSING';
       break;
     }
