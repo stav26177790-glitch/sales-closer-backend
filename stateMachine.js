@@ -26,6 +26,7 @@ function getComposerMessages(composerOutput) {
 }
 
 // Превращает объект/массив в читаемую строку вместо сырого JSON.
+// Используется для значений ВНУТРИ одной строки (например, элемент массива).
 function humanizeValue(val) {
   if (val === null || val === undefined) return '';
   if (typeof val === 'string' || typeof val === 'number') return String(val);
@@ -37,6 +38,39 @@ function humanizeValue(val) {
       .join('; ');
   }
   return String(val);
+}
+
+// Превращает объект в многострочный читаемый блок: каждое поле — на своей строке,
+// с человекопонятной подписью вместо технического ключа (если она задана в labels).
+// В отличие от humanizeValue не "склеивает" всё через "; " в одну строку.
+function renderKeyValueBlock(obj, labels = {}) {
+  if (obj === null || obj === undefined) return '—';
+  if (typeof obj !== 'object') return String(obj);
+  return Object.entries(obj)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `${labels[k] || k}: ${humanizeValue(v)}`)
+    .join('\n');
+}
+
+const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
+const SESSION_SUMMARY_LABELS = {
+  session_number: 'Номер сессии',
+  session_date: 'Дата',
+  what_we_know: 'Что известно',
+  what_blocks: 'Что блокирует',
+  what_was_done: 'Что сделано',
+  what_is_next: 'Дальнейшие шаги',
+  key_insight: 'Ключевой инсайт'
+};
+
+// Блокер иногда приходит не в отдельном поле main_blocker, а зашит внутрь
+// primary_strategy (например, в rationale). Проверяем все известные варианты.
+function getMainBlocker(strategyOutput) {
+  return strategyOutput?.main_blocker
+    || strategyOutput?.blocker
+    || strategyOutput?.primary_strategy?.main_blocker
+    || strategyOutput?.primary_strategy?.blocker
+    || null;
 }
 
 // Единая логика fallback для объяснения расхождений между менеджером и агентом.
@@ -83,13 +117,14 @@ function formatAgentReplyForChat(state, output) {
     case 'STRATEGY_SELECTION': {
       const s = output?.strategy_output;
       if (!s) return JSON.stringify(output, null, 2);
+      const mainBlocker = getMainBlocker(s);
       const lines = [
-        `Стратегия: ${humanizeValue(s.primary_strategy) || '—'}`,
-        s.main_blocker ? `Блокер: ${s.main_blocker}` : null,
+        'Стратегия:\n' + renderKeyValueBlock(s.primary_strategy, STRATEGY_LABELS),
+        mainBlocker ? `Блокер: ${mainBlocker}` : null,
         s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
         s.rationale ? `Обоснование: ${s.rationale}` : null,
       ].filter(Boolean);
-      return lines.join('\n');
+      return lines.join('\n\n');
     }
     case 'COMPOSING': {
       const msgs = getComposerMessages(output?.composer_output);
@@ -158,6 +193,32 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
   return formatFinalSummary(memoryResult?.memory_output, strategyOutput, composerOutput, extra.statusNote);
 }
 
+// Логика приёма новой информации по сделке: planner → diagnostic → определение
+// следующего состояния. Вынесена в отдельную функцию, чтобы её можно было
+// вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
+// при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
+async function runIntakeStep(baseInput) {
+  const output = {};
+
+  const plannerResult = await callAgent('planner', baseInput);
+  output.planner_output = plannerResult?.planner_output;
+
+  if (plannerResult?.planner_output?.clarification_needed?.required) {
+    return { output, nextState: 'SOPRANO_INTERVIEW' };
+  }
+
+  const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
+  output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
+
+  if (output.diagnostic_output?.clarification_needed?.required) {
+    return { output, nextState: 'SOPRANO_INTERVIEW' };
+  }
+  if (output.diagnostic_output?.conflicts_require_confirmation) {
+    return { output, nextState: 'CONFLICT_RESOLUTION' };
+  }
+  return { output, nextState: 'DIAGNOSING' };
+}
+
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
 async function advance(dealId, managerInput) {
   const deal = await db.getDeal(dealId);
@@ -195,26 +256,9 @@ async function advance(dealId, managerInput) {
     case 'INIT':
     case 'COLLECTING':
     case 'SOPRANO_INTERVIEW': {
-      const plannerResult = await callAgent('planner', baseInput);
-      output.planner_output = plannerResult?.planner_output;
-
-      if (plannerResult?.planner_output?.clarification_needed?.required) {
-        nextState = 'SOPRANO_INTERVIEW';
-        break;
-      }
-
-      const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
-      output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
-
-      if (output.diagnostic_output?.clarification_needed?.required) {
-        nextState = 'SOPRANO_INTERVIEW';
-        break;
-      }
-      if (output.diagnostic_output?.conflicts_require_confirmation) {
-        nextState = 'CONFLICT_RESOLUTION';
-        break;
-      }
-      nextState = 'DIAGNOSING';
+      const result = await runIntakeStep(baseInput);
+      output = result.output;
+      nextState = result.nextState;
       break;
     }
 
@@ -336,9 +380,13 @@ async function advance(dealId, managerInput) {
     }
 
     case 'FINAL_OUTPUT': {
-      // Новая сессия по той же сделке
-      nextState = 'INIT';
-      output = {};
+      // Новая сессия по той же сделке. Раньше здесь просто сбрасывали state в INIT
+      // и ничего не делали — первое сообщение менеджера уходило "вхолостую", и
+      // реальная обработка (planner/diagnostic) начиналась только со следующего
+      // сообщения. Теперь обрабатываем его сразу же.
+      const result = await runIntakeStep(baseInput);
+      output = result.output;
+      nextState = result.nextState;
       break;
     }
 
@@ -379,18 +427,20 @@ async function advance(dealId, managerInput) {
 function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, statusNote) {
   if (!memoryOutput) return 'Сессия завершена.';
   const msgs = getComposerMessages(composerOutput);
+  const mainBlocker = getMainBlocker(strategyOutput);
+
   const lines = [
     'ИТОГ СЕССИИ',
     statusNote || null,
-    msgs.length ? '\nКАСАНИЯ:\n' + msgs.map((m, i) =>
+    msgs.length ? 'КАСАНИЯ:\n' + msgs.map((m, i) =>
       `Касание ${i + 1} — ${m.channel}:\n${m.body}`
     ).join('\n\n---\n\n') : null,
-    strategyOutput?.main_blocker ? `Блокер: ${strategyOutput.main_blocker}` : null,
-    strategyOutput?.primary_strategy ? `Стратегия: ${humanizeValue(strategyOutput.primary_strategy)}` : null,
+    mainBlocker ? `Блокер: ${mainBlocker}` : null,
+    strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(strategyOutput.primary_strategy, STRATEGY_LABELS) : null,
     msgs.length ? `Одобренные касания: ${msgs.length}` : null,
-    memoryOutput.session_summary ? `Резюме: ${humanizeValue(memoryOutput.session_summary)}` : null
+    memoryOutput.session_summary ? 'Резюме:\n' + renderKeyValueBlock(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null
   ].filter(Boolean);
-  return lines.join('\n');
+  return lines.join('\n\n');
 }
 
 module.exports = { advance };
