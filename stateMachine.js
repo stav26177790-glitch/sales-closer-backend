@@ -315,8 +315,11 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput) {
   if (!memoryOutput) return 'Сессия завершена.';
   const lines = [
     'ИТОГ СЕССИИ',
+    composerOutput?.messages?.length ? '\nКАСАНИЯ:\n' + composerOutput.messages.map((m, i) =>
+  `Касание ${i + 1} — ${m.channel}:\n${m.body}`
+).join('\n\n---\n\n') : null,
     strategyOutput?.main_blocker ? `Блокер: ${strategyOutput.main_blocker}` : null,
-    strategyOutput?.primary_strategy ? `Стратегия: ${strategyOutput.primary_strategy}` : null,
+    strategyOutput?.primary_strategy ? `Стратегия: ${typeof strategyOutput.primary_strategy === 'object' ? JSON.stringify(strategyOutput.primary_strategy) : strategyOutput.primary_strategy}` : null,
     composerOutput?.messages?.length ? `Одобренные касания: ${composerOutput.messages.length}` : null,
     memoryOutput.session_summary ? `Резюме: ${JSON.stringify(memoryOutput.session_summary)}` : null
   ].filter(Boolean);
