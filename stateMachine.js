@@ -50,7 +50,7 @@ function formatAgentReplyForChat(state, output) {
       const s = output?.strategy_output;
       if (!s) return JSON.stringify(output, null, 2);
       const lines = [
-        `Стратегия: ${s.primary_strategy || '—'}`,
+        `Стратегия: ${typeof s.primary_strategy === 'object' ? JSON.stringify(s.primary_strategy) : s.primary_strategy || '—'}`,
         s.main_blocker ? `Блокер: ${s.main_blocker}` : null,
         s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
         s.rationale ? `Обоснование: ${s.rationale}` : null,
@@ -164,13 +164,12 @@ async function advance(dealId, managerInput) {
       // Переход — показать диагностику и сразу пойти в стратегию (либо конфликт уже отработан выше)
       const strategyInput = { ...baseInput, diagnostic_output: deal.last_diagnostic_output };
       const strategyResult = await callAgent('strategy', strategyInput);
-      output.strategy_output = strategyResult?.strategy_output;
-
-      if (strategyResult?.strategy_output?.deal_health === 'потеряна') {
+      output.strategy_output = strategyResult?.strategy_output || strategyResult;
+      if (output.strategy_output?.deal_health === 'потеряна') {
         nextState = 'LOST_DEAL';
         break;
       }
-      if (strategyResult?.strategy_output?.primary_strategy === 'Disqualification') {
+     if (output.strategy_output?.primary_strategy === 'Disqualification') {
         nextState = 'DISQUALIFICATION';
         break;
       }
@@ -197,7 +196,7 @@ async function advance(dealId, managerInput) {
         iteration: 1
       };
       const composerResult = await callAgent('composer', composerInput, 5000);
-      output.composer_output = composerResult?.composer_output;
+     output.composer_output = composerResult?.composer_output || composerResult;
       nextState = 'COMPOSING';
       break;
     }
@@ -225,7 +224,7 @@ async function advance(dealId, managerInput) {
         strategy_output: deal.last_strategy_output,
         composer_output: deal.last_composer_output
       });
-      output.reviewer_output = reviewerResult?.reviewer_output;
+      output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
       nextState = 'REVIEWING';
       break;
     }
@@ -248,7 +247,7 @@ async function advance(dealId, managerInput) {
           iteration: iterations + 1
         };
         const composerResult = await callAgent('composer', composerInput, 5000);
-        output.composer_output = composerResult?.composer_output;
+       output.composer_output = composerResult?.composer_output || composerResult;
         output._composer_iterations = iterations + 1;
         nextState = 'COMPOSING';
       }
