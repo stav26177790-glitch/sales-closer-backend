@@ -56,9 +56,10 @@ function formatAgentReplyForChat(state, output) {
       ].filter(Boolean);
       return lines.join('\n');
     }
-    case 'COMPOSING': {
-      const msgs = output?.composer_output?.messages || [];
-      if (!msgs.length) return JSON.stringify(output?.composer_output || output, null, 2);
+   case 'COMPOSING': {
+      const msgs = output?.composer_output?.messages 
+        || output?.composer_output?.composer_output?.messages || [];
+      if (!msgs.length) return 'Касания составлены, ожидается проверка...';
       return msgs.map((m, i) =>
         `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
       ).join('\n\n---\n\n');
@@ -70,7 +71,8 @@ function formatAgentReplyForChat(state, output) {
   
   if (verdict === 'ОДОБРЕНО') {
     // Показываем одобренные касания из last_composer_output
-    const msgs = output?.composer_output?.messages || [];
+  const msgs = output?.composer_output?.messages 
+  || output?.composer_output?.composer_output?.messages || [];
     if (msgs.length) {
       const touchpoints = msgs.map((m, i) =>
         `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
