@@ -20,7 +20,6 @@ function validateMessageLength(composerOutput) {
 }
 
 function formatAgentReplyForChat(state, output) {
-  // Человекочитаемое сообщение в чат менеджеру под конкретное состояние.
   switch (state) {
     case 'SOPRANO_INTERVIEW': {
       const qs = output?.diagnostic_output?.clarification_needed?.questions
@@ -29,9 +28,17 @@ function formatAgentReplyForChat(state, output) {
     }
     case 'DIAGNOSING': {
       const c = output?.diagnostic_output?.criteria_assessment;
-      if (!c) return 'Диагностика выполнена.';
-      const lines = Object.entries(c).map(([k, v]) => `${k}: ${v.status || v}`);
-      return `Оценка по критериям:\n${lines.join('\n')}`;
+      if (!c) return JSON.stringify(output?.diagnostic_output || output, null, 2);
+      const lines = Object.entries(c).map(([k, v]) => {
+        const status = v?.status || v;
+        const comment = v?.comment || v?.explanation || '';
+        return `${k}: ${status}${comment ? ' — ' + comment : ''}`;
+      });
+      const conflicts = output?.diagnostic_output?.conflicts_explained || [];
+      const conflictText = conflicts.length
+        ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${c.plain_explanation}`).join('\n')
+        : '';
+      return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
       const conflicts = output?.diagnostic_output?.conflicts_explained || [];
@@ -40,15 +47,30 @@ function formatAgentReplyForChat(state, output) {
     }
     case 'STRATEGY_SELECTION': {
       const s = output?.strategy_output;
-      return s ? `Выбрана стратегия: ${s.primary_strategy}.\nБлокер: ${s.main_blocker || '—'}` : 'Стратегия определена.';
+      if (!s) return JSON.stringify(output, null, 2);
+      const lines = [
+        `Стратегия: ${s.primary_strategy || '—'}`,
+        s.main_blocker ? `Блокер: ${s.main_blocker}` : null,
+        s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
+        s.rationale ? `Обоснование: ${s.rationale}` : null,
+      ].filter(Boolean);
+      return lines.join('\n');
     }
     case 'COMPOSING': {
       const msgs = output?.composer_output?.messages || [];
-      return msgs.map((m) => `Канал: ${m.channel}\n${m.body}`).join('\n\n---\n\n') || 'Касание составлено.';
+      if (!msgs.length) return JSON.stringify(output?.composer_output || output, null, 2);
+      return msgs.map((m, i) =>
+        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
+      ).join('\n\n---\n\n');
     }
     case 'REVIEWING': {
-      const v = output?.reviewer_output?.verdict;
-      return `Проверка по 11 критериям: ${v || 'выполнена'}.`;
+      const r = output?.reviewer_output;
+      if (!r) return JSON.stringify(output, null, 2);
+      const verdict = r.verdict || '—';
+      const details = (r.messages_reviewed || []).map(m =>
+        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
+      ).join('\n');
+      return `Результат проверки: ${verdict}\n${details}`;
     }
     case 'ESCALATION':
       return 'После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.';
@@ -59,7 +81,7 @@ function formatAgentReplyForChat(state, output) {
     case 'FINAL_OUTPUT':
       return output?._finalText || 'Сессия завершена.';
     default:
-      return 'Обрабатываю...';
+      return JSON.stringify(output, null, 2) || 'Обрабатываю...';
   }
 }
 
@@ -268,8 +290,8 @@ async function advance(dealId, managerInput) {
 
   await db.updateDealState(dealId, statePatch);
 
-  const chatText = formatAgentReplyForChat(nextState === deal.current_state ? nextState : deal.current_state, output)
-    || formatAgentReplyForChat(nextState, output);
+ const chatText = formatAgentReplyForChat(nextState, output)
+    || formatAgentReplyForChat(deal.current_state, output);
 
   return { nextState, chatText, raw: output };
 }
