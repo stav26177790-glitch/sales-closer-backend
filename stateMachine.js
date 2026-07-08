@@ -37,8 +37,8 @@ function formatAgentReplyForChat(state, output) {
       });
       const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
       const conflictText = conflicts.length
-        ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${c.plain_explanation}`).join('\n')
-        : '';
+  ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${c.plain_explanation || c.reason || c.agent_assessment || ''}`).join('\n')
+  : '';
       return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
