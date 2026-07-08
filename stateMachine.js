@@ -64,14 +64,26 @@ function formatAgentReplyForChat(state, output) {
       ).join('\n\n---\n\n');
     }
     case 'REVIEWING': {
-      const r = output?.reviewer_output;
-      if (!r) return JSON.stringify(output, null, 2);
-      const verdict = r.verdict || '—';
-      const details = (r.messages_reviewed || []).map(m =>
-        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
-      ).join('\n');
-      return `Результат проверки: ${verdict}\n${details}`;
+  const r = output?.reviewer_output;
+  if (!r) return JSON.stringify(output, null, 2);
+  const verdict = r.verdict || '—';
+  
+  if (verdict === 'ОДОБРЕНО') {
+    // Показываем одобренные касания из last_composer_output
+    const msgs = output?.composer_output?.messages || [];
+    if (msgs.length) {
+      const touchpoints = msgs.map((m, i) =>
+        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
+      ).join('\n\n---\n\n');
+      return `✅ Касания одобрены:\n\n${touchpoints}`;
     }
+  }
+  
+  const details = (r.messages_reviewed || []).map(m =>
+    `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
+  ).join('\n');
+  return `Результат проверки: ${verdict}\n${details}`;
+}
     case 'ESCALATION':
       return 'После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.';
     case 'LOST_DEAL':
@@ -290,7 +302,10 @@ async function advance(dealId, managerInput) {
 
   await db.updateDealState(dealId, statePatch);
 
- const chatText = formatAgentReplyForChat(nextState, output)
+ if (!output.composer_output && deal.last_composer_output) {
+    output.composer_output = deal.last_composer_output;
+  }
+  const chatText = formatAgentReplyForChat(nextState, output)
     || formatAgentReplyForChat(deal.current_state, output);
 
   return { nextState, chatText, raw: output };
