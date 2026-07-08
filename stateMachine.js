@@ -19,6 +19,40 @@ function validateMessageLength(composerOutput) {
   return { valid: violations.length === 0, violations };
 }
 
+// Достаёт массив касаний независимо от того, есть ли лишний уровень вложенности
+// composer_output.composer_output.messages или нет.
+function getComposerMessages(composerOutput) {
+  return composerOutput?.messages || composerOutput?.composer_output?.messages || [];
+}
+
+// Превращает объект/массив в читаемую строку вместо сырого JSON.
+function humanizeValue(val) {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string' || typeof val === 'number') return String(val);
+  if (Array.isArray(val)) return val.map(humanizeValue).filter(Boolean).join('; ');
+  if (typeof val === 'object') {
+    return Object.entries(val)
+      .map(([k, v]) => `${k}: ${humanizeValue(v)}`)
+      .filter(Boolean)
+      .join('; ');
+  }
+  return String(val);
+}
+
+// Единая логика fallback для объяснения расхождений между менеджером и агентом.
+function getConflictExplanation(c) {
+  return c?.plain_explanation
+    || c?.explanation
+    || c?.reason
+    || c?.agent_assessment
+    || c?.comment
+    || 'уточните, пожалуйста, детали по этому критерию';
+}
+
+function getConflictQuestion(c) {
+  return c?.question_for_manager || c?.question || 'Расскажите подробнее об этом моменте.';
+}
+
 function formatAgentReplyForChat(state, output) {
   switch (state) {
     case 'SOPRANO_INTERVIEW': {
@@ -37,56 +71,53 @@ function formatAgentReplyForChat(state, output) {
       });
       const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
       const conflictText = conflicts.length
-  ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${c.plain_explanation || c.reason || c.agent_assessment || ''}`).join('\n')
-  : '';
+        ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${getConflictExplanation(c)}`).join('\n')
+        : '';
       return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
       const conflicts = output?.diagnostic_output?.conflicts_explained || [];
-      return conflicts.map((c) => `${c.criterion}: ${c.plain_explanation}\n${c.question_for_manager}`).join('\n\n')
+      return conflicts.map((c) => `${c.criterion}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
         || 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
     }
     case 'STRATEGY_SELECTION': {
       const s = output?.strategy_output;
       if (!s) return JSON.stringify(output, null, 2);
       const lines = [
-        `Стратегия: ${typeof s.primary_strategy === 'object' ? JSON.stringify(s.primary_strategy) : s.primary_strategy || '—'}`,
+        `Стратегия: ${humanizeValue(s.primary_strategy) || '—'}`,
         s.main_blocker ? `Блокер: ${s.main_blocker}` : null,
         s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
         s.rationale ? `Обоснование: ${s.rationale}` : null,
       ].filter(Boolean);
       return lines.join('\n');
     }
-   case 'COMPOSING': {
-      const msgs = output?.composer_output?.messages 
-        || output?.composer_output?.composer_output?.messages || [];
+    case 'COMPOSING': {
+      const msgs = getComposerMessages(output?.composer_output);
       if (!msgs.length) return 'Касания составлены, ожидается проверка...';
       return msgs.map((m, i) =>
         `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
       ).join('\n\n---\n\n');
     }
     case 'REVIEWING': {
-  const r = output?.reviewer_output;
-  if (!r) return JSON.stringify(output, null, 2);
-  const verdict = r.verdict || '—';
-  
-  if (verdict === 'ОДОБРЕНО') {
-    // Показываем одобренные касания из last_composer_output
-  const msgs = output?.composer_output?.messages 
-  || output?.composer_output?.composer_output?.messages || [];
-    if (msgs.length) {
-      const touchpoints = msgs.map((m, i) =>
-        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
-      ).join('\n\n---\n\n');
-      return `✅ Касания одобрены:\n\n${touchpoints}`;
+      const r = output?.reviewer_output;
+      if (!r) return JSON.stringify(output, null, 2);
+      const verdict = r.verdict || '—';
+
+      if (verdict === 'ОДОБРЕНО') {
+        const msgs = getComposerMessages(output?.composer_output);
+        if (msgs.length) {
+          const touchpoints = msgs.map((m, i) =>
+            `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
+          ).join('\n\n---\n\n');
+          return `✅ Касания одобрены:\n\n${touchpoints}`;
+        }
+      }
+
+      const details = (r.messages_reviewed || []).map(m =>
+        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
+      ).join('\n');
+      return `Результат проверки: ${verdict}\n${details}`;
     }
-  }
-  
-  const details = (r.messages_reviewed || []).map(m =>
-    `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
-  ).join('\n');
-  return `Результат проверки: ${verdict}\n${details}`;
-}
     case 'ESCALATION':
       return 'После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.';
     case 'LOST_DEAL':
@@ -95,9 +126,36 @@ function formatAgentReplyForChat(state, output) {
       return output?.diagnostic_output?.disqualification_reason || 'Сделка не квалифицирована.';
     case 'FINAL_OUTPUT':
       return output?._finalText || 'Сессия завершена.';
+    case 'MEMORY_UPDATE':
+      // Промежуточное состояние — до фикса сюда попадали "вхолостую" и показывали сырой JSON.
+      // Теперь сюда практически не должны попадать (см. runMemoryUpdate), но на всякий случай
+      // держим осмысленный текст, а не default-ветку с JSON.stringify.
+      return output?._finalText || 'Формирую итог сессии...';
     default:
       return JSON.stringify(output, null, 2) || 'Обрабатываю...';
   }
+}
+
+// Запускает memory-агента и сразу собирает читаемый итог сессии.
+// Используется во всех точках, где диалог завершается (одобрение, эскалация,
+// потерянная сделка, дисквалификация) — чтобы не было промежуточного "пустого" хода,
+// на котором раньше показывался сырой JSON.
+async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
+  const strategyOutput = extra.strategy_output || deal.last_strategy_output;
+  const composerOutput = extra.composer_output || deal.last_composer_output;
+  const reviewerOutput = extra.reviewer_output || deal.last_reviewer_output;
+
+  const memoryInput = {
+    ...baseInput,
+    strategy_output: strategyOutput,
+    composer_output: composerOutput,
+    reviewer_output: reviewerOutput
+  };
+
+  const memoryResult = await callAgent('memory', memoryInput, 6000);
+  await db.saveMemory(dealId, memoryResult?.memory_output);
+
+  return formatFinalSummary(memoryResult?.memory_output, strategyOutput, composerOutput, extra.statusNote);
 }
 
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
@@ -107,7 +165,7 @@ async function advance(dealId, managerInput) {
     session_number: 1, previous_touchpoints: [], confirmed_facts: [], open_questions: []
   };
 
- const allMessages = await db.getMessages(dealId);
+  const allMessages = await db.getMessages(dealId);
   const dialogHistory = allMessages
     .filter(m => m.role === 'user' || m.role === 'agent')
     .map(m => `[${m.role === 'user' ? 'Менеджер' : 'Агент'}]: ${m.content}`)
@@ -145,7 +203,7 @@ async function advance(dealId, managerInput) {
         break;
       }
 
-   const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
+      const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
       output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
 
       if (output.diagnostic_output?.clarification_needed?.required) {
@@ -161,23 +219,31 @@ async function advance(dealId, managerInput) {
     }
 
     case 'DIAGNOSING': {
-      // Переход — показать диагностику и сразу пойти в стратегию (либо конфликт уже отработан выше)
       const strategyInput = { ...baseInput, diagnostic_output: deal.last_diagnostic_output };
       const strategyResult = await callAgent('strategy', strategyInput);
       output.strategy_output = strategyResult?.strategy_output || strategyResult;
+
       if (output.strategy_output?.deal_health === 'потеряна') {
-        nextState = 'LOST_DEAL';
+        output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+          strategy_output: output.strategy_output,
+          statusNote: 'Статус: сделка отмечена как потерянная.'
+        });
+        nextState = 'FINAL_OUTPUT';
         break;
       }
-     if (output.strategy_output?.primary_strategy === 'Disqualification') {
-        nextState = 'DISQUALIFICATION';
+      if (output.strategy_output?.primary_strategy === 'Disqualification') {
+        output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+          strategy_output: output.strategy_output,
+          statusNote: 'Статус: сделка не квалифицирована.'
+        });
+        nextState = 'FINAL_OUTPUT';
         break;
       }
       nextState = 'STRATEGY_SELECTION';
       break;
     }
 
-   case 'CONFLICT_RESOLUTION': {
+    case 'CONFLICT_RESOLUTION': {
       const diagnosticResult = await callAgent('diagnostic', {
         ...baseInput,
         manager_conflict_response: { new_facts: managerInput }
@@ -196,7 +262,7 @@ async function advance(dealId, managerInput) {
         iteration: 1
       };
       const composerResult = await callAgent('composer', composerInput, 5000);
-     output.composer_output = composerResult?.composer_output || composerResult;
+      output.composer_output = composerResult?.composer_output || composerResult;
       nextState = 'COMPOSING';
       break;
     }
@@ -234,11 +300,15 @@ async function advance(dealId, managerInput) {
       const iterations = (deal.composer_iterations || 1);
 
       if (approved) {
-        nextState = 'MEMORY_UPDATE';
+        // Раньше здесь просто ставился nextState = 'MEMORY_UPDATE' без выполнения
+        // самой логики — из-за этого на следующем сообщении менеджера показывался
+        // сырой "{}" (для 'MEMORY_UPDATE' не было своего case в formatAgentReplyForChat).
+        // Теперь финализируем сессию сразу в этом же шаге.
+        output._finalText = await runMemoryUpdate(dealId, baseInput, deal);
+        nextState = 'FINAL_OUTPUT';
       } else if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
         nextState = 'ESCALATION';
       } else {
-        // Возврат к Composer с фидбэком
         const composerInput = {
           ...baseInput,
           strategy_output: deal.last_strategy_output,
@@ -247,7 +317,7 @@ async function advance(dealId, managerInput) {
           iteration: iterations + 1
         };
         const composerResult = await callAgent('composer', composerInput, 5000);
-       output.composer_output = composerResult?.composer_output || composerResult;
+        output.composer_output = composerResult?.composer_output || composerResult;
         output._composer_iterations = iterations + 1;
         nextState = 'COMPOSING';
       }
@@ -258,16 +328,9 @@ async function advance(dealId, managerInput) {
     case 'MEMORY_UPDATE':
     case 'LOST_DEAL':
     case 'DISQUALIFICATION': {
-      const memoryInput = {
-        ...baseInput,
-        strategy_output: deal.last_strategy_output,
-        composer_output: deal.last_composer_output,
-        reviewer_output: deal.last_reviewer_output
-      };
-      const memoryResult = await callAgent('memory', memoryInput, 6000);
-      await db.saveMemory(dealId, memoryResult?.memory_output);
-
-      output._finalText = formatFinalSummary(memoryResult?.memory_output, deal.last_strategy_output, deal.last_composer_output);
+      // Точка входа "на всякий случай" — если сделка когда-либо попала в одно из этих
+      // состояний и ждёт следующего сообщения менеджера, финализируем сессию тут же.
+      output._finalText = await runMemoryUpdate(dealId, baseInput, deal);
       nextState = 'FINAL_OUTPUT';
       break;
     }
@@ -304,7 +367,7 @@ async function advance(dealId, managerInput) {
 
   await db.updateDealState(dealId, statePatch);
 
- if (!output.composer_output && deal.last_composer_output) {
+  if (!output.composer_output && deal.last_composer_output) {
     output.composer_output = deal.last_composer_output;
   }
   const chatText = formatAgentReplyForChat(nextState, output)
@@ -313,17 +376,19 @@ async function advance(dealId, managerInput) {
   return { nextState, chatText, raw: output };
 }
 
-function formatFinalSummary(memoryOutput, strategyOutput, composerOutput) {
+function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, statusNote) {
   if (!memoryOutput) return 'Сессия завершена.';
+  const msgs = getComposerMessages(composerOutput);
   const lines = [
     'ИТОГ СЕССИИ',
-    composerOutput?.messages?.length ? '\nКАСАНИЯ:\n' + composerOutput.messages.map((m, i) =>
-  `Касание ${i + 1} — ${m.channel}:\n${m.body}`
-).join('\n\n---\n\n') : null,
+    statusNote || null,
+    msgs.length ? '\nКАСАНИЯ:\n' + msgs.map((m, i) =>
+      `Касание ${i + 1} — ${m.channel}:\n${m.body}`
+    ).join('\n\n---\n\n') : null,
     strategyOutput?.main_blocker ? `Блокер: ${strategyOutput.main_blocker}` : null,
-    strategyOutput?.primary_strategy ? `Стратегия: ${typeof strategyOutput.primary_strategy === 'object' ? JSON.stringify(strategyOutput.primary_strategy) : strategyOutput.primary_strategy}` : null,
-    composerOutput?.messages?.length ? `Одобренные касания: ${composerOutput.messages.length}` : null,
-    memoryOutput.session_summary ? `Резюме: ${JSON.stringify(memoryOutput.session_summary)}` : null
+    strategyOutput?.primary_strategy ? `Стратегия: ${humanizeValue(strategyOutput.primary_strategy)}` : null,
+    msgs.length ? `Одобренные касания: ${msgs.length}` : null,
+    memoryOutput.session_summary ? `Резюме: ${humanizeValue(memoryOutput.session_summary)}` : null
   ].filter(Boolean);
   return lines.join('\n');
 }
