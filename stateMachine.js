@@ -70,6 +70,12 @@ async function advance(dealId, managerInput) {
     session_number: 1, previous_touchpoints: [], confirmed_facts: [], open_questions: []
   };
 
+ const allMessages = await db.getMessages(dealId);
+  const dialogHistory = allMessages
+    .filter(m => m.role === 'user' || m.role === 'agent')
+    .map(m => `[${m.role === 'user' ? 'Менеджер' : 'Агент'}]: ${m.content}`)
+    .join('\n\n');
+
   const baseInput = {
     deal: {
       client: deal.client,
@@ -79,7 +85,11 @@ async function advance(dealId, managerInput) {
       last_contact: deal.last_contact,
       days_silent: deal.days_silent
     },
-    materials: { correspondence: managerInput, user_assessment: deal.criteria },
+    materials: {
+      correspondence: managerInput,
+      dialog_history: dialogHistory,
+      user_assessment: deal.criteria
+    },
     memory
   };
 
