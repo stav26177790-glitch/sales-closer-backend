@@ -351,11 +351,15 @@ async function advance(dealId, managerInput) {
         break;
       }
 
+      // Ответ reviewer-агента — самый объёмный (чек-лист по ~10 пунктам на каждое
+      // касание + подробные заметки). Без явного лимита он обрезался на дефолтном
+      // значении agentRunner'а, JSON не закрывался и парсинг падал с parse_error —
+      // отсюда "не удалось прочитать вердикт" при полностью корректном ответе агента.
       const reviewerResult = await callAgent('reviewer', {
         ...baseInput,
         strategy_output: deal.last_strategy_output,
         composer_output: deal.last_composer_output
-      });
+      }, 8000);
       output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
       nextState = 'REVIEWING';
       break;
