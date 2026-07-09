@@ -193,6 +193,31 @@ function formatAgentReplyForChat(state, output) {
   }
 }
 
+// Если agentRunner не смог распарсить ответ модели (например, потому что модель
+// обернула JSON в markdown-разметку ```json ... ```), он возвращает
+// { raw_output: '...', parse_error: true } вместо нормального объекта.
+// Раньше это тихо "протекало" дальше по цепочке: сломанный reviewer_output без
+// verdict читался как "не одобрено", composer получал этот мусор как фидбэк и сам
+// съезжал в свободный текст вместо JSON. Пытаемся восстановить JSON здесь же —
+// снимаем обёртку ```json / ``` и парсим второй раз.
+function tryRecoverFromRawOutput(result) {
+  if (!result || typeof result !== 'object') return result;
+  if (!result.parse_error || typeof result.raw_output !== 'string') return result;
+
+  const cleaned = result.raw_output
+    .trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '');
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Не получилось (например, ответ действительно оборван) — возвращаем как было,
+    // чтобы сработали существующие диагностические заглушки с сырым текстом.
+    return result;
+  }
+}
 // Запускает memory-агента и сразу собирает читаемый итог сессии.
 // Используется во всех точках, где диалог завершается (одобрение, эскалация,
 // потерянная сделка, дисквалификация) — чтобы не было промежуточного "пустого" хода,
@@ -209,7 +234,7 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
     reviewer_output: reviewerOutput
   };
 
-  const memoryResult = await callAgent('memory', memoryInput, 6000);
+  const memoryResult = tryRecoverFromRawOutput(await callAgent('memory', memoryInput, 6000));
   await db.saveMemory(dealId, memoryResult?.memory_output);
 
   return formatFinalSummary(memoryResult?.memory_output, strategyOutput, composerOutput, extra.statusNote);
@@ -222,14 +247,14 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
 async function runIntakeStep(baseInput) {
   const output = {};
 
-  const plannerResult = await callAgent('planner', baseInput);
+  const plannerResult = tryRecoverFromRawOutput(await callAgent('planner', baseInput));
   output.planner_output = plannerResult?.planner_output;
 
   if (plannerResult?.planner_output?.clarification_needed?.required) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
 
-  const diagnosticResult = await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output });
+  const diagnosticResult = tryRecoverFromRawOutput(await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output }));
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
 
   if (output.diagnostic_output?.clarification_needed?.required) {
@@ -286,7 +311,7 @@ async function advance(dealId, managerInput) {
 
     case 'DIAGNOSING': {
       const strategyInput = { ...baseInput, diagnostic_output: deal.last_diagnostic_output };
-      const strategyResult = await callAgent('strategy', strategyInput);
+      const strategyResult = tryRecoverFromRawOutput(await callAgent('strategy', strategyInput));
       output.strategy_output = strategyResult?.strategy_output || strategyResult;
 
       if (output.strategy_output?.deal_health === 'потеряна') {
@@ -310,10 +335,10 @@ async function advance(dealId, managerInput) {
     }
 
     case 'CONFLICT_RESOLUTION': {
-      const diagnosticResult = await callAgent('diagnostic', {
+      const diagnosticResult = tryRecoverFromRawOutput(await callAgent('diagnostic', {
         ...baseInput,
         manager_conflict_response: { new_facts: managerInput }
-      });
+      }));
       output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
       nextState = 'DIAGNOSING';
       break;
@@ -327,7 +352,7 @@ async function advance(dealId, managerInput) {
         message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
         iteration: 1
       };
-      const composerResult = await callAgent('composer', composerInput, 5000);
+      const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
       output.composer_output = composerResult?.composer_output || composerResult;
       nextState = 'COMPOSING';
       break;
@@ -355,11 +380,11 @@ async function advance(dealId, managerInput) {
       // касание + подробные заметки). Без явного лимита он обрезался на дефолтном
       // значении agentRunner'а, JSON не закрывался и парсинг падал с parse_error —
       // отсюда "не удалось прочитать вердикт" при полностью корректном ответе агента.
-      const reviewerResult = await callAgent('reviewer', {
+      const reviewerResult = tryRecoverFromRawOutput(await callAgent('reviewer', {
         ...baseInput,
         strategy_output: deal.last_strategy_output,
         composer_output: deal.last_composer_output
-      }, 8000);
+      }, 8000));
       output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
       nextState = 'REVIEWING';
       break;
@@ -386,7 +411,7 @@ async function advance(dealId, managerInput) {
           message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
           iteration: iterations + 1
         };
-        const composerResult = await callAgent('composer', composerInput, 5000);
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
         output.composer_output = composerResult?.composer_output || composerResult;
         output._composer_iterations = iterations + 1;
         nextState = 'COMPOSING';
