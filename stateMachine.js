@@ -73,6 +73,17 @@ function getMainBlocker(strategyOutput) {
     || null;
 }
 
+// primary_strategy иногда приходит простой строкой ('Disqualification'), а иногда
+// объектом ({ name: 'Disqualification', goal, rationale, ... }). Раньше код сравнивал
+// primary_strategy напрямую со строкой 'Disqualification', и когда агент возвращал
+// объект, сравнение всегда проваливалось — сделка не дисквалифицировалась, а шла
+// дальше по циклу composer/reviewer, хотя стратегия была определена верно.
+function getStrategyName(strategyOutput) {
+  const s = strategyOutput?.primary_strategy;
+  if (typeof s === 'string') return s;
+  return s?.name || null;
+}
+
 // Единая логика fallback для объяснения расхождений между менеджером и агентом.
 function getConflictExplanation(c) {
   return c?.plain_explanation
@@ -128,7 +139,12 @@ function formatAgentReplyForChat(state, output) {
     }
     case 'COMPOSING': {
       const msgs = getComposerMessages(output?.composer_output);
-      if (!msgs.length) return 'Касания составлены, ожидается проверка...';
+      if (!msgs.length) {
+        // Раньше здесь молча показывалась заглушка "ожидается проверка", даже если
+        // на самом деле парсинг просто не смог найти messages в ответе composer-агента.
+        // Показываем сырой ответ, чтобы увидеть реальную структуру и поправить парсинг.
+        return `⚠️ Не удалось прочитать касания из ответа composer-агента.\n\nСырой ответ:\n${JSON.stringify(output?.composer_output, null, 2)}`;
+      }
       return msgs.map((m, i) =>
         `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
       ).join('\n\n---\n\n');
@@ -136,7 +152,13 @@ function formatAgentReplyForChat(state, output) {
     case 'REVIEWING': {
       const r = output?.reviewer_output;
       if (!r) return JSON.stringify(output, null, 2);
-      const verdict = r.verdict || '—';
+      const verdict = r.verdict || r?.reviewer_output?.verdict;
+
+      if (!verdict) {
+        // Раньше здесь показывалось "Результат проверки: —" без объяснений, если
+        // r.verdict не находился. Показываем сырой ответ для диагностики.
+        return `⚠️ Не удалось прочитать вердикт reviewer-агента.\n\nСырой ответ:\n${JSON.stringify(r, null, 2)}`;
+      }
 
       if (verdict === 'ОДОБРЕНО') {
         const msgs = getComposerMessages(output?.composer_output);
@@ -148,7 +170,7 @@ function formatAgentReplyForChat(state, output) {
         }
       }
 
-      const details = (r.messages_reviewed || []).map(m =>
+      const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m =>
         `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
       ).join('\n');
       return `Результат проверки: ${verdict}\n${details}`;
@@ -275,7 +297,7 @@ async function advance(dealId, managerInput) {
         nextState = 'FINAL_OUTPUT';
         break;
       }
-      if (output.strategy_output?.primary_strategy === 'Disqualification') {
+      if (getStrategyName(output.strategy_output) === 'Disqualification') {
         output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
           strategy_output: output.strategy_output,
           statusNote: 'Статус: сделка не квалифицирована.'
