@@ -98,6 +98,33 @@ function getConflictQuestion(c) {
   return c?.question_for_manager || c?.question || 'Расскажите подробнее об этом моменте.';
 }
 
+// Раньше ЛЮБОЕ сообщение менеджера в состоянии COMPOSING (после показа касаний)
+// уходило сразу на формальную проверку reviewer'ом — даже если менеджер написал
+// содержательную правку вроде "слишком в лоб, нужно мягче". Reviewer проверяет
+// по чек-листу (стоп-слова, персонализация и т.д.), а не по вкусовым пожеланиям
+// менеджера, поэтому такой фидбэк тихо терялся, и одобрялся неизменённый вариант.
+// Чтобы не терять правки, но и не гонять composer впустую на каждое "ок" —
+// одобрением считаем только ТОЧНОЕ совпадение всего сообщения с известной фразой
+// согласия (не просто наличие слова внутри — иначе "в целом норм, но..." тоже
+// ложно засчиталось бы как согласие из-за слова "норм").
+const PURE_APPROVAL_PHRASES = new Set([
+  'ок', 'окей', 'окай', 'ok', 'okay', 'да', 'ага', 'угу',
+  'супер', 'отлично', 'класс', 'здорово', 'хорошо', 'норм', 'нормально',
+  'принято', 'согласен', 'согласна', 'одобряю', 'одобрено',
+  'погнали', 'го', 'вперед', 'вперёд', 'давай', 'запускай', 'запускаем',
+  'все ок', 'всё ок', 'все супер', 'всё супер', 'все хорошо', 'всё хорошо',
+  'все норм', 'всё норм', 'все отлично', 'всё отлично'
+]);
+
+function isPureApproval(text) {
+  const normalized = (text || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?,;:]+$/g, '')
+    .trim();
+  return PURE_APPROVAL_PHRASES.has(normalized);
+}
+
 function formatAgentReplyForChat(state, output) {
   switch (state) {
     case 'SOPRANO_INTERVIEW': {
@@ -361,9 +388,19 @@ async function advance(dealId, managerInput) {
     case 'COMPOSING': {
       const composerOutput = { composer_output: deal.last_composer_output };
       const lengthCheck = validateMessageLength(composerOutput);
+      const managerGaveFeedback = !isPureApproval(managerInput);
 
       if (!lengthCheck.valid) {
-        output.reviewer_output = {
+        // Техническое нарушение длины (channel_fit) — это отдельный источник
+        // правок, независимый от того, что написал менеджер. Раньше эта проверка
+        // стояла ПЕРЕД проверкой "согласие / фидбэк менеджера" и всегда обрывала
+        // выполнение через break — из-за этого содержательный комментарий
+        // менеджера ("используйте ещё сравнение по качеству сборки...") терялся,
+        // даже если formatAgentReplyForChat потом красиво показывал "НА ДОРАБОТКУ".
+        // Теперь оба источника фидбэка (длина + менеджер) объединяются в один
+        // вызов composer, вместо того чтобы конкурировать за то, кто сработает первым.
+        const iterations = (deal.composer_iterations || 1);
+        const lengthFeedback = {
           verdict: 'НА ДОРАБОТКУ',
           messages_reviewed: lengthCheck.violations.map((v) => ({
             touchpoint_number: v.touchpoint,
@@ -372,7 +409,52 @@ async function advance(dealId, managerInput) {
             fix_instructions: `Сообщение для ${v.channel} слишком длинное: ${v.current}/${v.max} символов.`
           }))
         };
-        nextState = 'REVIEWING';
+
+        if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
+          output.reviewer_output = lengthFeedback;
+          nextState = 'ESCALATION';
+          break;
+        }
+
+        const composerInput = {
+          ...baseInput,
+          strategy_output: deal.last_strategy_output,
+          previous_composer_feedback: managerGaveFeedback
+            ? { ...lengthFeedback, source: 'manager', manager_feedback: managerInput }
+            : lengthFeedback,
+          message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
+          iteration: iterations + 1
+        };
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+        output.composer_output = composerResult?.composer_output || composerResult;
+        // Нарушение длины — техническая причина, поэтому итерацию считаем как обычно
+        // (в отличие от чисто вкусового фидбэка менеджера ниже).
+        output._composer_iterations = iterations + 1;
+        nextState = 'COMPOSING';
+        break;
+      }
+
+      // Если менеджер написал не просто "ок", а содержательный комментарий — это
+      // правка, а не согласие. Возвращаем на доработку в composer с этим фидбэком,
+      // вместо того чтобы молча отправлять неизменённый вариант на проверку reviewer'ом.
+      if (managerGaveFeedback) {
+        const iterations = (deal.composer_iterations || 1);
+        const composerInput = {
+          ...baseInput,
+          strategy_output: deal.last_strategy_output,
+          previous_composer_feedback: {
+            source: 'manager',
+            manager_feedback: managerInput
+          },
+          message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
+          iteration: iterations
+        };
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+        output.composer_output = composerResult?.composer_output || composerResult;
+        // composer_iterations намеренно НЕ увеличиваем здесь — этот счётчик считает
+        // автоматические доработки по вердикту reviewer'а (лимит MAX_COMPOSER_ITERATIONS).
+        // Правки по инициативе менеджера не должны приближать эскалацию.
+        nextState = 'COMPOSING';
         break;
       }
 
