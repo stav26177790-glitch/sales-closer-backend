@@ -7,6 +7,25 @@ const CONFIG = {
   MAX_MESSAGE_LENGTH: { telegram: 400, whatsapp: 400, email: 1500, voice: 300, call_script: 500 }
 };
 
+// Раньше в системе не было НИКАКОГО способа для менеджера сказать "закончи
+// сессию прямо сейчас" — фраза вроде "заверши сессию" просто уходила как
+// обычный текст в planner/diagnostic, который не находил в ней ответов на
+// свои уточняющие вопросы и переспрашивал то же самое по кругу. Теперь такая
+// команда распознаётся явно и сразу приводит к FINAL_OUTPUT, независимо от
+// того, в каком состоянии находится сделка (даже посреди уточняющих вопросов).
+const END_SESSION_PHRASES = [
+  'заверши сессию', 'заверши сеанс', 'заверши диалог',
+  'закрой сессию', 'закрой сеанс',
+  'закрыть сессию', 'закрыть сеанс',
+  'заверши', 'закончи сессию', 'закончить сессию',
+  'завершить сессию', 'заканчиваем', 'на сегодня хватит', 'стоп сессия'
+];
+
+function isEndSessionCommand(text) {
+  const raw = (text || '').trim().toLowerCase().replace(/[.!?,;:]+$/g, '');
+  return END_SESSION_PHRASES.includes(raw);
+}
+
 function validateMessageLength(composerOutput) {
   const messages = composerOutput?.composer_output?.messages || [];
   const violations = [];
@@ -358,6 +377,18 @@ async function advance(dealId, managerInput) {
   let nextState = deal.current_state;
   let output = {};
 
+  // Явная команда завершения — срабатывает в ЛЮБОМ состоянии, кроме уже
+  // завершённого FINAL_OUTPUT (там и так каждое сообщение начинает новую
+  // сессию). Это даёт менеджеру аварийный выход, если, например, planner
+  // застрял на уточняющих вопросах, а менеджер просто хочет закрыть сессию
+  // сейчас, не проходя весь цикл диагностики до конца.
+  if (deal.current_state !== 'FINAL_OUTPUT' && isEndSessionCommand(managerInput)) {
+    output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+      statusNote: 'Статус: сессия завершена вручную по команде менеджера (досрочно, не весь цикл мог быть пройден).'
+    });
+    nextState = 'FINAL_OUTPUT';
+  } else {
+
   switch (deal.current_state) {
     case 'INIT':
     case 'COLLECTING':
@@ -558,6 +589,8 @@ async function advance(dealId, managerInput) {
     default:
       nextState = 'INIT';
   }
+
+  } // конец else (команда завершения сессии не сработала — обычный switch выполнился)
 
   // Сохранить промежуточные выходы агентов на сделке для следующего шага
   const statePatch = { current_state: nextState };
