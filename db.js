@@ -95,7 +95,10 @@ async function saveMemory(dealId, memoryData) {
     .upsert({ deal_id: dealId, memory_data: memoryData, saved_at: new Date().toISOString(), expires_at });
   if (error) throw error;
 }
-
+async function deleteDeal(dealId) {
+  const { error } = await supabase.from('deals').delete().eq('id', dealId);
+  if (error) throw error;
+}
 module.exports = {
   supabase,
   listDeals,
@@ -105,5 +108,6 @@ module.exports = {
   getMessages,
   addMessage,
   loadMemory,
-  saveMemory
+  saveMemory,
+  deleteDeal
 };
