@@ -557,7 +557,7 @@ async function advance(dealId, managerInput) {
             || '⚠️ Не удалось сформировать ответ на вопрос — уточните, пожалуйста, формулировку.';
           output._directText = `${answer}\n\nСкорректировать текущие касания с учётом этого? (да/нет)`;
           output._awaitingCorrectionConfirmation = true;
-          output._pendingManagerFeedback = managerInput;
+          output._pendingManagerFeedback = `Вопрос менеджера: ${managerInput}\n\nРекомендация: ${answer}`;
           nextState = 'COMPOSING';
           break;
         }
