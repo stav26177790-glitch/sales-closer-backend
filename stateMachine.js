@@ -1,12 +1,10 @@
 const { callAgent } = require('./agentRunner');
 const db = require('./db');
-
 const CONFIG = {
   MAX_COMPOSER_ITERATIONS: 3,
   CHANNEL_HISTORY_SIZE: 3,
   MAX_MESSAGE_LENGTH: { telegram: 400, whatsapp: 400, email: 1500, voice: 300, call_script: 500 }
 };
-
 // Раньше в системе не было НИКАКОГО способа для менеджера сказать "закончи
 // сессию прямо сейчас" — фраза вроде "заверши сессию" просто уходила как
 // обычный текст в planner/diagnostic, который не находил в ней ответов на
@@ -20,12 +18,10 @@ const END_SESSION_PHRASES = [
   'заверши', 'закончи сессию', 'закончить сессию',
   'завершить сессию', 'заканчиваем', 'на сегодня хватит', 'стоп сессия'
 ];
-
 function isEndSessionCommand(text) {
   const raw = (text || '').trim().toLowerCase().replace(/[.!?,;:]+$/g, '');
   return END_SESSION_PHRASES.includes(raw);
 }
-
 function validateMessageLength(composerOutput) {
   const messages = composerOutput?.composer_output?.messages || [];
   const violations = [];
@@ -37,13 +33,11 @@ function validateMessageLength(composerOutput) {
   });
   return { valid: violations.length === 0, violations };
 }
-
 // Достаёт массив касаний независимо от того, есть ли лишний уровень вложенности
 // composer_output.composer_output.messages или нет.
 function getComposerMessages(composerOutput) {
   return composerOutput?.messages || composerOutput?.composer_output?.messages || [];
 }
-
 // Превращает объект/массив в читаемую строку вместо сырого JSON.
 // Используется для значений ВНУТРИ одной строки (например, элемент массива).
 function humanizeValue(val) {
@@ -58,7 +52,6 @@ function humanizeValue(val) {
   }
   return String(val);
 }
-
 // Превращает объект в многострочный читаемый блок: каждое поле — на своей строке,
 // с человекопонятной подписью вместо технического ключа (если она задана в labels).
 // В отличие от humanizeValue не "склеивает" всё через "; " в одну строку.
@@ -70,7 +63,6 @@ function renderKeyValueBlock(obj, labels = {}) {
     .map(([k, v]) => `${labels[k] || k}: ${humanizeValue(v)}`)
     .join('\n');
 }
-
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
 const SESSION_SUMMARY_LABELS = {
   session_number: 'Номер сессии',
@@ -81,7 +73,6 @@ const SESSION_SUMMARY_LABELS = {
   what_is_next: 'Дальнейшие шаги',
   key_insight: 'Ключевой инсайт'
 };
-
 // Блокер иногда приходит не в отдельном поле main_blocker, а зашит внутрь
 // primary_strategy (например, в rationale). Проверяем все известные варианты.
 function getMainBlocker(strategyOutput) {
@@ -91,7 +82,6 @@ function getMainBlocker(strategyOutput) {
     || strategyOutput?.primary_strategy?.blocker
     || null;
 }
-
 // primary_strategy иногда приходит простой строкой ('Disqualification'), а иногда
 // объектом ({ name: 'Disqualification', goal, rationale, ... }). Раньше код сравнивал
 // primary_strategy напрямую со строкой 'Disqualification', и когда агент возвращал
@@ -102,7 +92,6 @@ function getStrategyName(strategyOutput) {
   if (typeof s === 'string') return s;
   return s?.name || null;
 }
-
 // Единая логика fallback для объяснения расхождений между менеджером и агентом.
 function getConflictExplanation(c) {
   return c?.plain_explanation
@@ -112,11 +101,9 @@ function getConflictExplanation(c) {
     || c?.comment
     || 'уточните, пожалуйста, детали по этому критерию';
 }
-
 function getConflictQuestion(c) {
   return c?.question_for_manager || c?.question || 'Расскажите подробнее об этом моменте.';
 }
-
 // Раньше ЛЮБОЕ сообщение менеджера в состоянии COMPOSING (после показа касаний)
 // уходило сразу на формальную проверку reviewer'ом — даже если менеджер написал
 // содержательную правку вроде "слишком в лоб, нужно мягче". Reviewer проверяет
@@ -147,7 +134,6 @@ const PURE_APPROVAL_PHRASES = new Set([
   'все норм', 'всё норм', 'все отлично', 'всё отлично', 'все верно', 'всё верно',
   'все устраивает', 'всё устраивает', 'все подходит', 'всё подходит'
 ]);
-
 const REVISION_SIGNAL_WORDS = new Set(['но', 'однако', 'хотя', 'кроме', 'зато']);
 const REVISION_SIGNAL_PHRASES = [
   'добавь', 'добавьте', 'поменяй', 'поменяйте', 'убери', 'уберите',
@@ -156,26 +142,68 @@ const REVISION_SIGNAL_PHRASES = [
   'а также', 'ещё используй', 'еще используй', 'обычно использую', 'я использую',
   'смягчи', 'сократи', 'удлини', 'исправь', 'поправь'
 ];
-
 function isPureApproval(text) {
   const raw = (text || '').trim().toLowerCase();
   if (!raw) return false;
-
   // Токенизация — чтобы "но" ловилось только как отдельное слово, а не как
   // часть другого слова (например "давно").
   const tokens = raw.split(/[^a-zа-яё0-9]+/i).filter(Boolean);
   if (tokens.some(t => REVISION_SIGNAL_WORDS.has(t))) return false;
   if (REVISION_SIGNAL_PHRASES.some(p => raw.includes(p))) return false;
-
   const clauses = raw
     .split(/[.,!;:\-—]+/)
     .map(s => s.trim())
     .filter(Boolean);
-
   if (!clauses.length) return false;
   return clauses.every(clause => PURE_APPROVAL_PHRASES.has(clause));
 }
-
+// Определяет, является ли сообщение менеджера ВОПРОСОМ к агенту (просьбой
+// подсказать/посоветовать), а не инструкцией по правке текста касаний.
+// Раньше такие сообщения ("может продолжить с Александром?", "что ответить
+// на 'дорого'?") уходили в composer как manager_feedback — composer не умеет
+// отвечать на вопросы, он умеет только переписывать касания, поэтому на
+// таком вводе он просто возвращал прежний текст почти без изменений, и
+// сессия зацикливалась, потому что менеждер продолжал получать один и тот
+// же результат на разные переформулировки вопроса.
+const QUESTION_MARKER_PHRASES = [
+  'может ', 'можно ли', 'стоит ли', 'как быть', 'что делать', 'что если',
+  'как мне', 'как поступить', 'что ответить', 'что посоветуешь', 'что посоветуете',
+  'как думаешь', 'как думаете', 'а если', 'нужно ли', 'правильно ли', 'как лучше'
+];
+function isManagerQuestion(text) {
+  const raw = (text || '').trim().toLowerCase();
+  if (!raw) return false;
+  if (raw.includes('?')) return true;
+  return QUESTION_MARKER_PHRASES.some((p) => raw.includes(p));
+}
+// Проверка ответа менеджера на наш уточняющий вопрос "скорректировать касания
+// с учётом этого?" — отдельная от isPureApproval, потому что здесь речь не
+// об одобрении касаний, а именно о да/нет на конкретный вопрос.
+const AFFIRMATIVE_PHRASES = new Set([
+  'да', 'ага', 'угу', 'давай', 'конечно', 'обязательно', 'нужно', 'хочу',
+  'скорректируй', 'скорректируйте', 'скорректировать', 'поправь', 'поправьте',
+  'да, скорректируй', 'да скорректируй', 'да, нужно', 'да нужно'
+]);
+const NEGATIVE_PHRASES = new Set([
+  'нет', 'не', 'не надо', 'не нужно', 'не стоит',
+  'оставь как есть', 'оставьте как есть', 'оставить как есть'
+]);
+function isAffirmativeResponse(text) {
+  const raw = (text || '').trim().toLowerCase().replace(/[.!]+$/g, '');
+  if (!raw) return false;
+  if (AFFIRMATIVE_PHRASES.has(raw)) return true;
+  if (raw.startsWith('да') && !raw.startsWith('давно')) return true;
+  if (raw.includes('скорректир') || raw.includes('поправ')) return true;
+  return false;
+}
+function isNegativeResponse(text) {
+  const raw = (text || '').trim().toLowerCase().replace(/[.!]+$/g, '');
+  if (!raw) return false;
+  if (NEGATIVE_PHRASES.has(raw)) return true;
+  if (raw.startsWith('нет')) return true;
+  if (raw.includes('не надо') || raw.includes('не нужно') || raw.includes('оставь как есть') || raw.includes('оставьте как есть')) return true;
+  return false;
+}
 function formatAgentReplyForChat(state, output) {
   switch (state) {
     case 'SOPRANO_INTERVIEW': {
@@ -231,13 +259,11 @@ function formatAgentReplyForChat(state, output) {
       const r = output?.reviewer_output;
       if (!r) return JSON.stringify(output, null, 2);
       const verdict = r.verdict || r?.reviewer_output?.verdict;
-
       if (!verdict) {
         // Раньше здесь показывалось "Результат проверки: —" без объяснений, если
         // r.verdict не находился. Показываем сырой ответ для диагностики.
         return `⚠️ Не удалось прочитать вердикт reviewer-агента.\n\nСырой ответ:\n${JSON.stringify(r, null, 2)}`;
       }
-
       if (verdict === 'ОДОБРЕНО') {
         const msgs = getComposerMessages(output?.composer_output);
         if (msgs.length) {
@@ -247,7 +273,6 @@ function formatAgentReplyForChat(state, output) {
           return `✅ Касания одобрены:\n\n${touchpoints}`;
         }
       }
-
       const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m =>
         `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
       ).join('\n');
@@ -270,7 +295,6 @@ function formatAgentReplyForChat(state, output) {
       return JSON.stringify(output, null, 2) || 'Обрабатываю...';
   }
 }
-
 // Если agentRunner не смог распарсить ответ модели (например, потому что модель
 // обернула JSON в markdown-разметку ```json ... ```), он возвращает
 // { raw_output: '...', parse_error: true } вместо нормального объекта.
@@ -281,13 +305,11 @@ function formatAgentReplyForChat(state, output) {
 function tryRecoverFromRawOutput(result) {
   if (!result || typeof result !== 'object') return result;
   if (!result.parse_error || typeof result.raw_output !== 'string') return result;
-
   const cleaned = result.raw_output
     .trim()
     .replace(/^```json\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/```\s*$/i, '');
-
   try {
     return JSON.parse(cleaned);
   } catch (e) {
@@ -304,37 +326,29 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
   const strategyOutput = extra.strategy_output || deal.last_strategy_output;
   const composerOutput = extra.composer_output || deal.last_composer_output;
   const reviewerOutput = extra.reviewer_output || deal.last_reviewer_output;
-
   const memoryInput = {
     ...baseInput,
     strategy_output: strategyOutput,
     composer_output: composerOutput,
     reviewer_output: reviewerOutput
   };
-
   const memoryResult = tryRecoverFromRawOutput(await callAgent('memory', memoryInput, 6000));
   await db.saveMemory(dealId, memoryResult?.memory_output);
-
   return formatFinalSummary(memoryResult?.memory_output, strategyOutput, composerOutput, extra.statusNote);
 }
-
 // Логика приёма новой информации по сделке: planner → diagnostic → определение
 // следующего состояния. Вынесена в отдельную функцию, чтобы её можно было
 // вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
 // при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
 async function runIntakeStep(baseInput) {
   const output = {};
-
   const plannerResult = tryRecoverFromRawOutput(await callAgent('planner', baseInput));
   output.planner_output = plannerResult?.planner_output;
-
   if (plannerResult?.planner_output?.clarification_needed?.required) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
-
   const diagnosticResult = tryRecoverFromRawOutput(await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output }));
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
-
   if (output.diagnostic_output?.clarification_needed?.required) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
@@ -343,20 +357,17 @@ async function runIntakeStep(baseInput) {
   }
   return { output, nextState: 'DIAGNOSING' };
 }
-
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
 async function advance(dealId, managerInput) {
   const deal = await db.getDeal(dealId);
   const memory = (await db.loadMemory(dealId)) || {
     session_number: 1, previous_touchpoints: [], confirmed_facts: [], open_questions: []
   };
-
   const allMessages = await db.getMessages(dealId);
   const dialogHistory = allMessages
     .filter(m => m.role === 'user' || m.role === 'agent')
     .map(m => `[${m.role === 'user' ? 'Менеджер' : 'Агент'}]: ${m.content}`)
     .join('\n\n');
-
   const baseInput = {
     deal: {
       client: deal.client,
@@ -373,10 +384,8 @@ async function advance(dealId, managerInput) {
     },
     memory
   };
-
   let nextState = deal.current_state;
   let output = {};
-
   // Явная команда завершения — срабатывает в ЛЮБОМ состоянии, кроме уже
   // завершённого FINAL_OUTPUT (там и так каждое сообщение начинает новую
   // сессию). Это даёт менеджеру аварийный выход, если, например, planner
@@ -388,7 +397,6 @@ async function advance(dealId, managerInput) {
     });
     nextState = 'FINAL_OUTPUT';
   } else {
-
   switch (deal.current_state) {
     case 'INIT':
     case 'COLLECTING':
@@ -398,12 +406,10 @@ async function advance(dealId, managerInput) {
       nextState = result.nextState;
       break;
     }
-
     case 'DIAGNOSING': {
       const strategyInput = { ...baseInput, diagnostic_output: deal.last_diagnostic_output };
       const strategyResult = tryRecoverFromRawOutput(await callAgent('strategy', strategyInput));
       output.strategy_output = strategyResult?.strategy_output || strategyResult;
-
       if (output.strategy_output?.deal_health === 'потеряна') {
         output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
           strategy_output: output.strategy_output,
@@ -423,7 +429,6 @@ async function advance(dealId, managerInput) {
       nextState = 'STRATEGY_SELECTION';
       break;
     }
-
     case 'CONFLICT_RESOLUTION': {
       const diagnosticResult = tryRecoverFromRawOutput(await callAgent('diagnostic', {
         ...baseInput,
@@ -433,7 +438,6 @@ async function advance(dealId, managerInput) {
       nextState = 'DIAGNOSING';
       break;
     }
-
     case 'STRATEGY_SELECTION': {
       const composerInput = {
         ...baseInput,
@@ -447,12 +451,48 @@ async function advance(dealId, managerInput) {
       nextState = 'COMPOSING';
       break;
     }
-
     case 'COMPOSING': {
+      // Менеджер отвечает на наш уточняющий вопрос "скорректировать касания
+      // с учётом этого?" — это отдельный под-режим, не связанный с обычной
+      // веткой одобрения/правки/проверки длины ниже.
+      if (deal.awaiting_correction_confirmation) {
+        if (isAffirmativeResponse(managerInput)) {
+          const iterations = (deal.composer_iterations || 1);
+          const composerInput = {
+            ...baseInput,
+            strategy_output: deal.last_strategy_output,
+            previous_composer_feedback: {
+              source: 'manager',
+              manager_feedback: deal.pending_manager_feedback
+            },
+            message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
+            iteration: iterations
+          };
+          const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+          output.composer_output = composerResult?.composer_output || composerResult;
+          output._awaitingCorrectionConfirmation = false;
+          output._pendingManagerFeedback = null;
+          nextState = 'COMPOSING';
+          break;
+        }
+        if (isNegativeResponse(managerInput)) {
+          output._awaitingCorrectionConfirmation = false;
+          output._pendingManagerFeedback = null;
+          output.composer_output = deal.last_composer_output;
+          output._directText = 'Хорошо, оставляю текущие касания без изменений. Когда будете готовы — напишите "ок", чтобы отправить их на финальную проверку.';
+          nextState = 'COMPOSING';
+          break;
+        }
+        // Ответ не распознан как явное да/нет — переспрашиваем, не теряя
+        // исходный вопрос менеджера, чтобы не уйти в composer с мусором.
+        output._directText = 'Не понял ответ — скорректировать текущие касания с учётом этого? Ответьте, пожалуйста, "да" или "нет".';
+        nextState = 'COMPOSING';
+        break;
+      }
+
       const composerOutput = { composer_output: deal.last_composer_output };
       const lengthCheck = validateMessageLength(composerOutput);
       const managerGaveFeedback = !isPureApproval(managerInput);
-
       if (!lengthCheck.valid) {
         // Техническое нарушение длины (channel_fit) — это отдельный источник
         // правок, независимый от того, что написал менеджер. Раньше эта проверка
@@ -472,13 +512,11 @@ async function advance(dealId, managerInput) {
             fix_instructions: `Сообщение для ${v.channel} слишком длинное: ${v.current}/${v.max} символов.`
           }))
         };
-
         if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
           output.reviewer_output = lengthFeedback;
           nextState = 'ESCALATION';
           break;
         }
-
         const composerInput = {
           ...baseInput,
           strategy_output: deal.last_strategy_output,
@@ -496,11 +534,33 @@ async function advance(dealId, managerInput) {
         nextState = 'COMPOSING';
         break;
       }
-
       // Если менеджер написал не просто "ок", а содержательный комментарий — это
-      // правка, а не согласие. Возвращаем на доработку в composer с этим фидбэком,
-      // вместо того чтобы молча отправлять неизменённый вариант на проверку reviewer'ом.
+      // либо ПРАВКА текста касаний, либо ВОПРОС к агенту ("что ответить на
+      // 'дорого'?", "может продолжить с Александром?"). Composer умеет только
+      // переписывать касания по инструкции — он не отвечает на вопросы. Раньше
+      // оба случая обрабатывались одинаково (всё уходило в composer), из-за
+      // чего на вопрос composer молча возвращал прежний текст почти без
+      // изменений, и менеджер получал один и тот же результат на разные
+      // переформулировки вопроса. Теперь вопрос сначала уходит советнику
+      // (advisor), который отвечает по существу и уточняет, нужна ли правка.
       if (managerGaveFeedback) {
+        if (isManagerQuestion(managerInput)) {
+          const advisorInput = {
+            ...baseInput,
+            strategy_output: deal.last_strategy_output,
+            composer_output: deal.last_composer_output,
+            manager_question: managerInput
+          };
+          const advisorResult = tryRecoverFromRawOutput(await callAgent('advisor', advisorInput, 2000));
+          output.advisor_output = advisorResult?.advisor_output || advisorResult;
+          const answer = output.advisor_output?.answer
+            || '⚠️ Не удалось сформировать ответ на вопрос — уточните, пожалуйста, формулировку.';
+          output._directText = `${answer}\n\nСкорректировать текущие касания с учётом этого? (да/нет)`;
+          output._awaitingCorrectionConfirmation = true;
+          output._pendingManagerFeedback = managerInput;
+          nextState = 'COMPOSING';
+          break;
+        }
         const iterations = (deal.composer_iterations || 1);
         const composerInput = {
           ...baseInput,
@@ -520,7 +580,6 @@ async function advance(dealId, managerInput) {
         nextState = 'COMPOSING';
         break;
       }
-
       // Ответ reviewer-агента — самый объёмный (чек-лист по ~10 пунктам на каждое
       // касание + подробные заметки). Без явного лимита он обрезался на дефолтном
       // значении agentRunner'а, JSON не закрывался и парсинг падал с parse_error —
@@ -534,11 +593,9 @@ async function advance(dealId, managerInput) {
       nextState = 'REVIEWING';
       break;
     }
-
     case 'REVIEWING': {
       const approved = deal.last_reviewer_output?.verdict === 'ОДОБРЕНО';
       const iterations = (deal.composer_iterations || 1);
-
       if (approved) {
         // Раньше здесь просто ставился nextState = 'MEMORY_UPDATE' без выполнения
         // самой логики — из-за этого на следующем сообщении менеджера показывался
@@ -563,7 +620,6 @@ async function advance(dealId, managerInput) {
       }
       break;
     }
-
     case 'ESCALATION':
     case 'MEMORY_UPDATE':
     case 'LOST_DEAL':
@@ -574,7 +630,6 @@ async function advance(dealId, managerInput) {
       nextState = 'FINAL_OUTPUT';
       break;
     }
-
     case 'FINAL_OUTPUT': {
       // Новая сессия по той же сделке. Раньше здесь просто сбрасывали state в INIT
       // и ничего не делали — первое сообщение менеджера уходило "вхолостую", и
@@ -585,13 +640,10 @@ async function advance(dealId, managerInput) {
       nextState = result.nextState;
       break;
     }
-
     default:
       nextState = 'INIT';
   }
-
   } // конец else (команда завершения сессии не сработала — обычный switch выполнился)
-
   // Сохранить промежуточные выходы агентов на сделке для следующего шага
   const statePatch = { current_state: nextState };
   if (output.diagnostic_output) statePatch.last_diagnostic_output = output.diagnostic_output;
@@ -599,7 +651,16 @@ async function advance(dealId, managerInput) {
   if (output.composer_output) statePatch.last_composer_output = output.composer_output;
   if (output.reviewer_output) statePatch.last_reviewer_output = output.reviewer_output;
   if (output._composer_iterations) statePatch.composer_iterations = output._composer_iterations;
-
+  // Флаг ожидания ответа "скорректировать/нет" и текст вопроса, на который
+  // ждём этот ответ — сохраняем на сделке, чтобы следующий ход менеджера
+  // (в новом HTTP-запросе, с чистого state) знал, что мы сейчас ждём именно
+  // да/нет, а не обычную реплику.
+  if (typeof output._awaitingCorrectionConfirmation === 'boolean') {
+    statePatch.awaiting_correction_confirmation = output._awaitingCorrectionConfirmation;
+  }
+  if (output._pendingManagerFeedback !== undefined) {
+    statePatch.pending_manager_feedback = output._pendingManagerFeedback;
+  }
   if (output.diagnostic_output?.criteria_assessment) {
     const c = output.diagnostic_output.criteria_assessment;
     statePatch.criteria = {
@@ -610,23 +671,24 @@ async function advance(dealId, managerInput) {
       urgency: c.urgency?.status || deal.criteria.urgency
     };
   }
-
   await db.updateDealState(dealId, statePatch);
-
   if (!output.composer_output && deal.last_composer_output) {
     output.composer_output = deal.last_composer_output;
   }
-  const chatText = formatAgentReplyForChat(nextState, output)
+  // Если на этом шаге явно задан "прямой" текст ответа (ответ advisor'а,
+  // уточнение да/нет и т.п.) — показываем его как есть, а не через
+  // formatAgentReplyForChat(nextState, ...), потому что состояние остаётся
+  // COMPOSING и без этого приоритета показались бы прежние касания вместо
+  // ответа на вопрос менеджера.
+  const chatText = output._directText
+    || formatAgentReplyForChat(nextState, output)
     || formatAgentReplyForChat(deal.current_state, output);
-
   return { nextState, chatText, raw: output };
 }
-
 function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, statusNote) {
   if (!memoryOutput) return 'Сессия завершена.';
   const msgs = getComposerMessages(composerOutput);
   const mainBlocker = getMainBlocker(strategyOutput);
-
   const lines = [
     'ИТОГ СЕССИИ',
     statusNote || null,
@@ -640,5 +702,4 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
   ].filter(Boolean);
   return lines.join('\n\n');
 }
-
 module.exports = { advance };
