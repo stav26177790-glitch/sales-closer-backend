@@ -9,7 +9,8 @@ const MODEL_BY_AGENT = {
   strategy: 'claude-sonnet-4-6',
   composer: 'claude-sonnet-4-6',
   reviewer: 'claude-haiku-4-5-20251001',
-  memory: 'claude-haiku-4-5-20251001'
+  memory: 'claude-haiku-4-5-20251001',
+  advisor: 'claude-haiku-4-5-20251001'
 };
 const TEMPERATURES = {
   planner: 0.2,
@@ -17,7 +18,8 @@ const TEMPERATURES = {
   strategy: 0.3,
   composer: 0.4,
   reviewer: 0.1,
-  memory: 0.1
+  memory: 0.1,
+  advisor: 0.3
 };
 const AGENT_KNOWLEDGE = {
   planner: [],
@@ -37,12 +39,16 @@ const AGENT_KNOWLEDGE = {
     '17_trust_building.md', '22_presentation.md'
   ],
   reviewer: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md'],
-  memory: []
+  memory: [],
+  advisor: [
+    '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
+    '07_decision_authority.md', '23_lpr_tactics.md'
+  ]
 };
 const KNOWLEDGE_BASE_PATH = path.join(__dirname, 'knowledge');
 const AGENTS_PATH = path.join(__dirname, 'agents');
 const CASES_BASE_PATH = path.join(__dirname, 'knowledge', 'cases');
-const AGENTS_WITH_INDUSTRY_CASES = new Set(['strategy', 'composer']);
+const AGENTS_WITH_INDUSTRY_CASES = new Set(['strategy', 'composer', 'advisor']);
 
 function loadKnowledgeForAgent(agentName) {
   const files = AGENT_KNOWLEDGE[agentName] || [];
