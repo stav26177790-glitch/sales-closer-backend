@@ -1,9 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
-
 const client = new Anthropic(); // ANTHROPIC_API_KEY читается из env автоматически
-
 // Дешёвые агенты на Haiku, остальные — на Sonnet (как согласовано)
 const MODEL_BY_AGENT = {
   planner: 'claude-sonnet-4-6',
@@ -13,7 +11,6 @@ const MODEL_BY_AGENT = {
   reviewer: 'claude-haiku-4-5-20251001',
   memory: 'claude-haiku-4-5-20251001'
 };
-
 const TEMPERATURES = {
   planner: 0.2,
   diagnostic: 0.2,
@@ -22,7 +19,6 @@ const TEMPERATURES = {
   reviewer: 0.1,
   memory: 0.1
 };
-
 const AGENT_KNOWLEDGE = {
   planner: [],
   diagnostic: [
@@ -43,9 +39,10 @@ const AGENT_KNOWLEDGE = {
   reviewer: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md'],
   memory: []
 };
-
 const KNOWLEDGE_BASE_PATH = path.join(__dirname, 'knowledge');
 const AGENTS_PATH = path.join(__dirname, 'agents');
+const CASES_BASE_PATH = path.join(__dirname, 'knowledge', 'cases');
+const AGENTS_WITH_INDUSTRY_CASES = new Set(['strategy', 'composer']);
 
 function loadKnowledgeForAgent(agentName) {
   const files = AGENT_KNOWLEDGE[agentName] || [];
@@ -60,12 +57,24 @@ function loadKnowledgeForAgent(agentName) {
   return knowledge;
 }
 
+function loadIndustryCases(industry) {
+  if (!industry) return '';
+  const folderPath = path.join(CASES_BASE_PATH, industry);
+  if (!fs.existsSync(folderPath)) return '';
+  const files = fs.readdirSync(folderPath).filter((f) => f.endsWith('.md'));
+  if (!files.length) return '';
+  let cases = `\n\n---\n# КЕЙСЫ ПО ОТРАСЛИ: ${industry}\n---\n\n`;
+  files.forEach((file) => {
+    cases += fs.readFileSync(path.join(folderPath, file), 'utf8') + '\n\n';
+  });
+  return cases;
+}
+
 function loadAgentPrompt(agentName) {
   const filePath = path.join(AGENTS_PATH, `${agentName}_agent.md`);
   if (!fs.existsSync(filePath)) throw new Error(`Промпт агента не найден: ${filePath}`);
   return fs.readFileSync(filePath, 'utf8');
 }
-
 function compressInput(inputData, maxChars = 12000) {
   const str = JSON.stringify(inputData);
   if (str.length <= maxChars) return inputData;
@@ -78,11 +87,12 @@ function compressInput(inputData, maxChars = 12000) {
     }
   };
 }
-
 async function callAgent(agentName, inputData, maxTokens = 4000) {
-  const systemPrompt = loadAgentPrompt(agentName) + loadKnowledgeForAgent(agentName);
+  let systemPrompt = loadAgentPrompt(agentName) + loadKnowledgeForAgent(agentName);
+  if (AGENTS_WITH_INDUSTRY_CASES.has(agentName)) {
+    systemPrompt += loadIndustryCases(inputData?.deal?.industry);
+  }
   const MAX_RETRIES = 3;
-
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await client.messages.create({
@@ -92,9 +102,7 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
         system: systemPrompt,
         messages: [{ role: 'user', content: JSON.stringify(compressInput(inputData), null, 2) }]
       });
-
       const rawOutput = response.content.find((b) => b.type === 'text')?.text || '';
-
       try {
         const jsonMatch = rawOutput.match(/```json\n([\s\S]*?)\n```/);
         if (jsonMatch) return JSON.parse(jsonMatch[1]);
@@ -108,5 +116,4 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
     }
   }
 }
-
 module.exports = { callAgent };
