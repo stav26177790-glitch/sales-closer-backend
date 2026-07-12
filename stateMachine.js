@@ -44,10 +44,26 @@ function getComposerMessages(composerOutput) {
 // резюме сессии. Менеджеру приходилось самому писать текст документа,
 // хотя он уже был сгенерирован агентом. Единая функция форматирования
 // вложения используется во всех местах, где рендерится касание.
+//
+// После находки на реальном тесте (медиаплан с выдуманным трафиком и
+// ложными ссылками на источники) Правило 11 в composer_agent.md изменено:
+// Composer больше не обязан генерировать content любой ценой — если нужных
+// данных нет во входных данных, он оставляет content = null и объясняет в
+// manager_action_needed, что менеджеру нужно подготовить самому. Функция
+// обрабатывает оба случая.
 function formatAttachmentBlock(attachment) {
-  if (!attachment || !attachment.content) return '';
+  if (!attachment) return '';
   const title = attachment.title || 'Документ';
-  return `\n\n📎 ${title}:\n${attachment.content}`;
+  if (attachment.content) {
+    const todo = attachment.manager_action_needed
+      ? `\n\n⚠️ Нужно дополнить перед отправкой: ${attachment.manager_action_needed}`
+      : '';
+    return `\n\n📎 ${title}:\n${attachment.content}${todo}`;
+  }
+  if (attachment.manager_action_needed) {
+    return `\n\n📎 ${title} — черновик не сгенерирован, подготовьте самостоятельно:\n${attachment.manager_action_needed}`;
+  }
+  return '';
 }
 // Превращает объект/массив в читаемую строку вместо сырого JSON.
 // Используется для значений ВНУТРИ одной строки (например, элемент массива).
