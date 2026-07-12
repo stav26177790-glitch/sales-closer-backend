@@ -64,6 +64,31 @@ function renderKeyValueBlock(obj, labels = {}) {
     .join('\n');
 }
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
+// Технические коды критериев reviewer'а (используются во внутренних полях
+// checklist / failed_criteria) — не предназначены для показа человеку как есть.
+// Раньше failed_criteria выводился в чат сырыми английскими идентификаторами
+// (например "no_pressure, tone_fit"), что было непонятно менеджеру. Теперь
+// переводим каждый код на русский перед показом.
+const CRITERIA_LABELS = {
+  new_value: 'нет новой ценности',
+  single_goal: 'несколько целей в одном сообщении',
+  strategy_alignment: 'не соответствует выбранной стратегии',
+  blocker_addressed: 'не работает на главный блокер',
+  no_pressure: 'создаёт давление на клиента',
+  no_stop_words: 'содержит запрещённую фразу',
+  personalization: 'недостаточно персонализировано',
+  clear_next_step: 'нет чёткого следующего шага',
+  channel_fit: 'не соответствует формату канала',
+  not_repetitive: 'повторяет предыдущее касание',
+  tone_fit: 'тон не соответствует типу клиента'
+};
+// Переводит список технических кодов в читаемую строку через запятую.
+// Код, отсутствующий в словаре (например, если промпт вернёт что-то новое),
+// показываем как есть — лучше показать сырой код, чем молча его скрыть.
+function translateCriteria(codes) {
+  if (!Array.isArray(codes) || !codes.length) return '';
+  return codes.map((c) => CRITERIA_LABELS[c] || c).join(', ');
+}
 const SESSION_SUMMARY_LABELS = {
   session_number: 'Номер сессии',
   session_date: 'Дата',
@@ -274,7 +299,7 @@ function formatAgentReplyForChat(state, output) {
         }
       }
       const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m =>
-        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + m.failed_criteria.join(', ') : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
+        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + translateCriteria(m.failed_criteria) : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
       ).join('\n');
       return `Результат проверки: ${verdict}\n${details}`;
     }
