@@ -38,6 +38,17 @@ function validateMessageLength(composerOutput) {
 function getComposerMessages(composerOutput) {
   return composerOutput?.messages || composerOutput?.composer_output?.messages || [];
 }
+// Баг №14: composer с версии с Правилом 11 генерирует поле attachment
+// (полный текст документа, который упоминается в касании), но нигде в чате
+// это поле не показывалось менеджеру — ни в самих касаниях, ни в финальном
+// резюме сессии. Менеджеру приходилось самому писать текст документа,
+// хотя он уже был сгенерирован агентом. Единая функция форматирования
+// вложения используется во всех местах, где рендерится касание.
+function formatAttachmentBlock(attachment) {
+  if (!attachment || !attachment.content) return '';
+  const title = attachment.title || 'Документ';
+  return `\n\n📎 ${title}:\n${attachment.content}`;
+}
 // Превращает объект/массив в читаемую строку вместо сырого JSON.
 // Используется для значений ВНУТРИ одной строки (например, элемент массива).
 function humanizeValue(val) {
@@ -277,7 +288,7 @@ function formatAgentReplyForChat(state, output) {
         return `⚠️ Не удалось прочитать касания из ответа composer-агента.\n\nСырой ответ:\n${JSON.stringify(output?.composer_output, null, 2)}`;
       }
       return msgs.map((m, i) =>
-        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
+        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
       ).join('\n\n---\n\n');
     }
     case 'REVIEWING': {
@@ -293,7 +304,7 @@ function formatAgentReplyForChat(state, output) {
         const msgs = getComposerMessages(output?.composer_output);
         if (msgs.length) {
           const touchpoints = msgs.map((m, i) =>
-            `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}`
+            `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
           ).join('\n\n---\n\n');
           return `✅ Касания одобрены:\n\n${touchpoints}`;
         }
@@ -723,7 +734,7 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
     'ИТОГ СЕССИИ',
     statusNote || null,
     msgs.length ? 'КАСАНИЯ:\n' + msgs.map((m, i) =>
-      `Касание ${i + 1} — ${m.channel}:\n${m.body}`
+      `Касание ${i + 1} — ${m.channel}:\n${m.body}${formatAttachmentBlock(m.attachment)}`
     ).join('\n\n---\n\n') : null,
     mainBlocker ? `Блокер: ${mainBlocker}` : null,
     strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(strategyOutput.primary_strategy, STRATEGY_LABELS) : null,
