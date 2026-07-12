@@ -471,7 +471,12 @@ async function advance(dealId, managerInput) {
         message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
         iteration: 1
       };
-      const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+      // Лимит увеличен с 5000 до 8000: с добавлением поля attachment
+      // (полный текст прикладываемых документов, а не просто плейсхолдер)
+      // ответ composer может включать несколько объёмных документов сразу
+      // — на 5000 токенов ответ обрезался посреди JSON и парсинг падал
+      // с parse_error, хотя сама генерация была полностью корректной.
+      const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
       output.composer_output = composerResult?.composer_output || composerResult;
       nextState = 'COMPOSING';
       break;
@@ -493,7 +498,7 @@ async function advance(dealId, managerInput) {
             message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
             iteration: iterations
           };
-          const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+          const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
           output.composer_output = composerResult?.composer_output || composerResult;
           output._awaitingCorrectionConfirmation = false;
           output._pendingManagerFeedback = null;
@@ -551,7 +556,7 @@ async function advance(dealId, managerInput) {
           message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
           iteration: iterations + 1
         };
-        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
         output.composer_output = composerResult?.composer_output || composerResult;
         // Нарушение длины — техническая причина, поэтому итерацию считаем как обычно
         // (в отличие от чисто вкусового фидбэка менеджера ниже).
@@ -597,7 +602,7 @@ async function advance(dealId, managerInput) {
           message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
           iteration: iterations
         };
-        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
         output.composer_output = composerResult?.composer_output || composerResult;
         // composer_iterations намеренно НЕ увеличиваем здесь — этот счётчик считает
         // автоматические доработки по вердикту reviewer'а (лимит MAX_COMPOSER_ITERATIONS).
@@ -638,7 +643,7 @@ async function advance(dealId, managerInput) {
           message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
           iteration: iterations + 1
         };
-        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 5000));
+        const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
         output.composer_output = composerResult?.composer_output || composerResult;
         output._composer_iterations = iterations + 1;
         nextState = 'COMPOSING';
