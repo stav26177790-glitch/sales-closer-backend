@@ -379,8 +379,14 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
   const strategyOutput = extra.strategy_output || deal.last_strategy_output;
   const composerOutput = extra.composer_output || deal.last_composer_output;
   const reviewerOutput = extra.reviewer_output || deal.last_reviewer_output;
+  // Баг №22: diagnostic_output документирован в схеме входных данных
+  // memory_agent.md, но фактически никогда не передавался — memory был
+  // вынужден сам додумывать patterns_detected по сырому dialog_history,
+  // вместо того чтобы скопировать реальную оценку diagnostic-агента.
+  const diagnosticOutput = extra.diagnostic_output || deal.last_diagnostic_output;
   const memoryInput = {
     ...baseInput,
+    diagnostic_output: diagnosticOutput,
     strategy_output: strategyOutput,
     composer_output: composerOutput,
     reviewer_output: reviewerOutput
@@ -422,6 +428,13 @@ async function advance(dealId, managerInput) {
     .map(m => `[${m.role === 'user' ? 'Менеджер' : 'Агент'}]: ${m.content}`)
     .join('\n\n');
   const baseInput = {
+    // Баг №21: ни один агент в цепочке не получал реальную текущую дату —
+    // из-за этого diagnostic не мог достоверно судить "дедлайн прошёл или
+    // нет" (Критерий 5 — Срочность), а memory при формировании
+    // session_date был вынужден либо выдумывать дату, либо собирать
+    // мусор вроде "2025-01-session-1". today передаётся один раз здесь и
+    // автоматически доходит до всех агентов через `...baseInput`.
+    today: new Date().toISOString().slice(0, 10),
     deal: {
       client: deal.client,
       product: deal.product,
