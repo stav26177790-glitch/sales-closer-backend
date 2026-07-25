@@ -411,6 +411,35 @@ Telegram → Голосовое → Email → Звонок → Зум → Лич
 
 ---
 
+# ЯЗЫК ИТОГОВОГО НАЗВАНИЯ СТРАТЕГИИ
+
+Внутри этого промпта стратегии обозначены английскими кодовыми именами
+(Diagnostic, StakeholderExpansion, EconomicValue, RiskReduction, Activation,
+Escalation, DirectConversation, Disqualification) — это ТОЛЬКО внутренняя
+техническая маркировка для структуры рассуждения. Менеджер, который увидит
+результат в чате, не должен видеть эти английские кодовые имена ни при
+каких обстоятельствах.
+
+В полях `primary_strategy.name` и `secondary_strategy.name` итогового JSON
+указывай ИСКЛЮЧИТЕЛЬНО русское название по этой таблице:
+
+| Кодовое имя (только для внутренней логики) | Название в JSON (`name`) |
+|---|---|
+| Diagnostic | Диагностика потребности |
+| StakeholderExpansion | Охват всех участников решения |
+| EconomicValue | Экономическое обоснование |
+| RiskReduction | Снижение риска |
+| Activation | Активация срочности |
+| Escalation | Эскалация |
+| DirectConversation | Прямой разговор |
+| Disqualification | Дисквалификация |
+
+Это правило касается только поля `name`. Само рассуждение (`rationale`,
+`strategy_summary`, `recommended_next_action`) и так пишется по-русски —
+здесь ничего не меняется.
+
+---
+
 # ВЫХОДНЫЕ ДАННЫЕ
 
 ```json
@@ -463,12 +492,12 @@ Telegram → Голосовое → Email → Звонок → Зум → Лич
 {
   "strategy_output": {
     "primary_strategy": {
-      "name": "StakeholderExpansion",
+      "name": "Охват всех участников решения",
       "goal": "Выйти на ЛПР через чемпиона или напрямую",
       "rationale": "Екатерина не имеет полномочий. 2 месяца работы с ней не дали результата. Нужна смена уровня коммуникации."
     },
     "secondary_strategy": {
-      "name": "DirectConversation",
+      "name": "Прямой разговор",
       "goal": "Получить честный ответ о статусе сделки"
     },
     "touchpoint_sequence": [
