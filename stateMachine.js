@@ -732,8 +732,13 @@ async function advance(dealId, managerInput) {
   if (output._pendingManagerFeedback !== undefined) {
     statePatch.pending_manager_feedback = output._pendingManagerFeedback;
   }
-  if (output.diagnostic_output?.criteria_assessment) {
-    const c = output.diagnostic_output.criteria_assessment;
+  // Баг №24: раньше здесь проверялось только diag.criteria_assessment, но
+  // схема diagnostic_agent.md отдаёт поле "scores" — без этого фоллбэка
+  // (тот же, что уже используется в formatAgentReplyForChat выше) deal.criteria
+  // в БД никогда не обновлялся реальным выводом diagnostic-агента.
+  const diagForCriteria = output.diagnostic_output?.criteria_assessment || output.diagnostic_output?.scores;
+  if (diagForCriteria) {
+    const c = diagForCriteria;
     statePatch.criteria = {
       financial: c.financial_capacity?.status || c.financial?.status || deal.criteria.financial,
       need: c.need?.status || deal.criteria.need,
