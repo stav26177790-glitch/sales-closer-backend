@@ -345,7 +345,7 @@ function formatAgentReplyForChat(state, output) {
     }
     case 'CONFLICT_RESOLUTION': {
       const conflicts = output?.diagnostic_output?.conflicts_explained || [];
-      return conflicts.map((c) => `${c.criterion}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
+      return conflicts.map((c) => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
         || 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
     }
     case 'STRATEGY_SELECTION': {
