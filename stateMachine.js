@@ -91,6 +91,21 @@ function renderKeyValueBlock(obj, labels = {}) {
     .join('\n');
 }
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
+// Ключи критериев СОПРАНО (diagnostic_output.scores) — раньше рендерились
+// сырыми английскими именами ("financial: Риск", "authority: Риск"),
+// в отличие от значений статуса, которые агент и так пишет по-русски
+// ("Риск", "Неизвестно", "Подтверждено"). Тот же класс проблемы, что и
+// с STRATEGY_LABELS/CRITERIA_LABELS ниже — здесь просто был пропущен.
+const SOPRANO_CRITERIA_KEY_LABELS = {
+  financial: 'Финансы',
+  need: 'Потребность',
+  trust: 'Доверие',
+  authority: 'Полномочия (ЛПР)',
+  urgency: 'Срочность'
+};
+function translateCriterionKey(key) {
+  return SOPRANO_CRITERIA_KEY_LABELS[key] || key;
+}
 // Стратегический агент называет primary_strategy.name внутренним английским
 // кодовым именем (традиция методологии продаж — RiskReduction,
 // StakeholderExpansion и т.п.) — это утекало менеджеру в чат как есть.
@@ -320,11 +335,11 @@ function formatAgentReplyForChat(state, output) {
       const lines = Object.entries(c).map(([k, v]) => {
         const status = v?.status || v;
         const comment = v?.comment || v?.explanation || '';
-        return `${k}: ${status}${comment ? ' — ' + comment : ''}`;
+        return `${translateCriterionKey(k)}: ${status}${comment ? ' — ' + comment : ''}`;
       });
       const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
       const conflictText = conflicts.length
-        ? '\n\nРасхождения:\n' + conflicts.map(c => `${c.criterion}: ${getConflictExplanation(c)}`).join('\n')
+        ? '\n\nРасхождения:\n' + conflicts.map(c => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}`).join('\n')
         : '';
       return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
     }
