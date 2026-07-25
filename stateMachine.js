@@ -91,6 +91,36 @@ function renderKeyValueBlock(obj, labels = {}) {
     .join('\n');
 }
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
+// Стратегический агент называет primary_strategy.name внутренним английским
+// кодовым именем (традиция методологии продаж — RiskReduction,
+// StakeholderExpansion и т.п.) — это утекало менеджеру в чат как есть.
+// Правильное решение — поправить сам strategy_agent.md (промпт агента),
+// но его нет в этом пакете передачи. Это защитный слой на уровне рендеринга:
+// известные названия переводим сразу, неизвестные — логируем, чтобы словарь
+// пополнялся, а не переводим "на глаз" то, чего не видели на реальных выводах.
+const STRATEGY_NAME_RU = {
+  RiskReduction: 'Снижение риска',
+  StakeholderExpansion: 'Охват всех участников решения',
+  SoftNurture: 'Мягкое сопровождение',
+  'Soft Nurture': 'Мягкое сопровождение',
+  TrustBuilding: 'Построение доверия',
+  'Trust Building': 'Построение доверия',
+  Disqualification: 'Дисквалификация'
+};
+function translateStrategyName(name) {
+  if (typeof name !== 'string' || !name) return name;
+  if (/[а-яА-ЯёЁ]/.test(name)) return name; // уже по-русски — не трогаем
+  if (STRATEGY_NAME_RU[name]) return STRATEGY_NAME_RU[name];
+  console.warn(
+    `[strategy] Неизвестное английское название стратегии "${name}" — нет перевода в STRATEGY_NAME_RU. ` +
+    `Показано менеджеру без перевода, добавьте перевод в словарь.`
+  );
+  return name;
+}
+function withTranslatedStrategyName(primaryStrategy) {
+  if (!primaryStrategy || typeof primaryStrategy !== 'object') return primaryStrategy;
+  return { ...primaryStrategy, name: translateStrategyName(primaryStrategy.name) };
+}
 // Технические коды критериев reviewer'а (используются во внутренних полях
 // checklist / failed_criteria) — не предназначены для показа человеку как есть.
 // Раньше failed_criteria выводился в чат сырыми английскими идентификаторами
@@ -289,7 +319,7 @@ function formatAgentReplyForChat(state, output) {
       if (!s) return JSON.stringify(output, null, 2);
       const mainBlocker = getMainBlocker(s);
       const lines = [
-        'Стратегия:\n' + renderKeyValueBlock(s.primary_strategy, STRATEGY_LABELS),
+        'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
         mainBlocker ? `Блокер: ${mainBlocker}` : null,
         s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
         s.rationale ? `Обоснование: ${s.rationale}` : null,
@@ -417,7 +447,7 @@ async function runIntakeStep(baseInput) {
   return { output, nextState: 'DIAGNOSING' };
 }
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
-async function advance(dealId, managerInput) {
+async function advanceInternal(dealId, managerInput) {
   const deal = await db.getDeal(dealId);
   const memory = (await db.loadMemory(dealId)) || {
     session_number: 1, previous_touchpoints: [], confirmed_facts: [], open_questions: []
@@ -772,10 +802,56 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
       `Касание ${i + 1} — ${m.channel}:\n${m.body}${formatAttachmentBlock(m.attachment)}`
     ).join('\n\n---\n\n') : null,
     mainBlocker ? `Блокер: ${mainBlocker}` : null,
-    strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(strategyOutput.primary_strategy, STRATEGY_LABELS) : null,
+    strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(strategyOutput.primary_strategy), STRATEGY_LABELS) : null,
     msgs.length ? `Одобренные касания: ${msgs.length}` : null,
     memoryOutput.session_summary ? 'Резюме:\n' + renderKeyValueBlock(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null
   ].filter(Boolean);
   return lines.join('\n\n');
 }
+
+/**
+ * Защита от дублей (найдена по логам после включения логирования в
+ * agentRunner.js — на реальной сделке planner и diagnostic отработали
+ * по два раза подряд с идентичными входными данными). advance() сам по
+ * себе не имел никакой защиты от повторной обработки одного и того же
+ * сообщения — при двойной отправке (двойной клик, повтор запроса от
+ * клиента и т.п.) вся цепочка агентов просто честно отрабатывала дважды,
+ * дважды тратя токены.
+ *
+ * Это НЕ чинит источник дублирования (сам HTTP-роут/вебхук, который
+ * вызывает advance(), в этот пакет не входил) — это защитный слой на
+ * уровне stateMachine.js, который сработает независимо от того, откуда
+ * пришёл дубль.
+ *
+ * ВАЖНО: дедупликация — в памяти процесса (Map), не в БД. Это значит:
+ * - не переживает перезапуск/передеплой сервиса (это нормально, дубли
+ *   обычно приходят в пределах секунд, а не через рестарт);
+ * - НЕ защищает от дублей, если бэкенд когда-либо будет масштабирован
+ *   на несколько инстансов Render одновременно (тогда нужен будет
+ *   дедуп на уровне БД — отдельная задача, если/когда до этого дойдёт).
+ */
+const recentAdvanceCalls = new Map(); // dealId -> { input, timestamp, promise }
+const ADVANCE_DEDUP_WINDOW_MS = 15000;
+
+async function advance(dealId, managerInput) {
+  const now = Date.now();
+  const prev = recentAdvanceCalls.get(dealId);
+  if (prev && prev.input === managerInput && (now - prev.timestamp) < ADVANCE_DEDUP_WINDOW_MS) {
+    console.warn(
+      `[advance] Повторный вызов для сделки ${dealId} с тем же сообщением в течение ` +
+      `${ADVANCE_DEDUP_WINDOW_MS}мс — возвращаю результат первого вызова, агенты повторно не запускаются.`
+    );
+    return prev.promise;
+  }
+  const promise = advanceInternal(dealId, managerInput);
+  recentAdvanceCalls.set(dealId, { input: managerInput, timestamp: now, promise });
+  promise.finally(() => {
+    setTimeout(() => {
+      const entry = recentAdvanceCalls.get(dealId);
+      if (entry && entry.promise === promise) recentAdvanceCalls.delete(dealId);
+    }, ADVANCE_DEDUP_WINDOW_MS);
+  }).catch(() => {}); // не даём неотловленному отклонению всплыть из фонового таймера
+  return promise;
+}
+
 module.exports = { advance };
