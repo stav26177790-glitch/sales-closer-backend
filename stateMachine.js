@@ -99,13 +99,20 @@ const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale:
 // известные названия переводим сразу, неизвестные — логируем, чтобы словарь
 // пополнялся, а не переводим "на глаз" то, чего не видели на реальных выводах.
 const STRATEGY_NAME_RU = {
-  RiskReduction: 'Снижение риска',
+  Diagnostic: 'Диагностика потребности',
   StakeholderExpansion: 'Охват всех участников решения',
+  EconomicValue: 'Экономическое обоснование',
+  RiskReduction: 'Снижение риска',
+  Activation: 'Активация срочности',
+  Escalation: 'Эскалация',
+  DirectConversation: 'Прямой разговор',
+  Disqualification: 'Дисквалификация',
+  // Встречались в реальных выводах агента до унификации словаря — оставлены
+  // для обратной совместимости с уже сохранёнными в БД сделками.
   SoftNurture: 'Мягкое сопровождение',
   'Soft Nurture': 'Мягкое сопровождение',
   TrustBuilding: 'Построение доверия',
-  'Trust Building': 'Построение доверия',
-  Disqualification: 'Дисквалификация'
+  'Trust Building': 'Построение доверия'
 };
 function translateStrategyName(name) {
   if (typeof name !== 'string' || !name) return name;
@@ -174,6 +181,18 @@ function getStrategyName(strategyOutput) {
   const s = strategyOutput?.primary_strategy;
   if (typeof s === 'string') return s;
   return s?.name || null;
+}
+// После правки strategy_agent.md (перевод primary_strategy.name на русский)
+// агент теперь отдаёт "Дисквалификация" вместо "Disqualification". Раньше
+// код сравнивал getStrategyName(...) === 'Disqualification' напрямую — при
+// обновлении промпта это сравнение молча перестало бы срабатывать, и
+// дисквалификация сделок сломалась бы без единой ошибки в логах. Проверяем
+// оба варианта — и новый русский (основной, актуальный), и старый английский
+// (на случай, если где-то в БД/памяти остался last_strategy_output,
+// сохранённый до деплоя этого фикса).
+function isDisqualificationStrategy(strategyOutput) {
+  const name = getStrategyName(strategyOutput);
+  return name === 'Дисквалификация' || name === 'Disqualification';
 }
 // Единая логика fallback для объяснения расхождений между менеджером и агентом.
 function getConflictExplanation(c) {
@@ -514,7 +533,7 @@ async function advanceInternal(dealId, managerInput) {
         nextState = 'FINAL_OUTPUT';
         break;
       }
-      if (getStrategyName(output.strategy_output) === 'Disqualification') {
+      if (isDisqualificationStrategy(output.strategy_output)) {
         output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
           strategy_output: output.strategy_output,
           statusNote: 'Статус: сделка не квалифицирована.'
