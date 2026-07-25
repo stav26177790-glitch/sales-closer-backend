@@ -93,24 +93,45 @@ function loadAgentPrompt(agentName) {
  * что в JS даёт строку "undefined\n...[сокращено]" — она подставлялась
  * как БУКВАЛЬНЫЙ контент в промпт агенту. Теперь отсутствующее поле
  * остаётся отсутствующим (не обрезается и не заменяется мусорной строкой).
+ *
+ * Баг №26 (найден по логам с прода после включения логирования обрезки):
+ * materials.dialog_history — вся история сообщений по сделке, склеенная
+ * в одну строку в stateMachine.js (`db.getMessages(dealId)`), — росла БЕЗ
+ * ОГРАНИЧЕНИЙ и не участвовала в обрезке вообще. На реальной сделке это
+ * дало вход в 69137 символов для strategy при том, что correspondence
+ * после обрезки был всего 3000 — то есть основную стоимость запроса
+ * создавал именно необрезанный dialog_history. Теперь обрезается и он,
+ * но с ХВОСТА (оставляем последние maxDialogChars символов, а не первые) —
+ * недавняя история сделки обычно важнее самой старой для текущего решения.
  */
 function compressInput(inputData, agentName, maxChars = 12000) {
   const str = JSON.stringify(inputData);
   if (str.length <= maxChars) return inputData;
 
+  const MAX_CORRESPONDENCE = 3000;
+  const MAX_CRM_NOTES = 1000;
+  const MAX_DIALOG_HISTORY = 4000;
+
   const originalCorrespondence = inputData.materials?.correspondence;
   const originalCrmNotes = inputData.materials?.crm_notes;
+  const originalDialogHistory = inputData.materials?.dialog_history;
   const truncatedFields = [];
 
   const newMaterials = { ...inputData.materials };
 
-  if (typeof originalCorrespondence === 'string' && originalCorrespondence.length > 3000) {
-    newMaterials.correspondence = originalCorrespondence.slice(0, 3000) + '\n...[сокращено]';
-    truncatedFields.push(`correspondence (${originalCorrespondence.length} → 3000 симв.)`);
+  if (typeof originalCorrespondence === 'string' && originalCorrespondence.length > MAX_CORRESPONDENCE) {
+    newMaterials.correspondence = originalCorrespondence.slice(0, MAX_CORRESPONDENCE) + '\n...[сокращено]';
+    truncatedFields.push(`correspondence (${originalCorrespondence.length} → ${MAX_CORRESPONDENCE} симв.)`);
   }
-  if (typeof originalCrmNotes === 'string' && originalCrmNotes.length > 1000) {
-    newMaterials.crm_notes = originalCrmNotes.slice(0, 1000) + '\n...[сокращено]';
-    truncatedFields.push(`crm_notes (${originalCrmNotes.length} → 1000 симв.)`);
+  if (typeof originalCrmNotes === 'string' && originalCrmNotes.length > MAX_CRM_NOTES) {
+    newMaterials.crm_notes = originalCrmNotes.slice(0, MAX_CRM_NOTES) + '\n...[сокращено]';
+    truncatedFields.push(`crm_notes (${originalCrmNotes.length} → ${MAX_CRM_NOTES} симв.)`);
+  }
+  if (typeof originalDialogHistory === 'string' && originalDialogHistory.length > MAX_DIALOG_HISTORY) {
+    // Оставляем хвост (последние сообщения), а не начало — для истории
+    // диалога недавний контекст важнее самого раннего.
+    newMaterials.dialog_history = '[начало истории сокращено]...\n' + originalDialogHistory.slice(-MAX_DIALOG_HISTORY);
+    truncatedFields.push(`dialog_history (${originalDialogHistory.length} → ${MAX_DIALOG_HISTORY} симв., оставлен хвост)`);
   }
 
   const result = { ...inputData, materials: newMaterials };
