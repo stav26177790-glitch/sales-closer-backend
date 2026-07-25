@@ -90,7 +90,13 @@ function renderKeyValueBlock(obj, labels = {}) {
     .map(([k, v]) => `${labels[k] || k}: ${humanizeValue(v)}`)
     .join('\n');
 }
-const STRATEGY_LABELS = { name: 'Название', goal: 'Цель', rationale: 'Обоснование' };
+// rationale здесь намеренно не указан: это подробное многосоставное
+// рассуждение агента для внутренней логики, не задумывалось как цельный
+// текст для чтения менеджером (сплошной абзац без структуры). Вместо него
+// показывается strategy_summary — отдельное поле, специально описанное в
+// схеме strategy_agent.md как "краткое резюме на русском", но раньше нигде
+// не рендерившееся. rationale исключается из объекта в withTranslatedStrategyName.
+const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 // Ключи критериев СОПРАНО (diagnostic_output.scores) — раньше рендерились
 // сырыми английскими именами ("financial: Риск", "authority: Риск"),
 // в отличие от значений статуса, которые агент и так пишет по-русски
@@ -141,7 +147,13 @@ function translateStrategyName(name) {
 }
 function withTranslatedStrategyName(primaryStrategy) {
   if (!primaryStrategy || typeof primaryStrategy !== 'object') return primaryStrategy;
-  return { ...primaryStrategy, name: translateStrategyName(primaryStrategy.name) };
+  // rationale исключён из показа менеджеру намеренно (см. комментарий у
+  // STRATEGY_LABELS) — здесь его явно убираем из объекта, а не полагаемся
+  // на отсутствие в STRATEGY_LABELS: renderKeyValueBlock рендерит ВСЕ ключи
+  // объекта, labels влияют только на подпись найденного ключа, а не на то,
+  // показывать поле или нет.
+  const { rationale, ...rest } = primaryStrategy;
+  return { ...rest, name: translateStrategyName(primaryStrategy.name) };
 }
 // Технические коды критериев reviewer'а (используются во внутренних полях
 // checklist / failed_criteria) — не предназначены для показа человеку как есть.
@@ -356,7 +368,7 @@ function formatAgentReplyForChat(state, output) {
         'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
         mainBlocker ? `Блокер: ${mainBlocker}` : null,
         s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
-        s.rationale ? `Обоснование: ${s.rationale}` : null,
+        s.rationale ? `Обоснование: ${s.rationale}` : (s.strategy_summary ? `Обоснование: ${s.strategy_summary}` : null),
       ].filter(Boolean);
       return lines.join('\n\n');
     }
@@ -837,6 +849,7 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
     ).join('\n\n---\n\n') : null,
     mainBlocker ? `Блокер: ${mainBlocker}` : null,
     strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(strategyOutput.primary_strategy), STRATEGY_LABELS) : null,
+    strategyOutput?.strategy_summary ? `Обоснование: ${strategyOutput.strategy_summary}` : null,
     msgs.length ? `Одобренные касания: ${msgs.length}` : null,
     memoryOutput.session_summary ? 'Резюме:\n' + renderKeyValueBlock(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null
   ].filter(Boolean);
