@@ -1032,6 +1032,10 @@ Follow-up — это короткое сообщение клиенту посл
 ---
 
 # ВЫХОДНЫЕ ДАННЫЕ
+```json
+{
+  "composer_output": {
+    "messages": [
       {
         "touchpoint_number": 1,
         "channel": "string",
