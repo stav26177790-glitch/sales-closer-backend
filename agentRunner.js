@@ -11,7 +11,8 @@ const MODEL_BY_AGENT = {
   composer: 'claude-sonnet-4-6',
   reviewer: 'claude-haiku-4-5-20251001',
   memory: 'claude-haiku-4-5-20251001',
-  advisor: 'claude-haiku-4-5-20251001'
+  advisor: 'claude-haiku-4-5-20251001',
+  intent_classifier: 'claude-haiku-4-5-20251001'
 };
 const TEMPERATURES = {
   planner: 0.2,
@@ -20,7 +21,8 @@ const TEMPERATURES = {
   composer: 0.4,
   reviewer: 0.1,
   memory: 0.1,
-  advisor: 0.3
+  advisor: 0.3,
+  intent_classifier: 0.1
 };
 const AGENT_KNOWLEDGE = {
   planner: [],
@@ -44,7 +46,8 @@ const AGENT_KNOWLEDGE = {
   advisor: [
     '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
     '07_decision_authority.md', '23_lpr_tactics.md'
-  ]
+  ],
+  intent_classifier: []
 };
 const KNOWLEDGE_BASE_PATH = path.join(__dirname, 'knowledge');
 const AGENTS_PATH = path.join(__dirname, 'agents');
