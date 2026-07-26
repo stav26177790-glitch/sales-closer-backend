@@ -1,6 +1,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
+const { validateAgentOutput } = require('./outputSchemas');
 const client = new Anthropic(); // ANTHROPIC_API_KEY читается из env автоматически
 // Дешёвые агенты на Haiku, остальные — на Sonnet (как согласовано)
 const MODEL_BY_AGENT = {
@@ -175,8 +176,9 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
       const rawOutput = response.content.find((b) => b.type === 'text')?.text || '';
       try {
         const jsonMatch = rawOutput.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch) return JSON.parse(jsonMatch[1]);
-        return JSON.parse(rawOutput);
+        const parsed = jsonMatch ? JSON.parse(jsonMatch[1]) : JSON.parse(rawOutput);
+        logSchemaDrift(agentName, inputData, parsed);
+        return parsed;
       } catch {
         return { raw_output: rawOutput, parse_error: true };
       }
@@ -186,4 +188,37 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
     }
   }
 }
+/**
+ * Схема-валидация (Блок 1 сессии 3, продолжение): сверяет ЖИВОЙ ответ
+ * модели с её же собственной схемой из *_agent.md ("ВЫХОДНЫЕ ДАННЫЕ").
+ *
+ * ВАЖНО — это НЕ то же самое, что баги №24/№30/№31/№32, которые чинили
+ * этой сессией: те были рассогласованием КОДА stateMachine.js со схемой
+ * (ловится статическим анализом в regression/static-checks.js). Здесь —
+ * другой класс проблемы: сама модель в конкретном вызове не выполнила
+ * то, что обещает её собственный промпт (забыла обязательное поле,
+ * вернула не тот тип). Раньше это тихо утекало на 2-3 шага дальше по
+ * пайплайну и разбиралось только когда кто-то замечал сломанный вывод
+ * в чате — без единой зацепки, что пошло не так и на каком именно агенте.
+ *
+ * НЕ блокирует и не ретраит пайплайн — только громко логирует, с
+ * указанием сделки и агента, чтобы проблему можно было найти по логам
+ * (тот же принцип, что уже используется в compressInput() ниже).
+ * Решение "должна ли схема-валидация ретраить вызов агента при дрейфе" —
+ * сознательно НЕ реализовано здесь: это отдельный риск (лишние вызовы
+ * API, возможность зацикливания), обсудить отдельно, если понадобится.
+ */
+function logSchemaDrift(agentName, inputData, parsedResult) {
+  if (parsedResult?.parse_error) return; // это отдельный, уже залогированный на своём уровне случай
+  const payload = parsedResult?.[`${agentName}_output`] || parsedResult;
+  const { valid, problems } = validateAgentOutput(agentName, payload);
+  if (valid) return;
+  const dealLabel = inputData?.deal?.client || inputData?.deal?.id || 'unknown_deal';
+  console.warn(
+    `[schema] Ответ агента "${agentName}" (сделка: ${dealLabel}) разошёлся с его собственной схемой: ` +
+    `${problems.join('; ')}. Пайплайн продолжает работу как есть — если дальше по цепочке что-то ` +
+    `отрендерится пусто или странно, вероятная причина здесь.`
+  );
+}
+
 module.exports = { callAgent };
