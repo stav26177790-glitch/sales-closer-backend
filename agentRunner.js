@@ -162,6 +162,14 @@ function compressInput(inputData, agentName, maxChars = 12000) {
 }
 
 async function callAgent(agentName, inputData, maxTokens = 4000) {
+  // Трейс-логгинг (баг №34, найден в проде): раньше НИ ОДИН успешный вызов
+  // агента не оставлял следа в логах — видны были только редкие случаи
+  // (обрезка входа, расхождение схемы). Из-за этого расследование гонки
+  // между параллельными запросами к одной сделке было невозможно провести
+  // по логам — оставалось только гадать по косвенным признакам. Теперь
+  // каждый вызов агента виден: кто, для какой сделки, когда начался.
+  const dealLabel = inputData?.deal?.client || inputData?.deal?.id || 'unknown_deal';
+  console.log(`[agentRunner] → ${agentName} (сделка: ${dealLabel}, ${new Date().toISOString()})`);
   let systemPrompt = loadAgentPrompt(agentName) + loadKnowledgeForAgent(agentName);
   if (AGENTS_WITH_INDUSTRY_CASES.has(agentName)) {
     systemPrompt += loadIndustryCases(inputData?.deal?.industry);
