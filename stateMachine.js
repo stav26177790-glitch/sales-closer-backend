@@ -172,7 +172,8 @@ const CRITERIA_LABELS = {
   channel_fit: 'не соответствует формату канала',
   not_repetitive: 'повторяет предыдущее касание',
   tone_fit: 'тон не соответствует типу клиента',
-  attachment_honesty: 'вложение содержит недостоверные данные или создаёт риск завышенного ожидания'
+  attachment_honesty: 'вложение содержит недостоверные данные или создаёт риск завышенного ожидания',
+  broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)'
 };
 // Переводит список технических кодов в читаемую строку через запятую.
 // Код, отсутствующий в словаре (например, если промпт вернёт что-то новое),
@@ -356,7 +357,14 @@ function formatAgentReplyForChat(state, output) {
       return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
-      const conflicts = output?.diagnostic_output?.conflicts_explained || [];
+      // Баг №32: раньше здесь читалось только conflicts_explained — поля с
+      // таким именем нет в схеме diagnostic_agent.md, есть только
+      // conflicts_with_manager (тот же фоллбэк уже стоит в кейсе DIAGNOSING
+      // чуть выше). Из-за бага №31 (CONFLICT_RESOLUTION была недостижима)
+      // это оставалось незамеченным — конфликты сразу проваливались в
+      // безликий дефолтный текст, вместо реальных criterion/reason из
+      // диагностики.
+      const conflicts = output?.diagnostic_output?.conflicts_explained || output?.diagnostic_output?.conflicts_with_manager || [];
       return conflicts.map((c) => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
         || 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
     }
@@ -497,7 +505,16 @@ async function runIntakeStep(baseInput) {
   if (output.diagnostic_output?.clarification_needed?.required) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
-  if (output.diagnostic_output?.conflicts_require_confirmation) {
+  // Баг №31: раньше здесь проверялось output.diagnostic_output?.conflicts_require_confirmation —
+  // поля с таким именем нет НИГДЕ в схеме diagnostic_agent.md (ни в "ВЫХОДНЫЕ
+  // ДАННЫЕ", ни в примерах) — агент никогда не знал, что должен его
+  // возвращать. Условие было всегда undefined/false, и состояние
+  // CONFLICT_RESOLUTION было физически недостижимо: диагностика всегда
+  // проваливалась в DIAGNOSING, даже если diagnostic-агент явно нашёл
+  // расхождение между самооценкой менеджера и своей оценкой. Источник
+  // истины — сам факт непустого conflicts_with_manager (это поле агент
+  // реально возвращает и заполняет), а не выдуманный отдельный флаг.
+  if (output.diagnostic_output?.conflicts_with_manager?.length > 0) {
     return { output, nextState: 'CONFLICT_RESOLUTION' };
   }
   return { output, nextState: 'DIAGNOSING' };
