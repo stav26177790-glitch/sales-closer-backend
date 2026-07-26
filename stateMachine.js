@@ -367,8 +367,18 @@ function formatAgentReplyForChat(state, output) {
       const lines = [
         'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
         mainBlocker ? `Блокер: ${mainBlocker}` : null,
-        s.recommended_next_step ? `Следующий шаг: ${s.recommended_next_step}` : null,
-        s.rationale ? `Обоснование: ${s.rationale}` : (s.strategy_summary ? `Обоснование: ${s.strategy_summary}` : null),
+        // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
+        // strategy_agent.md отдаёт поле "recommended_next_action" — из-за
+        // рассогласования имени поле никогда не рендерилось менеджеру,
+        // хотя агент каждый раз генерирует конкретный следующий шаг.
+        s.recommended_next_action ? `Следующий шаг: ${s.recommended_next_action}` : null,
+        // Баг №29: раньше здесь стояло "s.rationale ? ... : s.strategy_summary",
+        // что выглядело как предпочтение rationale — но по схеме rationale
+        // лежит ВНУТРИ primary_strategy, а не на верхнем уровне strategy_output,
+        // так что ветка была мёртвой (и вводящей в заблуждение). Показываем
+        // только strategy_summary явно, как и было решено в сессии 3 для
+        // formatFinalSummary().
+        s.strategy_summary ? `Обоснование: ${s.strategy_summary}` : null,
       ].filter(Boolean);
       return lines.join('\n\n');
     }
