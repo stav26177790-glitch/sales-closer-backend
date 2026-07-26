@@ -334,6 +334,40 @@ function isNegativeResponse(text) {
   if (raw.includes('не надо') || raw.includes('не нужно') || raw.includes('оставь как есть') || raw.includes('оставьте как есть')) return true;
   return false;
 }
+// Блок 3 (сессия 3, ТЕНЕВОЙ РЕЖИМ) — маппинг категорий LLM-классификатора
+// на то, что фактически решил regex в текущей точке кода. Порядок
+// проверки должен зеркалить порядок проверок в самом COMPOSING-кейсе:
+// isPureApproval проверяется раньше isManagerQuestion, поэтому если
+// сообщение прошло как approval — question уже не имеет значения.
+function regexIntentLabel(isApproval, isQuestion) {
+  if (isApproval) return 'approval';
+  if (isQuestion) return 'question';
+  return 'revision'; // всё остальное сейчас уходит в composer как правка
+}
+
+// Fire-and-forget: НЕ await'ится в вызывающем коде, чтобы не добавлять
+// задержку к ответу менеджеру. Любая ошибка (сеть, парсинг) молча
+// проглатывается здесь же — это диагностический слой, а не часть
+// критического пути, он не должен иметь возможности уронить сессию.
+function logIntentClassificationShadow(managerInput, isApproval, isQuestion, dealId) {
+  const regexLabel = regexIntentLabel(isApproval, isQuestion);
+  callAgent('intent_classifier', { text: managerInput }, 200)
+    .then((result) => {
+      const llmLabel = result?.intent_classifier_output?.intent || result?.intent;
+      if (!llmLabel) return; // сломанный/неожиданный ответ — не наш критический путь, просто пропускаем
+      if (llmLabel !== regexLabel) {
+        console.warn(
+          `[intent-shadow] Расхождение (сделка: ${dealId || 'unknown_deal'}): ` +
+          `сообщение "${managerInput}" — regex решил "${regexLabel}", LLM решила "${llmLabel}". ` +
+          `Реальное поведение сейчас определяет regex (теневой режим, ничего не меняется автоматически).`
+        );
+      }
+    })
+    .catch((err) => {
+      console.warn(`[intent-shadow] Не удалось получить теневую классификацию (сделка: ${dealId || 'unknown_deal'}): ${err.message}`);
+    });
+}
+
 function formatAgentReplyForChat(state, output) {
   switch (state) {
     case 'SOPRANO_INTERVIEW': {
@@ -667,6 +701,16 @@ async function advanceInternal(dealId, managerInput) {
       const composerOutput = { composer_output: deal.last_composer_output };
       const lengthCheck = validateMessageLength(composerOutput);
       const managerGaveFeedback = !isPureApproval(managerInput);
+      // Блок 3 (сессия 3, ТЕНЕВОЙ РЕЖИМ): раньше единственным способом понять
+      // намерение менеджера был закрытый список слов в isPureApproval/
+      // isManagerQuestion — баг №33 показал живьём, что "дальше" туда не
+      // попадает и классифицируется неверно. Здесь НЕ меняем реальное
+      // поведение (regex по-прежнему решает, что делать) — только
+      // асинхронно, не блокируя ответ менеджеру, сравниваем с тем, что
+      // сказала бы LLM, и логируем расхождения. Цель — накопить примеры
+      // расхождений, прежде чем переключать реальную логику (см. README
+      // регресс-набора, раздел про поэтапный раскат Блока 3).
+      logIntentClassificationShadow(managerInput, isPureApproval(managerInput), isManagerQuestion(managerInput), deal.id);
       if (!lengthCheck.valid) {
         // Техническое нарушение длины (channel_fit) — это отдельный источник
         // правок, независимый от того, что написал менеджер. Раньше эта проверка
