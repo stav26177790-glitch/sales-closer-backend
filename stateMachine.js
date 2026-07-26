@@ -808,10 +808,41 @@ async function advanceInternal(dealId, managerInput) {
         composer_output: deal.last_composer_output
       }, 8000));
       output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
-      nextState = 'REVIEWING';
+      // Баг №34 (сессия 3, найден на живой сделке): раньше здесь ВСЕГДА
+      // ставилось nextState = 'REVIEWING', и финализация сессии (case
+      // 'REVIEWING' ниже) откладывалась до СЛЕДУЮЩЕГО сообщения менеджера.
+      // Между показом "✅ Касания одобрены" и реальным завершением сессии
+      // был зазор в один ход — а решение "финализировать или нет" на
+      // следующем ходу проверяло только СОХРАНЁННЫЙ вердикт, вообще не
+      // глядя, что менеджер написал. Если менеджер в этот зазор присылал
+      // содержательное новое сообщение (например, "клиент подтвердил
+      // оплату") — оно полностью игнорировалось: сессия просто
+      // финализировалась по старым данным, как будто это было "ок,
+      // закрывай". Теперь при одобрении финализируем СРАЗУ, в этом же
+      // ходе — зазора для потери сообщения больше нет.
+      const reviewerVerdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
+      if (reviewerVerdict === 'ОДОБРЕНО') {
+        output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+          composer_output: deal.last_composer_output,
+          strategy_output: deal.last_strategy_output,
+          reviewer_output: output.reviewer_output
+        });
+        nextState = 'FINAL_OUTPUT';
+      } else {
+        nextState = 'REVIEWING';
+      }
       break;
     }
     case 'REVIEWING': {
+      // ВАЖНО: с фикса бага №34 этот блок для ОДОБРЕННОГО вердикта больше
+      // не должен достигаться в норме — одобрение теперь финализируется
+      // сразу выше, в case 'COMPOSING'. Ветка approved здесь оставлена
+      // намеренно как фоллбэк ТОЛЬКО для сделок, которые уже застряли в
+      // state='REVIEWING' с сохранённым last_reviewer_output.verdict ===
+      // 'ОДОБРЕНО' ДО деплоя этого фикса (например, реальная сделка,
+      // на которой баг был найден) — чтобы они корректно завершились на
+      // следующем сообщении, а не зависли или не сломались. Для новых
+      // сделок эта ветка — мёртвый код по построению.
       const approved = deal.last_reviewer_output?.verdict === 'ОДОБРЕНО';
       const iterations = (deal.composer_iterations || 1);
       if (approved) {
@@ -951,6 +982,35 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
 const recentAdvanceCalls = new Map(); // dealId -> { input, timestamp, promise }
 const ADVANCE_DEDUP_WINDOW_MS = 15000;
 
+/**
+ * Баг №34 (сессия 3, найден в проде через несовпадающий текст касаний
+ * между тестами): защита выше ловит только ДОСЛОВНО одинаковый текст
+ * сообщения в 15-секундном окне. Если к одной и той же сделке пришли
+ * ДВА РАЗНЫХ по тексту запроса почти одновременно (двойной клик с уже
+ * изменившимся полем ввода, повтор формы при нестабильном интернете,
+ * открытая в двух вкладках сделка) — она их не ловит вообще, и оба
+ * запроса выполняют advanceInternal() ПАРАЛЛЕЛЬНО:
+ *   1. Оба читают db.getDeal() и видят ОДНУ И ТУ ЖЕ версию сделки
+ *      (то, что записал предыдущий, уже завершённый шаг).
+ *   2. Оба независимо гоняют agentRunner (десятки секунд на Sonnet-вызовах).
+ *   3. Тот, кто запишет db.updateDealState() ПОСЛЕДНИМ — затирает
+ *      результат другого. Менеджер может увидеть ответ, посчитанный
+ *      на уже устаревших входных данных, или получить "чужой" текст,
+ *      как будто пайплайн не запускался вовсе.
+ *
+ * Фикс — сериализация (не дедупликация): все вызовы advance() для ОДНОЙ
+ * И ТОЙ ЖЕ сделки, независимо от текста сообщения, ставятся в очередь
+ * (async mutex через цепочку промисов) — второй запрос НАЧИНАЕТ
+ * выполняться только после того, как первый полностью завершился и
+ * записал результат в БД. Для РАЗНЫХ сделок ограничений нет — параллелизм
+ * между сделками не страдает.
+ *
+ * ТЕ ЖЕ ограничения, что и у дедупликации выше: работает только в памяти
+ * одного процесса, не спасает при горизонтальном масштабировании на
+ * несколько инстансов (там нужна блокировка на уровне БД).
+ */
+const dealQueueTail = new Map(); // dealId -> Promise (последний поставленный в очередь вызов)
+
 async function advance(dealId, managerInput) {
   const now = Date.now();
   const prev = recentAdvanceCalls.get(dealId);
@@ -961,14 +1021,35 @@ async function advance(dealId, managerInput) {
     );
     return prev.promise;
   }
-  const promise = advanceInternal(dealId, managerInput);
+
+  const previousTail = dealQueueTail.get(dealId) || Promise.resolve();
+  const queuedAlready = dealQueueTail.has(dealId);
+  const promise = previousTail
+    .catch(() => {}) // ошибка предыдущего запроса не должна ломать очередь для следующего
+    .then(() => {
+      if (queuedAlready) {
+        console.warn(
+          `[advance] Сделка ${dealId}: запрос с сообщением "${managerInput}" ждал в очереди ` +
+          `завершения предыдущего запроса к этой же сделке (баг №34 — защита от гонки).`
+        );
+      }
+      return advanceInternal(dealId, managerInput);
+    });
+
+  dealQueueTail.set(dealId, promise);
   recentAdvanceCalls.set(dealId, { input: managerInput, timestamp: now, promise });
+
   promise.finally(() => {
+    // Убираем себя из очереди, только если мы всё ещё её "хвост" — если
+    // за это время встал в очередь более новый запрос, его promise уже
+    // должен остаться как хвост, не наш.
+    if (dealQueueTail.get(dealId) === promise) dealQueueTail.delete(dealId);
     setTimeout(() => {
       const entry = recentAdvanceCalls.get(dealId);
       if (entry && entry.promise === promise) recentAdvanceCalls.delete(dealId);
     }, ADVANCE_DEDUP_WINDOW_MS);
   }).catch(() => {}); // не даём неотловленному отклонению всплыть из фонового таймера
+
   return promise;
 }
 
