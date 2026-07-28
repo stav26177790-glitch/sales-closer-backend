@@ -2,6 +2,14 @@ const { callAgent } = require('./agentRunner');
 const db = require('./db');
 const CONFIG = {
   MAX_COMPOSER_ITERATIONS: 3,
+  // diagnostic_agent.md сам обещает остановиться после 2 раундов уточнений
+  // ПО ОДНОМУ критерию (раздел "Предохранитель"), но это инструкция внутри
+  // промпта — LLM может её не соблюсти, а для критериев несколько сразу
+  // "2 раунда на критерий" не то же самое, что "2 раунда на всю сессию
+  // SOPRANO_INTERVIEW". Этот лимит — код-уровневый предохранитель поверх
+  // того обещания, тот же принцип, что уже есть у MAX_COMPOSER_ITERATIONS:
+  // работает независимо от того, выполнил ли агент свою же инструкцию.
+  MAX_INTAKE_ROUNDS: 3,
   CHANNEL_HISTORY_SIZE: 3,
   MAX_MESSAGE_LENGTH: { telegram: 400, whatsapp: 400, email: 1500, voice: 300, call_script: 500 }
 };
@@ -527,17 +535,31 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
 // следующего состояния. Вынесена в отдельную функцию, чтобы её можно было
 // вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
 // при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
-async function runIntakeStep(baseInput) {
+async function runIntakeStep(baseInput, intakeRounds = 1) {
   const output = {};
+  // Лимит достигнут — дальше НЕ возвращаемся в SOPRANO_INTERVIEW, даже если
+  // planner/diagnostic снова просят уточнение. Оба агента уже отдают полную
+  // оценку (scores/criteria_assessment) ДАЖЕ когда clarification_needed.required
+  // = true — это не блокирующая ошибка, а их собственный сигнал "было бы
+  // лучше уточнить". Проходим дальше с тем, что есть; недостающие критерии
+  // и так помечены "Неизвестно" внутри самой оценки agent'ом.
+  const roundLimitReached = intakeRounds >= CONFIG.MAX_INTAKE_ROUNDS;
   const plannerResult = tryRecoverFromRawOutput(await callAgent('planner', baseInput));
   output.planner_output = plannerResult?.planner_output;
-  if (plannerResult?.planner_output?.clarification_needed?.required) {
+  if (plannerResult?.planner_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
   const diagnosticResult = tryRecoverFromRawOutput(await callAgent('diagnostic', { ...baseInput, planner_output: output.planner_output }));
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
-  if (output.diagnostic_output?.clarification_needed?.required) {
+  if (output.diagnostic_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
+  }
+  if (roundLimitReached && (
+    plannerResult?.planner_output?.clarification_needed?.required
+    || output.diagnostic_output?.clarification_needed?.required
+  )) {
+    output._intakeRoundLimitNote = `⚠️ Не все детали удалось уточнить за ${CONFIG.MAX_INTAKE_ROUNDS} раунда — ` +
+      'диагностика продолжена с доступными данными, недостающие критерии отмечены как "Неизвестно".';
   }
   // Баг №31: раньше здесь проверялось output.diagnostic_output?.conflicts_require_confirmation —
   // поля с таким именем нет НИГДЕ в схеме diagnostic_agent.md (ни в "ВЫХОДНЫЕ
@@ -604,9 +626,18 @@ async function advanceInternal(dealId, managerInput) {
     case 'INIT':
     case 'COLLECTING':
     case 'SOPRANO_INTERVIEW': {
-      const result = await runIntakeStep(baseInput);
+      // Раунд против MAX_INTAKE_ROUNDS считается только когда мы уже КРУТИЛИСЬ
+      // в SOPRANO_INTERVIEW (менеджер отвечает на уточняющий вопрос заново) —
+      // самый первый заход в уточнения из INIT/COLLECTING не расходует лимит.
+      const isLoopingInterview = deal.current_state === 'SOPRANO_INTERVIEW';
+      const intakeRounds = isLoopingInterview ? (deal.intake_rounds || 1) + 1 : 1;
+      const result = await runIntakeStep(baseInput, intakeRounds);
       output = result.output;
       nextState = result.nextState;
+      output._intake_rounds = intakeRounds;
+      if (output._intakeRoundLimitNote) {
+        output._directText = `${output._intakeRoundLimitNote}\n\n${formatAgentReplyForChat(nextState, output)}`;
+      }
       break;
     }
     case 'DIAGNOSING': {
@@ -884,9 +915,12 @@ async function advanceInternal(dealId, managerInput) {
       // и ничего не делали — первое сообщение менеджера уходило "вхолостую", и
       // реальная обработка (planner/diagnostic) начиналась только со следующего
       // сообщения. Теперь обрабатываем его сразу же.
-      const result = await runIntakeStep(baseInput);
+      const result = await runIntakeStep(baseInput, 1);
       output = result.output;
       nextState = result.nextState;
+      // Новая сессия — счётчик раундов должен начаться с чистого листа,
+      // а не унаследовать значение от предыдущей (уже завершённой) сессии.
+      output._intake_rounds = 1;
       break;
     }
     default:
@@ -900,6 +934,7 @@ async function advanceInternal(dealId, managerInput) {
   if (output.composer_output) statePatch.last_composer_output = output.composer_output;
   if (output.reviewer_output) statePatch.last_reviewer_output = output.reviewer_output;
   if (output._composer_iterations) statePatch.composer_iterations = output._composer_iterations;
+  if (output._intake_rounds) statePatch.intake_rounds = output._intake_rounds;
   // Флаг ожидания ответа "скорректировать/нет" и текст вопроса, на который
   // ждём этот ответ — сохраняем на сделке, чтобы следующий ход менеджера
   // (в новом HTTP-запросе, с чистого state) знал, что мы сейчас ждём именно
