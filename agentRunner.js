@@ -9,7 +9,7 @@ const MODEL_BY_AGENT = {
   diagnostic: 'claude-sonnet-4-6',
   strategy: 'claude-sonnet-4-6',
   composer: 'claude-sonnet-4-6',
-  reviewer: 'claude-haiku-4-5-20251001',
+  reviewer: 'claude-sonnet-4-6',
   memory: 'claude-haiku-4-5-20251001',
   advisor: 'claude-haiku-4-5-20251001',
   intent_classifier: 'claude-haiku-4-5-20251001'
