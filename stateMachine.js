@@ -10,6 +10,15 @@ const CONFIG = {
   // того обещания, тот же принцип, что уже есть у MAX_COMPOSER_ITERATIONS:
   // работает независимо от того, выполнил ли агент свою же инструкцию.
   MAX_INTAKE_ROUNDS: 3,
+  // Баг №35 (HANDOFF_v7 §1.6, зафиксирован как бэклог, пофикшен в HANDOFF_v8):
+  // ESCALATION раньше был тупиком — любое следующее сообщение менеджера,
+  // включая содержательные правки по замечаниям reviewer'а, приводило к
+  // немедленной финализации сессии с уже имеющимся, НЕ одобренным текстом.
+  // Теперь менеджер может явным "да" запустить ещё одну ручную попытку
+  // composer'а с учётом своего фидбэка — но не бесконечно: тот же принцип
+  // конечного код-уровневого предохранителя, что уже есть у
+  // MAX_COMPOSER_ITERATIONS и MAX_INTAKE_ROUNDS.
+  MAX_ESCALATION_RETRIES: 2,
   CHANNEL_HISTORY_SIZE: 3,
   MAX_MESSAGE_LENGTH: { telegram: 400, whatsapp: 400, email: 1500, voice: 300, call_script: 500 }
 };
@@ -900,7 +909,82 @@ async function advanceInternal(dealId, managerInput) {
       }
       break;
     }
-    case 'ESCALATION':
+    case 'ESCALATION': {
+      // Баг №35 — раньше это состояние было тупиком (см. комментарий у
+      // MAX_ESCALATION_RETRIES выше). Логика ниже сознательно повторяет
+      // структуру awaiting_correction_confirmation из case 'COMPOSING':
+      // сначала явно спрашиваем менеджера "доработать или закрыть?", и
+      // только на явное "да" запускаем composer повторно — не молча по
+      // любому содержательному сообщению (решение из обсуждения с
+      // пользователем в HANDOFF_v8).
+      if (deal.awaiting_escalation_confirmation) {
+        if (isAffirmativeResponse(managerInput)) {
+          const retriesUsed = deal.escalation_retries || 0;
+          if (retriesUsed >= CONFIG.MAX_ESCALATION_RETRIES) {
+            output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+              statusNote: `Статус: лимит ручных попыток доработки (${CONFIG.MAX_ESCALATION_RETRIES}) после эскалации исчерпан — сессия завершена с последним вариантом текста, дальнейшие правки нужно вносить вручную.`
+            });
+            output._awaitingEscalationConfirmation = false;
+            output._pendingEscalationFeedback = null;
+            nextState = 'FINAL_OUTPUT';
+            break;
+          }
+          const iterations = (deal.composer_iterations || 1);
+          const composerInput = {
+            ...baseInput,
+            strategy_output: deal.last_strategy_output,
+            previous_composer_feedback: {
+              source: 'manager',
+              manager_feedback: deal.pending_escalation_feedback
+            },
+            message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
+            iteration: iterations + 1
+          };
+          const composerResult = tryRecoverFromRawOutput(await callAgent('composer', composerInput, 8000));
+          output.composer_output = composerResult?.composer_output || composerResult;
+          // composer_iterations двигаем как обычно (это реальная новая попытка
+          // сходимости), а отдельно считаем escalation_retries — сколько раз
+          // именно РУЧНОЙ перезапуск после эскалации был использован, чтобы
+          // не уйти в бесконечный цикл эскалация → правка → эскалация.
+          output._composer_iterations = iterations + 1;
+          output._escalation_retries = retriesUsed + 1;
+          output._awaitingEscalationConfirmation = false;
+          output._pendingEscalationFeedback = null;
+          nextState = 'COMPOSING';
+          break;
+        }
+        if (isNegativeResponse(managerInput)) {
+          output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+            statusNote: 'Статус: сессия завершена вручную — после эскалации менеджер решил оставить текст как есть.'
+          });
+          output._awaitingEscalationConfirmation = false;
+          output._pendingEscalationFeedback = null;
+          nextState = 'FINAL_OUTPUT';
+          break;
+        }
+        // Ответ не распознан как явное да/нет — переспрашиваем, не теряя
+        // исходный фидбэк менеджера, чтобы не потерять его контекст.
+        output._directText = 'Не понял ответ — доработать текст с учётом этого, или закрыть сессию как есть? Ответьте, пожалуйста, "да" или "нет".';
+        nextState = 'ESCALATION';
+        break;
+      }
+      const retriesUsed = deal.escalation_retries || 0;
+      if (retriesUsed >= CONFIG.MAX_ESCALATION_RETRIES) {
+        // Лимит уже исчерпан ещё до этого сообщения (например, сделка попала
+        // сюда повторно после уже использованных ручных попыток) — закрываем
+        // сразу, не спрашивая заново.
+        output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+          statusNote: `Статус: лимит ручных попыток доработки (${CONFIG.MAX_ESCALATION_RETRIES}) после эскалации уже исчерпан — сессия завершена с последним вариантом текста.`
+        });
+        nextState = 'FINAL_OUTPUT';
+        break;
+      }
+      output._directText = 'Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)';
+      output._awaitingEscalationConfirmation = true;
+      output._pendingEscalationFeedback = managerInput;
+      nextState = 'ESCALATION';
+      break;
+    }
     case 'MEMORY_UPDATE':
     case 'LOST_DEAL':
     case 'DISQUALIFICATION': {
@@ -921,6 +1005,13 @@ async function advanceInternal(dealId, managerInput) {
       // Новая сессия — счётчик раундов должен начаться с чистого листа,
       // а не унаследовать значение от предыдущей (уже завершённой) сессии.
       output._intake_rounds = 1;
+      // Тот же принцип для эскалации (баг №35, HANDOFF_v8): если предыдущая
+      // сессия закончилась в ESCALATION с уже использованными ручными
+      // попытками (или посреди ожидания да/нет), новая сессия не должна
+      // унаследовать ни счётчик, ни флаг ожидания.
+      output._escalation_retries = 0;
+      output._awaitingEscalationConfirmation = false;
+      output._pendingEscalationFeedback = null;
       break;
     }
     default:
@@ -944,6 +1035,17 @@ async function advanceInternal(dealId, managerInput) {
   }
   if (output._pendingManagerFeedback !== undefined) {
     statePatch.pending_manager_feedback = output._pendingManagerFeedback;
+  }
+  // Тот же принцип для ручных попыток после ESCALATION (баг №35, HANDOFF_v8).
+  // ВАЖНО: проверка на undefined, а не на truthy — сброс в 0 при старте новой
+  // сессии (см. case 'FINAL_OUTPUT') иначе молча не сохранился бы в БД, и
+  // новая сессия унаследовала бы исчерпанный лимит от предыдущей.
+  if (output._escalation_retries !== undefined) statePatch.escalation_retries = output._escalation_retries;
+  if (typeof output._awaitingEscalationConfirmation === 'boolean') {
+    statePatch.awaiting_escalation_confirmation = output._awaitingEscalationConfirmation;
+  }
+  if (output._pendingEscalationFeedback !== undefined) {
+    statePatch.pending_escalation_feedback = output._pendingEscalationFeedback;
   }
   // Баг №24: раньше здесь проверялось только diag.criteria_assessment, но
   // схема diagnostic_agent.md отдаёт поле "scores" — без этого фоллбэка
