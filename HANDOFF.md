@@ -4,8 +4,9 @@
 Полный аудит с диаграммами: https://claude.ai/artifact/HJ8PtmVzYrULPukHa3FdvT
 
 Этот файл — единая точка входа для следующей сессии (человека или Claude).
-Прежние HANDOFF_v2…v8, на которые ссылаются комментарии в коде, в репозитории
-отсутствуют — см. «Комплектность репозитория».
+Прежние HANDOFF_v2…v8, на которые ссылаются комментарии в коде, утеряны:
+в локальных архивах владельца их тоже нет. Этот файл их заменяет; суть решений
+сохранилась в комментариях кода.
 
 ---
 
@@ -64,7 +65,8 @@
 фикстуры, тесты; фронтенд собирается (`vite build` без ошибок).
 
 Отсутствует или устарело:
-- [ ] HANDOFF_v2, v5, v6, v7, v8 — на них ссылаются комментарии в коде. Положить в `docs/handoff/`.
+- [x] HANDOFF_v2, v5–v8 — утеряны (проверены локальные архивы 2026-11-11). Заменены этим файлом.
+- Локальные архивы владельца (`фронт_и_бэк`, `Фронт`) — исходная версия от 2026-06-30; база знаний и кейсы в них совпадают с репо побайтно, код старше. Ничего нового, кроме `.env.example` и `.gitignore`.
 - [ ] `test_conflict_resolution_reachable.js` — упомянут в `test_intake_round_limit.js`, файла нет.
 - [ ] README регресс-набора и папка `regression/` — упомянуты в `agentRunner.js`, `outputSchemas.js`, `stateMachine.js`; файлы лежат в корне, README нет.
 - [ ] `supabase_schema.sql` отстал от живой базы: нет 13 полей `deals` — `last_diagnostic_output`,
@@ -72,8 +74,9 @@
   `intake_rounds`, `escalation_retries`, `awaiting_correction_confirmation`,
   `awaiting_escalation_confirmation`, `pending_manager_feedback`, `pending_escalation_feedback`,
   `experience_decision`, `stale_dismissed`. Снять реальную схему из Supabase.
-- [ ] `.env.example` в обоих репо.
-- [ ] `.gitignore` в обоих репо; в бэкенде закоммичены `node_modules` и `.DS_Store`.
+- [x] `.env.example` в обоих репо (2026-11-11, из локальной копии).
+- [x] `.gitignore` в обоих репо (2026-11-11).
+- [ ] В бэкенде всё ещё закоммичены `node_modules` и `.DS_Store` — удалить в шаге 1, проверив build command на Render.
 - [ ] README бэкенда описывает старую структуру (`backend/`, `sales-closer-frontend.jsx`).
 - [ ] `knowledge/10b_scripts_post_kp_meeting.md` ссылается на `message_composer_agent.md` — файл называется `composer_agent.md`.
 
@@ -158,7 +161,6 @@
 ## 8. Открытые вопросы
 
 - Сколько менеджеров будет через 3 месяца (тариф Supabase, инстансы Render)?
-- Где лежат HANDOFF v2–v8?
 - Какой тариф Битрикс24 (лимиты API)?
 
 ## 9. Как работать с репо
