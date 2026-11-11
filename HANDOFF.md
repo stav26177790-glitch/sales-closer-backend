@@ -69,7 +69,7 @@
 - Локальные архивы владельца (`фронт_и_бэк`, `Фронт`) — исходная версия от 2026-06-30; база знаний и кейсы в них совпадают с репо побайтно, код старше. Ничего нового, кроме `.env.example` и `.gitignore`.
 - [ ] `test_conflict_resolution_reachable.js` — упомянут в `test_intake_round_limit.js`, файла нет.
 - [ ] README регресс-набора и папка `regression/` — упомянуты в `agentRunner.js`, `outputSchemas.js`, `stateMachine.js`; файлы лежат в корне, README нет.
-- [ ] `supabase_schema.sql` отстал от живой базы: нет 13 полей `deals` — `last_diagnostic_output`,
+- [x] (заменён на `db/migrations/001_init.sql`) `supabase_schema.sql` отстал от живой базы: нет 13 полей `deals` — `last_diagnostic_output`,
   `last_strategy_output`, `last_composer_output`, `last_reviewer_output`, `composer_iterations`,
   `intake_rounds`, `escalation_retries`, `awaiting_correction_confirmation`,
   `awaiting_escalation_confirmation`, `pending_manager_feedback`, `pending_escalation_feedback`,
@@ -103,12 +103,17 @@
 Правило для всех шагов: каждый шаг — отдельные коммиты; после шага Клоузер работает,
 тесты зелёные. Сначала закрываем доступ и строим страховку, потом режем код.
 
-### Шаг 1. Закрыть доступ и зафиксировать базу (1–2 дня)
-- [ ] Вход через Supabase Auth (ссылка на почту); сервер принимает только JWT; убрать `x-manager-id` и зашитый UUID.
-- [ ] Авторизацию проектировать так, чтобы позже добавить вход из Битрикс24.
-- [ ] Снять реальную схему в `db/migrations/001_init.sql`, исправить default отрасли.
-- [ ] `.gitignore`, `.env.example`; удалить `node_modules` и `.DS_Store` из репо.
-- Риск: менеджер не войдёт без аккаунта → создать аккаунты до выката.
+### Шаг 1. Закрыть доступ и зафиксировать базу (1–2 дня) — В РАБОТЕ
+- [x] Фронтенд: вход по ссылке на почту (Supabase Auth, регистрация закрыта), запросы с JWT, кнопка «Выйти». Ветка `auth-login` во фронтенде — влить после настройки Netlify.
+- [x] Бэкенд: при первом входе создаётся строка `managers`; `x-manager-id` принимается, пока не выставлен `ALLOW_LEGACY_MANAGER_HEADER=false` на Render.
+- [x] `db/migrations/001_init.sql` — полная идемпотентная схема (+13 колонок, RLS на managers, default отрасли `signage`); `db/check_schema.sql` — сверка. `supabase_schema.sql` удалён.
+- [x] Default отрасли в `db.js` → `signage`.
+- [ ] Владелец: выполнить `001_init.sql` и `check_schema.sql` в Supabase, прислать результат сверки.
+- [ ] Владелец: Supabase Auth — запретить регистрацию, Site URL = адрес Netlify, найти почту пользователя `febece1a-…`.
+- [ ] Владелец: Netlify — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
+- [ ] Влить `auth-login`, проверить вход и сделки, затем `ALLOW_LEGACY_MANAGER_HEADER=false` на Render и удалить ветку заголовка из кода.
+- [ ] Удалить `node_modules` и `.DS_Store` из репо (сначала проверить build command на Render).
+- Риск: менеджер не войдёт без аккаунта → аккаунты создаёт администратор в Supabase → Authentication → Users.
 
 ### Шаг 2. Страховочная сетка (1 день)
 - [ ] Снимки ответов по фикстурам: каждый этап на моках, сохраняем то, что видит менеджер.

@@ -20,8 +20,13 @@ function withFlags(deal) {
   };
 }
 
-// Простейшая аутентификация: фронт передаёт Supabase JWT, мы достаём manager_id.
-// Для прототипа также допускаем заголовок x-manager-id напрямую (до подключения полноценного Auth UI).
+// Аутентификация: фронтенд передаёт Supabase JWT, из него берём manager_id.
+// Переходный режим (шаг 1 дорожной карты): заголовок x-manager-id ещё принимается,
+// пока фронтенд со входом по почте не проверен на проде. После проверки —
+// выставить ALLOW_LEGACY_MANAGER_HEADER=false на Render, затем удалить ветку из кода.
+const ALLOW_LEGACY_MANAGER_HEADER = process.env.ALLOW_LEGACY_MANAGER_HEADER !== 'false';
+const knownManagers = new Set();
+
 async function requireManager(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
@@ -29,10 +34,20 @@ async function requireManager(req, res, next) {
     const { data, error } = await db.supabase.auth.getUser(token);
     if (error || !data?.user) return res.status(401).json({ error: 'Не авторизован' });
     req.managerId = data.user.id;
+    if (!knownManagers.has(req.managerId)) {
+      try {
+        await db.ensureManager(data.user);
+        knownManagers.add(req.managerId);
+      } catch (e) {
+        console.error('[auth] Не удалось создать строку managers:', e.message);
+        return res.status(500).json({ error: 'Не удалось подготовить профиль менеджера' });
+      }
+    }
     return next();
   }
   const headerManagerId = req.headers['x-manager-id'];
-  if (headerManagerId) {
+  if (ALLOW_LEGACY_MANAGER_HEADER && headerManagerId) {
+    console.warn(`[auth] Запрос по устаревшему заголовку x-manager-id (${req.method} ${req.path})`);
     req.managerId = headerManagerId;
     return next();
   }

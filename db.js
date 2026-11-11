@@ -21,6 +21,16 @@ async function listDeals(managerId) {
   return data;
 }
 
+// Строка в managers нужна до первой сделки (deals.manager_id → managers.id).
+// Аккаунты создаёт администратор в Supabase Auth; строку managers создаём сами при первом входе.
+async function ensureManager(user) {
+  const displayName = user.user_metadata?.full_name || user.email || 'Менеджер';
+  const { error } = await supabase
+    .from('managers')
+    .upsert({ id: user.id, display_name: displayName }, { onConflict: 'id', ignoreDuplicates: true });
+  if (error) throw error;
+}
+
 async function createDeal(managerId, deal) {
   const { data, error } = await supabase
     .from('deals')
@@ -29,7 +39,7 @@ async function createDeal(managerId, deal) {
       client: deal.client,
       product: deal.product || null,
       deal_size: deal.deal_size || null,
-      industry: deal.industry || 'вывески',
+      industry: deal.industry || 'signage', // имя папки в knowledge/cases
       last_contact: deal.last_contact || null,
       days_silent: deal.days_silent || 0
     })
@@ -101,6 +111,7 @@ async function deleteDeal(dealId) {
 }
 module.exports = {
   supabase,
+  ensureManager,
   listDeals,
   createDeal,
   getDeal,
