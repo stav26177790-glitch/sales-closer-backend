@@ -1,0 +1,30 @@
+# Не даёт бесплатному проекту Supabase уйти в автопаузу (~7 дней без активности).
+# Раз в 3 дня дёргает /api/ping-db на бэкенде, который делает запрос к базе.
+# Адрес бэкенда берётся из секрета BACKEND_URL (Settings → Secrets and variables → Actions),
+# например https://sales-closer-backend.onrender.com — без /api и без слэша в конце.
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'   # каждые 3 дня, 06:17 UTC
+  workflow_dispatch: {}      # кнопка ручного запуска во вкладке Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database via backend
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+        run: |
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::error::Секрет BACKEND_URL не задан"; exit 1
+          fi
+          # Бесплатный Render может спать — первый ответ бывает через ~1 минуту, поэтому ретраи.
+          for i in 1 2 3; do
+            if curl -fsS --max-time 120 "$BACKEND_URL/api/ping-db"; then
+              echo; echo "OK"; exit 0
+            fi
+            echo "Попытка $i не удалась, жду 30 с"; sleep 30
+          done
+          echo "::error::База не ответила — проверьте, не на паузе ли проект Supabase"; exit 1

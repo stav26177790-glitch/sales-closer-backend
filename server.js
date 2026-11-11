@@ -41,6 +41,15 @@ async function requireManager(req, res, next) {
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+// Пинг базы: делает минимальный запрос к Supabase, чтобы бесплатный проект
+// не уходил в автопаузу. Вызывается по расписанию из .github/workflows/keep-alive.yml.
+// Данные не возвращает — только факт успешного запроса.
+app.get('/api/ping-db', async (req, res) => {
+  const { error } = await db.supabase.from('deals').select('id', { head: true, count: 'exact' }).limit(1);
+  if (error) return res.status(500).json({ ok: false, error: error.message });
+  res.json({ ok: true, at: new Date().toISOString() });
+});
+
 // Список сделок менеджера
 app.get('/api/deals', requireManager, async (req, res) => {
   try {
