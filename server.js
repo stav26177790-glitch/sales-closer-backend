@@ -20,11 +20,9 @@ function withFlags(deal) {
   };
 }
 
-// Аутентификация: фронтенд передаёт Supabase JWT, из него берём manager_id.
-// Переходный режим (шаг 1 дорожной карты): заголовок x-manager-id ещё принимается,
-// пока фронтенд со входом по почте не проверен на проде. После проверки —
-// выставить ALLOW_LEGACY_MANAGER_HEADER=false на Render, затем удалить ветку из кода.
-const ALLOW_LEGACY_MANAGER_HEADER = process.env.ALLOW_LEGACY_MANAGER_HEADER !== 'false';
+// Аутентификация: фронтенд передаёт Supabase JWT (вход по ссылке на почту),
+// из него берём manager_id. Других способов нет: заголовок x-manager-id убран
+// 2026-11-11 после проверки входа на проде.
 const knownManagers = new Set();
 
 async function requireManager(req, res, next) {
@@ -43,12 +41,6 @@ async function requireManager(req, res, next) {
         return res.status(500).json({ error: 'Не удалось подготовить профиль менеджера' });
       }
     }
-    return next();
-  }
-  const headerManagerId = req.headers['x-manager-id'];
-  if (ALLOW_LEGACY_MANAGER_HEADER && headerManagerId) {
-    console.warn(`[auth] Запрос по устаревшему заголовку x-manager-id (${req.method} ${req.path})`);
-    req.managerId = headerManagerId;
     return next();
   }
   return res.status(401).json({ error: 'Не авторизован' });
