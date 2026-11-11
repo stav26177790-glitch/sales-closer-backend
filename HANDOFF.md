@@ -140,7 +140,7 @@
 - [x] `stateMachine.js` (1200 строк) → папка `engine/` (см. раздел 2). `stateMachine.js` оставлен как точка входа (`require('./engine/advance')`), server.js и старые тесты не менялись.
 - [x] Модули `config`, `intent`, `chat` перенесены дословно; этапы — по файлу в `engine/steps/`, выбор этапа — таблица `STEP_HANDLERS` вместо `switch`.
 - [x] Один конструктор входа composer (`buildComposerInput` в `engine/pipeline.js`) вместо 6 копий; порядок ключей сохранён.
-- [x] Под-режимы COMPOSING и ESCALATION — отдельные функции с говорящими именами (`awaitingCorrection`, `lengthViolation`, `managerQuestion`, `managerEdit`, `sendToReview`; `askToRetry`/`awaitingRetry`/`retriesExhausted`).
+- [x] Под-режимы COMPOSING и ESCALATION — отдельные функции с говорящими именами (`awaitingCorrection`, `lengthViolation`, `managerQuestion`, `managerEdit`, `sendToReview`; `awaitingRetry`, `retriesExhausted`).
 - [x] Проверка: все 12 снимков совпали **побайтно, включая порядок ключей во входе агентов** (сравнение со старым stateMachine.js); static-checks читают `stateMachine.js` + `engine/`.
 - Перенесено осознанно:
   - Флаги `awaiting_*` / `pending_*` остались колонками в `deals`, а не отдельными этапами: перевод в этапы требует миграции живых сделок и правки этапов во фронтенде, а выигрыш небольшой — в коде они уже выделены в отдельные функции.
