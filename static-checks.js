@@ -3,7 +3,7 @@
  * static-checks.js
  *
  * Проверки, которые НЕ требуют вызова LLM (agentRunner.callAgent) —
- * работают чистым парсингом текста stateMachine.js и agents/*.md.
+ * работают чистым парсингом текста stateMachine.js + engine/ и agents/*.md.
  * Быстрые (доли секунды), можно гонять на каждый коммит/PR.
  *
  * Запуск:
@@ -61,6 +61,19 @@ function check(id, title, fn) {
 const src = {};
 for (const [k, p] of Object.entries(paths)) {
   src[k] = readFileSafe(p);
+}
+// С шага 3 (2026-11-11) логика stateMachine.js разнесена по engine/.
+// Проверки читают весь код машины состояний как один текст: сначала
+// stateMachine.js, затем модули engine/ в порядке «от общего к частному».
+const ENGINE_FILES = [
+  'engine/config.js', 'engine/intent.js', 'engine/chat.js', 'engine/pipeline.js',
+  'engine/steps/intake.js', 'engine/steps/newSession.js', 'engine/steps/diagnosing.js',
+  'engine/steps/conflict.js', 'engine/steps/strategySelection.js', 'engine/steps/composing.js',
+  'engine/steps/reviewing.js', 'engine/steps/escalation.js', 'engine/steps/finalize.js',
+  'engine/steps/index.js', 'engine/advance.js'
+];
+if (src.stateMachine !== null) {
+  src.stateMachine = [src.stateMachine, ...ENGINE_FILES.map((f) => readFileSafe(path.join(ROOT, f)) || '')].join('\n');
 }
 
 // ---------------------------------------------------------------------

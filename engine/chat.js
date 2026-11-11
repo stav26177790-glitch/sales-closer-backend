@@ -1,0 +1,360 @@
+/**
+ * engine/chat.js — как ответы агентов превращаются в текст для менеджера:
+ * переводы названий и критериев, касания, вложения, итог сессии.
+ * Только форматирование, без вызовов агентов и базы.
+ */
+
+// Достаёт массив касаний независимо от того, есть ли лишний уровень вложенности
+// composer_output.composer_output.messages или нет.
+function getComposerMessages(composerOutput) {
+  return composerOutput?.messages || composerOutput?.composer_output?.messages || [];
+}
+
+// Баг №14: composer с версии с Правилом 11 генерирует поле attachment
+// (полный текст документа, который упоминается в касании), но нигде в чате
+// это поле не показывалось менеджеру — ни в самих касаниях, ни в финальном
+// резюме сессии. Менеджеру приходилось самому писать текст документа,
+// хотя он уже был сгенерирован агентом. Единая функция форматирования
+// вложения используется во всех местах, где рендерится касание.
+//
+// После находки на реальном тесте (медиаплан с выдуманным трафиком и
+// ложными ссылками на источники) Правило 11 в composer_agent.md изменено:
+// Composer больше не обязан генерировать content любой ценой — если нужных
+// данных нет во входных данных, он оставляет content = null и объясняет в
+// manager_action_needed, что менеджеру нужно подготовить самому. Функция
+// обрабатывает оба случая.
+function formatAttachmentBlock(attachment) {
+  if (!attachment) return '';
+  const title = attachment.title || 'Документ';
+  if (attachment.content) {
+    const todo = attachment.manager_action_needed
+      ? `\n\n⚠️ Нужно дополнить перед отправкой: ${attachment.manager_action_needed}`
+      : '';
+    return `\n\n📎 ${title}:\n${attachment.content}${todo}`;
+  }
+  if (attachment.manager_action_needed) {
+    return `\n\n📎 ${title} — черновик не сгенерирован, подготовьте самостоятельно:\n${attachment.manager_action_needed}`;
+  }
+  return '';
+}
+
+// Превращает объект/массив в читаемую строку вместо сырого JSON.
+// Используется для значений ВНУТРИ одной строки (например, элемент массива).
+function humanizeValue(val) {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string' || typeof val === 'number') return String(val);
+  if (Array.isArray(val)) return val.map(humanizeValue).filter(Boolean).join('; ');
+  if (typeof val === 'object') {
+    return Object.entries(val)
+      .map(([k, v]) => `${k}: ${humanizeValue(v)}`)
+      .filter(Boolean)
+      .join('; ');
+  }
+  return String(val);
+}
+
+// Превращает объект в многострочный читаемый блок: каждое поле — на своей строке,
+// с человекопонятной подписью вместо технического ключа (если она задана в labels).
+// В отличие от humanizeValue не "склеивает" всё через "; " в одну строку.
+function renderKeyValueBlock(obj, labels = {}) {
+  if (obj === null || obj === undefined) return '—';
+  if (typeof obj !== 'object') return String(obj);
+  return Object.entries(obj)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `${labels[k] || k}: ${humanizeValue(v)}`)
+    .join('\n');
+}
+
+// rationale здесь намеренно не указан: это подробное многосоставное
+// рассуждение агента для внутренней логики, не задумывалось как цельный
+// текст для чтения менеджером (сплошной абзац без структуры). Вместо него
+// показывается strategy_summary — отдельное поле, специально описанное в
+// схеме strategy_agent.md как "краткое резюме на русском", но раньше нигде
+// не рендерившееся. rationale исключается из объекта в withTranslatedStrategyName.
+const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
+
+// Ключи критериев СОПРАНО (diagnostic_output.scores) — раньше рендерились
+// сырыми английскими именами ("financial: Риск", "authority: Риск"),
+// в отличие от значений статуса, которые агент и так пишет по-русски
+// ("Риск", "Неизвестно", "Подтверждено"). Тот же класс проблемы, что и
+// с STRATEGY_LABELS/CRITERIA_LABELS ниже — здесь просто был пропущен.
+const SOPRANO_CRITERIA_KEY_LABELS = {
+  financial: 'Финансы',
+  need: 'Потребность',
+  trust: 'Доверие',
+  authority: 'Полномочия (ЛПР)',
+  urgency: 'Срочность'
+};
+
+function translateCriterionKey(key) {
+  return SOPRANO_CRITERIA_KEY_LABELS[key] || key;
+}
+
+// Стратегический агент называет primary_strategy.name внутренним английским
+// кодовым именем (традиция методологии продаж — RiskReduction,
+// StakeholderExpansion и т.п.) — это утекало менеджеру в чат как есть.
+// Правильное решение — поправить сам strategy_agent.md (промпт агента),
+// но его нет в этом пакете передачи. Это защитный слой на уровне рендеринга:
+// известные названия переводим сразу, неизвестные — логируем, чтобы словарь
+// пополнялся, а не переводим "на глаз" то, чего не видели на реальных выводах.
+const STRATEGY_NAME_RU = {
+  Diagnostic: 'Диагностика потребности',
+  StakeholderExpansion: 'Охват всех участников решения',
+  EconomicValue: 'Экономическое обоснование',
+  RiskReduction: 'Снижение риска',
+  Activation: 'Активация срочности',
+  Escalation: 'Эскалация',
+  DirectConversation: 'Прямой разговор',
+  Disqualification: 'Дисквалификация',
+  // Встречались в реальных выводах агента до унификации словаря — оставлены
+  // для обратной совместимости с уже сохранёнными в БД сделками.
+  SoftNurture: 'Мягкое сопровождение',
+  'Soft Nurture': 'Мягкое сопровождение',
+  TrustBuilding: 'Построение доверия',
+  'Trust Building': 'Построение доверия'
+};
+
+function translateStrategyName(name) {
+  if (typeof name !== 'string' || !name) return name;
+  if (/[а-яА-ЯёЁ]/.test(name)) return name; // уже по-русски — не трогаем
+  if (STRATEGY_NAME_RU[name]) return STRATEGY_NAME_RU[name];
+  console.warn(
+    `[strategy] Неизвестное английское название стратегии "${name}" — нет перевода в STRATEGY_NAME_RU. ` +
+    `Показано менеджеру без перевода, добавьте перевод в словарь.`
+  );
+  return name;
+}
+
+function withTranslatedStrategyName(primaryStrategy) {
+  if (!primaryStrategy || typeof primaryStrategy !== 'object') return primaryStrategy;
+  // rationale исключён из показа менеджеру намеренно (см. комментарий у
+  // STRATEGY_LABELS) — здесь его явно убираем из объекта, а не полагаемся
+  // на отсутствие в STRATEGY_LABELS: renderKeyValueBlock рендерит ВСЕ ключи
+  // объекта, labels влияют только на подпись найденного ключа, а не на то,
+  // показывать поле или нет.
+  const { rationale, ...rest } = primaryStrategy;
+  return { ...rest, name: translateStrategyName(primaryStrategy.name) };
+}
+
+// Технические коды критериев reviewer'а (используются во внутренних полях
+// checklist / failed_criteria) — не предназначены для показа человеку как есть.
+// Раньше failed_criteria выводился в чат сырыми английскими идентификаторами
+// (например "no_pressure, tone_fit"), что было непонятно менеджеру. Теперь
+// переводим каждый код на русский перед показом.
+const CRITERIA_LABELS = {
+  new_value: 'нет новой ценности',
+  single_goal: 'несколько целей в одном сообщении',
+  strategy_alignment: 'не соответствует выбранной стратегии',
+  blocker_addressed: 'не работает на главный блокер',
+  no_pressure: 'создаёт давление на клиента',
+  no_stop_words: 'содержит запрещённую фразу',
+  personalization: 'недостаточно персонализировано',
+  clear_next_step: 'нет чёткого следующего шага',
+  channel_fit: 'не соответствует формату канала',
+  not_repetitive: 'повторяет предыдущее касание',
+  tone_fit: 'тон не соответствует типу клиента',
+  attachment_honesty: 'вложение содержит недостоверные данные или создаёт риск завышенного ожидания',
+  broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)'
+};
+
+// Переводит список технических кодов в читаемую строку через запятую.
+// Код, отсутствующий в словаре (например, если промпт вернёт что-то новое),
+// показываем как есть — лучше показать сырой код, чем молча его скрыть.
+function translateCriteria(codes) {
+  if (!Array.isArray(codes) || !codes.length) return '';
+  return codes.map((c) => CRITERIA_LABELS[c] || c).join(', ');
+}
+
+const SESSION_SUMMARY_LABELS = {
+  session_number: 'Номер сессии',
+  session_date: 'Дата',
+  what_we_know: 'Что известно',
+  what_blocks: 'Что блокирует',
+  what_was_done: 'Что сделано',
+  what_is_next: 'Дальнейшие шаги',
+  key_insight: 'Ключевой инсайт'
+};
+
+// Блокер иногда приходит не в отдельном поле main_blocker, а зашит внутрь
+// primary_strategy (например, в rationale). Проверяем все известные варианты.
+function getMainBlocker(strategyOutput) {
+  return strategyOutput?.main_blocker
+    || strategyOutput?.blocker
+    || strategyOutput?.primary_strategy?.main_blocker
+    || strategyOutput?.primary_strategy?.blocker
+    || null;
+}
+
+// primary_strategy иногда приходит простой строкой ('Disqualification'), а иногда
+// объектом ({ name: 'Disqualification', goal, rationale, ... }). Раньше код сравнивал
+// primary_strategy напрямую со строкой 'Disqualification', и когда агент возвращал
+// объект, сравнение всегда проваливалось — сделка не дисквалифицировалась, а шла
+// дальше по циклу composer/reviewer, хотя стратегия была определена верно.
+function getStrategyName(strategyOutput) {
+  const s = strategyOutput?.primary_strategy;
+  if (typeof s === 'string') return s;
+  return s?.name || null;
+}
+
+// После правки strategy_agent.md (перевод primary_strategy.name на русский)
+// агент теперь отдаёт "Дисквалификация" вместо "Disqualification". Раньше
+// код сравнивал getStrategyName(...) === 'Disqualification' напрямую — при
+// обновлении промпта это сравнение молча перестало бы срабатывать, и
+// дисквалификация сделок сломалась бы без единой ошибки в логах. Проверяем
+// оба варианта — и новый русский (основной, актуальный), и старый английский
+// (на случай, если где-то в БД/памяти остался last_strategy_output,
+// сохранённый до деплоя этого фикса).
+function isDisqualificationStrategy(strategyOutput) {
+  const name = getStrategyName(strategyOutput);
+  return name === 'Дисквалификация' || name === 'Disqualification';
+}
+
+// Единая логика fallback для объяснения расхождений между менеджером и агентом.
+function getConflictExplanation(c) {
+  return c?.plain_explanation
+    || c?.explanation
+    || c?.reason
+    || c?.agent_assessment
+    || c?.comment
+    || 'уточните, пожалуйста, детали по этому критерию';
+}
+
+function getConflictQuestion(c) {
+  return c?.question_for_manager || c?.question || 'Расскажите подробнее об этом моменте.';
+}
+
+
+function formatAgentReplyForChat(state, output) {
+  switch (state) {
+    case 'SOPRANO_INTERVIEW': {
+      const qs = output?.diagnostic_output?.clarification_needed?.questions
+        || output?.planner_output?.clarification_needed?.questions || [];
+      return qs.length ? qs.join('\n') : 'Уточните, пожалуйста, недостающие детали по сделке.';
+    }
+    case 'DIAGNOSING': {
+      const diag = output?.diagnostic_output || output;
+      const c = diag?.criteria_assessment || diag?.scores;
+      if (!c) return JSON.stringify(diag, null, 2);
+      const lines = Object.entries(c).map(([k, v]) => {
+        const status = v?.status || v;
+        const comment = v?.comment || v?.explanation || '';
+        return `${translateCriterionKey(k)}: ${status}${comment ? ' — ' + comment : ''}`;
+      });
+      const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
+      const conflictText = conflicts.length
+        ? '\n\nРасхождения:\n' + conflicts.map(c => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}`).join('\n')
+        : '';
+      return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
+    }
+    case 'CONFLICT_RESOLUTION': {
+      // Баг №32: раньше здесь читалось только conflicts_explained — поля с
+      // таким именем нет в схеме diagnostic_agent.md, есть только
+      // conflicts_with_manager (тот же фоллбэк уже стоит в кейсе DIAGNOSING
+      // чуть выше). Из-за бага №31 (CONFLICT_RESOLUTION была недостижима)
+      // это оставалось незамеченным — конфликты сразу проваливались в
+      // безликий дефолтный текст, вместо реальных criterion/reason из
+      // диагностики.
+      const conflicts = output?.diagnostic_output?.conflicts_explained || output?.diagnostic_output?.conflicts_with_manager || [];
+      return conflicts.map((c) => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
+        || 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
+    }
+    case 'STRATEGY_SELECTION': {
+      const s = output?.strategy_output;
+      if (!s) return JSON.stringify(output, null, 2);
+      const mainBlocker = getMainBlocker(s);
+      const lines = [
+        'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
+        mainBlocker ? `Блокер: ${mainBlocker}` : null,
+        // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
+        // strategy_agent.md отдаёт поле "recommended_next_action" — из-за
+        // рассогласования имени поле никогда не рендерилось менеджеру,
+        // хотя агент каждый раз генерирует конкретный следующий шаг.
+        s.recommended_next_action ? `Следующий шаг: ${s.recommended_next_action}` : null,
+        // Баг №29: раньше здесь стояло "s.rationale ? ... : s.strategy_summary",
+        // что выглядело как предпочтение rationale — но по схеме rationale
+        // лежит ВНУТРИ primary_strategy, а не на верхнем уровне strategy_output,
+        // так что ветка была мёртвой (и вводящей в заблуждение). Показываем
+        // только strategy_summary явно, как и было решено в сессии 3 для
+        // formatFinalSummary().
+        s.strategy_summary ? `Обоснование: ${s.strategy_summary}` : null,
+      ].filter(Boolean);
+      return lines.join('\n\n');
+    }
+    case 'COMPOSING': {
+      const msgs = getComposerMessages(output?.composer_output);
+      if (!msgs.length) {
+        // Раньше здесь молча показывалась заглушка "ожидается проверка", даже если
+        // на самом деле парсинг просто не смог найти messages в ответе composer-агента.
+        // Показываем сырой ответ, чтобы увидеть реальную структуру и поправить парсинг.
+        return `⚠️ Не удалось прочитать касания из ответа composer-агента.\n\nСырой ответ:\n${JSON.stringify(output?.composer_output, null, 2)}`;
+      }
+      return msgs.map((m, i) =>
+        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
+      ).join('\n\n---\n\n');
+    }
+    case 'REVIEWING': {
+      const r = output?.reviewer_output;
+      if (!r) return JSON.stringify(output, null, 2);
+      const verdict = r.verdict || r?.reviewer_output?.verdict;
+      if (!verdict) {
+        // Раньше здесь показывалось "Результат проверки: —" без объяснений, если
+        // r.verdict не находился. Показываем сырой ответ для диагностики.
+        return `⚠️ Не удалось прочитать вердикт reviewer-агента.\n\nСырой ответ:\n${JSON.stringify(r, null, 2)}`;
+      }
+      if (verdict === 'ОДОБРЕНО') {
+        const msgs = getComposerMessages(output?.composer_output);
+        if (msgs.length) {
+          const touchpoints = msgs.map((m, i) =>
+            `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
+          ).join('\n\n---\n\n');
+          return `✅ Касания одобрены:\n\n${touchpoints}`;
+        }
+      }
+      const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m =>
+        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + translateCriteria(m.failed_criteria) : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
+      ).join('\n');
+      return `Результат проверки: ${verdict}\n${details}`;
+    }
+    case 'ESCALATION':
+      return 'После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.';
+    case 'LOST_DEAL':
+      return output?._lostText || 'Сделка отмечена как потерянная.';
+    case 'DISQUALIFICATION':
+      return output?.diagnostic_output?.disqualification_reason || 'Сделка не квалифицирована.';
+    case 'FINAL_OUTPUT':
+      return output?._finalText || 'Сессия завершена.';
+    case 'MEMORY_UPDATE':
+      // Промежуточное состояние — до фикса сюда попадали "вхолостую" и показывали сырой JSON.
+      // Теперь сюда практически не должны попадать (см. runMemoryUpdate), но на всякий случай
+      // держим осмысленный текст, а не default-ветку с JSON.stringify.
+      return output?._finalText || 'Формирую итог сессии...';
+    default:
+      return JSON.stringify(output, null, 2) || 'Обрабатываю...';
+  }
+}
+
+function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, statusNote) {
+  if (!memoryOutput) return 'Сессия завершена.';
+  const msgs = getComposerMessages(composerOutput);
+  const mainBlocker = getMainBlocker(strategyOutput);
+  const lines = [
+    'ИТОГ СЕССИИ',
+    statusNote || null,
+    msgs.length ? 'КАСАНИЯ:\n' + msgs.map((m, i) =>
+      `Касание ${i + 1} — ${m.channel}:\n${m.body}${formatAttachmentBlock(m.attachment)}`
+    ).join('\n\n---\n\n') : null,
+    mainBlocker ? `Блокер: ${mainBlocker}` : null,
+    strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(strategyOutput.primary_strategy), STRATEGY_LABELS) : null,
+    strategyOutput?.strategy_summary ? `Обоснование: ${strategyOutput.strategy_summary}` : null,
+    msgs.length ? `Одобренные касания: ${msgs.length}` : null,
+    memoryOutput.session_summary ? 'Резюме:\n' + renderKeyValueBlock(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null
+  ].filter(Boolean);
+  return lines.join('\n\n');
+}
+
+module.exports = {
+  getComposerMessages,
+  isDisqualificationStrategy,
+  formatAgentReplyForChat,
+  formatFinalSummary,
+};

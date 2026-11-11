@@ -32,9 +32,13 @@
 - `server.js` — 9 маршрутов: `/api/health`, `/api/ping-db`, `/api/deals` (GET/POST),
   `/api/deals/:id/history`, `/api/deals/:id/continue`, `/api/deals/:id/experience`,
   `/api/deals/:id/dismiss-stale`, `DELETE /api/deals/:id`.
-- `stateMachine.js` (~1200 строк) — этапы INIT → SOPRANO_INTERVIEW → DIAGNOSING →
-  (CONFLICT_RESOLUTION) → STRATEGY_SELECTION → COMPOSING → REVIEWING →
-  ESCALATION / FINAL_OUTPUT (+ LOST_DEAL, DISQUALIFICATION, MEMORY_UPDATE).
+- Машина состояний — папка `engine/` (точка входа `stateMachine.js`). Этапы: INIT → SOPRANO_INTERVIEW → DIAGNOSING →
+  (CONFLICT_RESOLUTION) → STRATEGY_SELECTION → COMPOSING → REVIEWING → ESCALATION / FINAL_OUTPUT
+  (+ LOST_DEAL, DISQUALIFICATION, MEMORY_UPDATE).
+  - `engine/advance.js` — один ход: контекст, «заверши сессию», выбор обработчика этапа, запись в `deals`, очередь и защита от дублей;
+  - `engine/steps/*.js` — по файлу на этап, реестр в `engine/steps/index.js`;
+  - `engine/pipeline.js` — общие вызовы агентов: composer (единый вход), memory (итог), planner → diagnostic;
+  - `engine/chat.js` — тексты для менеджера; `engine/intent.js` — ок/правка/вопрос/да-нет; `engine/config.js` — лимиты.
 - `agentRunner.js` — вызов 8 агентов, подгрузка базы знаний и кейсов отрасли.
 - `agents/*.md` — промпты; `knowledge/` — 23 файла методологии + ~280 кейсов по 11 отраслям.
 - Фронтенд — один `src/App.jsx` (~600 строк).
@@ -87,7 +91,7 @@
 | --- | --- |
 | ~~Высокий~~ | ~~Нет авторизации~~ — закрыто 2026-11-11 (вход по почте, только JWT) |
 | ~~Высокий~~ | ~~Схема БД расходится~~ — закрыто 2026-11-11 (`db/migrations/001_init.sql`) |
-| Высокий | `stateMachine.js` — монолит, composer вызывается из 6 мест, под-состояния спрятаны во флагах |
+| ~~Высокий~~ | ~~`stateMachine.js` — монолит~~ — закрыто 2026-11-11 (`engine/`, шаг 3) |
 | Средний | composer: ~300 КБ системного промпта на вызов, без prompt caching; кейсы отрасли грузятся все |
 | Средний | Правила дублируются между промптами и базой знаний (блоки касаний, ФХВЭ, стоп-список) |
 | Средний | Разбор ответов агентов регуляркой по ```json; ошибка формата не повторяется |
@@ -132,12 +136,15 @@
 Замечено при записи снимков (поведение не менялось, сохранено как есть):
 - При расхождении с менеджером (CONFLICT_RESOLUTION) вопрос всегда общий — «Расскажите подробнее об этом моменте.»: в схеме `diagnostic_agent.md` нет поля вопроса (`question_for_manager`), код его ищет. Решить в шаге 5: добавить поле в схему агента.
 
-### Шаг 3. Разрезать `stateMachine.js` (2–3 дня)
-- [ ] `config.js`, `intent.js`, `chat/` (форматирование), `engine/steps/` — файл на этап, `engine/advance.js`.
-- [ ] Один конструктор входа для composer вместо 6 копий.
-- [ ] Флаги `awaiting_*` / `pending_*` → явные под-состояния.
-- [ ] Фоновая обработка (очередь задач): нужна для Битрикс24 (лимит 60 с на запрос).
-- Риск: регрессии переходов → снимки из шага 2 должны совпасть посимвольно.
+### Шаг 3. Разрезать `stateMachine.js` — ГОТОВ (2026-11-11)
+- [x] `stateMachine.js` (1200 строк) → папка `engine/` (см. раздел 2). `stateMachine.js` оставлен как точка входа (`require('./engine/advance')`), server.js и старые тесты не менялись.
+- [x] Модули `config`, `intent`, `chat` перенесены дословно; этапы — по файлу в `engine/steps/`, выбор этапа — таблица `STEP_HANDLERS` вместо `switch`.
+- [x] Один конструктор входа composer (`buildComposerInput` в `engine/pipeline.js`) вместо 6 копий; порядок ключей сохранён.
+- [x] Под-режимы COMPOSING и ESCALATION — отдельные функции с говорящими именами (`awaitingCorrection`, `lengthViolation`, `managerQuestion`, `managerEdit`, `sendToReview`; `askToRetry`/`awaitingRetry`/`retriesExhausted`).
+- [x] Проверка: все 12 снимков совпали **побайтно, включая порядок ключей во входе агентов** (сравнение со старым stateMachine.js); static-checks читают `stateMachine.js` + `engine/`.
+- Перенесено осознанно:
+  - Флаги `awaiting_*` / `pending_*` остались колонками в `deals`, а не отдельными этапами: перевод в этапы требует миграции живых сделок и правки этапов во фронтенде, а выигрыш небольшой — в коде они уже выделены в отдельные функции.
+  - Фоновая обработка (очередь задач) → в шаг 7: сейчас фронтенд ждёт ответ синхронно, переход на фон требует изменить и фронтенд (опрос статуса). Нужна именно для Битрикс24.
 
 ### Шаг 4. Вызов агентов (1–2 дня)
 - [ ] Prompt caching системного промпта.
@@ -158,6 +165,7 @@
 - Риск: визуальные отличия → сверка по скриншотам.
 
 ### Шаг 7. Интеграция с Битрикс24
+- [ ] Фоновая обработка хода (очередь задач) + опрос статуса во фронтенде — перенесено из шага 3.
 - [ ] Локальное приложение на портале (раздел «Разработчикам»), scope `crm`, `placement`.
 - [ ] Вкладка «Клоузер» в карточке сделки (`CRM_DEAL_DETAIL_TAB`).
 - [ ] Чтение сделки: поля, письма, звонки (расшифровки), комментарии таймлайна — через `batch`.

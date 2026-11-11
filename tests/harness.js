@@ -79,7 +79,13 @@ function createRunner(script) {
 }
 
 function loadStateMachine(dbApi, runnerApi) {
-  for (const p of [STATE_MACHINE, DB, RUNNER]) delete require.cache[p];
+  // Сбрасываем все модули проекта (stateMachine.js, engine/…), чтобы каждый
+  // сценарий получил свежие копии с нашими моками и чистые очереди advance().
+  for (const p of Object.keys(require.cache)) {
+    if (p.startsWith(ROOT) && !p.includes(`${path.sep}node_modules${path.sep}`) && !p.startsWith(__dirname)) {
+      delete require.cache[p];
+    }
+  }
   const fake = (filename, exports) => {
     require.cache[filename] = { id: filename, filename, loaded: true, exports, children: [], paths: [] };
   };
