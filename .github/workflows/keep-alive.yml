@@ -1,6 +1,6 @@
 # Не даёт бесплатному проекту Supabase уйти в автопаузу (~7 дней без активности).
 # Раз в 3 дня дёргает /api/ping-db на бэкенде, который делает запрос к базе.
-# Адрес бэкенда берётся из секрета BACKEND_URL (Settings → Secrets and variables → Actions),
+# Адрес бэкенда прописан ниже; при желании его можно переопределить секретом BACKEND_URL
 # например https://sales-closer-backend.onrender.com — без /api и без слэша в конце.
 name: Keep Supabase awake
 
@@ -15,7 +15,8 @@ jobs:
     steps:
       - name: Ping database via backend
         env:
-          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          # Адрес бэкенда не секретный (он и так виден во фронтенде); секрет BACKEND_URL, если задан, его переопределяет.
+          BACKEND_URL: ${{ secrets.BACKEND_URL || 'https://sales-closer-backend.onrender.com' }}
         run: |
           if [ -z "$BACKEND_URL" ]; then
             echo "::error::Секрет BACKEND_URL не задан"; exit 1
