@@ -1,0 +1,374 @@
+{
+  "name": "escalation_manual_retry_then_close",
+  "description": "ESCALATION: правка → «доработать?» → непонятный ответ → «да» (ручная попытка) → reviewer снова не одобряет → снова ESCALATION → правка → «нет» → итог",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "добавь цифры по срокам монтажа",
+      "stateBefore": "ESCALATION",
+      "nextState": "ESCALATION",
+      "chatText": "Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "ESCALATION",
+          "awaiting_escalation_confirmation": true,
+          "pending_escalation_feedback": "добавь цифры по срокам монтажа"
+        }
+      ]
+    },
+    {
+      "message": "хм",
+      "stateBefore": "ESCALATION",
+      "nextState": "ESCALATION",
+      "chatText": "Не понял ответ — доработать текст с учётом этого, или закрыть сессию как есть? Ответьте, пожалуйста, \"да\" или \"нет\".",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "ESCALATION"
+        }
+      ]
+    },
+    {
+      "message": "да",
+      "stateBefore": "ESCALATION",
+      "nextState": "COMPOSING",
+      "chatText": "Касание 1 — whatsapp:\nКасание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема D\nПисьмо D: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "да",
+              "dialog_history": "[Менеджер]: добавь цифры по срокам монтажа\n\n[Агент]: Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)\n\n[Менеджер]: хм\n\n[Агент]: Не понял ответ — доработать текст с учётом этого, или закрыть сессию как есть? Ответьте, пожалуйста, \"да\" или \"нет\".\n\n[Менеджер]: да",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "previous_composer_feedback": {
+              "source": "manager",
+              "manager_feedback": "добавь цифры по срокам монтажа"
+            },
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 4
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема D",
+                "body": "Письмо D: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          },
+          "composer_iterations": 4,
+          "escalation_retries": 1,
+          "awaiting_escalation_confirmation": false,
+          "pending_escalation_feedback": null
+        }
+      ]
+    },
+    {
+      "message": "ок",
+      "stateBefore": "COMPOSING",
+      "nextState": "REVIEWING",
+      "chatText": "Результат проверки: НА ДОРАБОТКУ\nКасание 1: НА ДОРАБОТКУ | Проблемы: недостаточно персонализировано\nПравки: добавить имя и факт из переписки",
+      "agentCalls": [
+        {
+          "agent": "reviewer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "ок",
+              "dialog_history": "[Менеджер]: добавь цифры по срокам монтажа\n\n[Агент]: Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)\n\n[Менеджер]: хм\n\n[Агент]: Не понял ответ — доработать текст с учётом этого, или закрыть сессию как есть? Ответьте, пожалуйста, \"да\" или \"нет\".\n\n[Менеджер]: да\n\n[Агент]: Касание 1 — whatsapp:\nКасание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема D\nПисьмо D: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: ок",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема D",
+                  "body": "Письмо D: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "REVIEWING",
+          "last_reviewer_output": {
+            "verdict": "НА ДОРАБОТКУ",
+            "messages_reviewed": [
+              {
+                "touchpoint_number": 1,
+                "verdict": "НА ДОРАБОТКУ",
+                "failed_criteria": [
+                  "personalization"
+                ],
+                "fix_instructions": "добавить имя и факт из переписки"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "message": "ок",
+      "stateBefore": "REVIEWING",
+      "nextState": "ESCALATION",
+      "chatText": "После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "ESCALATION"
+        }
+      ]
+    },
+    {
+      "message": "всё равно не то",
+      "stateBefore": "ESCALATION",
+      "nextState": "ESCALATION",
+      "chatText": "Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "ESCALATION",
+          "awaiting_escalation_confirmation": true,
+          "pending_escalation_feedback": "всё равно не то"
+        }
+      ]
+    },
+    {
+      "message": "нет",
+      "stateBefore": "ESCALATION",
+      "nextState": "FINAL_OUTPUT",
+      "chatText": "ИТОГ СЕССИИ\n\nСтатус: сессия завершена вручную — после эскалации менеджер решил оставить текст как есть.\n\nКАСАНИЯ:\nКасание 1 — whatsapp:\nКасание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nПисьмо D: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\nБлокер: ЛПР не участвует в переговорах\n\nСтратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nОбоснование: без ЛПР сделка не двинется\n\nОдобренные касания: 2\n\nРезюме:\nНомер сессии: 1\nДата: 2026-07-19\nЧто известно: бюджет есть, ЛПР неизвестен\nЧто блокирует: нет выхода на собственника\nЧто сделано: подготовлены касания\nДальнейшие шаги: встреча с собственником\nКлючевой инсайт: решает собственник",
+      "agentCalls": [
+        {
+          "agent": "memory",
+          "maxTokens": 6000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "нет",
+              "dialog_history": "[Менеджер]: добавь цифры по срокам монтажа\n\n[Агент]: Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)\n\n[Менеджер]: хм\n\n[Агент]: Не понял ответ — доработать текст с учётом этого, или закрыть сессию как есть? Ответьте, пожалуйста, \"да\" или \"нет\".\n\n[Менеджер]: да\n\n[Агент]: Касание 1 — whatsapp:\nКасание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема D\nПисьмо D: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: ок\n\n[Агент]: Результат проверки: НА ДОРАБОТКУ\nКасание 1: НА ДОРАБОТКУ | Проблемы: недостаточно персонализировано\nПравки: добавить имя и факт из переписки\n\n[Менеджер]: ок\n\n[Агент]: После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.\n\n[Менеджер]: всё равно не то\n\n[Агент]: Доработать текст с учётом этого, или закрыть сессию как есть? (да/нет)\n\n[Менеджер]: нет",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема D",
+                  "body": "Письмо D: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            },
+            "reviewer_output": {
+              "verdict": "НА ДОРАБОТКУ",
+              "messages_reviewed": [
+                {
+                  "touchpoint_number": 1,
+                  "verdict": "НА ДОРАБОТКУ",
+                  "failed_criteria": [
+                    "personalization"
+                  ],
+                  "fix_instructions": "добавить имя и факт из переписки"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "FINAL_OUTPUT",
+          "awaiting_escalation_confirmation": false,
+          "pending_escalation_feedback": null
+        }
+      ]
+    }
+  ]
+}

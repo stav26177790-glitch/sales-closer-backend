@@ -1,0 +1,202 @@
+{
+  "name": "disqualification",
+  "description": "Стратегия «Дисквалификация» → итог сессии",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "дальше",
+      "stateBefore": "DIAGNOSING",
+      "nextState": "FINAL_OUTPUT",
+      "chatText": "ИТОГ СЕССИИ\n\nСтатус: сделка не квалифицирована.\n\nБлокер: ЛПР не участвует в переговорах\n\nСтратегия:\nНазвание: Дисквалификация\nЦель: не тратить время\n\nОбоснование: без ЛПР сделка не двинется\n\nРезюме:\nНомер сессии: 1\nДата: 2026-07-19\nЧто известно: бюджет есть, ЛПР неизвестен\nЧто блокирует: нет выхода на собственника\nЧто сделано: подготовлены касания\nДальнейшие шаги: встреча с собственником\nКлючевой инсайт: решает собственник",
+      "agentCalls": [
+        {
+          "agent": "strategy",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            }
+          }
+        },
+        {
+          "agent": "memory",
+          "maxTokens": 6000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Дисквалификация",
+                "goal": "не тратить время"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "FINAL_OUTPUT",
+          "last_strategy_output": {
+            "deal_health": "под риском",
+            "primary_strategy": {
+              "name": "Дисквалификация",
+              "goal": "не тратить время"
+            },
+            "main_blocker": "ЛПР не участвует в переговорах",
+            "recommended_next_action": "предложить встречу с собственником",
+            "strategy_summary": "без ЛПР сделка не двинется"
+          }
+        }
+      ]
+    }
+  ]
+}

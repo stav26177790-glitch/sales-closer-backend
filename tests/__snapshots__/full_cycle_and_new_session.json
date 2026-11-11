@@ -1,0 +1,618 @@
+{
+  "name": "full_cycle_and_new_session",
+  "description": "INIT → диагностика → стратегия → касания → одобрение → итог; затем новая сессия с уточняющими вопросами",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.",
+      "stateBefore": "INIT",
+      "nextState": "DIAGNOSING",
+      "chatText": "Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        },
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "planner_output": {
+              "data_quality": {
+                "level": "средний"
+              },
+              "deal_context": {
+                "stage": "после КП"
+              },
+              "diagnostic_priorities": [
+                "authority",
+                "urgency"
+              ],
+              "flags": [],
+              "agent_chain": [
+                "diagnostic",
+                "strategy",
+                "composer",
+                "reviewer"
+              ],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "planner_notes": "тест"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "intake_rounds": 1,
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    },
+    {
+      "message": "дальше",
+      "stateBefore": "DIAGNOSING",
+      "nextState": "STRATEGY_SELECTION",
+      "chatText": "Стратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nБлокер: ЛПР не участвует в переговорах\n\nСледующий шаг: предложить встречу с собственником\n\nОбоснование: без ЛПР сделка не двинется",
+      "agentCalls": [
+        {
+          "agent": "strategy",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.\n\n[Агент]: Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно\n\n[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "STRATEGY_SELECTION",
+          "last_strategy_output": {
+            "deal_health": "под риском",
+            "primary_strategy": {
+              "name": "Охват всех участников решения",
+              "goal": "выйти на ЛПР"
+            },
+            "main_blocker": "ЛПР не участвует в переговорах",
+            "recommended_next_action": "предложить встречу с собственником",
+            "strategy_summary": "без ЛПР сделка не двинется"
+          }
+        }
+      ]
+    },
+    {
+      "message": "дальше",
+      "stateBefore": "STRATEGY_SELECTION",
+      "nextState": "COMPOSING",
+      "chatText": "Касание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема A\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.\n\n[Агент]: Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно\n\n[Менеджер]: дальше\n\n[Агент]: Стратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nБлокер: ЛПР не участвует в переговорах\n\nСледующий шаг: предложить встречу с собственником\n\nОбоснование: без ЛПР сделка не двинется\n\n[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "channel_history": [],
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 1
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема A",
+                "body": "Письмо A: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "message": "ок",
+      "stateBefore": "COMPOSING",
+      "nextState": "FINAL_OUTPUT",
+      "chatText": "ИТОГ СЕССИИ\n\nКАСАНИЯ:\nКасание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\nБлокер: ЛПР не участвует в переговорах\n\nСтратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nОбоснование: без ЛПР сделка не двинется\n\nОдобренные касания: 2\n\nРезюме:\nНомер сессии: 1\nДата: 2026-07-19\nЧто известно: бюджет есть, ЛПР неизвестен\nЧто блокирует: нет выхода на собственника\nЧто сделано: подготовлены касания\nДальнейшие шаги: встреча с собственником\nКлючевой инсайт: решает собственник",
+      "agentCalls": [
+        {
+          "agent": "reviewer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "ок",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.\n\n[Агент]: Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно\n\n[Менеджер]: дальше\n\n[Агент]: Стратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nБлокер: ЛПР не участвует в переговорах\n\nСледующий шаг: предложить встречу с собственником\n\nОбоснование: без ЛПР сделка не двинется\n\n[Менеджер]: дальше\n\n[Агент]: Касание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема A\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: ок",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема A",
+                  "body": "Письмо A: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "agent": "memory",
+          "maxTokens": 6000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "ок",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.\n\n[Агент]: Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно\n\n[Менеджер]: дальше\n\n[Агент]: Стратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nБлокер: ЛПР не участвует в переговорах\n\nСледующий шаг: предложить встречу с собственником\n\nОбоснование: без ЛПР сделка не двинется\n\n[Менеджер]: дальше\n\n[Агент]: Касание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема A\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: ок",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема A",
+                  "body": "Письмо A: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            },
+            "reviewer_output": {
+              "verdict": "ОДОБРЕНО",
+              "messages_reviewed": [
+                {
+                  "touchpoint_number": 1,
+                  "verdict": "ОДОБРЕНО",
+                  "failed_criteria": []
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "FINAL_OUTPUT",
+          "last_reviewer_output": {
+            "verdict": "ОДОБРЕНО",
+            "messages_reviewed": [
+              {
+                "touchpoint_number": 1,
+                "verdict": "ОДОБРЕНО",
+                "failed_criteria": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "message": "Клиент вернулся: хочет обсудить сроки.",
+      "stateBefore": "FINAL_OUTPUT",
+      "nextState": "SOPRANO_INTERVIEW",
+      "chatText": "Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Клиент вернулся: хочет обсудить сроки.",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.\n\n[Агент]: Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно\n\n[Менеджер]: дальше\n\n[Агент]: Стратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nБлокер: ЛПР не участвует в переговорах\n\nСледующий шаг: предложить встречу с собственником\n\nОбоснование: без ЛПР сделка не двинется\n\n[Менеджер]: дальше\n\n[Агент]: Касание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема A\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: ок\n\n[Агент]: ИТОГ СЕССИИ\n\nКАСАНИЯ:\nКасание 1 — whatsapp:\nКасание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nПисьмо A: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\nБлокер: ЛПР не участвует в переговорах\n\nСтратегия:\nНазвание: Охват всех участников решения\nЦель: выйти на ЛПР\n\nОбоснование: без ЛПР сделка не двинется\n\nОдобренные касания: 2\n\nРезюме:\nНомер сессии: 1\nДата: 2026-07-19\nЧто известно: бюджет есть, ЛПР неизвестен\nЧто блокирует: нет выхода на собственника\nЧто сделано: подготовлены касания\nДальнейшие шаги: встреча с собственником\nКлючевой инсайт: решает собственник\n\n[Менеджер]: Клиент вернулся: хочет обсудить сроки.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [
+                "бюджет согласован"
+              ],
+              "open_questions": [
+                "кто ЛПР"
+              ],
+              "session_summary": {
+                "session_number": 1,
+                "session_date": "2026-07-19",
+                "what_we_know": "бюджет есть, ЛПР неизвестен",
+                "what_blocks": "нет выхода на собственника",
+                "what_was_done": "подготовлены касания",
+                "what_is_next": "встреча с собственником",
+                "key_insight": "решает собственник"
+              }
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "SOPRANO_INTERVIEW",
+          "intake_rounds": 1,
+          "escalation_retries": 0,
+          "awaiting_escalation_confirmation": false,
+          "pending_escalation_feedback": null
+        }
+      ]
+    }
+  ]
+}

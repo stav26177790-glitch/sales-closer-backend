@@ -1,0 +1,52 @@
+{
+  "name": "end_session_command",
+  "description": "«заверши сессию» посреди уточняющих вопросов → итог",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "заверши сессию",
+      "stateBefore": "SOPRANO_INTERVIEW",
+      "nextState": "FINAL_OUTPUT",
+      "chatText": "ИТОГ СЕССИИ\n\nСтатус: сессия завершена вручную по команде менеджера (досрочно, не весь цикл мог быть пройден).\n\nРезюме:\nНомер сессии: 1\nДата: 2026-07-19\nЧто известно: бюджет есть, ЛПР неизвестен\nЧто блокирует: нет выхода на собственника\nЧто сделано: подготовлены касания\nДальнейшие шаги: встреча с собственником\nКлючевой инсайт: решает собственник",
+      "agentCalls": [
+        {
+          "agent": "memory",
+          "maxTokens": 6000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "заверши сессию",
+              "dialog_history": "[Менеджер]: заверши сессию",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "FINAL_OUTPUT"
+        }
+      ]
+    }
+  ]
+}

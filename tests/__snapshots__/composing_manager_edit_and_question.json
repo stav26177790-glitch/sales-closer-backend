@@ -1,0 +1,380 @@
+{
+  "name": "composing_manager_edit_and_question",
+  "description": "Правка менеджера → composer; вопрос → advisor и «скорректировать?»; непонятный ответ → переспрос; «да» → composer; «нет» на второй вопрос",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "слишком в лоб, смягчи первое касание",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Касание 1 — whatsapp:\nКасание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема B\nПисьмо B: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "слишком в лоб, смягчи первое касание",
+              "dialog_history": "[Менеджер]: слишком в лоб, смягчи первое касание",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "previous_composer_feedback": {
+              "source": "manager",
+              "manager_feedback": "слишком в лоб, смягчи первое касание"
+            },
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 1
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема B",
+                "body": "Письмо B: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "message": "что ответить, если скажут что дорого?",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Ответьте, что цена включает монтаж и гарантию 3 года.\n\nСкорректировать текущие касания с учётом этого? (да/нет)",
+      "agentCalls": [
+        {
+          "agent": "advisor",
+          "maxTokens": 2000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "что ответить, если скажут что дорого?",
+              "dialog_history": "[Менеджер]: слишком в лоб, смягчи первое касание\n\n[Агент]: Касание 1 — whatsapp:\nКасание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема B\nПисьмо B: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: что ответить, если скажут что дорого?",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема B",
+                  "body": "Письмо B: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            },
+            "manager_question": "что ответить, если скажут что дорого?"
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "awaiting_correction_confirmation": true,
+          "pending_manager_feedback": "Вопрос менеджера: что ответить, если скажут что дорого?\n\nРекомендация: Ответьте, что цена включает монтаж и гарантию 3 года."
+        }
+      ]
+    },
+    {
+      "message": "подумаю",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Не понял ответ — скорректировать текущие касания с учётом этого? Ответьте, пожалуйста, \"да\" или \"нет\".",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING"
+        }
+      ]
+    },
+    {
+      "message": "да",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Касание 1 — whatsapp:\nКасание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема C\nПисьмо C: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "да",
+              "dialog_history": "[Менеджер]: слишком в лоб, смягчи первое касание\n\n[Агент]: Касание 1 — whatsapp:\nКасание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема B\nПисьмо B: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: что ответить, если скажут что дорого?\n\n[Агент]: Ответьте, что цена включает монтаж и гарантию 3 года.\n\nСкорректировать текущие касания с учётом этого? (да/нет)\n\n[Менеджер]: подумаю\n\n[Агент]: Не понял ответ — скорректировать текущие касания с учётом этого? Ответьте, пожалуйста, \"да\" или \"нет\".\n\n[Менеджер]: да",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "previous_composer_feedback": {
+              "source": "manager",
+              "manager_feedback": "Вопрос менеджера: что ответить, если скажут что дорого?\n\nРекомендация: Ответьте, что цена включает монтаж и гарантию 3 года."
+            },
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 1
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема C",
+                "body": "Письмо C: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          },
+          "awaiting_correction_confirmation": false,
+          "pending_manager_feedback": null
+        }
+      ]
+    },
+    {
+      "message": "может предложить скидку?",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Ответьте, что цена включает монтаж и гарантию 3 года.\n\nСкорректировать текущие касания с учётом этого? (да/нет)",
+      "agentCalls": [
+        {
+          "agent": "advisor",
+          "maxTokens": 2000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "может предложить скидку?",
+              "dialog_history": "[Менеджер]: слишком в лоб, смягчи первое касание\n\n[Агент]: Касание 1 — whatsapp:\nКасание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема B\nПисьмо B: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: что ответить, если скажут что дорого?\n\n[Агент]: Ответьте, что цена включает монтаж и гарантию 3 года.\n\nСкорректировать текущие касания с учётом этого? (да/нет)\n\n[Менеджер]: подумаю\n\n[Агент]: Не понял ответ — скорректировать текущие касания с учётом этого? Ответьте, пожалуйста, \"да\" или \"нет\".\n\n[Менеджер]: да\n\n[Агент]: Касание 1 — whatsapp:\nКасание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема C\nПисьмо C: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж\n\n[Менеджер]: может предложить скидку?",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема C",
+                  "body": "Письмо C: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            },
+            "manager_question": "может предложить скидку?"
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "awaiting_correction_confirmation": true,
+          "pending_manager_feedback": "Вопрос менеджера: может предложить скидку?\n\nРекомендация: Ответьте, что цена включает монтаж и гарантию 3 года."
+        }
+      ]
+    },
+    {
+      "message": "нет",
+      "stateBefore": "COMPOSING",
+      "nextState": "COMPOSING",
+      "chatText": "Хорошо, оставляю текущие касания без изменений. Когда будете готовы — напишите \"ок\", чтобы отправить их на финальную проверку.",
+      "agentCalls": [],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема C",
+                "body": "Письмо C: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          },
+          "awaiting_correction_confirmation": false,
+          "pending_manager_feedback": null
+        }
+      ]
+    }
+  ]
+}

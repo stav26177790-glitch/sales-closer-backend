@@ -1,0 +1,90 @@
+{
+  "name": "raw_output_recovery",
+  "description": "Ответ composer в обёртке ```json с parse_error восстанавливается",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "дальше",
+      "stateBefore": "STRATEGY_SELECTION",
+      "nextState": "COMPOSING",
+      "chatText": "Касание 1 — whatsapp:\nКасание RAW: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\nКасание 2 — email:\nТема: Тема RAW\nПисьмо RAW: материалы по монтажу во вложении.\n\n📎 График монтажа:\nнеделя 1 — замер, неделя 2 — монтаж",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "channel_history": [],
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 1
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание RAW: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема RAW",
+                "body": "Письмо RAW: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

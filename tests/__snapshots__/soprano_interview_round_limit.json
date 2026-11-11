@@ -1,0 +1,373 @@
+{
+  "name": "soprano_interview_round_limit",
+  "description": "Уточняющие вопросы: planner, затем diagnostic просят уточнить; на 3-м раунде лимит — переход в DIAGNOSING с пометкой",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "Клиент интересуется вывеской.",
+      "stateBefore": "INIT",
+      "nextState": "SOPRANO_INTERVIEW",
+      "chatText": "Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Клиент интересуется вывеской.",
+              "dialog_history": "[Менеджер]: Клиент интересуется вывеской.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "SOPRANO_INTERVIEW",
+          "intake_rounds": 1
+        }
+      ]
+    },
+    {
+      "message": "Решение принимает директор.",
+      "stateBefore": "SOPRANO_INTERVIEW",
+      "nextState": "SOPRANO_INTERVIEW",
+      "chatText": "Кто подписывает договор?",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Решение принимает директор.",
+              "dialog_history": "[Менеджер]: Клиент интересуется вывеской.\n\n[Агент]: Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?\n\n[Менеджер]: Решение принимает директор.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        },
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Решение принимает директор.",
+              "dialog_history": "[Менеджер]: Клиент интересуется вывеской.\n\n[Агент]: Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?\n\n[Менеджер]: Решение принимает директор.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "planner_output": {
+              "data_quality": {
+                "level": "средний"
+              },
+              "deal_context": {
+                "stage": "после КП"
+              },
+              "diagnostic_priorities": [
+                "authority",
+                "urgency"
+              ],
+              "flags": [],
+              "agent_chain": [
+                "diagnostic",
+                "strategy",
+                "composer",
+                "reviewer"
+              ],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "planner_notes": "тест"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "SOPRANO_INTERVIEW",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": true,
+              "questions": [
+                "Кто подписывает договор?"
+              ]
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "intake_rounds": 2,
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    },
+    {
+      "message": "Срок — к открытию в сентябре.",
+      "stateBefore": "SOPRANO_INTERVIEW",
+      "nextState": "DIAGNOSING",
+      "chatText": "⚠️ Не все детали удалось уточнить за 3 раунда — диагностика продолжена с доступными данными, недостающие критерии отмечены как \"Неизвестно\".\n\nОценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Срок — к открытию в сентябре.",
+              "dialog_history": "[Менеджер]: Клиент интересуется вывеской.\n\n[Агент]: Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?\n\n[Менеджер]: Решение принимает директор.\n\n[Агент]: Кто подписывает договор?\n\n[Менеджер]: Срок — к открытию в сентябре.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        },
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Срок — к открытию в сентябре.",
+              "dialog_history": "[Менеджер]: Клиент интересуется вывеской.\n\n[Агент]: Кто принимает решение о покупке?\nЕсть ли срок открытия магазина?\n\n[Менеджер]: Решение принимает директор.\n\n[Агент]: Кто подписывает договор?\n\n[Менеджер]: Срок — к открытию в сентябре.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "planner_output": {
+              "data_quality": {
+                "level": "средний"
+              },
+              "deal_context": {
+                "stage": "после КП"
+              },
+              "diagnostic_priorities": [
+                "authority",
+                "urgency"
+              ],
+              "flags": [],
+              "agent_chain": [
+                "diagnostic",
+                "strategy",
+                "composer",
+                "reviewer"
+              ],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "planner_notes": "тест"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": true,
+              "questions": [
+                "Кто подписывает договор?"
+              ]
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "intake_rounds": 3,
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    }
+  ]
+}

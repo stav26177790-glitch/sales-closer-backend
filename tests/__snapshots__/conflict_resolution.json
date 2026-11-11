@@ -1,0 +1,276 @@
+{
+  "name": "conflict_resolution",
+  "description": "Диагностика расходится с самооценкой менеджера → CONFLICT_RESOLUTION → уточнение → DIAGNOSING",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "Переписка с менеджером закупок, говорит что всё согласовано.",
+      "stateBefore": "INIT",
+      "nextState": "CONFLICT_RESOLUTION",
+      "chatText": "Полномочия (ЛПР): в переписке нет подтверждения, что собеседник — ЛПР\nРасскажите подробнее об этом моменте.",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка с менеджером закупок, говорит что всё согласовано.",
+              "dialog_history": "[Менеджер]: Переписка с менеджером закупок, говорит что всё согласовано.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "",
+                "trust": "",
+                "authority": "Подтверждено",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        },
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка с менеджером закупок, говорит что всё согласовано.",
+              "dialog_history": "[Менеджер]: Переписка с менеджером закупок, говорит что всё согласовано.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "",
+                "trust": "",
+                "authority": "Подтверждено",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "planner_output": {
+              "data_quality": {
+                "level": "средний"
+              },
+              "deal_context": {
+                "stage": "после КП"
+              },
+              "diagnostic_priorities": [
+                "authority",
+                "urgency"
+              ],
+              "flags": [],
+              "agent_chain": [
+                "diagnostic",
+                "strategy",
+                "composer",
+                "reviewer"
+              ],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "planner_notes": "тест"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "CONFLICT_RESOLUTION",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [
+              {
+                "criterion": "authority",
+                "manager_assessment": "Подтверждено",
+                "agent_assessment": "Неизвестно",
+                "reason": "в переписке нет подтверждения, что собеседник — ЛПР"
+              }
+            ],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "intake_rounds": 1,
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    },
+    {
+      "message": "Подписывает генеральный, закупщик только собирает КП.",
+      "stateBefore": "CONFLICT_RESOLUTION",
+      "nextState": "DIAGNOSING",
+      "chatText": "Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно",
+      "agentCalls": [
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Подписывает генеральный, закупщик только собирает КП.",
+              "dialog_history": "[Менеджер]: Переписка с менеджером закупок, говорит что всё согласовано.\n\n[Агент]: Полномочия (ЛПР): в переписке нет подтверждения, что собеседник — ЛПР\nРасскажите подробнее об этом моменте.\n\n[Менеджер]: Подписывает генеральный, закупщик только собирает КП.",
+              "user_assessment": {
+                "financial": "Подтверждено",
+                "need": "Подтверждено",
+                "trust": "Вероятно",
+                "authority": "Неизвестно",
+                "urgency": "Вероятно"
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "manager_conflict_response": {
+              "new_facts": "Подписывает генеральный, закупщик только собирает КП."
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    }
+  ]
+}

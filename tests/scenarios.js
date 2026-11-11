@@ -1,0 +1,287 @@
+/**
+ * tests/scenarios.js — сценарии для снимков (tests/snapshots.test.js).
+ *
+ * Каждый сценарий проходит по реальным веткам stateMachine.js: стартовая
+ * сделка → сообщения менеджера → заранее заданные ответы агентов.
+ * Содержание ответов агентов условное, но форма — как в схемах agents/*.md,
+ * чтобы проверялось и то, как ответы превращаются в текст для менеджера.
+ *
+ * Покрыто: полный цикл до итога и новая сессия, уточняющие вопросы и их
+ * лимит, расхождение с менеджером, потерянная сделка, дисквалификация,
+ * правка и вопрос менеджера по касаниям, доработки reviewer'а до эскалации,
+ * ручные попытки после эскалации и их лимит, превышение длины, команда
+ * «заверши сессию», восстановление ответа в обёртке ```json.
+ */
+
+const BASE_DEAL = {
+  client: 'СтройДвор',
+  product: 'вывеска на фасад',
+  deal_size: 420000,
+  industry: 'signage',
+  last_contact: '2026-07-15',
+  days_silent: 4,
+  criteria: { financial: '', need: '', trust: '', authority: '', urgency: '' },
+};
+
+// ---------- типовые ответы агентов ----------
+const planner = (clarify = false) => ({
+  planner_output: {
+    data_quality: { level: 'средний' },
+    deal_context: { stage: 'после КП' },
+    diagnostic_priorities: ['authority', 'urgency'],
+    flags: [],
+    agent_chain: ['diagnostic', 'strategy', 'composer', 'reviewer'],
+    clarification_needed: clarify
+      ? { required: true, questions: ['Кто принимает решение о покупке?', 'Есть ли срок открытия магазина?'] }
+      : { required: false, questions: [] },
+    planner_notes: 'тест',
+  },
+});
+
+// Форма — как в разделе «ВЫХОДНЫЕ ДАННЫЕ» agents/diagnostic_agent.md.
+const scores = {
+  financial: { status: 'Подтверждено', evidence: ['бюджет 420 тыс согласован'], confidence: 'high' },
+  need: { status: 'Подтверждено', evidence: ['открытие магазина'], confidence: 'high' },
+  trust: { status: 'Вероятно', evidence: ['одна встреча'], confidence: 'medium' },
+  authority: { status: 'Неизвестно', evidence: [], confidence: 'low' },
+  urgency: { status: 'Вероятно', evidence: ['срок размыт'], confidence: 'medium' },
+};
+
+const diagnostic = ({ clarify = false, conflicts = [] } = {}) => ({
+  diagnostic_output: {
+    scores,
+    primary_blocker: { criterion: 'authority', reason: 'ЛПР не выявлен', evidence: [] },
+    patterns_detected: [],
+    conflicts_with_manager: conflicts,
+    clarification_needed: clarify
+      ? { required: true, questions: ['Кто подписывает договор?'] }
+      : { required: false, questions: [] },
+    diagnostic_summary: 'бюджет есть, ЛПР не выявлен',
+  },
+});
+
+const strategy = (overrides = {}) => ({
+  strategy_output: {
+    deal_health: 'под риском',
+    primary_strategy: { name: 'Охват всех участников решения', goal: 'выйти на ЛПР' },
+    main_blocker: 'ЛПР не участвует в переговорах',
+    recommended_next_action: 'предложить встречу с собственником',
+    strategy_summary: 'без ЛПР сделка не двинется',
+    ...overrides,
+  },
+});
+
+const composer = (label, body) => ({
+  composer_output: {
+    messages: [
+      { touchpoint_number: 1, channel: 'whatsapp', body: body || `Касание ${label}: Иван, добрый день! Предлагаю созвониться с собственником в четверг.` },
+      { touchpoint_number: 2, channel: 'email', subject: `Тема ${label}`, body: `Письмо ${label}: материалы по монтажу во вложении.`, attachment: { title: 'График монтажа', content: 'неделя 1 — замер, неделя 2 — монтаж' } },
+    ],
+  },
+});
+
+const reviewer = (verdict) => ({
+  reviewer_output: {
+    verdict,
+    messages_reviewed: [
+      verdict === 'ОДОБРЕНО'
+        ? { touchpoint_number: 1, verdict: 'ОДОБРЕНО', failed_criteria: [] }
+        : { touchpoint_number: 1, verdict: 'НА ДОРАБОТКУ', failed_criteria: ['personalization'], fix_instructions: 'добавить имя и факт из переписки' },
+    ],
+  },
+});
+
+const memory = (n = 1) => ({
+  memory_output: {
+    session_number: n,
+    previous_touchpoints: [],
+    confirmed_facts: ['бюджет согласован'],
+    open_questions: ['кто ЛПР'],
+    session_summary: {
+      session_number: n,
+      session_date: '2026-07-19',
+      what_we_know: 'бюджет есть, ЛПР неизвестен',
+      what_blocks: 'нет выхода на собственника',
+      what_was_done: 'подготовлены касания',
+      what_is_next: 'встреча с собственником',
+      key_insight: 'решает собственник',
+    },
+  },
+});
+
+const advisor = { advisor_output: { answer: 'Ответьте, что цена включает монтаж и гарантию 3 года.' } };
+
+// Состояние сделки «касания уже показаны менеджеру».
+const AT_COMPOSING = {
+  ...BASE_DEAL,
+  current_state: 'COMPOSING',
+  last_diagnostic_output: diagnostic().diagnostic_output,
+  last_strategy_output: strategy().strategy_output,
+  last_composer_output: composer('A').composer_output,
+  composer_iterations: 1,
+};
+
+module.exports = [
+  {
+    name: 'full_cycle_and_new_session',
+    description: 'INIT → диагностика → стратегия → касания → одобрение → итог; затем новая сессия с уточняющими вопросами',
+    deal: { ...BASE_DEAL, current_state: 'INIT' },
+    agents: {
+      planner: [planner(false), planner(true)],
+      diagnostic: [diagnostic()],
+      strategy: [strategy()],
+      composer: [composer('A')],
+      reviewer: [reviewer('ОДОБРЕНО')],
+      memory: [memory(1)],
+    },
+    messages: [
+      'Переписка: клиент просит КП на вывеску, бюджет 420 тыс согласован, решение за собственником.',
+      'дальше',
+      'дальше',
+      'ок',
+      'Клиент вернулся: хочет обсудить сроки.',
+    ],
+  },
+  {
+    name: 'soprano_interview_round_limit',
+    description: 'Уточняющие вопросы: planner, затем diagnostic просят уточнить; на 3-м раунде лимит — переход в DIAGNOSING с пометкой',
+    deal: { ...BASE_DEAL, current_state: 'INIT' },
+    agents: {
+      planner: [planner(true), planner(false), planner(false)],
+      diagnostic: [diagnostic({ clarify: true }), diagnostic({ clarify: true })],
+    },
+    messages: [
+      'Клиент интересуется вывеской.',
+      'Решение принимает директор.',
+      'Срок — к открытию в сентябре.',
+    ],
+  },
+  {
+    name: 'conflict_resolution',
+    description: 'Диагностика расходится с самооценкой менеджера → CONFLICT_RESOLUTION → уточнение → DIAGNOSING',
+    deal: { ...BASE_DEAL, current_state: 'INIT', criteria: { financial: 'Подтверждено', need: '', trust: '', authority: 'Подтверждено', urgency: '' } },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [
+        diagnostic({ conflicts: [{ criterion: 'authority', manager_assessment: 'Подтверждено', agent_assessment: 'Неизвестно', reason: 'в переписке нет подтверждения, что собеседник — ЛПР' }] }),
+        diagnostic(),
+      ],
+    },
+    messages: [
+      'Переписка с менеджером закупок, говорит что всё согласовано.',
+      'Подписывает генеральный, закупщик только собирает КП.',
+    ],
+  },
+  {
+    name: 'lost_deal',
+    description: 'Стратегия признаёт сделку потерянной → итог сессии',
+    deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
+    agents: {
+      strategy: [strategy({ deal_health: 'потеряна', primary_strategy: { name: 'Закрытие', goal: 'зафиксировать причину' } })],
+      memory: [memory(1)],
+    },
+    messages: ['дальше'],
+  },
+  {
+    name: 'disqualification',
+    description: 'Стратегия «Дисквалификация» → итог сессии',
+    deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
+    agents: {
+      strategy: [strategy({ primary_strategy: { name: 'Дисквалификация', goal: 'не тратить время' } })],
+      memory: [memory(1)],
+    },
+    messages: ['дальше'],
+  },
+  {
+    name: 'composing_manager_edit_and_question',
+    description: 'Правка менеджера → composer; вопрос → advisor и «скорректировать?»; непонятный ответ → переспрос; «да» → composer; «нет» на второй вопрос',
+    deal: AT_COMPOSING,
+    agents: {
+      composer: [composer('B'), composer('C')],
+      advisor: [advisor, advisor],
+    },
+    messages: [
+      'слишком в лоб, смягчи первое касание',
+      'что ответить, если скажут что дорого?',
+      'подумаю',
+      'да',
+      'может предложить скидку?',
+      'нет',
+    ],
+  },
+  {
+    name: 'reviewer_rework_to_escalation',
+    description: 'Reviewer дважды не одобряет → доработки composer → лимит итераций → ESCALATION',
+    deal: AT_COMPOSING,
+    agents: {
+      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
+      composer: [composer('B'), composer('C')],
+    },
+    messages: ['ок', 'ок', 'ок', 'ок', 'ок', 'ок'],
+  },
+  {
+    name: 'escalation_manual_retry_then_close',
+    description: 'ESCALATION: правка → «доработать?» → непонятный ответ → «да» (ручная попытка) → reviewer снова не одобряет → снова ESCALATION → правка → «нет» → итог',
+    deal: {
+      ...AT_COMPOSING,
+      current_state: 'ESCALATION',
+      composer_iterations: 3,
+      last_reviewer_output: reviewer('НА ДОРАБОТКУ').reviewer_output,
+      escalation_retries: 0,
+    },
+    agents: {
+      composer: [composer('D')],
+      reviewer: [reviewer('НА ДОРАБОТКУ')],
+      memory: [memory(1)],
+    },
+    messages: [
+      'добавь цифры по срокам монтажа',
+      'хм',
+      'да',
+      'ок',
+      'ок',
+      'всё равно не то',
+      'нет',
+    ],
+  },
+  {
+    name: 'escalation_retry_limit',
+    description: 'ESCALATION с исчерпанными ручными попытками: «да» → итог с пометкой о лимите',
+    deal: {
+      ...AT_COMPOSING,
+      current_state: 'ESCALATION',
+      composer_iterations: 5,
+      escalation_retries: 2,
+      awaiting_escalation_confirmation: true,
+      pending_escalation_feedback: 'добавь цифры',
+    },
+    agents: { memory: [memory(1)] },
+    messages: ['да'],
+  },
+  {
+    name: 'message_length_violation',
+    description: 'Касание длиннее лимита канала: одобрение не уходит в reviewer, composer получает фидбэк про длину',
+    deal: {
+      ...AT_COMPOSING,
+      last_composer_output: composer('LONG', 'Очень длинное сообщение. '.repeat(30)).composer_output,
+    },
+    agents: { composer: [composer('E')] },
+    messages: ['ок'],
+  },
+  {
+    name: 'end_session_command',
+    description: '«заверши сессию» посреди уточняющих вопросов → итог',
+    deal: { ...BASE_DEAL, current_state: 'SOPRANO_INTERVIEW', intake_rounds: 1 },
+    agents: { memory: [memory(1)] },
+    messages: ['заверши сессию'],
+  },
+  {
+    name: 'raw_output_recovery',
+    description: 'Ответ composer в обёртке ```json с parse_error восстанавливается',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_strategy_output: strategy().strategy_output },
+    agents: {
+      composer: [{ parse_error: true, raw_output: '```json\n' + JSON.stringify(composer('RAW')) + '\n```' }],
+    },
+    messages: ['дальше'],
+  },
+];
