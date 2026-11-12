@@ -50,10 +50,40 @@ const COMPOSER_MAX_TOKENS = 8000;
 function buildComposerInput(baseInput, deal, { feedback, channelHistory, iteration }) {
   const input = { ...baseInput, strategy_output: deal.last_strategy_output };
   if (channelHistory !== undefined) input.channel_history = channelHistory;
-  if (feedback !== undefined) input.previous_composer_feedback = feedback;
+  if (feedback !== undefined) {
+    // 2026-11-12: на доработке composer должен видеть свои прошлые касания —
+    // иначе он пишет набор заново и ломает уже одобренное (живой тест: после
+    // доработки вернулись ошибки в одобренных касаниях).
+    if (deal.last_composer_output) input.previous_composer_output = deal.last_composer_output;
+    input.previous_composer_feedback = feedback;
+  }
   input.message_length_limits = CONFIG.MAX_MESSAGE_LENGTH;
   input.iteration = iteration;
   return input;
+}
+
+// После доработки по вердикту reviewer'а одобренные им касания возвращаются
+// дословно: модель переписывает набор целиком и может испортить одобренное.
+// Сопоставление по позиции; если число касаний изменилось (composer разбил
+// или объединил касания) — набор оставляем как есть.
+function keepApprovedTouches(newOutput, prevOutput, reviewerOutput) {
+  const reviewed = reviewerOutput?.messages_reviewed || reviewerOutput?.reviewer_output?.messages_reviewed || [];
+  const approved = new Set(reviewed.filter((m) => m?.verdict === 'ОДОБРЕНО').map((m) => Number(m.touchpoint_number)));
+  const newMsgs = newOutput?.messages;
+  const prevMsgs = prevOutput?.messages;
+  if (!approved.size || !Array.isArray(newMsgs) || !Array.isArray(prevMsgs)) return { output: newOutput, kept: [] };
+  if (newMsgs.length !== prevMsgs.length) {
+    console.warn(`[composer] Число касаний изменилось (${prevMsgs.length} → ${newMsgs.length}) — одобренные касания не восстанавливаются`);
+    return { output: newOutput, kept: [] };
+  }
+  const kept = [];
+  const messages = newMsgs.map((m, i) => {
+    const prev = prevMsgs[i];
+    const number = Number(prev?.touchpoint_number ?? i + 1);
+    if (approved.has(number)) { kept.push(number); return prev; }
+    return m;
+  });
+  return { output: { ...newOutput, messages }, kept };
 }
 
 async function runComposer(baseInput, deal, options) {
@@ -170,6 +200,7 @@ function cleanManagerConflicts(diag, baseInput) {
 }
 
 module.exports = {
+  keepApprovedTouches,
   realManagerConflicts,
   cleanManagerConflicts,
   callAgentSafe,

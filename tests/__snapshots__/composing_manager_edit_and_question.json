@@ -49,6 +49,25 @@
               "recommended_next_action": "предложить встречу с собственником",
               "strategy_summary": "без ЛПР сделка не двинется"
             },
+            "previous_composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема A",
+                  "body": "Письмо A: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
+            },
             "previous_composer_feedback": {
               "source": "manager",
               "manager_feedback": "слишком в лоб, смягчи первое касание"
@@ -223,6 +242,25 @@
               "main_blocker": "ЛПР не участвует в переговорах",
               "recommended_next_action": "предложить встречу с собственником",
               "strategy_summary": "без ЛПР сделка не двинется"
+            },
+            "previous_composer_output": {
+              "messages": [
+                {
+                  "touchpoint_number": 1,
+                  "channel": "whatsapp",
+                  "body": "Касание B: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+                },
+                {
+                  "touchpoint_number": 2,
+                  "channel": "email",
+                  "subject": "Тема B",
+                  "body": "Письмо B: материалы по монтажу во вложении.",
+                  "attachment": {
+                    "title": "График монтажа",
+                    "content": "неделя 1 — замер, неделя 2 — монтаж"
+                  }
+                }
+              ]
             },
             "previous_composer_feedback": {
               "source": "manager",

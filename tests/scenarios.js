@@ -287,6 +287,24 @@ module.exports = [
     messages: ['ок', 'ок', 'ок', 'ок', 'ок', 'ок'],
   },
   {
+    name: 'rework_keeps_approved_touches',
+    description: 'Reviewer одобрил касание 1 и вернул касание 2; composer на доработке переписал оба — код возвращает одобренное касание 1 дословно, касание 2 берёт новое. Composer получает свои прошлые касания',
+    deal: AT_COMPOSING,
+    agents: {
+      reviewer: [{
+        reviewer_output: {
+          verdict: 'НА ДОРАБОТКУ',
+          messages_reviewed: [
+            { touchpoint_number: 1, verdict: 'ОДОБРЕНО', failed_criteria: [] },
+            { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', failed_criteria: ['client_value'], fix_instructions: 'добавить выгоду для ЛПР' },
+          ],
+        },
+      }],
+      composer: [composer('B')],
+    },
+    messages: ['ок', 'доработай'],
+  },
+  {
     name: 'escalation_manual_retry_then_close',
     description: 'ESCALATION: правка → «доработать?» → непонятный ответ → «да» (ручная попытка) → reviewer снова не одобряет → снова ESCALATION → правка → «нет» → итог',
     deal: {

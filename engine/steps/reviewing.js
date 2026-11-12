@@ -3,7 +3,7 @@
  * Следующее сообщение запускает автоматическую доработку, пока не исчерпан
  * лимит MAX_COMPOSER_ITERATIONS; после него — ESCALATION.
  */
-const { runComposer, runMemoryUpdate } = require('../pipeline');
+const { runComposer, runMemoryUpdate, keepApprovedTouches } = require('../pipeline');
 const { CONFIG } = require('../config');
 
 async function reviewing({ dealId, deal, baseInput }) {
@@ -18,10 +18,13 @@ async function reviewing({ dealId, deal, baseInput }) {
   if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
     return { nextState: 'ESCALATION', output };
   }
-  output.composer_output = await runComposer(baseInput, deal, {
+  const reworked = await runComposer(baseInput, deal, {
     feedback: deal.last_reviewer_output,
     iteration: iterations + 1
   });
+  const { output: merged, kept } = keepApprovedTouches(reworked, deal.last_composer_output, deal.last_reviewer_output);
+  if (kept.length) console.log(`[composer] Одобренные касания оставлены без изменений: ${kept.join(', ')}`);
+  output.composer_output = merged;
   output._composer_iterations = iterations + 1;
   return { nextState: 'COMPOSING', output };
 }
