@@ -173,12 +173,13 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
       fits_client_deadline: bLatest <= readyBy,
       latest_start_date: bLatestStart,
       summary: bLatest <= readyBy
-        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.install} раб. дн. — при старте сегодня готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}.`
+        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.install} раб. дн. — при старте сегодня готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}. Эта дата — только для баннера: постоянная вывеска при любом дне задержки старта сдвигается на столько же рабочих дней.`
         : `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.install} раб. дн. — к дате клиента тоже не успеваем (готова ${humanDate(bLatest)}).`
     };
   }
 
   const install = iMin === iMax ? `${iMin}` : `${iMin}–${iMax}`;
+  const shiftNote = buffer < 0 ? ' Каждый рабочий день задержки старта сдвигает готовность постоянной вывески на рабочий день.' : '';
   const lastStartText = latestStart >= today
     ? `Последний день старта (согласования макета) с учётом монтажа ${iMax} дн. — ${humanDate(latestStart)}.`
     : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= today && latestStartBestCase !== latestStart ? ` (при монтаже за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
@@ -201,7 +202,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
     summary:
       `Старт сегодня, ${humanDate(today)}: производство ${wdays(prod)} — до ${humanDate(productionDone)}, ` +
       `монтаж ${install} раб. дн. — готово ${iMin === iMax ? humanDate(installedLatest) : `${humanDate(installedEarliest)} – ${humanDate(installedLatest)}`}. ` +
-      `Клиенту нужно к ${humanDate(clientDeadline)} (готово не позже ${humanDate(readyBy)}): ${verdict}. ${lastStartText}` +
+      `Клиенту нужно к ${humanDate(clientDeadline)} (готово не позже ${humanDate(readyBy)}): ${verdict}. ${lastStartText}${shiftNote}` +
       (tempBanner ? ` ${tempBanner.summary}` : ''),
     rules: 'Считаются только рабочие дни (без выходных и праздников РФ). Даты готовности и последний день старта в касаниях — только из этого расчёта, сам не считай.'
   };
