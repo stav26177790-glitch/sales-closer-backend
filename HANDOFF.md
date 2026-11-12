@@ -1,6 +1,6 @@
 # HANDOFF — Sales Closer AI (Клоузер)
 
-Обновлено: 2026-11-11. Бэкенд `1e81c34`, фронтенд `ec3fb42`.
+Обновлено: 2026-11-12. Бэкенд `1e81c34`, фронтенд `ec3fb42`.
 Полный аудит с диаграммами: https://claude.ai/artifact/HJ8PtmVzYrULPukHa3FdvT
 
 Этот файл — единая точка входа для следующей сессии (человека или Claude).
@@ -54,7 +54,7 @@
 | advisor | Haiku 4.5 | ответы на вопросы менеджера по касаниям |
 | intent_classifier | Haiku 4.5 | теневой режим, только логирует |
 
-Тесты (все зелёные на 2026-11-11): `npm test` — static-checks (13/13), `test_escalation_manual_retry.js`, `test_intake_round_limit.js`, снимки `tests/snapshots.test.js` (12/12), вызов агента `tests/runner.test.js` (10/10).
+Тесты (все зелёные на 2026-11-12): `npm test` — static-checks (13/13), `test_escalation_manual_retry.js`, `test_intake_round_limit.js`, снимки `tests/snapshots.test.js` (12/12), вызов агента `tests/runner.test.js` (10/10).
 
 ## 3. Сделано 2026-11-11
 
