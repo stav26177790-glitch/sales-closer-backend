@@ -159,7 +159,7 @@ module.exports = [
   {
     name: 'conflict_resolution',
     description: 'Диагностика расходится с самооценкой менеджера → CONFLICT_RESOLUTION → уточнение → DIAGNOSING',
-    deal: { ...BASE_DEAL, current_state: 'INIT', criteria: { financial: 'Подтверждено', need: '', trust: '', authority: 'Подтверждено', urgency: '' } },
+    deal: { ...BASE_DEAL, current_state: 'INIT', manager_criteria: { financial: 'Подтверждено', need: '', trust: '', authority: 'Подтверждено', urgency: '' } },
     agents: {
       planner: [planner(false)],
       diagnostic: [
@@ -183,6 +183,35 @@ module.exports = [
       ],
     },
     messages: ['Переписка: клиент просит КП на вывеску, бюджет согласован, решение за собственником.'],
+  },
+  {
+    name: 'agent_is_not_compared_with_itself',
+    description: 'Вторая диагностика: в deals.criteria уже оценка агента, самооценки менеджера нет — агенту уходит пустая самооценка, записи «расхождение»/«совпадают» не показываются',
+    deal: { ...BASE_DEAL, current_state: 'CONFLICT_RESOLUTION', criteria: { financial: 'Вероятно', need: 'Подтверждено', trust: 'Вероятно', authority: 'Риск', urgency: 'Риск' } },
+    agents: {
+      diagnostic: [
+        diagnostic({ conflicts: [
+          { criterion: 'Срочность', manager_assessment: 'Риск', agent_assessment: 'Подтверждено', reason: 'клиент назвал дату открытия' },
+          { criterion: 'Потребность', manager_assessment: 'Подтверждено', agent_assessment: 'Подтверждено', reason: 'Оценки совпадают. Расхождений нет.' },
+        ] }),
+      ],
+    },
+    messages: ['Свою оценку не давал, ориентируйся на переписку'],
+  },
+  {
+    name: 'real_conflict_keeps_only_disagreements',
+    description: 'Менеджер дал самооценку: настоящее расхождение остаётся, запись «оценки совпадают» убирается',
+    deal: { ...BASE_DEAL, current_state: 'INIT', manager_criteria: { financial: 'Подтверждено', need: 'Подтверждено', trust: '', authority: 'Подтверждено', urgency: '' } },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [
+        diagnostic({ conflicts: [
+          { criterion: 'ЛПР', manager_assessment: 'Подтверждено', agent_assessment: 'Неизвестно', reason: 'в переписке нет подтверждения, что собеседник — ЛПР' },
+          { criterion: 'Потребность', manager_assessment: 'Подтверждено', agent_assessment: 'Подтверждено', reason: 'Оценки совпадают.' },
+        ] }),
+      ],
+    },
+    messages: ['Переписка с менеджером закупок, говорит что всё согласовано.'],
   },
   {
     name: 'lost_deal',

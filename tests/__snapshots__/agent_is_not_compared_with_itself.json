@@ -1,0 +1,111 @@
+{
+  "name": "agent_is_not_compared_with_itself",
+  "description": "Вторая диагностика: в deals.criteria уже оценка агента, самооценки менеджера нет — агенту уходит пустая самооценка, записи «расхождение»/«совпадают» не показываются",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "Свою оценку не давал, ориентируйся на переписку",
+      "stateBefore": "CONFLICT_RESOLUTION",
+      "nextState": "DIAGNOSING",
+      "chatText": "Оценка по критериям СОПРАНО:\nФинансы: Подтверждено\nПотребность: Подтверждено\nДоверие: Вероятно\nПолномочия (ЛПР): Неизвестно\nСрочность: Вероятно",
+      "agentCalls": [
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Свою оценку не давал, ориентируйся на переписку",
+              "dialog_history": "[Менеджер]: Свою оценку не давал, ориентируйся на переписку",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "manager_conflict_response": {
+              "new_facts": "Свою оценку не давал, ориентируйся на переписку"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    }
+  ]
+}

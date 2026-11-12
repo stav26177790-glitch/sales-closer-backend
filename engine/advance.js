@@ -14,6 +14,8 @@ const { isEndSessionCommand } = require('./intent');
 const { formatAgentReplyForChat } = require('./chat');
 const { STEP_HANDLERS } = require('./steps');
 
+const EMPTY_ASSESSMENT = { financial: '', need: '', trust: '', authority: '', urgency: '' };
+
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
 async function advanceInternal(dealId, managerInput) {
   const deal = await db.getDeal(dealId);
@@ -44,7 +46,12 @@ async function advanceInternal(dealId, managerInput) {
     materials: {
       correspondence: managerInput,
       dialog_history: dialogHistory,
-      user_assessment: deal.criteria
+      // Самооценка МЕНЕДЖЕРА. Не deal.criteria: туда после диагностики пишется
+      // оценка самого агента («лампочки» в интерфейсе), и агент сравнивал себя
+      // с собой прошлым, называя это «мнением менеджера» (найдено на живом
+      // тесте 2026-11-12). Ввода самооценки в интерфейсе пока нет — поле
+      // deal.manager_criteria зарезервировано под него (см. HANDOFF).
+      user_assessment: deal.manager_criteria || EMPTY_ASSESSMENT
     },
     memory
   };

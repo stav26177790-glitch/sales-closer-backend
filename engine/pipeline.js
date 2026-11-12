@@ -131,17 +131,7 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   // не указал оценку» (промпт сам подсказывает так формулировать), а новая
   // сделка создаётся вообще без самооценки — и почти каждая новая сделка
   // уходила в CONFLICT_RESOLUTION с вопросом ни о чём. Такие записи убираем.
-  const diag = output.diagnostic_output;
-  if (Array.isArray(diag?.conflicts_with_manager) && diag.conflicts_with_manager.length) {
-    const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
-    if (real.length !== diag.conflicts_with_manager.length) {
-      console.warn(
-        `[conflicts] Убраны записи без оценки менеджера: ${diag.conflicts_with_manager.length - real.length} ` +
-        `(сделка: ${baseInput?.deal?.client || 'unknown_deal'})`
-      );
-      diag.conflicts_with_manager = real;
-    }
-  }
+  cleanManagerConflicts(output.diagnostic_output, baseInput);
   if (output.diagnostic_output?.conflicts_with_manager?.length > 0) {
     return { output, nextState: 'CONFLICT_RESOLUTION' };
   }
@@ -150,18 +140,38 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
 
 const NO_ASSESSMENT = /не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк\w*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
 
-// Записи conflicts_with_manager, где у менеджера действительно есть своя оценка.
+// Записи «оценки совпадают / расхождений нет» — не расхождения.
+const NO_CONFLICT = /совпада|расхождени\w*\s+нет|нет\s+расхожд|без\s+расхожд/i;
+
+// Записи conflicts_with_manager, где у менеджера действительно есть своя
+// оценка и агент с ней НЕ согласен.
 function realManagerConflicts(conflicts, userAssessment) {
   const managerGaveAny = Object.values(userAssessment || {}).some((v) => v && String(v).trim());
   if (!managerGaveAny) return [];
   return conflicts.filter((c) => {
     const managerSays = typeof c?.manager_assessment === 'string' ? c.manager_assessment.trim() : '';
-    return managerSays && !NO_ASSESSMENT.test(managerSays);
+    if (!managerSays || NO_ASSESSMENT.test(managerSays)) return false;
+    return !NO_CONFLICT.test(`${c?.reason || ''} ${c?.agent_assessment || ''}`);
   });
+}
+
+// Чистит diagnostic_output.conflicts_with_manager на месте; вызывается после
+// каждого вызова diagnostic (приём материалов и ответ на расхождение).
+function cleanManagerConflicts(diag, baseInput) {
+  if (!Array.isArray(diag?.conflicts_with_manager) || !diag.conflicts_with_manager.length) return;
+  const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
+  if (real.length !== diag.conflicts_with_manager.length) {
+    console.warn(
+      `[conflicts] Убраны записи без реального расхождения с менеджером: ${diag.conflicts_with_manager.length - real.length} ` +
+      `(сделка: ${baseInput?.deal?.client || 'unknown_deal'})`
+    );
+    diag.conflicts_with_manager = real;
+  }
 }
 
 module.exports = {
   realManagerConflicts,
+  cleanManagerConflicts,
   callAgentSafe,
   runComposer,
   runMemoryUpdate,
