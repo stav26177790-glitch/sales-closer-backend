@@ -19,7 +19,8 @@ const DB = path.join(ROOT, 'db.js');
 const RUNNER = path.join(ROOT, 'agentRunner.js');
 
 const TODAY_TOKEN = '<TODAY>';
-const today = () => new Date().toISOString().slice(0, 10);
+// Как в engine/advance.js: «сегодня» по Москве.
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
 
 // Дата меняется каждый день — в снимках заменяем её на постоянную метку.
 function normalize(value) {

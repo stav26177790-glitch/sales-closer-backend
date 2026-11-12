@@ -413,7 +413,18 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
   return lines.join('\n\n');
 }
 
+// Блок «Сроки» под диагностикой: расчёт кодом (engine/timeline.js), а не моделью.
+const TIMELINE_STATUS_LABEL = { 'с запасом': 'УСПЕВАЕМ', 'впритык': 'ВПРИТЫК', 'не успеваем': 'НЕ УСПЕВАЕМ' };
+function formatTimeline(timeline) {
+  if (!timeline) {
+    return '\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._';
+  }
+  const label = TIMELINE_STATUS_LABEL[timeline.status] || timeline.status;
+  return `\n\n## Сроки — ${label}\n\n${timeline.summary}\n\n_${timeline.rules.split('.')[0]}._`;
+}
+
 module.exports = {
+  formatTimeline,
   getComposerMessages,
   isDisqualificationStrategy,
   formatAgentReplyForChat,

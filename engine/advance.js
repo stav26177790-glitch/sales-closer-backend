@@ -11,8 +11,15 @@
 const db = require('../db');
 const { runMemoryUpdate } = require('./pipeline');
 const { isEndSessionCommand } = require('./intent');
-const { formatAgentReplyForChat } = require('./chat');
+const { formatAgentReplyForChat, formatTimeline } = require('./chat');
 const { STEP_HANDLERS } = require('./steps');
+const { computeTimeline } = require('./timeline');
+
+// Дата по Москве: менеджеры работают по московскому времени, а сервер — в UTC
+// (после 21:00 МСК дата в UTC была бы «вчерашней» для расчёта сроков).
+function moscowToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
+}
 
 const EMPTY_ASSESSMENT = { financial: '', need: '', trust: '', authority: '', urgency: '' };
 
@@ -34,7 +41,16 @@ async function advanceInternal(dealId, managerInput) {
     // session_date был вынужден либо выдумывать дату, либо собирать
     // мусор вроде "2025-01-session-1". today передаётся один раз здесь и
     // автоматически доходит до всех агентов через `...baseInput`.
-    today: new Date().toISOString().slice(0, 10),
+    today: moscowToday(),
+    // Сроки, посчитанные кодом (engine/timeline.js). null — если в сделке нет
+    // даты клиента или срока производства.
+    timeline: computeTimeline({
+      today: moscowToday(),
+      clientDeadline: deal.client_deadline,
+      productionDays: deal.production_days,
+      installDaysMin: deal.install_days_min ?? 2,
+      installDaysMax: deal.install_days_max ?? 3
+    }),
     deal: {
       client: deal.client,
       product: deal.product,
@@ -125,9 +141,11 @@ async function advanceInternal(dealId, managerInput) {
   // formatAgentReplyForChat(nextState, ...), потому что состояние остаётся
   // COMPOSING и без этого приоритета показались бы прежние касания вместо
   // ответа на вопрос менеджера.
-  const chatText = output._directText
+  let chatText = output._directText
     || formatAgentReplyForChat(nextState, output)
     || formatAgentReplyForChat(deal.current_state, output);
+  // После свежей диагностики — блок «Сроки» (расчёт кодом).
+  if (!output._directText && output.diagnostic_output) chatText += formatTimeline(baseInput.timeline);
   return { nextState, chatText, raw: output };
 }
 

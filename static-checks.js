@@ -118,7 +118,7 @@ check('bug21', 'baseInput.today выставляется реальной дат
   const asAssignment = /baseInput\.today\s*=\s*new Date\(\)\.toISOString\(\)\.slice\(0,\s*10\)/.test(src.stateMachine);
   const baseInputBlock = src.stateMachine.match(/const baseInput = {([\s\S]*?)\n {2}};?/);
   const asLiteralField = baseInputBlock
-    ? /today\s*:\s*new Date\(\)\.toISOString\(\)\.slice\(0,\s*10\)/.test(baseInputBlock[1])
+    ? /today\s*:\s*(new Date\(\)\.toISOString\(\)\.slice\(0,\s*10\)|moscowToday\(\))/.test(baseInputBlock[1])
     : false;
   const hasToday = asAssignment || asLiteralField;
   return {

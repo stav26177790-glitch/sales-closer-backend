@@ -14,6 +14,7 @@
           "maxTokens": null,
           "input": {
             "today": "<TODAY>",
+            "timeline": null,
             "deal": {
               "client": "СтройДвор",
               "product": "вывеска на фасад",
@@ -95,6 +96,7 @@
           "maxTokens": 6000,
           "input": {
             "today": "<TODAY>",
+            "timeline": null,
             "deal": {
               "client": "СтройДвор",
               "product": "вывеска на фасад",

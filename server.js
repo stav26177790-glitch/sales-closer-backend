@@ -146,6 +146,20 @@ app.patch('/api/deals/:id/dismiss-stale', requireManager, async (req, res) => {
   }
 });
 
+// Сроки сделки (дата клиента, производство, монтаж) — для расчёта кодом.
+app.patch('/api/deals/:id/timeline', requireManager, async (req, res) => {
+  try {
+    const deal = await db.getDeal(req.params.id);
+    if (deal.manager_id !== req.managerId) return res.status(403).json({ error: 'Нет доступа' });
+    const fields = db.timelineFields(req.body);
+    if (!Object.keys(fields).length) return res.status(400).json({ error: 'Нет корректных полей сроков' });
+    const updated = await db.updateDealState(req.params.id, fields);
+    res.json({ deal: withFlags(updated) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Полное удаление сделки (вручную или после подтверждения зависшей) — messages и memory удалятся каскадом
 app.delete('/api/deals/:id', requireManager, async (req, res) => {
   try {

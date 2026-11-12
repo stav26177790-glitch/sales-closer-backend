@@ -31,6 +31,17 @@ async function ensureManager(user) {
   if (error) throw error;
 }
 
+// Поля сроков сделки из тела запроса: только заданные и корректные.
+function timelineFields(src) {
+  const out = {};
+  if (/^\d{4}-\d{2}-\d{2}$/.test(src?.client_deadline || '')) out.client_deadline = src.client_deadline;
+  const int = (v) => (Number.isInteger(Number(v)) && Number(v) >= 0 && v !== '' && v !== null ? Number(v) : undefined);
+  if (int(src?.production_days) > 0) out.production_days = int(src.production_days);
+  if (int(src?.install_days_min) !== undefined) out.install_days_min = int(src.install_days_min);
+  if (int(src?.install_days_max) !== undefined) out.install_days_max = int(src.install_days_max);
+  return out;
+}
+
 async function createDeal(managerId, deal) {
   const { data, error } = await supabase
     .from('deals')
@@ -41,7 +52,10 @@ async function createDeal(managerId, deal) {
       deal_size: deal.deal_size || null,
       industry: deal.industry || 'signage', // имя папки в knowledge/cases
       last_contact: deal.last_contact || null,
-      days_silent: deal.days_silent || 0
+      days_silent: deal.days_silent || 0,
+      // Сроки (миграция 002) — только если заданы, чтобы создание сделки
+      // работало и на базе без новых колонок.
+      ...timelineFields(deal)
     })
     .select()
     .single();
@@ -111,6 +125,7 @@ async function deleteDeal(dealId) {
 }
 module.exports = {
   supabase,
+  timelineFields,
   ensureManager,
   listDeals,
   createDeal,
