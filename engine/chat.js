@@ -28,12 +28,12 @@ function formatAttachmentBlock(attachment) {
   const title = attachment.title || 'Документ';
   if (attachment.content) {
     const todo = attachment.manager_action_needed
-      ? `\n\n⚠️ Нужно дополнить перед отправкой: ${attachment.manager_action_needed}`
+      ? `\n\n⚠️ **Нужно дополнить перед отправкой:** ${attachment.manager_action_needed}`
       : '';
-    return `\n\n📎 ${title}:\n${attachment.content}${todo}`;
+    return `\n\n📎 **${title}**\n${attachment.content}${todo}`;
   }
   if (attachment.manager_action_needed) {
-    return `\n\n📎 ${title} — черновик не сгенерирован, подготовьте самостоятельно:\n${attachment.manager_action_needed}`;
+    return `\n\n📎 **${title}** — черновик не сгенерирован, подготовьте самостоятельно:\n${attachment.manager_action_needed}`;
   }
   return '';
 }
@@ -71,6 +71,34 @@ function renderKeyValueBlock(obj, labels = {}) {
 // показывается strategy_summary — отдельное поле, специально описанное в
 // схеме strategy_agent.md как "краткое резюме на русском", но раньше нигде
 // не рендерившееся. rationale исключается из объекта в withTranslatedStrategyName.
+// То же, что renderKeyValueBlock, но пунктами с выделенными подписями:
+// «- **Цель:** …». Разметку показывает фронтенд (агентские сообщения).
+function renderKeyValueList(obj, labels = {}) {
+  if (obj === null || obj === undefined) return '';
+  if (typeof obj !== 'object') return String(obj);
+  return Object.entries(obj)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `- **${labels[k] || k}:** ${humanizeValue(v)}`)
+    .join('\n');
+}
+
+// Название канала для заголовка касания: агент пишет и «whatsapp», и «WhatsApp».
+const CHANNEL_LABELS = {
+  whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'Email', 'e-mail': 'Email',
+  voice: 'Голосовое', call_script: 'Звонок', call: 'Звонок', phone: 'Звонок', sms: 'SMS'
+};
+function channelLabel(channel) {
+  if (!channel) return '';
+  return CHANNEL_LABELS[String(channel).trim().toLowerCase()] || channel;
+}
+
+// Одно касание: заголовок с номером и каналом, тема, текст, вложение.
+function formatTouchpoint(m, i) {
+  const channel = m.channel ? ` · ${channelLabel(m.channel)}` : '';
+  const subject = m.subject ? `**Тема:** ${m.subject}\n\n` : '';
+  return `### Касание ${i + 1}${channel}\n${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
+}
+
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 
 // Ключи критериев СОПРАНО (diagnostic_output.scores) — раньше рендерились
@@ -229,7 +257,9 @@ function formatAgentReplyForChat(state, output) {
     case 'SOPRANO_INTERVIEW': {
       const qs = output?.diagnostic_output?.clarification_needed?.questions
         || output?.planner_output?.clarification_needed?.questions || [];
-      return qs.length ? qs.join('\n') : 'Уточните, пожалуйста, недостающие детали по сделке.';
+      return qs.length
+        ? `## Нужно уточнить\n\n${qs.map((q, i) => `${i + 1}. ${q}`).join('\n')}`
+        : 'Уточните, пожалуйста, недостающие детали по сделке.';
     }
     case 'DIAGNOSING': {
       const diag = output?.diagnostic_output || output;
@@ -238,13 +268,16 @@ function formatAgentReplyForChat(state, output) {
       const lines = Object.entries(c).map(([k, v]) => {
         const status = v?.status || v;
         const comment = v?.comment || v?.explanation || '';
-        return `${translateCriterionKey(k)}: ${status}${comment ? ' — ' + comment : ''}`;
+        return `- **${translateCriterionKey(k)}:** ${status}${comment ? ' — ' + comment : ''}`;
       });
       const conflicts = diag?.conflicts_explained || diag?.conflicts_with_manager || [];
       const conflictText = conflicts.length
-        ? '\n\nРасхождения:\n' + conflicts.map(c => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}`).join('\n')
+        ? '\n\n## Расхождения с вашей оценкой\n\n' + conflicts.map(c => `- **${translateCriterionKey(c.criterion)}:** ${getConflictExplanation(c)}`).join('\n')
         : '';
-      return `Оценка по критериям СОПРАНО:\n${lines.join('\n')}${conflictText}`;
+      const summary = typeof diag?.diagnostic_summary === 'string' && diag.diagnostic_summary.trim()
+        ? `\n\n**Вывод:** ${diag.diagnostic_summary.trim()}`
+        : '';
+      return `## Оценка по СОПРАНО\n\n${lines.join('\n')}${summary}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
       // Баг №32: раньше здесь читалось только conflicts_explained — поля с
@@ -255,28 +288,30 @@ function formatAgentReplyForChat(state, output) {
       // безликий дефолтный текст, вместо реальных criterion/reason из
       // диагностики.
       const conflicts = output?.diagnostic_output?.conflicts_explained || output?.diagnostic_output?.conflicts_with_manager || [];
-      return conflicts.map((c) => `${translateCriterionKey(c.criterion)}: ${getConflictExplanation(c)}\n${getConflictQuestion(c)}`).join('\n\n')
-        || 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
+      const items = conflicts.map((c) => `- **${translateCriterionKey(c.criterion)}:** ${getConflictExplanation(c)}\n\n**Вопрос:** ${getConflictQuestion(c)}`);
+      return items.length
+        ? `## Ваша оценка расходится с оценкой агента\n\n${items.join('\n\n')}`
+        : 'Есть расхождение между вашей оценкой и оценкой агента — уточните детали.';
     }
     case 'STRATEGY_SELECTION': {
       const s = output?.strategy_output;
       if (!s) return JSON.stringify(output, null, 2);
       const mainBlocker = getMainBlocker(s);
       const lines = [
-        'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
-        mainBlocker ? `Блокер: ${mainBlocker}` : null,
+        '## Стратегия\n\n' + renderKeyValueList(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
+        mainBlocker ? `**Главный блокер:** ${mainBlocker}` : null,
         // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
         // strategy_agent.md отдаёт поле "recommended_next_action" — из-за
         // рассогласования имени поле никогда не рендерилось менеджеру,
         // хотя агент каждый раз генерирует конкретный следующий шаг.
-        s.recommended_next_action ? `Следующий шаг: ${s.recommended_next_action}` : null,
+        s.recommended_next_action ? `**Следующий шаг:** ${s.recommended_next_action}` : null,
         // Баг №29: раньше здесь стояло "s.rationale ? ... : s.strategy_summary",
         // что выглядело как предпочтение rationale — но по схеме rationale
         // лежит ВНУТРИ primary_strategy, а не на верхнем уровне strategy_output,
         // так что ветка была мёртвой (и вводящей в заблуждение). Показываем
         // только strategy_summary явно, как и было решено в сессии 3 для
         // formatFinalSummary().
-        s.strategy_summary ? `Обоснование: ${s.strategy_summary}` : null,
+        s.strategy_summary ? `**Обоснование:** ${s.strategy_summary}` : null,
       ].filter(Boolean);
       return lines.join('\n\n');
     }
@@ -288,9 +323,8 @@ function formatAgentReplyForChat(state, output) {
         // Показываем сырой ответ, чтобы увидеть реальную структуру и поправить парсинг.
         return `⚠️ Не удалось прочитать касания из ответа composer-агента.\n\nСырой ответ:\n${JSON.stringify(output?.composer_output, null, 2)}`;
       }
-      return msgs.map((m, i) =>
-        `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
-      ).join('\n\n---\n\n');
+      const hint = '\n\n---\n\n_Напишите «ок», чтобы отправить на проверку, или пришлите правку._';
+      return msgs.map(formatTouchpoint).join('\n\n---\n\n') + hint;
     }
     case 'REVIEWING': {
       const r = output?.reviewer_output;
@@ -304,16 +338,17 @@ function formatAgentReplyForChat(state, output) {
       if (verdict === 'ОДОБРЕНО') {
         const msgs = getComposerMessages(output?.composer_output);
         if (msgs.length) {
-          const touchpoints = msgs.map((m, i) =>
-            `Касание ${i + 1} — ${m.channel || ''}:\n${m.subject ? 'Тема: ' + m.subject + '\n' : ''}${m.body || ''}${formatAttachmentBlock(m.attachment)}`
-          ).join('\n\n---\n\n');
-          return `✅ Касания одобрены:\n\n${touchpoints}`;
+          const touchpoints = msgs.map(formatTouchpoint).join('\n\n---\n\n');
+          return `## ✅ Касания одобрены\n\n${touchpoints}`;
         }
       }
-      const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m =>
-        `Касание ${m.touchpoint_number}: ${m.verdict}${m.failed_criteria?.length ? ' | Проблемы: ' + translateCriteria(m.failed_criteria) : ''}${m.fix_instructions ? '\nПравки: ' + m.fix_instructions : ''}`
-      ).join('\n');
-      return `Результат проверки: ${verdict}\n${details}`;
+      const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m => {
+        const problems = m.failed_criteria?.length ? `\n  Проблемы: ${translateCriteria(m.failed_criteria)}` : '';
+        const fixes = m.fix_instructions ? `\n  Правки: ${m.fix_instructions}` : '';
+        return `- **Касание ${m.touchpoint_number}:** ${m.verdict}${problems}${fixes}`;
+      }).join('\n');
+      const next = verdict === 'ОДОБРЕНО' ? '' : '\n\n_Следующее сообщение запустит доработку касаний._';
+      return `## Проверка: ${verdict}\n\n${details}${next}`;
     }
     case 'ESCALATION':
       return 'После нескольких попыток автоматическая проверка не одобрила сообщение. Рекомендую составить касание вручную — последняя версия и причины показаны выше.';
@@ -338,16 +373,13 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
   const msgs = getComposerMessages(composerOutput);
   const mainBlocker = getMainBlocker(strategyOutput);
   const lines = [
-    'ИТОГ СЕССИИ',
+    '## Итог сессии',
     statusNote || null,
-    msgs.length ? 'КАСАНИЯ:\n' + msgs.map((m, i) =>
-      `Касание ${i + 1} — ${m.channel}:\n${m.body}${formatAttachmentBlock(m.attachment)}`
-    ).join('\n\n---\n\n') : null,
-    mainBlocker ? `Блокер: ${mainBlocker}` : null,
-    strategyOutput?.primary_strategy ? 'Стратегия:\n' + renderKeyValueBlock(withTranslatedStrategyName(strategyOutput.primary_strategy), STRATEGY_LABELS) : null,
-    strategyOutput?.strategy_summary ? `Обоснование: ${strategyOutput.strategy_summary}` : null,
-    msgs.length ? `Одобренные касания: ${msgs.length}` : null,
-    memoryOutput.session_summary ? 'Резюме:\n' + renderKeyValueBlock(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null
+    memoryOutput.session_summary ? '### Резюме\n\n' + renderKeyValueList(memoryOutput.session_summary, SESSION_SUMMARY_LABELS) : null,
+    mainBlocker ? `**Главный блокер:** ${mainBlocker}` : null,
+    strategyOutput?.primary_strategy ? '### Стратегия\n\n' + renderKeyValueList(withTranslatedStrategyName(strategyOutput.primary_strategy), STRATEGY_LABELS) : null,
+    strategyOutput?.strategy_summary ? `**Обоснование:** ${strategyOutput.strategy_summary}` : null,
+    msgs.length ? `## Касания (${msgs.length})\n\n` + msgs.map(formatTouchpoint).join('\n\n---\n\n') : null
   ].filter(Boolean);
   return lines.join('\n\n');
 }
