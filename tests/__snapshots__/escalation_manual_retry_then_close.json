@@ -127,7 +127,7 @@
       "agentCalls": [
         {
           "agent": "reviewer",
-          "maxTokens": 8000,
+          "maxTokens": 12000,
           "input": {
             "today": "<TODAY>",
             "deal": {

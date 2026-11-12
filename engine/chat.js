@@ -357,9 +357,12 @@ function formatAgentReplyForChat(state, output) {
       if (!r) return JSON.stringify(output, null, 2);
       const verdict = r.verdict || r?.reviewer_output?.verdict;
       if (!verdict) {
-        // Раньше здесь показывалось "Результат проверки: —" без объяснений, если
-        // r.verdict не находился. Показываем сырой ответ для диагностики.
-        return `⚠️ Не удалось прочитать вердикт reviewer-агента.\n\nСырой ответ:\n${JSON.stringify(r, null, 2)}`;
+        // Вердикт не прочитан (чаще всего ответ обрезан по длине). Сырой
+        // ответ менеджеру не показываем — он есть в логах. Замечания reviewer'а
+        // всё равно уйдут в composer: следующий ход запускает доработку
+        // с last_reviewer_output (там и сырой текст замечаний).
+        return '⚠️ Проверка не смогла выдать вердикт (ответ проверяющего не прочитан). ' +
+          'Касания не отправлены.\n\n_Напишите любое сообщение — касания будут доработаны по замечаниям проверки._';
       }
       if (verdict === 'ОДОБРЕНО') {
         const msgs = getComposerMessages(output?.composer_output);

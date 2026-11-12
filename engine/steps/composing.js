@@ -120,13 +120,15 @@ async function managerEdit({ deal, baseInput, managerInput }) {
 // итогом был лишний ход, и новое сообщение менеджера в нём терялось).
 async function sendToReview({ dealId, deal, baseInput }) {
   const output = {};
-  // Лимит 8000: ответ reviewer'а самый объёмный (чек-лист на каждое касание),
-  // на дефолтном лимите JSON обрезался и вердикт не читался.
+  // Лимит 12000: ответ reviewer'а самый объёмный (чек-лист из 14 критериев
+  // на каждое касание). 2026-11-12: на 8000 ответ обрезался посреди JSON
+  // (5 касаний + разбор перед JSON) — вердикт не читался. Промпт теперь
+  // запрещает текст вне JSON, лимит поднят с запасом.
   const reviewerResult = await callAgentSafe('reviewer', {
     ...baseInput,
     strategy_output: deal.last_strategy_output,
     composer_output: deal.last_composer_output
-  }, 8000);
+  }, 12000);
   output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
   const verdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
   if (verdict === 'ОДОБРЕНО') {
