@@ -46,7 +46,12 @@ async function requireManager(req, res, next) {
   return res.status(401).json({ error: 'Не авторизован' });
 }
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+// version — коммит, который сейчас работает на Render (RENDER_GIT_COMMIT задаёт сам Render).
+// Нужно, чтобы понимать, выкатилось ли изменение, перед живой проверкой.
+app.get('/api/health', (req, res) => res.json({
+  ok: true,
+  version: (process.env.RENDER_GIT_COMMIT || 'local').slice(0, 7)
+}));
 
 // Пинг базы: делает минимальный запрос к Supabase, чтобы бесплатный проект
 // не уходил в автопаузу. Вызывается по расписанию из .github/workflows/keep-alive.yml.
