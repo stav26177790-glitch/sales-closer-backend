@@ -72,6 +72,11 @@ const ENGINE_FILES = [
   'engine/steps/reviewing.js', 'engine/steps/escalation.js', 'engine/steps/finalize.js',
   'engine/steps/index.js', 'engine/advance.js'
 ];
+// С шага 4 (2026-11-11) код agentRunner.js разнесён по llm/ — так же читаем вместе.
+const LLM_FILES = ['llm/registry.js', 'llm/prompt.js', 'llm/input.js', 'llm/runner.js'];
+if (src.agentRunner !== null) {
+  src.agentRunner = [src.agentRunner, ...LLM_FILES.map((f) => readFileSafe(path.join(ROOT, f)) || '')].join('\n');
+}
 if (src.stateMachine !== null) {
   src.stateMachine = [src.stateMachine, ...ENGINE_FILES.map((f) => readFileSafe(path.join(ROOT, f)) || '')].join('\n');
 }
