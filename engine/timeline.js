@@ -118,6 +118,19 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
   const iMin = Math.max(0, Number(installDaysMin) || 0);
   const iMax = Math.max(iMin, Number(installDaysMax) || iMin);
 
+  // Дата клиента уже прошла — почти всегда опечатка при вводе (живой тест
+  // 2026-11-12: вместо 1 декабря сохранилось 1 ноября). Не считаем, а просим
+  // менеджера проверить; агенты в этом случае дат не называют.
+  if (clientDeadline <= today) {
+    return {
+      today,
+      client_deadline: clientDeadline,
+      status: 'дата прошла',
+      summary: `Дата клиента — ${humanDate(clientDeadline)} — уже прошла. Проверьте поле «Нужно клиенту к» в сроках сделки. Пока даты готовности не называем.`,
+      rules: 'Дата клиента в карточке сделки уже прошла — вероятно, ошибка ввода. Конкретных дат готовности и последнего дня старта в касаниях не называй.'
+    };
+  }
+
   const readyBy = lastWorkingDayBefore(clientDeadline);
   const productionDone = addWorkingDays(today, prod);
   const installedEarliest = addWorkingDays(productionDone, iMin);

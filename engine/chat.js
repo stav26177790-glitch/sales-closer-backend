@@ -414,7 +414,7 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
 }
 
 // Блок «Сроки» под диагностикой: расчёт кодом (engine/timeline.js), а не моделью.
-const TIMELINE_STATUS_LABEL = { 'с запасом': 'УСПЕВАЕМ', 'впритык': 'ВПРИТЫК', 'не успеваем': 'НЕ УСПЕВАЕМ' };
+const TIMELINE_STATUS_LABEL = { 'с запасом': 'УСПЕВАЕМ', 'впритык': 'ВПРИТЫК', 'не успеваем': 'НЕ УСПЕВАЕМ', 'дата прошла': 'ПРОВЕРЬТЕ ДАТУ' };
 function formatTimeline(timeline) {
   if (!timeline) {
     return '\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._';

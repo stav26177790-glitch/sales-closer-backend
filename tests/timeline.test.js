@@ -51,4 +51,10 @@ check('нет даты клиента или срока производства
   assert.equal(t.computeTimeline({ today: '2026-11-12', clientDeadline: '2026-12-01', productionDays: null }), null);
 });
 
+check('дата клиента уже прошла — просим проверить, не считаем', () => {
+  const r = t.computeTimeline({ ...base, clientDeadline: '2026-11-01', today: '2026-11-12' });
+  assert.equal(r.status, 'дата прошла');
+  assert.equal(r.ready_by, undefined);
+});
+
 console.log(`timeline: ${passed} проверок пройдено`);
