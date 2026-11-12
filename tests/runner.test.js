@@ -90,6 +90,22 @@ async function test(name, fn) {
     assert.strictEqual(requests[0].max_tokens, 4000);
   });
 
+  await test('Файл отрасли (knowledge/industry/signage.md) — только для сделок по вывескам и только нужным агентам', async () => {
+    const has = (agent, industry) => buildSystemPrompt(agent, industry).includes('# ОТРАСЛЬ СДЕЛКИ:');
+    assert.ok(has('composer', 'signage'), 'composer/signage без файла отрасли');
+    assert.ok(has('reviewer', 'signage'), 'reviewer/signage без файла отрасли');
+    assert.ok(!has('composer', 'saas'), 'saas получил файл отрасли, которого нет');
+    assert.ok(!has('diagnostic', 'signage'), 'diagnostic не должен получать факты компании');
+    assert.ok(!has('composer', '../agents'), 'путь отрасли не должен выходить за папку');
+  });
+
+  await test('Шесть триггеров (24_client_triggers.md) есть у diagnostic, strategy, composer, reviewer, advisor', async () => {
+    for (const a of ['diagnostic', 'strategy', 'composer', 'reviewer', 'advisor']) {
+      assert.ok(AGENTS[a].knowledge.includes('24_client_triggers.md'), a);
+    }
+    assert.ok(AGENTS.composer.knowledge.includes('23_lpr_tactics.md'), 'composer без тактики выхода на ЛПР');
+  });
+
   await test('Кэш включён ровно у composer, reviewer, advisor', async () => {
     const cached = Object.entries(AGENTS).filter(([, c]) => c.cache).map(([n]) => n).sort();
     assert.deepStrictEqual(cached, ['advisor', 'composer', 'reviewer']);

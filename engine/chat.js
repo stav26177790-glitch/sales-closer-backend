@@ -82,6 +82,30 @@ function renderKeyValueList(obj, labels = {}) {
     .join('\n');
 }
 
+// «Что важно клиенту» — триггеры из диагностики (24_client_triggers.md).
+function formatClientTriggers(triggers) {
+  if (!Array.isArray(triggers) || !triggers.length) return '';
+  const items = triggers
+    .filter((t) => t && t.trigger)
+    .map((t) => {
+      const evidence = t.evidence ? ` ${t.evidence}` : '';
+      const who = t.who ? ` (${t.who})` : '';
+      return `- **${t.trigger}:**${evidence}${who}`;
+    });
+  return items.length ? `\n\n## Что важно клиенту\n\n${items.join('\n')}` : '';
+}
+
+// Ценность следующего шага из стратегии (value_focus).
+function formatValueFocus(v) {
+  if (!v || typeof v !== 'object') return null;
+  const rows = [
+    v.trigger && v.trigger !== 'не определён' ? `- **Через что подаём ценность:** ${v.trigger}` : null,
+    v.for_contact ? `- **Контактному лицу:** ${v.for_contact}` : null,
+    v.for_decision_maker ? `- **ЛПР:** ${v.for_decision_maker}` : null
+  ].filter(Boolean);
+  return rows.length ? `### Ценность для клиента\n\n${rows.join('\n')}` : null;
+}
+
 // Название канала для заголовка касания: агент пишет и «whatsapp», и «WhatsApp».
 const CHANNEL_LABELS = {
   whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'Email', 'e-mail': 'Email',
@@ -182,7 +206,8 @@ const CRITERIA_LABELS = {
   not_repetitive: 'повторяет предыдущее касание',
   tone_fit: 'тон не соответствует типу клиента',
   attachment_honesty: 'вложение содержит недостоверные данные или создаёт риск завышенного ожидания',
-  broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)'
+  broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)',
+  client_value: 'не показана ценность для клиента (что даёт следующий шаг адресату)'
 };
 
 // Переводит список технических кодов в читаемую строку через запятую.
@@ -277,7 +302,7 @@ function formatAgentReplyForChat(state, output) {
       const summary = typeof diag?.diagnostic_summary === 'string' && diag.diagnostic_summary.trim()
         ? `\n\n**Вывод:** ${diag.diagnostic_summary.trim()}`
         : '';
-      return `## Оценка по СОПРАНО\n\n${lines.join('\n')}${summary}${conflictText}`;
+      return `## Оценка по СОПРАНО\n\n${lines.join('\n')}${formatClientTriggers(diag?.client_triggers)}${summary}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
       // Баг №32: раньше здесь читалось только conflicts_explained — поля с
@@ -299,6 +324,7 @@ function formatAgentReplyForChat(state, output) {
       const mainBlocker = getMainBlocker(s);
       const lines = [
         '## Стратегия\n\n' + renderKeyValueList(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
+        formatValueFocus(s.value_focus),
         mainBlocker ? `**Главный блокер:** ${mainBlocker}` : null,
         // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
         // strategy_agent.md отдаёт поле "recommended_next_action" — из-за

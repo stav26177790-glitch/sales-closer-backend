@@ -50,6 +50,7 @@ const SCHEMAS = {
       patterns_detected: 'array',
       conflicts_with_manager: 'array', // именно это поле — источник фикса бага №31/№32
       clarification_needed: 'object',
+      client_triggers: 'array', // необязательное (2026-11-12): ведущие триггеры клиента
       diagnostic_summary: 'string'
     }
   },
@@ -63,6 +64,7 @@ const SCHEMAS = {
     keyTypes: {
       primary_strategy: 'object',
       secondary_strategy: 'object',
+      value_focus: 'object', // необязательное (2026-11-12): ценность через триггер клиента
       touchpoint_sequence: 'array',
       channel_rotation: 'array',
       do_not_use: 'array',

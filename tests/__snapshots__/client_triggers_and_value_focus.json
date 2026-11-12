@@ -1,0 +1,301 @@
+{
+  "name": "client_triggers_and_value_focus",
+  "description": "Диагностика показывает «Что важно клиенту» (триггеры с цитатой), стратегия — «Ценность для клиента» (value_focus)",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.",
+      "stateBefore": "INIT",
+      "nextState": "DIAGNOSING",
+      "chatText": "## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n## Что важно клиенту\n\n- **Надёжность:** «успеете ли к 1 декабря?» (Марина)\n- **Тщеславие:** «нужна вывеска как на первой точке» (Марина)\n\n**Вывод:** бюджет есть, ЛПР не выявлен",
+      "agentCalls": [
+        {
+          "agent": "planner",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            }
+          }
+        },
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "planner_output": {
+              "data_quality": {
+                "level": "средний"
+              },
+              "deal_context": {
+                "stage": "после КП"
+              },
+              "diagnostic_priorities": [
+                "authority",
+                "urgency"
+              ],
+              "flags": [],
+              "agent_chain": [
+                "diagnostic",
+                "strategy",
+                "composer",
+                "reviewer"
+              ],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "planner_notes": "тест"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен",
+            "client_triggers": [
+              {
+                "trigger": "Надёжность",
+                "who": "Марина",
+                "evidence": "«успеете ли к 1 декабря?»"
+              },
+              {
+                "trigger": "Тщеславие",
+                "who": "Марина",
+                "evidence": "«нужна вывеска как на первой точке»"
+              }
+            ]
+          },
+          "intake_rounds": 1,
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    },
+    {
+      "message": "дальше",
+      "stateBefore": "DIAGNOSING",
+      "nextState": "STRATEGY_SELECTION",
+      "chatText": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** не пересказывать КП собственнику и не отвечать за неточности\n- **ЛПР:** вторая точка открывается в срок уже с вывеской, гости узнают бренд\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** без ЛПР сделка не двинется",
+      "agentCalls": [
+        {
+          "agent": "strategy",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "дальше",
+              "dialog_history": "[Менеджер]: Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.\n\n[Агент]: ## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n## Что важно клиенту\n\n- **Надёжность:** «успеете ли к 1 декабря?» (Марина)\n- **Тщеславие:** «нужна вывеска как на первой точке» (Марина)\n\n**Вывод:** бюджет есть, ЛПР не выявлен\n\n[Менеджер]: дальше",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен",
+              "client_triggers": [
+                {
+                  "trigger": "Надёжность",
+                  "who": "Марина",
+                  "evidence": "«успеете ли к 1 декабря?»"
+                },
+                {
+                  "trigger": "Тщеславие",
+                  "who": "Марина",
+                  "evidence": "«нужна вывеска как на первой точке»"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "STRATEGY_SELECTION",
+          "last_strategy_output": {
+            "deal_health": "под риском",
+            "primary_strategy": {
+              "name": "Охват всех участников решения",
+              "goal": "выйти на ЛПР"
+            },
+            "main_blocker": "ЛПР не участвует в переговорах",
+            "recommended_next_action": "предложить встречу с собственником",
+            "strategy_summary": "без ЛПР сделка не двинется",
+            "value_focus": {
+              "trigger": "Надёжность",
+              "for_contact": "не пересказывать КП собственнику и не отвечать за неточности",
+              "for_decision_maker": "вторая точка открывается в срок уже с вывеской, гости узнают бренд",
+              "facts_to_use": [
+                "своё производство → срок зависит только от нас"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

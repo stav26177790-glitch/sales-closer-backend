@@ -8,6 +8,8 @@
 const SONNET = 'claude-sonnet-4-6';
 const HAIKU = 'claude-haiku-4-5-20251001';
 
+// industryKnowledge — подключать ли knowledge/industry/<отрасль>.md (факты
+// компании как результат для клиента; есть не для всех отраслей).
 // cache — кэшировать ли системный промпт (prompt caching, TTL 5 минут).
 // Запись в кэш стоит 1.25× обычного входа, чтение — 0.1×. Окупается, только
 // если тот же агент с тем же промптом вызывается снова в течение 5 минут.
@@ -27,38 +29,39 @@ const AGENTS = {
     knowledge: [
       '01_sales_methodology.md', '02_sales_formula.md', '03_signal_dictionary.md',
       '04_financial_capacity.md', '05_need.md', '06_trust.md', '07_decision_authority.md',
-      '08_urgency.md', '13_examples.md', '16_soprano_qualification.md', '20_buying_psychology.md'
+      '08_urgency.md', '13_examples.md', '16_soprano_qualification.md', '20_buying_psychology.md',
+      '24_client_triggers.md'
     ]
   },
   strategy: {
-    model: SONNET, temperature: 0.3, industryCases: true, cache: false,
+    model: SONNET, temperature: 0.3, industryCases: true, industryKnowledge: true, cache: false,
     knowledge: [
       '02_sales_formula.md', '06_trust.md', '07_decision_authority.md', '08_urgency.md',
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
-      '21_industry_specifics.md', '23_lpr_tactics.md'
+      '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md'
     ]
   },
   composer: {
-    model: SONNET, temperature: 0.4, industryCases: true, cache: true,
+    model: SONNET, temperature: 0.4, industryCases: true, industryKnowledge: true, cache: true,
     knowledge: [
       '09_touchpoint_engine.md', '10b_scripts_post_kp_meeting.md', '11_touchpoint_library.md',
       '14_style_guide.md', '15_objection_expensive.md', '15b_objection_library.md',
-      '17_trust_building.md', '22_presentation.md'
+      '17_trust_building.md', '22_presentation.md', '23_lpr_tactics.md', '24_client_triggers.md'
     ]
   },
   reviewer: {
-    model: SONNET, temperature: 0.1, industryCases: false, cache: true,
-    knowledge: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md']
+    model: SONNET, temperature: 0.1, industryCases: false, industryKnowledge: true, cache: true,
+    knowledge: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md', '24_client_triggers.md']
   },
   memory: {
     model: HAIKU, temperature: 0.1, industryCases: false, cache: false,
     knowledge: []
   },
   advisor: {
-    model: HAIKU, temperature: 0.3, industryCases: true, cache: true,
+    model: HAIKU, temperature: 0.3, industryCases: true, industryKnowledge: true, cache: true,
     knowledge: [
       '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
-      '07_decision_authority.md', '23_lpr_tactics.md'
+      '07_decision_authority.md', '23_lpr_tactics.md', '24_client_triggers.md'
     ]
   },
   intent_classifier: {
@@ -70,7 +73,7 @@ const AGENTS = {
 const DEFAULT_TEMPERATURE = 0.2;
 
 function getAgentConfig(agentName) {
-  return AGENTS[agentName] || { model: undefined, temperature: DEFAULT_TEMPERATURE, industryCases: false, cache: false, knowledge: [] };
+  return AGENTS[agentName] || { model: undefined, temperature: DEFAULT_TEMPERATURE, industryCases: false, industryKnowledge: false, cache: false, knowledge: [] };
 }
 
 module.exports = { AGENTS, getAgentConfig };

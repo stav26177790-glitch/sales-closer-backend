@@ -44,8 +44,19 @@ function loadAgentPrompt(agentName) {
   return fs.readFileSync(filePath, 'utf8');
 }
 
+// Знания об отрасли сделки: knowledge/industry/<отрасль>.md. Файла может не быть.
+function loadIndustryKnowledge(industry) {
+  if (!industry || !/^[a-z0-9_]+$/.test(industry)) return '';
+  const filePath = path.join(KNOWLEDGE_BASE_PATH, 'industry', `${industry}.md`);
+  if (!fs.existsSync(filePath)) return '';
+  return `\n\n---\n# ОТРАСЛЬ СДЕЛКИ: ${industry}\n---\n\n${fs.readFileSync(filePath, 'utf8')}\n`;
+}
+
 function buildSystemPrompt(agentName, industry) {
   let systemPrompt = loadAgentPrompt(agentName) + loadKnowledgeForAgent(agentName);
+  if (getAgentConfig(agentName).industryKnowledge) {
+    systemPrompt += loadIndustryKnowledge(industry);
+  }
   if (getAgentConfig(agentName).industryCases) {
     systemPrompt += loadIndustryCases(industry);
   }

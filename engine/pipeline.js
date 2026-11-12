@@ -138,7 +138,7 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   return { output, nextState: 'DIAGNOSING' };
 }
 
-const NO_ASSESSMENT = /не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк\w*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
+const NO_ASSESSMENT = /не\s+зна|не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк\w*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
 
 // Записи «оценки совпадают / расхождений нет» — не расхождения.
 const NO_CONFLICT = /совпада|расхождени\w*\s+нет|нет\s+расхожд|без\s+расхожд/i;

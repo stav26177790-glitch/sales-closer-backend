@@ -214,6 +214,32 @@ module.exports = [
     messages: ['Переписка с менеджером закупок, говорит что всё согласовано.'],
   },
   {
+    name: 'client_triggers_and_value_focus',
+    description: 'Диагностика показывает «Что важно клиенту» (триггеры с цитатой), стратегия — «Ценность для клиента» (value_focus)',
+    deal: { ...BASE_DEAL, current_state: 'INIT' },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [{
+        diagnostic_output: {
+          ...diagnostic().diagnostic_output,
+          client_triggers: [
+            { trigger: 'Надёжность', who: 'Марина', evidence: '«успеете ли к 1 декабря?»' },
+            { trigger: 'Тщеславие', who: 'Марина', evidence: '«нужна вывеска как на первой точке»' },
+          ],
+        },
+      }],
+      strategy: [strategy({
+        value_focus: {
+          trigger: 'Надёжность',
+          for_contact: 'не пересказывать КП собственнику и не отвечать за неточности',
+          for_decision_maker: 'вторая точка открывается в срок уже с вывеской, гости узнают бренд',
+          facts_to_use: ['своё производство → срок зависит только от нас'],
+        },
+      })],
+    },
+    messages: ['Переписка: клиент просит вывеску к открытию 1 декабря, как на первой точке.', 'дальше'],
+  },
+  {
     name: 'lost_deal',
     description: 'Стратегия признаёт сделку потерянной → итог сессии',
     deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
