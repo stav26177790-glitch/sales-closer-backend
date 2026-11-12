@@ -173,6 +173,18 @@ module.exports = [
     ],
   },
   {
+    name: 'no_manager_assessment_is_not_conflict',
+    description: 'Новая сделка без самооценки менеджера: запись «менеджер не указал оценку» в conflicts_with_manager не уводит в CONFLICT_RESOLUTION и не показывается как расхождение',
+    deal: { ...BASE_DEAL, current_state: 'INIT' },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [
+        diagnostic({ conflicts: [{ criterion: 'Все критерии', manager_assessment: 'Не указана', agent_assessment: 'Восстановлено из переписки', reason: 'Менеджер не указал свою оценку ни по одному из пяти критериев. Сравнить позиции не получилось.' }] }),
+      ],
+    },
+    messages: ['Переписка: клиент просит КП на вывеску, бюджет согласован, решение за собственником.'],
+  },
+  {
     name: 'lost_deal',
     description: 'Стратегия признаёт сделку потерянной → итог сессии',
     deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },

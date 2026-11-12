@@ -125,13 +125,43 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   // расхождение между самооценкой менеджера и своей оценкой. Источник
   // истины — сам факт непустого conflicts_with_manager (это поле агент
   // реально возвращает и заполняет), а не выдуманный отдельный флаг.
+  //
+  // 2026-11-12: расхождение — только когда менеджер ДАЛ оценку, а агент с ней
+  // не согласен. Агент иногда кладёт в conflicts_with_manager и запись «менеджер
+  // не указал оценку» (промпт сам подсказывает так формулировать), а новая
+  // сделка создаётся вообще без самооценки — и почти каждая новая сделка
+  // уходила в CONFLICT_RESOLUTION с вопросом ни о чём. Такие записи убираем.
+  const diag = output.diagnostic_output;
+  if (Array.isArray(diag?.conflicts_with_manager) && diag.conflicts_with_manager.length) {
+    const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
+    if (real.length !== diag.conflicts_with_manager.length) {
+      console.warn(
+        `[conflicts] Убраны записи без оценки менеджера: ${diag.conflicts_with_manager.length - real.length} ` +
+        `(сделка: ${baseInput?.deal?.client || 'unknown_deal'})`
+      );
+      diag.conflicts_with_manager = real;
+    }
+  }
   if (output.diagnostic_output?.conflicts_with_manager?.length > 0) {
     return { output, nextState: 'CONFLICT_RESOLUTION' };
   }
   return { output, nextState: 'DIAGNOSING' };
 }
 
+const NO_ASSESSMENT = /не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк\w*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
+
+// Записи conflicts_with_manager, где у менеджера действительно есть своя оценка.
+function realManagerConflicts(conflicts, userAssessment) {
+  const managerGaveAny = Object.values(userAssessment || {}).some((v) => v && String(v).trim());
+  if (!managerGaveAny) return [];
+  return conflicts.filter((c) => {
+    const managerSays = typeof c?.manager_assessment === 'string' ? c.manager_assessment.trim() : '';
+    return managerSays && !NO_ASSESSMENT.test(managerSays);
+  });
+}
+
 module.exports = {
+  realManagerConflicts,
   callAgentSafe,
   runComposer,
   runMemoryUpdate,
