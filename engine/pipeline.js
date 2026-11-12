@@ -5,6 +5,7 @@
  * (planner → diagnostic).
  */
 const { callAgent } = require('../agentRunner');
+const { findBannedPhrases } = require('./phraseCheck');
 const db = require('../db');
 const { CONFIG } = require('./config');
 const { formatFinalSummary } = require('./chat');
@@ -76,11 +77,14 @@ function keepApprovedTouches(newOutput, prevOutput, reviewerOutput) {
     console.warn(`[composer] Число касаний изменилось (${prevMsgs.length} → ${newMsgs.length}) — одобренные касания не восстанавливаются`);
     return { output: newOutput, kept: [] };
   }
+  // Одобренное касание с запрещённой фразой (правила ужесточились после
+  // одобрения) не замораживаем — пусть перепишется.
+  const banned = new Set(findBannedPhrases(prevMsgs).map((h) => h.touchpoint_number));
   const kept = [];
   const messages = newMsgs.map((m, i) => {
     const prev = prevMsgs[i];
     const number = Number(prev?.touchpoint_number ?? i + 1);
-    if (approved.has(number)) { kept.push(number); return prev; }
+    if (approved.has(number) && !banned.has(number)) { kept.push(number); return prev; }
     return m;
   });
   return { output: { ...newOutput, messages }, kept };

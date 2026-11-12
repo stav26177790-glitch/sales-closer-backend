@@ -10,6 +10,7 @@
  */
 const { callAgentSafe, runComposer, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
+const { applyPhraseCheck } = require('../phraseCheck');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
@@ -130,6 +131,10 @@ async function sendToReview({ dealId, deal, baseInput }) {
     composer_output: deal.last_composer_output
   }, 12000);
   output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
+  // Запрещённые фразы ловим кодом — модель-reviewer их иногда пропускает.
+  const msgs = deal.last_composer_output?.messages || deal.last_composer_output?.composer_output?.messages;
+  const { hits } = applyPhraseCheck(output.reviewer_output, msgs);
+  if (hits.length) console.log(`[phraseCheck] Запрещённые фразы в касаниях: ${hits.map((h) => h.touchpoint_number).join(', ')}`);
   const verdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
   if (verdict === 'ОДОБРЕНО') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
