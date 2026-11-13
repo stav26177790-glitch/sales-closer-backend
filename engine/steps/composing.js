@@ -17,11 +17,24 @@ const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
 
+// Канал касания → ключ лимита. Composer пишет канал по-разному («Звонок»,
+// «call», «WhatsApp»), а лимит искался только по точному ключу — лимит звонка
+// почти никогда не применялся (прогон 2026-11-13).
+function channelKey(channel) {
+  const c = String(channel || '').trim().toLowerCase();
+  if (/whats|ватс|вотс/.test(c)) return 'whatsapp';
+  if (/telegram|телеграм|^tg$/.test(c)) return 'telegram';
+  if (/mail|почт|письм/.test(c)) return 'email';
+  if (/voice|голосов|кружок/.test(c)) return 'voice';
+  if (/call|phone|звон|скрипт/.test(c)) return 'call_script';
+  return c;
+}
+
 function validateMessageLength(composerOutput) {
   const messages = composerOutput?.composer_output?.messages || [];
   const violations = [];
   messages.forEach((msg, i) => {
-    const maxLen = CONFIG.MAX_MESSAGE_LENGTH[msg.channel?.toLowerCase()];
+    const maxLen = CONFIG.MAX_MESSAGE_LENGTH[channelKey(msg.channel)];
     if (maxLen && msg.body?.length > maxLen) {
       violations.push({ touchpoint: i + 1, channel: msg.channel, current: msg.body.length, max: maxLen });
     }
@@ -175,4 +188,5 @@ async function composing(ctx) {
   return sendToReview(ctx);
 }
 
-module.exports = { composing, validateMessageLength };
+module.exports = {
+  channelKey, composing, validateMessageLength };

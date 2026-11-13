@@ -16,6 +16,14 @@ const { STEP_HANDLERS } = require('./steps');
 const { computeTimeline, moscowToday } = require('./timeline');
 
 
+function daysSilentNow(deal) {
+  const base = Number(deal.days_silent) || 0;
+  if (!deal.created_at) return base;
+  const created = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date(deal.created_at));
+  const days = Math.round((Date.parse(`${moscowToday()}T00:00:00Z`) - Date.parse(`${created}T00:00:00Z`)) / 864e5);
+  return base + Math.max(0, days);
+}
+
 const EMPTY_ASSESSMENT = { financial: '', need: '', trust: '', authority: '', urgency: '' };
 
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
@@ -68,7 +76,10 @@ async function advanceInternal(dealId, managerInput) {
       deal_size: deal.deal_size,
       industry: deal.industry,
       last_contact: deal.last_contact,
-      days_silent: deal.days_silent
+      // Менеджер вводит «дней без ответа» при создании сделки, дальше число
+      // устаревало. Считаем на сегодня: введённое + дни с даты создания.
+      days_silent: daysSilentNow(deal),
+      days_silent_note: 'Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него.'
     },
     materials: {
       correspondence: managerInput,
@@ -265,4 +276,4 @@ async function advance(dealId, managerInput) {
   return promise;
 }
 
-module.exports = { advance };
+module.exports = { advance, daysSilentNow };

@@ -21,7 +21,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "ок",
@@ -162,7 +163,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "ок",
@@ -277,11 +279,11 @@
               ]
             },
             "message_length_limits": {
-              "telegram": 400,
-              "whatsapp": 400,
+              "telegram": 600,
+              "whatsapp": 600,
               "email": 1500,
-              "voice": 300,
-              "call_script": 500
+              "voice": 600,
+              "call_script": 1200
             },
             "iteration": 2
           }
@@ -331,7 +333,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "ок",
@@ -472,7 +475,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "ок",
@@ -587,11 +591,11 @@
               ]
             },
             "message_length_limits": {
-              "telegram": 400,
-              "whatsapp": 400,
+              "telegram": 600,
+              "whatsapp": 600,
               "email": 1500,
-              "voice": 300,
-              "call_script": 500
+              "voice": 600,
+              "call_script": 1200
             },
             "iteration": 3
           }
@@ -641,7 +645,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "ок",

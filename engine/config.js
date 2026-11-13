@@ -23,7 +23,10 @@ const CONFIG = {
   // MAX_COMPOSER_ITERATIONS и MAX_INTAKE_ROUNDS.
   MAX_ESCALATION_RETRIES: 2,
   CHANNEL_HISTORY_SIZE: 3,
-  MAX_MESSAGE_LENGTH: { telegram: 400, whatsapp: 400, email: 1500, voice: 300, call_script: 500 }
+  // Решение владельца 2026-11-13: звонок 1200 (≈1,5–2 мин речи), мессенджеры 600,
+  // email 1500; голосовое 600 (≈30–60 сек, как в промпте composer). Раньше звонок 500 и
+  // мессенджер 400 противоречили промпту и не вмещали «Обязательно в касаниях».
+  MAX_MESSAGE_LENGTH: { telegram: 600, whatsapp: 600, email: 1500, voice: 600, call_script: 1200 }
 };
 
 module.exports = {

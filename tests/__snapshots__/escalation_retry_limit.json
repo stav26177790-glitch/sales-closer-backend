@@ -21,7 +21,8 @@
               "deal_size": 420000,
               "industry": "signage",
               "last_contact": "2026-07-15",
-              "days_silent": 4
+              "days_silent": 4,
+              "days_silent_note": "Посчитано на сегодня от числа, введённого при создании сделки. Если в материалах есть более свежий ответ клиента — молчание считай от него."
             },
             "materials": {
               "correspondence": "да",
