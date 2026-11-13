@@ -117,7 +117,7 @@
 
 | Что | Где |
 | --- | --- |
-| Фронтенд (React + Vite) | https://rainbow-nougat-82a7e1.netlify.app · репо `sales-closer-frontend` |
+| Фронтенд (React + Vite) | https://sales-clouser.onrender.com (Render Static Site «Sales_Clouser»: build `npm install && npm run build`, publish `dist`, env VITE_API_BASE / VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY) · репо `sales-closer-frontend`. Netlify (rainbow-nougat-82a7e1) остановлен: кончился бесплатный лимит выкладок 13.11 |
 | Бэкенд (Express) | https://sales-closer-backend.onrender.com · репо `sales-closer-backend` |
 | База | Supabase, проект `nvnrhtygbjnjspzuagdz`, West EU (Ireland), тариф Free |
 | CRM (в перспективе) | Битрикс24, облако, портал `b24-4pbyoz.bitrix24.ru` |

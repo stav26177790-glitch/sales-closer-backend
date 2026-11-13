@@ -28,6 +28,6 @@
 - Факты о моей компании не выдумывай — спроси.
 
 Ссылки:
-- Клоузер: https://rainbow-nougat-82a7e1.netlify.app
+- Клоузер: https://sales-clouser.onrender.com (Render Static Site «Sales_Clouser», автообновление из sales-closer-frontend; Netlify больше не используется — кончился лимит выкладок)
 - Бэкенд (проверка версии): https://sales-closer-backend.onrender.com/api/health
 - Supabase (проект nvnrhtygbjnjspzuagdz): https://supabase.com/dashboard/project/nvnrhtygbjnjspzuagdz
