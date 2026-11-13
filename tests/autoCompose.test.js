@@ -76,4 +76,24 @@ check('Зерно 5: кружок с «[фото похожей работы]» 
   assert.equal(r.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
   assert.ok(r.messages_reviewed[0].failed_criteria.includes('circle_format'));
 });
+check('Зерно 5 (вечер): по плану «звонок эмп → сообщение эксп сразу после → кружок эмп» — чередование не ломано, кружок не на доработку', () => {
+  const plan = [
+    { touchpoint_number: 1, channel: 'Звонок', kind: 'эмпатичное' },
+    { touchpoint_number: 2, channel: 'Мессенджер', kind: 'экспертное', recipient: 'Марина' },
+    { touchpoint_number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'только если' },
+    { touchpoint_number: 4, channel: 'Кружок', kind: 'эмпатичное' },
+    { touchpoint_number: 5, channel: 'Мессенджер', kind: 'экспертное' }
+  ];
+  const msgs = [
+    { touchpoint_number: 1, channel: 'Звонок', kind: 'эмпатичное', timing: 'Сегодня', body: 'Марина, добрый день.' },
+    { touchpoint_number: 2, channel: 'Мессенджер', kind: 'экспертное', timing: '13 ноября (пт), сразу после предыдущего касания', body: 'Текст.' },
+    { touchpoint_number: 3, channel: 'Звонок', kind: 'экспертное', timing: 'Только если Марина даст контакт', body: 'Андрей, добрый день.' },
+    { touchpoint_number: 4, channel: 'Кружок', kind: 'эмпатичное', timing: '19 ноября (чт)', body: 'Марина, привет из мастерской.' },
+    { touchpoint_number: 5, channel: 'Мессенджер', kind: 'экспертное', timing: '23 ноября (пн)', body: 'Марина, честно спрошу.' }
+  ];
+  const r = codeChecks({ messages: msgs }, null, plan);
+  assert.equal(r.verdict, 'ОДОБРЕНО');
+  // без плана — то же: «сразу после» задаёт тип
+  assert.equal(codeChecks({ messages: msgs }, null, null).verdict, 'ОДОБРЕНО');
+});
 console.log(`autoCompose: ${n} проверок пройдено`);
