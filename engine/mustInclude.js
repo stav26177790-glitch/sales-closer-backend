@@ -43,11 +43,22 @@ function timelineItems(timeline) {
   return items;
 }
 
+// Пункт стратегии про даты готовности / последний день старта — их даёт код.
+// Живой тест 2026-11-13: стратегия написала «баннер при старте до 19 ноября
+// готов 20–24 ноября» — смешала «старт сегодня» и «старт до 19-го»; composer
+// мог бы перенести эту ошибку в касание. Такие пункты отбрасываем.
+const MONTH = '(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)';
+const TIMELINE_ITEM_RE = new RegExp(`timeline|из расчёта|(готов[а-яё]*|старт[а-яё]*|запуск[а-яё]*)[^.;]*\\d{1,2}([–-]\\d{1,2})?\\s+${MONTH}`, 'i');
+function isTimelineItem(text) {
+  return TIMELINE_ITEM_RE.test(text);
+}
+
 // Итоговый список: пункты стратегии + пункты по срокам, без повторов.
 function buildMustInclude(strategyOutput, timeline) {
-  const fromStrategy = Array.isArray(strategyOutput?.must_include)
-    ? strategyOutput.must_include.map(itemText).filter(Boolean).slice(0, MAX_STRATEGY_ITEMS)
-    : [];
+  const raw = Array.isArray(strategyOutput?.must_include) ? strategyOutput.must_include.map(itemText).filter(Boolean) : [];
+  const dropped = timeline ? raw.filter(isTimelineItem) : [];
+  if (dropped.length) console.warn(`[mustInclude] Пункты стратегии про даты убраны (даты даёт расчёт): ${dropped.length}`);
+  const fromStrategy = raw.filter((x) => !dropped.includes(x)).slice(0, MAX_STRATEGY_ITEMS);
   const all = [...fromStrategy, ...timelineItems(timeline)];
   return [...new Set(all)];
 }
@@ -98,4 +109,4 @@ function applyMustIncludeCheck(reviewerOutput, mustInclude, messageCount) {
   return { reviewerOutput, missed };
 }
 
-module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems };
+module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems, isTimelineItem };
