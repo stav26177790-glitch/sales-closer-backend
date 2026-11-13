@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const { advance } = require('./stateMachine');
+const { runPath } = require('./engine/autoFlow');
 const { friendlyError } = require('./engine/errors');
 const { timelineForDeal } = require('./engine/timeline');
 const { formatTimeline } = require('./engine/chat');
@@ -125,18 +126,25 @@ app.post('/api/deals/:id/continue', requireManager, async (req, res) => {
       }
       if (message) await db.addMessage(dealId, 'user', message, deal.current_state);
       const job = progress.startJob(dealId, progress.stageForState(deal.current_state), async () => {
-        const result = await advance(dealId, message || '');
-        await db.addMessage(dealId, 'agent', result.chatText, result.nextState);
+        // Путь без остановок: оценка → стратегия → касания (engine/autoFlow.js).
+        let parts = 0;
+        const result = await runPath(dealId, message || '', async (r) => {
+          parts++;
+          await db.addMessage(dealId, 'agent', r.chatText, r.nextState);
+        });
         const updatedDeal = await db.getDeal(dealId);
-        return { deal: updatedDeal, reply: result.chatText, state: result.nextState };
+        return { deal: updatedDeal, reply: result.chatText, state: result.nextState, parts };
       });
       return res.status(202).json({ job: { status: job.status, stage: job.stage, started_at: job.startedAt } });
     }
     if (message) await db.addMessage(dealId, 'user', message, deal.current_state);
-    const result = await advance(dealId, message || '');
-    await db.addMessage(dealId, 'agent', result.chatText, result.nextState);
+    let parts = 0;
+    const result = await runPath(dealId, message || '', async (r) => {
+      parts++;
+      await db.addMessage(dealId, 'agent', r.chatText, r.nextState);
+    });
     const updatedDeal = await db.getDeal(dealId);
-    res.json({ deal: updatedDeal, reply: result.chatText, state: result.nextState });
+    res.json({ deal: updatedDeal, reply: result.chatText, state: result.nextState, parts });
   } catch (e) {
     console.error('[CONTINUE ERROR]', e);
     res.status(500).json({ error: friendlyError(e) });
@@ -203,7 +211,7 @@ app.get('/api/deals/:id/job', requireManager, async (req, res) => {
     if (deal.manager_id !== req.managerId) return res.status(403).json({ error: 'Нет доступа' });
     const job = progress.getJob(req.params.id);
     if (!job) return res.status(404).json({ error: 'Хода нет' });
-    const body = { status: job.status, stage: job.stage, elapsed_sec: Math.round(((job.finishedAt || Date.now()) - job.startedAt) / 1000) };
+    const body = { status: job.status, stage: job.stage, parts: job.parts || 0, elapsed_sec: Math.round(((job.finishedAt || Date.now()) - job.startedAt) / 1000) };
     if (job.status === 'done') Object.assign(body, job.result);
     if (job.status === 'error') body.error = friendlyError(job.error);
     res.json(body);

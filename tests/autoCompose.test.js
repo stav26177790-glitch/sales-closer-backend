@@ -5,7 +5,7 @@
 const assert = require('assert');
 const dbPath = require.resolve('../db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {}, children: [], paths: [] };
-const { codeChecks, applySeverity } = require('../engine/autoCompose');
+const { codeChecks, applySeverity, applyCodeOwnership } = require('../engine/autoCompose');
 
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
@@ -95,5 +95,30 @@ check('Зерно 5 (вечер): по плану «звонок эмп → со
   assert.equal(r.verdict, 'ОДОБРЕНО');
   // без плана — то же: «сразу после» задаёт тип
   assert.equal(codeChecks({ messages: msgs }, null, null).verdict, 'ОДОБРЕНО');
+});
+check('Зерно 5 (вечер): reviewer спорит с кодом — дата на день отправки по расчёту, формат кружка, длина пересылки → совет', () => {
+  const plan = [
+    { touchpoint_number: 2, recipient: 'Марина — материал для пересылки Андрею', facts: {} },
+    { touchpoint_number: 4, channel: 'Кружок', facts: {} },
+    { touchpoint_number: 5, facts: { permanent_ready_if_start_that_day: '11 декабря (пт) – 14 декабря (пн)' } }
+  ];
+  const msgs = [
+    { touchpoint_number: 2, channel: 'Мессенджер', body: 'Текст для Андрея' },
+    { touchpoint_number: 4, channel: 'Кружок (WhatsApp/Telegram)', body: 'Марина, добрый день' },
+    { touchpoint_number: 5, channel: 'Мессенджер', body: 'постоянная вывеска при старте сегодня готова к 11–14 декабря' }
+  ];
+  const rv = { reviewer_output: { verdict: 'НА ДОРАБОТКУ', messages_reviewed: [
+    { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', severity: 'ошибка', failed_criteria: ['channel_fit'], fix_instructions: 'длинно' },
+    { touchpoint_number: 4, verdict: 'НА ДОРАБОТКУ', severity: 'ошибка', failed_criteria: ['channel_fit'], fix_instructions: 'не похоже на речь' },
+    { touchpoint_number: 5, verdict: 'НА ДОРАБОТКУ', severity: 'ошибка', failed_criteria: ['data_honesty'], fix_instructions: 'при старте сегодня — касание уходит 23 ноября' }
+  ] } };
+  applyCodeOwnership(rv, msgs, plan);
+  applySeverity(rv);
+  assert.equal(rv.reviewer_output.verdict, 'ОДОБРЕНО');
+  // настоящая ошибка (давление) остаётся ошибкой
+  const rv2 = { reviewer_output: { verdict: 'НА ДОРАБОТКУ', messages_reviewed: [
+    { touchpoint_number: 4, verdict: 'НА ДОРАБОТКУ', severity: 'ошибка', failed_criteria: ['channel_fit', 'no_pressure'], fix_instructions: 'давление' } ] } };
+  applyCodeOwnership(rv2, msgs, plan); applySeverity(rv2);
+  assert.equal(rv2.reviewer_output.verdict, 'НА ДОРАБОТКУ');
 });
 console.log(`autoCompose: ${n} проверок пройдено`);

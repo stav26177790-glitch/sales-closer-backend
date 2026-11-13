@@ -177,6 +177,39 @@ async function runEditor(baseInput, deal, composerOutput, verdict) {
 // «Совет» reviewer'а — касание можно отправлять: не переделываем и не
 // показываем менеджеру как «не принято» (живой тест 2026-11-13: проверка
 // возвращала касания с собственными сомнениями «это не проблема, но…»).
+// Правила, которые проверяет КОД (длина, формат кружка, материал для пересылки,
+// даты на день отправки), — у reviewer'а по ним только совет. Иначе он спорит с
+// планом и гоняет круги (живой «Зерно 5», 13.11 вечер: «при старте сегодня — 11–14
+// декабря» в касании 23 ноября — верно по расчёту, а reviewer вернул как ошибку;
+// кружок «не похож на речь» по вкусу — круг за кругом).
+function applyCodeOwnership(reviewerOutput, msgs, plan) {
+  const r = reviewedOf(reviewerOutput);
+  if (!r || !Array.isArray(r.messages_reviewed)) return reviewerOutput;
+  for (const m of r.messages_reviewed) {
+    if (!m?.verdict || m.verdict === 'ОДОБРЕНО' || m.code_checked) continue;
+    const n = Number(m.touchpoint_number);
+    const msg = msgs.find((x, i) => Number(x?.touchpoint_number ?? i + 1) === n);
+    const step = Array.isArray(plan) ? plan.find((p) => p.touchpoint_number === n) : null;
+    if (!msg) continue;
+    let crit = Array.isArray(m.failed_criteria) ? [...m.failed_criteria] : [];
+    const owned = new Set();
+    if (/кружок|видео/i.test(String(msg.channel || '')) || isForwardMaterial(step, msg)) owned.add('channel_fit');
+    const ready = step?.facts?.permanent_ready_if_start_that_day;
+    if (ready) {
+      const nums = (ready.match(/\d{1,2}/g) || []).slice(0, 2);
+      const body = String(msg.body || '');
+      if (nums.length && nums.every((d) => body.includes(d)) && /сегодня|старт|готов/i.test(String(m.fix_instructions || ''))) owned.add('data_honesty');
+    }
+    if (!owned.size) continue;
+    const left = crit.filter((c) => !owned.has(c));
+    if (crit.length && !left.length) {
+      m.severity = 'совет';
+      m.code_owned = [...owned];
+    }
+  }
+  return reviewerOutput;
+}
+
 function applySeverity(reviewerOutput) {
   const r = reviewedOf(reviewerOutput);
   if (!r || !Array.isArray(r.messages_reviewed)) return reviewerOutput;
@@ -284,8 +317,9 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     reviews++;
     reviewerOutput = result?.reviewer_output || result;
     const traceAt = trace.length;
-    applySeverity(reviewerOutput);
     const msgs = messagesOf(composerOutput);
+    applyCodeOwnership(reviewerOutput, msgs, deal.last_strategy_output?.touch_plan);
+    applySeverity(reviewerOutput);
     applyPhraseCheck(reviewerOutput, msgs);
     applyMustIncludeCheck(reviewerOutput, deal.last_strategy_output?.must_include, msgs.length);
     applyScheduleCheck(reviewerOutput, msgs, timeline);
@@ -307,6 +341,18 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
           return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });
         }
         trace.push(`код после редактора вернул ${bad(code2)}`);
+        // Замечания кода механические (длина, формат) — ещё одна точечная правка.
+        const edited2 = await runEditor(baseInput, deal, edited, code2);
+        if (edited2) {
+          rounds++;
+          trace.push('редактор');
+          const code3 = codeChecks(edited2, timeline, deal.last_strategy_output?.touch_plan);
+          if (code3.verdict === 'ОДОБРЕНО') {
+            const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
+            return done(edited2, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });
+          }
+          trace.push(`код после редактора вернул ${bad(code3)}`);
+        }
       } else {
         trace.push('редактор не смог');
       }
@@ -315,7 +361,10 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     fb = reviewerOutput;
     cur = { ...cur, last_reviewer_output: reviewerOutput };
   }
-  return done(composerOutput, reviewerOutput, verdictOf(reviewerOutput) === 'ОДОБРЕНО', rounds, reviews, { trace });
+  const ok = verdictOf(reviewerOutput) === 'ОДОБРЕНО';
+  // Не довёл до конца — менеджеру это не перекладываем; сделка помечается для разбора.
+  if (!ok) console.warn(`[autoCompose] needs_review: ${deal?.client || deal?.id || ''} — касания не прошли проверку (${trace.join(' → ')})`);
+  return done(composerOutput, reviewerOutput, ok, rounds, reviews, { trace, ...(ok ? {} : { needs_review: true }) });
 }
 
 // Касания помечаются как прошедшие цикл проверки: «ок» менеджера на них —
@@ -327,4 +376,4 @@ function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra =
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }
 
-module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, isForwardMaterial };
+module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, applyCodeOwnership, isForwardMaterial };

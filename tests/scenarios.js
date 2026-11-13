@@ -459,4 +459,61 @@ module.exports = [
     agents: { memory: [memory(1)] },
     messages: ['закрыть'],
   },
+  // ---------- Путь без остановок (engine/autoFlow.js, решение владельца 13.11) ----------
+  {
+    name: 'path_materials_to_touches',
+    description: 'Режим пути: переписка → оценка → стратегия → проверенные касания одним ходом, без «ок»',
+    path: true,
+    deal: { ...BASE_DEAL, current_state: 'INIT', client_deadline: '2026-12-15', production_days: 10 },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [diagnostic()],
+      strategy: [strategy({
+        touchpoint_sequence: [
+          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником' },
+          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие' }
+        ]
+      })],
+      writer: [{ composer_output: { messages: [
+        { touchpoint_number: 1, body: 'Иван, добрый день! Давайте созвонимся с собственником в четверг — вам не придётся пересказывать детали.' },
+        { touchpoint_number: 2, body: 'Иван, привет из мастерской! Понимаю, сейчас много дел. Если удобно — в четверг созвонимся втроём.' }
+      ] } }],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['Переписка: Иван (10.11): Спасибо за КП, покажу собственнику.'],
+  },
+  {
+    name: 'path_asks_timeline_first',
+    description: 'Режим пути: нет сроков — один короткий вопрос до старта (агенты не вызываются); «без срока» — путь строится',
+    path: true,
+    deal: { ...BASE_DEAL, current_state: 'INIT' },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [diagnostic()],
+      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'созвон' }] })],
+      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, body: 'Иван, добрый день! Давайте созвонимся в четверг с собственником — вам не придётся пересказывать.' }] } }],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['Переписка: Иван (10.11): Спасибо за КП.', 'без срока'],
+  },
+  {
+    name: 'path_stops_when_strategy_unparsed',
+    description: 'Режим пути: стратегия не разобралась — путь останавливается на оценке с понятной просьбой, касания не пишутся',
+    path: true,
+    deal: { ...BASE_DEAL, current_state: 'INIT', client_deadline: '2026-12-15', production_days: 10 },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [diagnostic()],
+      strategy: [{ parse_error: true, raw_output: 'обрезано' }],
+    },
+    messages: ['Переписка: Иван (10.11): Спасибо за КП.'],
+  },
+  {
+    name: 'path_stops_for_clarification',
+    description: 'Режим пути: planner просит факты — путь останавливается на уточнениях, дальше не идёт',
+    path: true,
+    deal: { ...BASE_DEAL, current_state: 'INIT', client_deadline: '2026-12-15', production_days: 10 },
+    agents: { planner: [planner(true)] },
+    messages: ['Клиент интересуется вывеской.'],
+  },
 ];

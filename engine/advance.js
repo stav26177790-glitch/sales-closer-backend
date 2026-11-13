@@ -29,7 +29,7 @@ function daysSilentNow(deal) {
 const EMPTY_ASSESSMENT = { financial: '', need: '', trust: '', authority: '', urgency: '' };
 
 // Один шаг машины состояний. managerInput — текст, который менеджер только что отправил.
-async function advanceInternal(dealId, managerInput) {
+async function advanceInternal(dealId, managerInput, opts = {}) {
   const deal = await db.getDeal(dealId);
   const memory = (await db.loadMemory(dealId)) || {
     session_number: 1, previous_touchpoints: [], confirmed_facts: [], open_questions: []
@@ -99,7 +99,7 @@ async function advanceInternal(dealId, managerInput) {
     },
     memory
   };
-  const ctx = { dealId, deal, memory, baseInput, managerInput };
+  const ctx = { dealId, deal, memory, baseInput, managerInput, opts };
   let nextState;
   let output;
   // Явная команда завершения — срабатывает в ЛЮБОМ состоянии, кроме уже
@@ -123,7 +123,7 @@ async function advanceInternal(dealId, managerInput) {
   if (output.composer_output) statePatch.last_composer_output = output.composer_output;
   if (output.reviewer_output) statePatch.last_reviewer_output = output.reviewer_output;
   if (output._composer_iterations) statePatch.composer_iterations = output._composer_iterations;
-  if (output._intake_rounds) statePatch.intake_rounds = output._intake_rounds;
+  if (output._intake_rounds != null) statePatch.intake_rounds = output._intake_rounds;
   // Флаг ожидания ответа "скорректировать/нет" и текст вопроса, на который
   // ждём этот ответ — сохраняем на сделке, чтобы следующий ход менеджера
   // (в новом HTTP-запросе, с чистого state) знал, что мы сейчас ждём именно
@@ -175,7 +175,10 @@ async function advanceInternal(dealId, managerInput) {
   // После свежей диагностики — блок «Сроки» (расчёт кодом).
   if (!output._directText && output.diagnostic_output) chatText += formatTimeline(baseInput.timeline);
   // Что делать дальше: «ок» — следующий шаг, иначе — правка (её учтут и пересоберут).
-  if (!output._directText && nextState === 'DIAGNOSING') {
+  // В режиме пути (engine/autoFlow.js) следующий шаг делает сам Клоузер — подсказки не нужны.
+  if (opts.path) {
+    // без подсказок
+  } else if (!output._directText && nextState === 'DIAGNOSING') {
     chatText += '\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._';
   } else if (!output._directText && nextState === 'STRATEGY_SELECTION') {
     chatText += '\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._';
@@ -239,7 +242,7 @@ const ADVANCE_DEDUP_WINDOW_MS = 15000;
 const dealQueueTail = new Map(); // dealId -> Promise (последний поставленный в очередь вызов)
 
 
-async function advance(dealId, managerInput) {
+async function advance(dealId, managerInput, opts = {}) {
   const now = Date.now();
   const prev = recentAdvanceCalls.get(dealId);
   if (prev && prev.input === managerInput && (now - prev.timestamp) < ADVANCE_DEDUP_WINDOW_MS) {
@@ -261,7 +264,7 @@ async function advance(dealId, managerInput) {
           `завершения предыдущего запроса к этой же сделке (баг №34 — защита от гонки).`
         );
       }
-      return runWithDeal(dealId, () => advanceInternal(dealId, managerInput));
+      return runWithDeal(dealId, () => advanceInternal(dealId, managerInput, opts));
     });
 
   dealQueueTail.set(dealId, promise);

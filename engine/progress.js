@@ -22,6 +22,12 @@ function setStage(dealId, stage) {
   }
 }
 
+// Ход выдал очередную часть пути (оценка, стратегия, касания) — страница подгружает чат.
+function addPart(dealId) {
+  const j = jobs.get(dealId);
+  if (j && j.status === 'running') j.parts = (j.parts || 0) + 1;
+}
+
 function getJob(dealId) {
   const j = jobs.get(dealId);
   if (j && j.status !== 'running' && Date.now() - j.finishedAt > KEEP_MS) { jobs.delete(dealId); return null; }
@@ -63,4 +69,4 @@ function stageForState(state) {
   }
 }
 
-module.exports = { setStage, getJob, isRunning, startJob, runningCount, stageForState };
+module.exports = { setStage, addPart, getJob, isRunning, startJob, runningCount, stageForState };

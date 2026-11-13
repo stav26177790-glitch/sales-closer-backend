@@ -33,13 +33,31 @@ function datesIn(text) {
 const report = [];
 const issue = (deal, sev, what) => report.push({ deal, sev, what });
 
+const { isGoAhead } = require(path.join(ROOT, 'engine/intent'));
+const pathVariants = [];
+
 (async () => {
-  for (const d of deals) {
+  const queue = [...deals, { _pathMarker: true }];
+  for (let qi = 0; qi < queue.length; qi++) {
+    const d = queue[qi];
+    if (d._pathMarker) {
+      // Второй проход: те же сделки в режиме пути (engine/autoFlow.js) — без «ок»
+      // после оценки и стратегии; остальные сообщения менеджера — как были.
+      queue.push(...pathVariants);
+      deals.push(...pathVariants);
+      continue;
+    }
     if (d.agents._reviewerTwice) { d.agents.reviewer.push(d.agents.reviewer[0]); delete d.agents._reviewerTwice; }
     // Касания по плану пишет writer; в сценариях ответы записаны как composer — тот же формат.
     if (d.agents.composer && !d.agents.writer && d.agents.strategy) { d.agents.writer = d.agents.composer; delete d.agents.composer; }
     let r;
     try { r = await runScenario(d); } catch (e) { issue(d.name, 'КРИТИЧНО', `прогон упал: ${e.message}`); continue; }
+    if (!d.path && (d.deal.current_state || 'INIT') === 'INIT') {
+      const keep = r.steps.filter((st) => !(['DIAGNOSING', 'STRATEGY_SELECTION'].includes(st.stateBefore) && isGoAhead(st.message))).map((st) => st.message);
+      // Без сроков путь сначала спрашивает их — менеджер отвечает «без срока».
+      if (!(d.deal.client_deadline && d.deal.production_days)) keep.splice(1, 0, 'без срока');
+      pathVariants.push({ ...d, name: `${d.name} [путь]`, path: true, messages: keep });
+    }
     console.log(`\n\n████ ${d.name} — ${d.description}`);
     console.log('Путь:', r.steps.map((s) => s.nextState).join(' → '));
     if (r.unusedAgentResponses.length) issue(d.name, 'код', `не вызваны агенты, хотя ответы заготовлены: ${r.unusedAgentResponses.join(', ')}`);

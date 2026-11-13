@@ -119,8 +119,20 @@ async function runScenario(scenario) {
       const callsBefore = runner.calls.length;
       const patchesBefore = db.patches.length;
       await db.api.addMessage(db.deal.id, 'user', message, stateBefore);
-      const result = await advance(db.deal.id, message);
-      await db.api.addMessage(db.deal.id, 'agent', result.chatText, result.nextState);
+      let result;
+      if (scenario.path) {
+        // Режим пути (engine/autoFlow.js): несколько частей ответа за один ход.
+        const { runPath } = require(path.join(ROOT, 'engine', 'autoFlow.js'));
+        const parts = [];
+        result = await runPath(db.deal.id, message, async (r) => {
+          parts.push(r.chatText);
+          await db.api.addMessage(db.deal.id, 'agent', r.chatText, r.nextState);
+        });
+        result = { ...result, chatText: parts.join('\n\n═════ следующая часть пути ═════\n\n') };
+      } else {
+        result = await advance(db.deal.id, message);
+        await db.api.addMessage(db.deal.id, 'agent', result.chatText, result.nextState);
+      }
       steps.push({
         message,
         stateBefore,
