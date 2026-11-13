@@ -4,6 +4,8 @@ const cors = require('cors');
 const db = require('./db');
 const { advance } = require('./stateMachine');
 const { friendlyError } = require('./engine/errors');
+const { timelineForDeal } = require('./engine/timeline');
+const { formatTimeline } = require('./engine/chat');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
@@ -160,7 +162,15 @@ app.patch('/api/deals/:id/timeline', requireManager, async (req, res) => {
     const fields = db.timelineFields(req.body);
     if (!Object.keys(fields).length) return res.status(400).json({ error: 'Нет корректных полей сроков' });
     const updated = await db.updateDealState(req.params.id, fields);
-    res.json({ deal: withFlags(updated) });
+    // Сразу показываем менеджеру расчёт: раньше блок «Сроки» появлялся только
+    // после свежей диагностики, и сроки, заданные позже, менеджер не видел
+    // (живой тест 2026-11-13). Сообщение попадает и в историю для агентов.
+    const timeline = timelineForDeal(updated);
+    const message = timeline
+      ? `${formatTimeline(timeline).trim()}\n\n_Сроки сохранены — Клоузер учтёт их в стратегии и касаниях._`
+      : formatTimeline(null).trim();
+    await db.addMessage(req.params.id, 'agent', message, updated.current_state);
+    res.json({ deal: withFlags(updated), message });
   } catch (e) {
     console.error('[API ERROR]', req.method, req.path, e);
     res.status(500).json({ error: friendlyError(e) });

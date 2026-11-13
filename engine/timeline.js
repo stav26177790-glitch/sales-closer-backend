@@ -36,6 +36,23 @@ const HOLIDAYS = new Set([
 const TEMP_BANNER = { productionMin: 3, productionMax: 4, installMin: 2, installMax: 3 };
 
 const DAY_MS = 864e5;
+
+// Дата по Москве: менеджеры работают по московскому времени, а сервер — в UTC
+// (после 21:00 МСК дата в UTC была бы «вчерашней» для расчёта сроков).
+function moscowToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
+}
+
+// Сроки по полям сделки на сегодня (Москва) — одно место для advance и server.
+function timelineForDeal(deal) {
+  return computeTimeline({
+    today: moscowToday(),
+    clientDeadline: deal.client_deadline,
+    productionDays: deal.production_days,
+    installDaysMin: deal.install_days_min ?? 2,
+    installDaysMax: deal.install_days_max ?? 3
+  });
+}
 const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 
@@ -217,5 +234,7 @@ module.exports = {
   workingDaysBetween,
   humanDate,
   HOLIDAYS,
-  TEMP_BANNER
+  TEMP_BANNER,
+  moscowToday,
+  timelineForDeal
 };

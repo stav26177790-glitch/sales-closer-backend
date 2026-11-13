@@ -13,13 +13,8 @@ const { runMemoryUpdate } = require('./pipeline');
 const { isEndSessionCommand } = require('./intent');
 const { formatAgentReplyForChat, formatTimeline } = require('./chat');
 const { STEP_HANDLERS } = require('./steps');
-const { computeTimeline } = require('./timeline');
+const { computeTimeline, moscowToday } = require('./timeline');
 
-// Дата по Москве: менеджеры работают по московскому времени, а сервер — в UTC
-// (после 21:00 МСК дата в UTC была бы «вчерашней» для расчёта сроков).
-function moscowToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
-}
 
 const EMPTY_ASSESSMENT = { financial: '', need: '', trust: '', authority: '', urgency: '' };
 
