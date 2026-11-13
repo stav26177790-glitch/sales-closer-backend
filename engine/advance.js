@@ -29,6 +29,21 @@ async function advanceInternal(dealId, managerInput) {
     .filter(m => m.role === 'user' || m.role === 'agent')
     .map(m => `[${m.role === 'user' ? 'Менеджер' : 'Агент'}]: ${m.content}`)
     .join('\n\n');
+  // Все материалы менеджера за всё время (переписка с клиентом, заметки,
+  // ответы на уточнения). Раньше агенты видели только ТЕКУЩЕЕ сообщение
+  // менеджера (на шаге касаний это «ок») и хвост dialog_history в 4000
+  // символов, где почти всё — длинные ответы самих агентов. Переписка из
+  // первого сообщения выпадала уже на втором ходу: composer не видел
+  // «Логотип пришлю» и «успеваем, если согласуем до 10 ноября» (живой
+  // тест 2026-11-13). Сообщения менеджера короткие и важные — отдаём их
+  // отдельным полем, не смешивая с ответами агентов.
+  const managerMessages = allMessages.filter(m => m.role === 'user' && String(m.content || '').trim());
+  const sourceMaterials = managerMessages.length
+    ? {
+      what_is_this: 'Все сообщения менеджера по сделке за всё время, по порядку: переписка с клиентом, заметки, ответы на уточнения. Главный источник фактов — цитаты клиента, его обещания, условия и даты, которые менеджер уже называл.',
+      text: managerMessages.map((m, i) => `[Сообщение менеджера ${i + 1}]\n${m.content}`).join('\n\n')
+    }
+    : undefined;
   const baseInput = {
     // Баг №21: ни один агент в цепочке не получал реальную текущую дату —
     // из-за этого diagnostic не мог достоверно судить "дедлайн прошёл или
@@ -44,7 +59,8 @@ async function advanceInternal(dealId, managerInput) {
       clientDeadline: deal.client_deadline,
       productionDays: deal.production_days,
       installDaysMin: deal.install_days_min ?? 2,
-      installDaysMax: deal.install_days_max ?? 3
+      installDaysMax: deal.install_days_max ?? 3,
+      industry: deal.industry
     }),
     deal: {
       client: deal.client,
@@ -56,6 +72,7 @@ async function advanceInternal(dealId, managerInput) {
     },
     materials: {
       correspondence: managerInput,
+      source_materials: sourceMaterials,
       dialog_history: dialogHistory,
       // Самооценка МЕНЕДЖЕРА. Не deal.criteria: туда после диагностики пишется
       // оценка самого агента («лампочки» в интерфейсе), и агент сравнивал себя

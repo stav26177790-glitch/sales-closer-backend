@@ -32,6 +32,10 @@ function compressInput(inputData, agentName, maxChars = 12000) {
   const CORRESPONDENCE_HEAD = 1000;
   const MAX_CRM_NOTES = 1000;
   const MAX_DIALOG_HISTORY = 4000;
+  // Материалы менеджера: начало (исходная переписка) важнее всего, плюс
+  // свежие сообщения в конце.
+  const MAX_SOURCE = 8000;
+  const SOURCE_HEAD = 5500;
 
   const originalCorrespondence = inputData.materials?.correspondence;
   const originalCrmNotes = inputData.materials?.crm_notes;
@@ -58,6 +62,15 @@ function compressInput(inputData, agentName, maxChars = 12000) {
     // диалога недавний контекст важнее самого раннего.
     newMaterials.dialog_history = '[начало истории сокращено]...\n' + originalDialogHistory.slice(-MAX_DIALOG_HISTORY);
     truncatedFields.push(`dialog_history (${originalDialogHistory.length} → ${MAX_DIALOG_HISTORY} симв., оставлен хвост)`);
+  }
+
+  const src = inputData.materials?.source_materials;
+  if (src && typeof src.text === 'string' && src.text.length > MAX_SOURCE) {
+    newMaterials.source_materials = {
+      ...src,
+      text: src.text.slice(0, SOURCE_HEAD) + '\n...[середина сокращена]...\n' + src.text.slice(-(MAX_SOURCE - SOURCE_HEAD))
+    };
+    truncatedFields.push(`source_materials (${src.text.length} → ${MAX_SOURCE} симв., начало + конец)`);
   }
 
   const result = { ...inputData, materials: newMaterials };

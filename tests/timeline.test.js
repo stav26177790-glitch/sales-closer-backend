@@ -37,6 +37,13 @@ check('временная вывеска при «не успеваем»: 3–4
   assert.equal(r.temp_banner.latest_start_date, '2026-11-19');
 });
 
+check('другая отрасль — временной вывески нет, «вывеска» не упоминается', () => {
+  const r = t.computeTimeline({ ...base, today: '2026-11-12', industry: 'saas' });
+  assert.equal(r.status, 'не успеваем');
+  assert.equal(r.temp_banner, null);
+  assert.ok(!/вывеск/i.test(r.summary));
+});
+
 check('с запасом — временная вывеска не нужна', () => {
   const r = t.computeTimeline({ ...base, today: '2026-11-02' });
   assert.equal(r.temp_banner, null);

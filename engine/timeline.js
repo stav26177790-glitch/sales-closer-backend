@@ -50,7 +50,8 @@ function timelineForDeal(deal) {
     clientDeadline: deal.client_deadline,
     productionDays: deal.production_days,
     installDaysMin: deal.install_days_min ?? 2,
-    installDaysMax: deal.install_days_max ?? 3
+    installDaysMax: deal.install_days_max ?? 3,
+    industry: deal.industry
   });
 }
 const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -134,7 +135,10 @@ const wdays = (n) => `${n} ${plural(n, 'рабочий день', 'рабочи�
  * @param {number} [p.installDaysMax] рабочих дней монтажа, максимум (по умолчанию 3)
  * @returns {object|null} null — если данных для расчёта нет
  */
-function computeTimeline({ today, clientDeadline, productionDays, installDaysMin = 2, installDaysMax = 3 }) {
+// industry: временная вывеска — факт компании для вывесок (signage.md); для
+// других отраслей её не предлагаем. Не задана (старые вызовы, тесты) — как signage.
+function computeTimeline({ today, clientDeadline, productionDays, installDaysMin = 2, installDaysMax = 3, industry }) {
+  const isSignage = !industry || industry === 'signage';
   const iso = /^\d{4}-\d{2}-\d{2}$/;
   const prod = Number(productionDays);
   if (!iso.test(String(today)) || !iso.test(String(clientDeadline)) || !(prod > 0)) return null;
@@ -180,7 +184,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
 
   // Временная вывеска — считаем, только когда постоянную не успеваем или впритык.
   let tempBanner = null;
-  if (status !== 'с запасом') {
+  if (status !== 'с запасом' && isSignage) {
     const bEarliest = addWorkingDays(today, TEMP_BANNER.productionMin + TEMP_BANNER.installMin);
     const bLatest = addWorkingDays(today, TEMP_BANNER.productionMax + TEMP_BANNER.installMax);
     const bLatestStart = subtractWorkingDays(readyBy, TEMP_BANNER.productionMax + TEMP_BANNER.installMax);
@@ -197,7 +201,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
   }
 
   const install = iMin === iMax ? `${iMin}` : `${iMin}–${iMax}`;
-  const shiftNote = buffer < 0 ? ' Каждый рабочий день задержки старта сдвигает готовность постоянной вывески на рабочий день.' : '';
+  const shiftNote = buffer < 0 ? ` Каждый рабочий день задержки старта сдвигает готовность ${isSignage ? 'постоянной вывески' : 'заказа'} на рабочий день.` : '';
   const lastStartText = latestStart >= today
     ? `Последний день старта (согласования макета) с учётом монтажа ${iMax} дн. — ${humanDate(latestStart)}.`
     : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= today && latestStartBestCase !== latestStart ? ` (при монтаже за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
