@@ -358,8 +358,22 @@ function formatAgentReplyForChat(state, output) {
         // Показываем сырой ответ, чтобы увидеть реальную структуру и поправить парсинг.
         return `⚠️ Не удалось прочитать касания из ответа composer-агента.\n\nСырой ответ:\n${JSON.stringify(output?.composer_output, null, 2)}`;
       }
-      const hint = '\n\n---\n\n_Напишите «ок», чтобы отправить на проверку, или пришлите правку._';
-      return msgs.map(formatTouchpoint).join('\n\n---\n\n') + hint;
+      const touches = msgs.map(formatTouchpoint).join('\n\n---\n\n');
+      const check = output?.composer_output?._check;
+      if (!check) {
+        // Касания составлены до автоцикла (старые сделки).
+        return touches + '\n\n---\n\n_Напишите «ок» — проверю и при необходимости доработаю касания. Или пришлите правку._';
+      }
+      if (check.approved) {
+        return `## ✅ Касания проверены\n\n${touches}\n\n---\n\n_«ок» — сохранить итог сессии. Если что-то поправить — напишите, доработаю и проверю снова._`;
+      }
+      // Не все касания прошли проверку за отведённые круги — показываем, что осталось.
+      const r = output?.reviewer_output?.messages_reviewed ? output.reviewer_output : output?.reviewer_output?.reviewer_output;
+      const left = (r?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО');
+      const notes = left.length
+        ? left.map((m) => `- **Касание ${m.touchpoint_number}:** ${m.fix_instructions || translateCriteria(m.failed_criteria) || 'не принято проверкой'}`).join('\n')
+        : '- проверка не дала вердикт';
+      return `${touches}\n\n---\n\n### Проверка приняла не всё\n\n${notes}\n\n_Клоузер сделал ${check.rounds} ${check.rounds === 1 ? 'вариант' : check.rounds < 5 ? 'варианта' : 'вариантов'} и проверил каждый. Напишите, как поправить, — доработаю и проверю снова. Или «ок», чтобы принять как есть._`;
     }
     case 'REVIEWING': {
       const r = output?.reviewer_output;

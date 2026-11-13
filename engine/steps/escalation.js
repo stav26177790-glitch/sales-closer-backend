@@ -7,7 +7,8 @@
  *   2. awaitingRetry   — ждём да/нет: «да» → ручная попытка composer, «нет» → итог;
  *   3. retriesExhausted — лимит MAX_ESCALATION_RETRIES исчерпан → итог.
  */
-const { runComposer, runMemoryUpdate } = require('../pipeline');
+const { runMemoryUpdate } = require('../pipeline');
+const { composeUntilReady } = require('../autoCompose');
 const { CONFIG } = require('../config');
 const { isAffirmativeResponse, isNegativeResponse } = require('../intent');
 
@@ -30,18 +31,11 @@ async function awaitingRetry(ctx) {
         `Статус: лимит ручных попыток доработки (${CONFIG.MAX_ESCALATION_RETRIES}) после эскалации исчерпан — сессия завершена с последним вариантом текста, дальнейшие правки нужно вносить вручную.`,
         true);
     }
-    const iterations = deal.composer_iterations || 1;
-    const output = {};
-    output.composer_output = await runComposer(baseInput, deal, {
-      // Плюс последние замечания проверки: раньше composer получал только
-      // слова менеджера и не знал точных подсказок (например, верную дату).
-      feedback: { source: 'manager', manager_feedback: deal.pending_escalation_feedback, reviewer_feedback: deal.last_reviewer_output },
-      iteration: iterations + 1
+    const res = await composeUntilReady(baseInput, deal, {
+      feedback: { source: 'manager', manager_feedback: deal.pending_escalation_feedback, reviewer_feedback: deal.last_reviewer_output }
     });
-    // composer_iterations двигаем как обычно (реальная новая попытка), а
-    // escalation_retries отдельно считает именно ручные перезапуски, чтобы
-    // не уйти в цикл эскалация → правка → эскалация.
-    output._composer_iterations = iterations + 1;
+    const output = { composer_output: res.composer_output, reviewer_output: res.reviewer_output || undefined };
+    output._composer_iterations = res.rounds || 1;
     output._escalation_retries = retriesUsed + 1;
     output._awaitingEscalationConfirmation = false;
     output._pendingEscalationFeedback = null;

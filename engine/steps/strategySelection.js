@@ -3,20 +3,20 @@
  * «ок» / «пиши касания» → пишем касания. Иначе сообщение менеджера — правка
  * стратегии или новые факты: стратегия пересобирается с их учётом.
  */
-const { runComposer } = require('../pipeline');
 const { CONFIG } = require('../config');
 const { isGoAhead } = require('../intent');
 const { runStrategy } = require('./diagnosing');
+const { composeUntilReady } = require('../autoCompose');
+const { composedOutput } = require('./composing');
 
 async function strategySelection(ctx) {
   const { deal, memory, baseInput, managerInput } = ctx;
   if (!isGoAhead(managerInput)) return runStrategy(ctx, managerInput);
-  const output = {};
-  output.composer_output = await runComposer(baseInput, deal, {
-    channelHistory: memory?.do_not_repeat?.channels_last_used?.slice(0, CONFIG.CHANNEL_HISTORY_SIZE) || [],
-    iteration: 1
+  // Касания составляются, проверяются и дорабатываются сами (engine/autoCompose.js).
+  const res = await composeUntilReady(baseInput, deal, {
+    channelHistory: memory?.do_not_repeat?.channels_last_used?.slice(0, CONFIG.CHANNEL_HISTORY_SIZE) || []
   });
-  return { nextState: 'COMPOSING', output };
+  return { nextState: 'COMPOSING', output: composedOutput(res) };
 }
 
 module.exports = { strategySelection };

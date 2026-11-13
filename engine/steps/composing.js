@@ -1,36 +1,22 @@
 /**
- * Этап COMPOSING — касания показаны менеджеру, ждём его реакцию.
+ * Этап COMPOSING — касания показаны менеджеру (уже проверенные Клоузером:
+ * см. engine/autoCompose.js), ждём его реакцию.
  *
- * Ответ менеджера разбирается в таком порядке (каждая ветка — своя функция):
- *   1. awaitingCorrection — мы задали вопрос «скорректировать касания?» и ждём да/нет;
- *   2. lengthViolation    — касание длиннее лимита канала (техническая правка);
- *   3. managerQuestion    — вопрос к агенту → отвечает advisor, спрашиваем «скорректировать?»;
- *   4. managerEdit        — содержательная правка → composer переписывает;
- *   5. sendToReview       — чистое одобрение («ок») → проверка reviewer'ом.
+ * Ответ менеджера:
+ *   1. awaitingCorrection — мы спросили «скорректировать касания?» после ответа на вопрос;
+ *   2. «ок» → accept: касания прошли автоцикл — итог сессии; старые
+ *      (до автоцикла) — сначала проверить и доработать;
+ *   3. вопрос → advisor отвечает, спрашиваем «скорректировать?»;
+ *   4. правка → composer переписывает, автоцикл проверяет и дорабатывает.
  */
-const { callAgentSafe, runComposer, runMemoryUpdate } = require('../pipeline');
+const { callAgentSafe, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
-const { applyPhraseCheck } = require('../phraseCheck');
-const { formatAgentReplyForChat } = require('../chat');
-const { applyMustIncludeCheck } = require('../mustInclude');
-const { applyScheduleCheck } = require('../scheduleCheck');
+const { composeUntilReady, channelKey } = require('../autoCompose');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
 
-// Канал касания → ключ лимита. Composer пишет канал по-разному («Звонок»,
-// «call», «WhatsApp»), а лимит искался только по точному ключу — лимит звонка
-// почти никогда не применялся (прогон 2026-11-13).
-function channelKey(channel) {
-  const c = String(channel || '').trim().toLowerCase();
-  if (/whats|ватс|вотс/.test(c)) return 'whatsapp';
-  if (/telegram|телеграм|^tg$/.test(c)) return 'telegram';
-  if (/mail|почт|письм/.test(c)) return 'email';
-  if (/voice|голосов|кружок/.test(c)) return 'voice';
-  if (/call|phone|звон|скрипт/.test(c)) return 'call_script';
-  return c;
-}
-
+// Касание длиннее лимита канала (для старых тестов и внешних вызовов).
 function validateMessageLength(composerOutput) {
   const messages = composerOutput?.composer_output?.messages || [];
   const violations = [];
@@ -43,68 +29,54 @@ function validateMessageLength(composerOutput) {
   return { valid: violations.length === 0, violations };
 }
 
-// 1. Ответ на наш вопрос «скорректировать текущие касания с учётом этого?».
+// Результат автоцикла → поля хода (advance сохраняет их в сделку).
+function composedOutput(res, extra = {}) {
+  return {
+    composer_output: res.composer_output,
+    reviewer_output: res.reviewer_output || undefined,
+    _composer_iterations: res.rounds || 1,
+    ...extra
+  };
+}
+
+// 1. Ответ на «скорректировать текущие касания с учётом этого?».
 async function awaitingCorrection({ deal, baseInput, managerInput }) {
-  const output = {};
   if (isAffirmativeResponse(managerInput)) {
-    output.composer_output = await runComposer(baseInput, deal, {
-      feedback: { source: 'manager', manager_feedback: deal.pending_manager_feedback },
-      iteration: deal.composer_iterations || 1
+    const res = await composeUntilReady(baseInput, deal, {
+      feedback: { source: 'manager', manager_feedback: deal.pending_manager_feedback }
     });
-    output._awaitingCorrectionConfirmation = false;
-    output._pendingManagerFeedback = null;
-    return { nextState: 'COMPOSING', output };
+    return { nextState: 'COMPOSING', output: composedOutput(res, { _awaitingCorrectionConfirmation: false, _pendingManagerFeedback: null }) };
   }
+  const output = {};
   if (isNegativeResponse(managerInput)) {
     output._awaitingCorrectionConfirmation = false;
     output._pendingManagerFeedback = null;
-    output.composer_output = deal.last_composer_output;
-    output._directText = 'Хорошо, оставляю текущие касания без изменений. Когда будете готовы — напишите "ок", чтобы отправить их на финальную проверку.';
+    output._directText = 'Хорошо, касания без изменений. Напишите «ок», чтобы сохранить итог сессии, или пришлите правку.';
     return { nextState: 'COMPOSING', output };
   }
-  // Ответ не распознан как явное да/нет — переспрашиваем, не теряя
-  // исходный вопрос менеджера, чтобы не уйти в composer с мусором.
   output._directText = 'Не понял ответ — скорректировать текущие касания с учётом этого? Ответьте, пожалуйста, "да" или "нет".';
   return { nextState: 'COMPOSING', output };
 }
 
-// 2. Касание длиннее лимита канала. Если менеджер вместе с этим написал
-// правку — оба фидбэка уходят в composer одним вызовом (раньше правка
-// менеджера терялась, потому что проверка длины срабатывала первой).
-async function lengthViolation({ deal, baseInput, managerInput }, violations, managerGaveFeedback) {
-  const output = {};
-  const iterations = deal.composer_iterations || 1;
-  const lengthFeedback = {
-    verdict: 'НА ДОРАБОТКУ',
-    messages_reviewed: violations.map((v) => ({
-      touchpoint_number: v.touchpoint,
-      verdict: 'НА ДОРАБОТКУ',
-      failed_criteria: ['channel_fit'],
-      fix_instructions: `Сообщение для ${v.channel} слишком длинное: ${v.current}/${v.max} символов.`
-    }))
-  };
-  if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
-    output.reviewer_output = lengthFeedback;
-    return { nextState: 'ESCALATION', output };
+// 2. «ок».
+async function accept({ dealId, deal, baseInput }) {
+  const check = deal.last_composer_output?._check;
+  if (!check) {
+    // Касания составлены до автоцикла — проверить (и при нужде доработать) сейчас.
+    const res = await composeUntilReady(baseInput, deal, { startWith: deal.last_composer_output });
+    return { nextState: 'COMPOSING', output: composedOutput(res) };
   }
-  output.composer_output = await runComposer(baseInput, deal, {
-    feedback: managerGaveFeedback
-      ? { ...lengthFeedback, source: 'manager', manager_feedback: managerInput }
-      : lengthFeedback,
-    iteration: iterations + 1
+  const output = {};
+  output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
+    composer_output: deal.last_composer_output,
+    strategy_output: deal.last_strategy_output,
+    reviewer_output: deal.last_reviewer_output,
+    statusNote: check.approved ? undefined : 'Статус: касания приняты менеджером, хотя проверка не приняла часть из них (замечания были показаны).'
   });
-  // Нарушение длины — техническая причина, поэтому итерацию считаем как обычно
-  // (в отличие от вкусового фидбэка менеджера в managerEdit).
-  output._composer_iterations = iterations + 1;
-  // Менеджер написал «ок», а получил другие касания — объясняем почему (прогон 2026-11-13).
-  const list = violations.map((v) => `касание ${v.touchpoint} — ${v.current} из ${v.max} символов`).join(', ');
-  output._directText = `_Касания длиннее лимита канала (${list}) — сократил. Проверьте, что важное осталось._\n\n${formatAgentReplyForChat('COMPOSING', output)}`;
-  return { nextState: 'COMPOSING', output };
+  return { nextState: 'FINAL_OUTPUT', output };
 }
 
-// 3. Вопрос к агенту («что ответить на "дорого"?»). Composer умеет только
-// переписывать касания, поэтому отвечает advisor, а затем спрашиваем,
-// нужна ли правка.
+// 3. Вопрос к агенту («что ответить на "дорого"?») — отвечает advisor.
 async function managerQuestion({ deal, baseInput, managerInput }) {
   const output = {};
   const advisorResult = await callAgentSafe('advisor', {
@@ -123,74 +95,21 @@ async function managerQuestion({ deal, baseInput, managerInput }) {
   return { nextState: 'COMPOSING', output };
 }
 
-// 4. Содержательная правка менеджера. composer_iterations намеренно НЕ
-// увеличиваем: счётчик считает автоматические доработки по вердикту
-// reviewer'а (лимит MAX_COMPOSER_ITERATIONS), правки менеджера не должны
-// приближать эскалацию.
+// 4. Правка менеджера → переписать, проверить, доработать.
 async function managerEdit({ deal, baseInput, managerInput }) {
-  const output = {};
-  output.composer_output = await runComposer(baseInput, deal, {
-    feedback: { source: 'manager', manager_feedback: managerInput },
-    iteration: deal.composer_iterations || 1
+  const res = await composeUntilReady(baseInput, deal, {
+    feedback: { source: 'manager', manager_feedback: managerInput, reviewer_feedback: deal.last_reviewer_output }
   });
-  return { nextState: 'COMPOSING', output };
-}
-
-// 5. Менеджер одобрил — проверка reviewer'ом. При одобрении сессия
-// завершается сразу в этом же ходе (баг №34: раньше между «одобрено» и
-// итогом был лишний ход, и новое сообщение менеджера в нём терялось).
-async function sendToReview({ dealId, deal, baseInput }) {
-  const output = {};
-  // Лимит 12000: ответ reviewer'а самый объёмный (чек-лист из 14 критериев
-  // на каждое касание). 2026-11-12: на 8000 ответ обрезался посреди JSON
-  // (5 касаний + разбор перед JSON) — вердикт не читался. Промпт теперь
-  // запрещает текст вне JSON, лимит поднят с запасом.
-  const reviewerResult = await callAgentSafe('reviewer', {
-    ...baseInput,
-    diagnostic_output: deal.last_diagnostic_output,
-    strategy_output: deal.last_strategy_output,
-    composer_output: deal.last_composer_output
-  }, 12000);
-  output.reviewer_output = reviewerResult?.reviewer_output || reviewerResult;
-  // Запрещённые фразы ловим кодом — модель-reviewer их иногда пропускает.
-  const msgs = deal.last_composer_output?.messages || deal.last_composer_output?.composer_output?.messages;
-  const { hits } = applyPhraseCheck(output.reviewer_output, msgs);
-  if (hits.length) console.log(`[phraseCheck] Запрещённые фразы в касаниях: ${hits.map((h) => h.touchpoint_number).join(', ')}`);
-  // Обязательные пункты сделки (strategy_output.must_include): невыполненный —
-  // касание на доработку, даже если reviewer его одобрил.
-  const { missed } = applyMustIncludeCheck(output.reviewer_output, deal.last_strategy_output?.must_include, msgs?.length);
-  if (missed.length) console.log(`[mustInclude] Не выполнены пункты: ${missed.map((m) => `${m.item}→касание ${m.touchpoint_number}`).join(', ')}`);
-  // Касание уходит позже срока, который называет (например, «до 19 ноября» 20-го).
-  const { hits: late } = applyScheduleCheck(output.reviewer_output, msgs, baseInput.timeline);
-  if (late.length) console.log(`[scheduleCheck] Срок пройдёт к отправке: касания ${late.map((h) => h.touchpoint_number).join(', ')}`);
-  const verdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
-  if (verdict === 'ОДОБРЕНО') {
-    output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
-      composer_output: deal.last_composer_output,
-      strategy_output: deal.last_strategy_output,
-      reviewer_output: output.reviewer_output
-    });
-    return { nextState: 'FINAL_OUTPUT', output };
-  }
-  return { nextState: 'REVIEWING', output };
+  return { nextState: 'COMPOSING', output: composedOutput(res) };
 }
 
 async function composing(ctx) {
   const { deal, managerInput } = ctx;
   if (deal.awaiting_correction_confirmation) return awaitingCorrection(ctx);
-
-  const lengthCheck = validateMessageLength({ composer_output: deal.last_composer_output });
-  const managerGaveFeedback = !isPureApproval(managerInput);
-  // Теневой режим: сравниваем решение списков фраз с LLM-классификатором и
-  // логируем расхождения, не меняя поведение (асинхронно, не блокирует ответ).
+  // Теневой режим: сравниваем решение списков фраз с LLM-классификатором.
   logIntentClassificationShadow(managerInput, isPureApproval(managerInput), isManagerQuestion(managerInput), deal.id);
-
-  if (!lengthCheck.valid) return lengthViolation(ctx, lengthCheck.violations, managerGaveFeedback);
-  if (managerGaveFeedback) {
-    return isManagerQuestion(managerInput) ? managerQuestion(ctx) : managerEdit(ctx);
-  }
-  return sendToReview(ctx);
+  if (isPureApproval(managerInput)) return accept(ctx);
+  return isManagerQuestion(managerInput) ? managerQuestion(ctx) : managerEdit(ctx);
 }
 
-module.exports = {
-  channelKey, composing, validateMessageLength };
+module.exports = { channelKey, composing, validateMessageLength, composedOutput };

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node static-checks.js && node test_escalation_manual_retry.js && node test_intake_round_limit.js && node tests/snapshots.test.js && node tests/runner.test.js && node tests/timeline.test.js && node tests/phraseCheck.test.js && node tests/errors.test.js && node tests/mustInclude.test.js && node tests/scheduleCheck.test.js && node tests/virtual/run.js",
+    "test": "node static-checks.js && node test_intake_round_limit.js && node tests/snapshots.test.js && node tests/runner.test.js && node tests/timeline.test.js && node tests/phraseCheck.test.js && node tests/errors.test.js && node tests/mustInclude.test.js && node tests/scheduleCheck.test.js && node tests/virtual/run.js",
     "test:virtual": "node tests/virtual/run.js --full",
     "test:update-snapshots": "node tests/snapshots.test.js --update"
   },

@@ -79,7 +79,7 @@ const issue = (deal, sev, what) => report.push({ deal, sev, what });
     // 4. Касания
     const composerOut = [...r.steps].reverse().find((s) => s.dbPatches.some((p) => p.last_composer_output))?.dbPatches.find((p) => p.last_composer_output)?.last_composer_output;
     const msgs = composerOut?.messages || [];
-    const allowedDates = new Set([...datesIn(JSON.stringify(tl || {}).replace(/\\n/g, ' ')), ...datesIn(d.messages.join(' '))]);
+    const allowedDates = new Set([...datesIn(JSON.stringify(tl || {}).replace(/\\n/g, ' ')), ...datesIn([d.context || '', ...d.messages].join(' '))]);
     if (tl) {
       // даты из ISO в расчёте
       for (const iso of JSON.stringify(tl).match(/\d{4}-\d{2}-\d{2}/g) || []) {

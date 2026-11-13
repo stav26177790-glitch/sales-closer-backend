@@ -121,6 +121,12 @@ const AT_COMPOSING = {
   composer_iterations: 1,
 };
 
+const AT_COMPOSING_CHECKED = {
+  ...AT_COMPOSING,
+  last_composer_output: { ...composer('A').composer_output, _check: { approved: true, rounds: 1, reviews: 1 } },
+  last_reviewer_output: reviewer('ОДОБРЕНО').reviewer_output,
+};
+
 module.exports = [
   {
     name: 'full_cycle_and_new_session',
@@ -261,10 +267,11 @@ module.exports = [
   },
   {
     name: 'composing_manager_edit_and_question',
-    description: 'Правка менеджера → composer; вопрос → advisor и «скорректировать?»; непонятный ответ → переспрос; «да» → composer; «нет» на второй вопрос',
-    deal: AT_COMPOSING,
+    description: 'Касания проверены. Правка → composer + проверка в том же ходе; вопрос → advisor и «скорректировать?»; непонятный ответ → переспрос; «да» → composer + проверка; «нет» на второй вопрос',
+    deal: AT_COMPOSING_CHECKED,
     agents: {
       composer: [composer('B'), composer('C')],
+      reviewer: [reviewer('ОДОБРЕНО'), reviewer('ОДОБРЕНО')],
       advisor: [advisor, advisor],
     },
     messages: [
@@ -277,20 +284,33 @@ module.exports = [
     ],
   },
   {
-    name: 'reviewer_rework_to_escalation',
-    description: 'Reviewer дважды не одобряет → доработки composer → лимит итераций → ESCALATION',
-    deal: AT_COMPOSING,
+    name: 'auto_rework_until_approved',
+    description: 'Автоцикл: «ок» на стратегию → composer → reviewer НА ДОРАБОТКУ → composer → reviewer ОДОБРЕНО — всё в одном ходе; «ок» → итог',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
-      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
-      composer: [composer('B'), composer('C')],
+      composer: [composer('A'), composer('B')],
+      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('ОДОБРЕНО')],
+      memory: [memory(1)],
     },
-    messages: ['ок', 'ок', 'ок', 'ок', 'ок', 'ок'],
+    messages: ['ок', 'ок'],
+  },
+  {
+    name: 'auto_loop_shows_notes_when_not_approved',
+    description: 'Автоцикл: проверка трижды не приняла → менеджер видит касания и что осталось; «ок» → итог с пометкой',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
+    agents: {
+      composer: [composer('A'), composer('B'), composer('C')],
+      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
+      memory: [memory(1)],
+    },
+    messages: ['ок', 'ок'],
   },
   {
     name: 'rework_keeps_approved_touches',
-    description: 'Reviewer одобрил касание 1 и вернул касание 2; composer на доработке переписал оба — код возвращает одобренное касание 1 дословно, касание 2 берёт новое. Composer получает свои прошлые касания',
-    deal: AT_COMPOSING,
+    description: 'Автоцикл: reviewer одобрил касание 1 и вернул 2; composer на доработке переписал оба — код возвращает одобренное касание 1 дословно',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
+      composer: [composer('A'), composer('B')],
       reviewer: [{
         reviewer_output: {
           verdict: 'НА ДОРАБОТКУ',
@@ -299,14 +319,13 @@ module.exports = [
             { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', failed_criteria: ['client_value'], fix_instructions: 'добавить выгоду для ЛПР' },
           ],
         },
-      }],
-      composer: [composer('B')],
+      }, reviewer('ОДОБРЕНО')],
     },
-    messages: ['ок', 'доработай'],
+    messages: ['ок'],
   },
   {
     name: 'escalation_manual_retry_then_close',
-    description: 'ESCALATION: правка → «доработать?» → непонятный ответ → «да» (ручная попытка) → reviewer снова не одобряет → снова ESCALATION → правка → «нет» → итог',
+    description: 'Старая сделка в ESCALATION: правка → «доработать?» → непонятный ответ → «да» → автоцикл (composer + проверка) → «ок» → итог',
     deal: {
       ...AT_COMPOSING,
       current_state: 'ESCALATION',
@@ -316,18 +335,10 @@ module.exports = [
     },
     agents: {
       composer: [composer('D')],
-      reviewer: [reviewer('НА ДОРАБОТКУ')],
+      reviewer: [reviewer('ОДОБРЕНО')],
       memory: [memory(1)],
     },
-    messages: [
-      'добавь цифры по срокам монтажа',
-      'хм',
-      'да',
-      'ок',
-      'ок',
-      'всё равно не то',
-      'нет',
-    ],
+    messages: ['добавь цифры по срокам монтажа', 'хм', 'да', 'ок'],
   },
   {
     name: 'escalation_retry_limit',
@@ -345,13 +356,20 @@ module.exports = [
   },
   {
     name: 'message_length_violation',
-    description: 'Касание длиннее лимита канала: одобрение не уходит в reviewer, composer получает фидбэк про длину',
-    deal: {
-      ...AT_COMPOSING,
-      last_composer_output: composer('LONG', 'Очень длинное сообщение. '.repeat(30)).composer_output,
+    description: 'Автоцикл: касание длиннее лимита канала → проверка кода → composer сокращает БЕЗ вызова reviewer → reviewer одобряет',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
+    agents: {
+      composer: [composer('LONG', 'Очень длинное сообщение. '.repeat(30)), composer('E')],
+      reviewer: [reviewer('ОДОБРЕНО')],
     },
-    agents: { composer: [composer('E')] },
     messages: ['ок'],
+  },
+  {
+    name: 'legacy_unchecked_touches_ok_runs_check',
+    description: 'Старая сделка: касания составлены до автоцикла → «ок» сначала проверяет их (без переписывания), потом «ок» → итог',
+    deal: AT_COMPOSING,
+    agents: { reviewer: [reviewer('ОДОБРЕНО')], memory: [memory(1)] },
+    messages: ['ок', 'ок'],
   },
   {
     name: 'end_session_command',
@@ -366,6 +384,7 @@ module.exports = [
     deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_strategy_output: strategy().strategy_output },
     agents: {
       composer: [{ parse_error: true, raw_output: '```json\n' + JSON.stringify(composer('RAW')) + '\n```' }],
+      reviewer: [reviewer('ОДОБРЕНО')],
     },
     messages: ['дальше'],
   },
@@ -377,25 +396,15 @@ module.exports = [
       diagnostic: [diagnostic()],
       strategy: [strategy(), strategy({ strategy_summary: 'учтено: собственник в отпуске до 20-го' })],
       composer: [composer('C')],
+      reviewer: [reviewer('ОДОБРЕНО')],
     },
     messages: ['перепиши оценку с учётом сроков', 'давай стратегию', 'собственник в отпуске до 20-го', 'пиши касания'],
   },
   {
-    name: 'code_fix_gets_extra_attempt',
-    description: '3 попытки composer исчерпаны, но на доработке только ошибка, найденная кодом (точная подсказка) → ещё попытка, а не эскалация',
-    deal: {
-      ...AT_COMPOSING,
-      current_state: 'REVIEWING',
-      composer_iterations: 3,
-      last_reviewer_output: {
-        verdict: 'НА ДОРАБОТКУ',
-        messages_reviewed: [
-          { touchpoint_number: 1, verdict: 'ОДОБРЕНО' },
-          { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', failed_criteria: ['schedule'], code_checked: true, fix_instructions: 'Касание уходит 25 ноября, при старте 25 ноября — готово 15–16 декабря.' }
-        ]
-      }
-    },
-    agents: { composer: [composer('FIX')] },
+    name: 'legacy_reviewing_reworks_in_auto_loop',
+    description: 'Старая сделка в REVIEWING: любое сообщение → доработка по замечаниям в автоцикле → проверено',
+    deal: { ...AT_COMPOSING, current_state: 'REVIEWING', last_reviewer_output: reviewer('НА ДОРАБОТКУ').reviewer_output },
+    agents: { composer: [composer('FIX')], reviewer: [reviewer('ОДОБРЕНО')] },
     messages: ['дальше'],
   },
   {

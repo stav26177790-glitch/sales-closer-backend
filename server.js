@@ -191,4 +191,10 @@ app.delete('/api/deals/:id', requireManager, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Sales Closer AI backend on :${PORT}`));
+const server = app.listen(PORT, () => console.log(`Sales Closer AI backend on :${PORT}`));
+// Касания составляются, проверяются и дорабатываются в одном запросе
+// (engine/autoCompose.js) — это может занять несколько минут. По умолчанию
+// Node обрывает запрос через 5 минут (requestTimeout) — поднимаем до 15.
+server.requestTimeout = 15 * 60 * 1000;
+server.headersTimeout = 15 * 60 * 1000 + 5000;
+server.keepAliveTimeout = 65 * 1000;
