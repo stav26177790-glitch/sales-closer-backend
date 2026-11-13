@@ -37,4 +37,12 @@ check('одобренное касание с запрещённой фразо�
   assert.equal(output.messages[1].body, 'новый 2');
 });
 
+check('упрёк «вы говорили, что пришлёте» ловится, шаблон владельца — нет', () => {
+  const bad = [{ touchpoint_number: 1, body: 'Марина, добрый день.\nВы говорили, что пришлёте логотип — он нужен для макета.' }];
+  const good = [{ touchpoint_number: 1, body: 'Помните, мы проговаривали, что пришлёте логотип? Скинете сейчас — сразу отдам дизайнеру, и вы получите готовую визуализацию.' }];
+  assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [1]);
+  assert.equal(findBannedPhrases(good).length, 0);
+  assert.ok(findBannedPhrases(bad)[0].fixes[0].includes('Помните, мы проговаривали'));
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);
