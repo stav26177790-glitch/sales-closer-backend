@@ -388,16 +388,18 @@ function formatAgentReplyForChat(state, output) {
       }
       const touches = msgs.map(formatTouchpoint).join('\n\n---\n\n');
       const check = output?.composer_output?._check;
+      // Что Клоузер делал за этот ход (составил → проверка → редактор …) — коротко.
+      const traceLine = Array.isArray(check?.trace) && check.trace.length ? `\n\n_Ход проверки: ${check.trace.join(' → ')}._` : '';
       if (!check) {
         // Касания составлены до автоцикла (старые сделки).
         return touches + '\n\n---\n\n_Напишите «ок» — проверю и при необходимости доработаю касания. Или пришлите правку._';
       }
       if (!check.approved && Array.isArray(check.fixedAfterReview) && check.fixedAfterReview.length) {
         const many = check.fixedAfterReview.length > 1;
-        return `## ✅ Касания проверены и доработаны\n\n${touches}\n\n---\n\n_${many ? 'Касания' : 'Касание'} ${check.fixedAfterReview.join(', ')} ${many ? 'исправлены' : 'исправлено'} по замечаниям второй проверки (повторно не ${many ? 'проверялись' : 'проверялось'} — посмотрите). «ок» — сохранить итог сессии; если что-то поправить — напишите._`;
+        return `## ✅ Касания проверены и доработаны\n\n${touches}\n\n---\n\n_${many ? 'Касания' : 'Касание'} ${check.fixedAfterReview.join(', ')} ${many ? 'исправлены' : 'исправлено'} по замечаниям второй проверки (повторно не ${many ? 'проверялись' : 'проверялось'} — посмотрите). «ок» — сохранить итог сессии; если что-то поправить — напишите._${traceLine}`;
       }
       if (check.approved) {
-        return `## ✅ Касания проверены\n\n${touches}\n\n---\n\n_«ок» — сохранить итог сессии. Если что-то поправить — напишите, доработаю и проверю снова._`;
+        return `## ✅ Касания проверены\n\n${touches}\n\n---\n\n_«ок» — сохранить итог сессии. Если что-то поправить — напишите, доработаю и проверю снова._${traceLine}`;
       }
       // Не все касания прошли проверку за отведённые круги — показываем, что осталось.
       const r = output?.reviewer_output?.messages_reviewed ? output.reviewer_output : output?.reviewer_output?.reviewer_output;
@@ -405,7 +407,7 @@ function formatAgentReplyForChat(state, output) {
       const notes = left.length
         ? left.map((m) => `- **Касание ${m.touchpoint_number}:** ${shortNote(m.fix_instructions) || translateCriteria(m.failed_criteria) || 'не принято проверкой'}`).join('\n')
         : '- проверка не дала вердикт';
-      return `${touches}\n\n---\n\n### Проверка приняла не всё\n\n${notes}\n\n_Клоузер сделал ${check.rounds} ${check.rounds === 1 ? 'вариант' : check.rounds < 5 ? 'варианта' : 'вариантов'} и проверил каждый. Напишите, как поправить, — доработаю и проверю снова. Или «ок», чтобы принять как есть._`;
+      return `${touches}\n\n---\n\n### Проверка приняла не всё\n\n${notes}\n\n_Клоузер сделал ${check.rounds} ${check.rounds === 1 ? 'вариант' : check.rounds < 5 ? 'варианта' : 'вариантов'} и проверил каждый. Напишите, как поправить, — доработаю и проверю снова. Или «ок», чтобы принять как есть._${traceLine}`;
     }
     case 'REVIEWING': {
       const r = output?.reviewer_output;

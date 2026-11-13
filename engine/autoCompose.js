@@ -65,7 +65,7 @@ function codeChecks(composerOutput, timeline) {
   msgs.forEach((m, i) => {
     if (/только если/i.test(String(m?.timing || ''))) return;
     // «Сразу после звонка/кружка» — продолжение того же касания (текст вдогонку), не новый шаг.
-    if (/сразу после/i.test(String(m?.timing || ''))) return;
+    if (/сразу после|в тот же день после|после звонка/i.test(String(m?.timing || ''))) return;
     // composer не всегда ставит kind (живой тест 2026-11-13). По воронке владельца
     // эмпатичные касания — короткие видео (кружки), поэтому без kind: кружок/видео/
     // голосовое — эмпатичное, остальное (текст, звонок) — экспертное.
@@ -152,6 +152,9 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
   let rounds = 0;
   let reviews = 0;
   const timeline = baseInput.timeline;
+  // Ход цикла — для менеджера и для разбора (что делал Клоузер за этот ход).
+  const trace = [];
+  const bad = (r) => (reviewedOf(r)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(',');
 
   // startWith — уже готовые касания (сделки, начатые до этой версии): сначала проверить, не переписывая.
   let skipCompose = !!startWith;
@@ -165,6 +168,9 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         rounds++;
         composerOutput = edited;
         skipCompose = true;
+        trace.push('редактор');
+      } else {
+        trace.push('редактор не смог');
       }
     }
     if (!skipCompose) {
@@ -174,6 +180,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         iteration: rounds + 1
       });
       rounds++;
+      trace.push(rounds === 1 && !fb ? 'составил' : 'переписал');
       // Касания, одобренные на прошлом круге, возвращаем дословно.
       composerOutput = fb && cur.last_reviewer_output && fb === cur.last_reviewer_output
         ? keepApprovedTouches(fresh, cur.last_composer_output, cur.last_reviewer_output).output
@@ -188,6 +195,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     }
 
     const code = codeChecks(composerOutput, timeline);
+    if (code.verdict !== 'ОДОБРЕНО') trace.push(`код вернул ${bad(code)}`);
     if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);
       reviewerOutput = code;
@@ -206,12 +214,14 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     }, 12000);
     reviews++;
     reviewerOutput = result?.reviewer_output || result;
+    const traceAt = trace.length;
     const msgs = messagesOf(composerOutput);
     applyPhraseCheck(reviewerOutput, msgs);
     applyMustIncludeCheck(reviewerOutput, deal.last_strategy_output?.must_include, msgs.length);
     applyScheduleCheck(reviewerOutput, msgs, timeline);
+    trace.splice(traceAt, 0, verdictOf(reviewerOutput) === 'ОДОБРЕНО' ? 'проверка приняла' : `проверка вернула ${bad(reviewerOutput) || '(вердикт не прочитан)'}`);
     if (verdictOf(reviewerOutput) === 'ОДОБРЕНО') {
-      return done(composerOutput, reviewerOutput, true, rounds, reviews);
+      return done(composerOutput, reviewerOutput, true, rounds, reviews, { trace });
     }
     console.log(`[autoCompose] круг ${rounds}: проверка не приняла касания`);
     if (reviews >= CONFIG.AUTO_REVIEWS) {
@@ -219,18 +229,22 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       const edited = await runEditor(baseInput, deal, composerOutput, reviewerOutput);
       if (edited) {
         rounds++;
+        trace.push('редактор');
         const code2 = codeChecks(edited, timeline);
         if (code2.verdict === 'ОДОБРЕНО') {
           const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
-          return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums });
+          return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });
         }
+        trace.push(`код после редактора вернул ${bad(code2)}`);
+      } else {
+        trace.push('редактор не смог');
       }
       break;
     }
     fb = reviewerOutput;
     cur = { ...cur, last_reviewer_output: reviewerOutput };
   }
-  return done(composerOutput, reviewerOutput, verdictOf(reviewerOutput) === 'ОДОБРЕНО', rounds, reviews);
+  return done(composerOutput, reviewerOutput, verdictOf(reviewerOutput) === 'ОДОБРЕНО', rounds, reviews, { trace });
 }
 
 // Касания помечаются как прошедшие цикл проверки: «ок» менеджера на них —

@@ -52,4 +52,12 @@ check('выдуманный кейс «пока ждал ответа — смо
   assert.equal(findBannedPhrases(ok).length, 0);
 });
 
+check('живой «Зерно 4»: угроза «слот уйдёт» и «нужно решение сегодня» ловятся', () => {
+  const bad = [
+    { touchpoint_number: 3, body: 'макет нужно согласовать до 19 ноября — иначе слот в производственном плане уйдёт и дата сдвинется.' },
+    { touchpoint_number: 5, body: 'Постоянная вывеска — следом. Нужно решение Андрея сегодня.' }];
+  assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [3, 5]);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Согласуем макет сейчас — держим за вами ближайший слот, и дата не сдвинется.' }]).length, 0);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);
