@@ -52,7 +52,7 @@ function applyPhraseCheck(reviewerOutput, messages) {
     let m = reviewed.find((x) => Number(x?.touchpoint_number) === h.touchpoint_number);
     if (!m) { m = { touchpoint_number: h.touchpoint_number }; reviewed.push(m); }
     if (m.verdict === 'ОДОБРЕНО' || !m.verdict) m.verdict = 'НА ДОРАБОТКУ';
-    m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'client_value'])];
+    m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'no_stop_words'])];
     m.fix_instructions = [m.fix_instructions, ...h.fixes].filter(Boolean).join(' ');
   }
   if (r.verdict === 'ОДОБРЕНО' || !r.verdict) r.verdict = 'НА ДОРАБОТКУ';
