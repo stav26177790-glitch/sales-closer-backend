@@ -30,11 +30,11 @@ check('старт 12 ноября: к 1 декабря не успеваем', (
   assert.equal(r.status, 'не успеваем');
 });
 
-check('временная вывеска при «не успеваем»: 3–4 + 1 раб. дн.', () => {
+check('временная вывеска при «не успеваем»: 3–4 + монтаж 2–3 раб. дн.', () => {
   const r = t.computeTimeline({ ...base, today: '2026-11-12' });
-  assert.equal(r.temp_banner.if_start_today_ready, '2026-11-18 – 2026-11-19');
+  assert.equal(r.temp_banner.if_start_today_ready, '2026-11-19 – 2026-11-23');
   assert.equal(r.temp_banner.fits_client_deadline, true);
-  assert.equal(r.temp_banner.latest_start_date, '2026-11-23');
+  assert.equal(r.temp_banner.latest_start_date, '2026-11-19');
 });
 
 check('с запасом — временная вывеска не нужна', () => {
