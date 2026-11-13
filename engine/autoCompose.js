@@ -24,6 +24,7 @@ const { applyPhraseCheck } = require('./phraseCheck');
 const { applyMustIncludeCheck } = require('./mustInclude');
 const { applyScheduleCheck } = require('./scheduleCheck');
 const { pinToPlan } = require('./touchPlan');
+const { setStage } = require('./progress');
 
 // Канал касания → ключ лимита длины («Звонок», «call», «WhatsApp»…).
 function channelKey(channel) {
@@ -178,6 +179,7 @@ function verdictOf(r) {
  * @returns { composer_output, reviewer_output, approved, rounds, reviews }
  */
 async function composeUntilReady(baseInput, deal, { feedback, channelHistory, startWith } = {}) {
+  const stage = (text) => setStage(deal.id, text);
   let cur = { ...deal };
   let fb = feedback;
   let composerOutput = deal.last_composer_output;
@@ -196,6 +198,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     // Доработка по замечаниям проверки — сначала точечно редактором.
     const byVerdict = !skipCompose && fb && cur.last_reviewer_output && fb === cur.last_reviewer_output;
     if (byVerdict) {
+      stage(`Редактор правит касания ${bad(fb) || ''}…`);
       const edited = await runEditor(baseInput, deal, cur.last_composer_output, fb);
       if (edited) {
         rounds++;
@@ -207,6 +210,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       }
     }
     if (!skipCompose) {
+      stage(rounds === 0 && !fb ? 'Пишу касания по плану…' : 'Переписываю касания с учётом замечаний…');
       const fresh = await runComposer(baseInput, cur, {
         feedback: fb,
         channelHistory: rounds === 0 ? channelHistory : undefined,
@@ -238,6 +242,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     }
 
     if (reviews >= CONFIG.AUTO_REVIEWS) break; // защита: вердикт — последняя проверка reviewer'а
+    stage(reviews === 0 ? 'Проверяю касания: тон, выгода, давление, обязательные пункты…' : 'Проверяю касания ещё раз…');
     // Лимит 12000: ответ reviewer'а самый объёмный (14 критериев на касание).
     const result = await callAgentSafe('reviewer', {
       ...baseInput,
@@ -260,6 +265,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     console.log(`[autoCompose] круг ${rounds}: проверка не приняла касания`);
     if (reviews >= CONFIG.AUTO_REVIEWS) {
       // Проверок больше не делаем (время) — последние замечания вносит editor.
+      stage(`Редактор вносит последние правки в касания ${bad(reviewerOutput)}…`);
       const edited = await runEditor(baseInput, deal, composerOutput, reviewerOutput);
       if (edited) {
         rounds++;
