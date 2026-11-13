@@ -42,6 +42,8 @@ function parseAgentText(rawOutput) {
   }
 }
 
+const { recordAgentCall } = require('../engine/agentLog');
+
 async function callAgent(agentName, inputData, maxTokens = 4000) {
   // Трейс-логгинг (баг №34): каждый вызов агента виден в логах —
   // кто, для какой сделки, когда начался и чем закончился.
@@ -66,6 +68,8 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
 
   const rawOutput = response.content.find((b) => b.type === 'text')?.text || '';
   const parsed = parseAgentText(rawOutput);
+  // Сохраняем вход и ответ агента для проверки правок на реальных ответах (engine/agentLog.js).
+  recordAgentCall({ agent: agentName, input: inputData, output: parsed, rawOutput, durationMs: Date.now() - startedAt, usage: response.usage });
   if (parsed === null) {
     console.warn(
       `[agentRunner] Ответ ${agentName} (сделка: ${dealLabel}) не разобран как JSON` +

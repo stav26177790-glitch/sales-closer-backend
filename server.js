@@ -7,6 +7,7 @@ const { friendlyError } = require('./engine/errors');
 const { timelineForDeal } = require('./engine/timeline');
 const { formatTimeline } = require('./engine/chat');
 const progress = require('./engine/progress');
+const { listAgentCalls } = require('./engine/agentLog');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
@@ -206,6 +207,18 @@ app.get('/api/deals/:id/job', requireManager, async (req, res) => {
     if (job.status === 'done') Object.assign(body, job.result);
     if (job.status === 'error') body.error = friendlyError(job.error);
     res.json(body);
+  } catch (e) {
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
+  }
+});
+
+// Ответы агентов по сделке — для разработчика: проверить правки на реальных ответах.
+app.get('/api/deals/:id/agent-calls', requireManager, async (req, res) => {
+  try {
+    const deal = await db.getDeal(req.params.id);
+    if (deal.manager_id !== req.managerId) return res.status(403).json({ error: 'Нет доступа' });
+    res.json({ deal, calls: await listAgentCalls(req.params.id) });
   } catch (e) {
     console.error('[API ERROR]', req.method, req.path, e);
     res.status(500).json({ error: friendlyError(e) });

@@ -15,6 +15,7 @@ const { formatAgentReplyForChat, formatTimeline } = require('./chat');
 const { STEP_HANDLERS } = require('./steps');
 const { computeTimeline, moscowToday } = require('./timeline');
 const { workingDaysAhead } = require('./scheduleCheck');
+const { runWithDeal } = require('./agentLog');
 
 
 function daysSilentNow(deal) {
@@ -260,7 +261,7 @@ async function advance(dealId, managerInput) {
           `завершения предыдущего запроса к этой же сделке (баг №34 — защита от гонки).`
         );
       }
-      return advanceInternal(dealId, managerInput);
+      return runWithDeal(dealId, () => advanceInternal(dealId, managerInput));
     });
 
   dealQueueTail.set(dealId, promise);
