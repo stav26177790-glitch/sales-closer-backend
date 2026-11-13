@@ -11,6 +11,7 @@
 const { callAgentSafe, runComposer, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
 const { applyPhraseCheck } = require('../phraseCheck');
+const { formatAgentReplyForChat } = require('../chat');
 const { applyMustIncludeCheck } = require('../mustInclude');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
@@ -81,6 +82,9 @@ async function lengthViolation({ deal, baseInput, managerInput }, violations, ma
   // Нарушение длины — техническая причина, поэтому итерацию считаем как обычно
   // (в отличие от вкусового фидбэка менеджера в managerEdit).
   output._composer_iterations = iterations + 1;
+  // Менеджер написал «ок», а получил другие касания — объясняем почему (прогон 2026-11-13).
+  const list = violations.map((v) => `касание ${v.touchpoint} — ${v.current} из ${v.max} символов`).join(', ');
+  output._directText = `_Касания длиннее лимита канала (${list}) — сократил. Проверьте, что важное осталось._\n\n${formatAgentReplyForChat('COMPOSING', output)}`;
   return { nextState: 'COMPOSING', output };
 }
 
@@ -91,6 +95,7 @@ async function managerQuestion({ deal, baseInput, managerInput }) {
   const output = {};
   const advisorResult = await callAgentSafe('advisor', {
     ...baseInput,
+    diagnostic_output: deal.last_diagnostic_output,
     strategy_output: deal.last_strategy_output,
     composer_output: deal.last_composer_output,
     manager_question: managerInput
@@ -128,6 +133,7 @@ async function sendToReview({ dealId, deal, baseInput }) {
   // запрещает текст вне JSON, лимит поднят с запасом.
   const reviewerResult = await callAgentSafe('reviewer', {
     ...baseInput,
+    diagnostic_output: deal.last_diagnostic_output,
     strategy_output: deal.last_strategy_output,
     composer_output: deal.last_composer_output
   }, 12000);

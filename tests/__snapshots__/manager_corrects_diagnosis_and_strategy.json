@@ -1,0 +1,533 @@
+{
+  "name": "manager_corrects_diagnosis_and_strategy",
+  "description": "Правка после оценки пересобирает оценку, правка после стратегии — стратегию; «давай стратегию» / «пиши касания» идут дальше",
+  "unusedAgentResponses": [],
+  "steps": [
+    {
+      "message": "перепиши оценку с учётом сроков",
+      "stateBefore": "DIAGNOSING",
+      "nextState": "DIAGNOSING",
+      "chatText": "## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n**Вывод:** бюджет есть, ЛПР не выявлен\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._",
+      "agentCalls": [
+        {
+          "agent": "diagnostic",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "timeline": null,
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "перепиши оценку с учётом сроков",
+              "source_materials": {
+                "what_is_this": "Все сообщения менеджера по сделке за всё время, по порядку: переписка с клиентом, заметки, ответы на уточнения. Главный источник фактов — цитаты клиента, его обещания, условия и даты, которые менеджер уже называл.",
+                "text": "[Сообщение менеджера 1]\nперепиши оценку с учётом сроков"
+              },
+              "dialog_history": "[Менеджер]: перепиши оценку с учётом сроков",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "manager_correction": "перепиши оценку с учётом сроков",
+            "previous_diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "DIAGNOSING",
+          "last_diagnostic_output": {
+            "scores": {
+              "financial": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "бюджет 420 тыс согласован"
+                ],
+                "confidence": "high"
+              },
+              "need": {
+                "status": "Подтверждено",
+                "evidence": [
+                  "открытие магазина"
+                ],
+                "confidence": "high"
+              },
+              "trust": {
+                "status": "Вероятно",
+                "evidence": [
+                  "одна встреча"
+                ],
+                "confidence": "medium"
+              },
+              "authority": {
+                "status": "Неизвестно",
+                "evidence": [],
+                "confidence": "low"
+              },
+              "urgency": {
+                "status": "Вероятно",
+                "evidence": [
+                  "срок размыт"
+                ],
+                "confidence": "medium"
+              }
+            },
+            "primary_blocker": {
+              "criterion": "authority",
+              "reason": "ЛПР не выявлен",
+              "evidence": []
+            },
+            "patterns_detected": [],
+            "conflicts_with_manager": [],
+            "clarification_needed": {
+              "required": false,
+              "questions": []
+            },
+            "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+          },
+          "criteria": {
+            "financial": "Подтверждено",
+            "need": "Подтверждено",
+            "trust": "Вероятно",
+            "authority": "Неизвестно",
+            "urgency": "Вероятно"
+          }
+        }
+      ]
+    },
+    {
+      "message": "давай стратегию",
+      "stateBefore": "DIAGNOSING",
+      "nextState": "STRATEGY_SELECTION",
+      "chatText": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** без ЛПР сделка не двинется\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._",
+      "agentCalls": [
+        {
+          "agent": "strategy",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "timeline": null,
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "давай стратегию",
+              "source_materials": {
+                "what_is_this": "Все сообщения менеджера по сделке за всё время, по порядку: переписка с клиентом, заметки, ответы на уточнения. Главный источник фактов — цитаты клиента, его обещания, условия и даты, которые менеджер уже называл.",
+                "text": "[Сообщение менеджера 1]\nперепиши оценку с учётом сроков\n\n[Сообщение менеджера 2]\nдавай стратегию"
+              },
+              "dialog_history": "[Менеджер]: перепиши оценку с учётом сроков\n\n[Агент]: ## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n**Вывод:** бюджет есть, ЛПР не выявлен\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._\n\n[Менеджер]: давай стратегию",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "STRATEGY_SELECTION",
+          "last_strategy_output": {
+            "deal_health": "под риском",
+            "primary_strategy": {
+              "name": "Охват всех участников решения",
+              "goal": "выйти на ЛПР"
+            },
+            "main_blocker": "ЛПР не участвует в переговорах",
+            "recommended_next_action": "предложить встречу с собственником",
+            "strategy_summary": "без ЛПР сделка не двинется",
+            "must_include": []
+          }
+        }
+      ]
+    },
+    {
+      "message": "собственник в отпуске до 20-го",
+      "stateBefore": "STRATEGY_SELECTION",
+      "nextState": "STRATEGY_SELECTION",
+      "chatText": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** учтено: собственник в отпуске до 20-го\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._",
+      "agentCalls": [
+        {
+          "agent": "strategy",
+          "maxTokens": null,
+          "input": {
+            "today": "<TODAY>",
+            "timeline": null,
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "собственник в отпуске до 20-го",
+              "source_materials": {
+                "what_is_this": "Все сообщения менеджера по сделке за всё время, по порядку: переписка с клиентом, заметки, ответы на уточнения. Главный источник фактов — цитаты клиента, его обещания, условия и даты, которые менеджер уже называл.",
+                "text": "[Сообщение менеджера 1]\nперепиши оценку с учётом сроков\n\n[Сообщение менеджера 2]\nдавай стратегию\n\n[Сообщение менеджера 3]\nсобственник в отпуске до 20-го"
+              },
+              "dialog_history": "[Менеджер]: перепиши оценку с учётом сроков\n\n[Агент]: ## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n**Вывод:** бюджет есть, ЛПР не выявлен\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._\n\n[Менеджер]: давай стратегию\n\n[Агент]: ## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** без ЛПР сделка не двинется\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._\n\n[Менеджер]: собственник в отпуске до 20-го",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
+            "manager_correction": "собственник в отпуске до 20-го",
+            "previous_strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "без ЛПР сделка не двинется",
+              "must_include": []
+            }
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "STRATEGY_SELECTION",
+          "last_strategy_output": {
+            "deal_health": "под риском",
+            "primary_strategy": {
+              "name": "Охват всех участников решения",
+              "goal": "выйти на ЛПР"
+            },
+            "main_blocker": "ЛПР не участвует в переговорах",
+            "recommended_next_action": "предложить встречу с собственником",
+            "strategy_summary": "учтено: собственник в отпуске до 20-го",
+            "must_include": []
+          }
+        }
+      ]
+    },
+    {
+      "message": "пиши касания",
+      "stateBefore": "STRATEGY_SELECTION",
+      "nextState": "COMPOSING",
+      "chatText": "### Касание 1 · WhatsApp\nКасание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг.\n\n---\n\n### Касание 2 · Email\n**Тема:** Тема C\n\nПисьмо C: материалы по монтажу во вложении.\n\n📎 **График монтажа**\nнеделя 1 — замер, неделя 2 — монтаж\n\n---\n\n_Напишите «ок», чтобы отправить на проверку, или пришлите правку._",
+      "agentCalls": [
+        {
+          "agent": "composer",
+          "maxTokens": 8000,
+          "input": {
+            "today": "<TODAY>",
+            "timeline": null,
+            "deal": {
+              "client": "СтройДвор",
+              "product": "вывеска на фасад",
+              "deal_size": 420000,
+              "industry": "signage",
+              "last_contact": "2026-07-15",
+              "days_silent": 4
+            },
+            "materials": {
+              "correspondence": "пиши касания",
+              "source_materials": {
+                "what_is_this": "Все сообщения менеджера по сделке за всё время, по порядку: переписка с клиентом, заметки, ответы на уточнения. Главный источник фактов — цитаты клиента, его обещания, условия и даты, которые менеджер уже называл.",
+                "text": "[Сообщение менеджера 1]\nперепиши оценку с учётом сроков\n\n[Сообщение менеджера 2]\nдавай стратегию\n\n[Сообщение менеджера 3]\nсобственник в отпуске до 20-го\n\n[Сообщение менеджера 4]\nпиши касания"
+              },
+              "dialog_history": "[Менеджер]: перепиши оценку с учётом сроков\n\n[Агент]: ## Оценка по СОПРАНО\n\n- **Финансы:** Подтверждено\n- **Потребность:** Подтверждено\n- **Доверие:** Вероятно\n- **Полномочия (ЛПР):** Неизвестно\n- **Срочность:** Вероятно\n\n**Вывод:** бюджет есть, ЛПР не выявлен\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._\n\n[Менеджер]: давай стратегию\n\n[Агент]: ## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** без ЛПР сделка не двинется\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._\n\n[Менеджер]: собственник в отпуске до 20-го\n\n[Агент]: ## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** выйти на ЛПР\n\n**Главный блокер:** ЛПР не участвует в переговорах\n\n**Следующий шаг:** предложить встречу с собственником\n\n**Обоснование:** учтено: собственник в отпуске до 20-го\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._\n\n[Менеджер]: пиши касания",
+              "user_assessment": {
+                "financial": "",
+                "need": "",
+                "trust": "",
+                "authority": "",
+                "urgency": ""
+              }
+            },
+            "memory": {
+              "session_number": 1,
+              "previous_touchpoints": [],
+              "confirmed_facts": [],
+              "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
+            "strategy_output": {
+              "deal_health": "под риском",
+              "primary_strategy": {
+                "name": "Охват всех участников решения",
+                "goal": "выйти на ЛПР"
+              },
+              "main_blocker": "ЛПР не участвует в переговорах",
+              "recommended_next_action": "предложить встречу с собственником",
+              "strategy_summary": "учтено: собственник в отпуске до 20-го",
+              "must_include": []
+            },
+            "channel_history": [],
+            "message_length_limits": {
+              "telegram": 400,
+              "whatsapp": 400,
+              "email": 1500,
+              "voice": 300,
+              "call_script": 500
+            },
+            "iteration": 1
+          }
+        }
+      ],
+      "dbPatches": [
+        {
+          "current_state": "COMPOSING",
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "whatsapp",
+                "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
+              },
+              {
+                "touchpoint_number": 2,
+                "channel": "email",
+                "subject": "Тема C",
+                "body": "Письмо C: материалы по монтажу во вложении.",
+                "attachment": {
+                  "title": "График монтажа",
+                  "content": "неделя 1 — замер, неделя 2 — монтаж"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

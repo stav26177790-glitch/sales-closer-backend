@@ -158,6 +158,12 @@ async function advanceInternal(dealId, managerInput) {
     || formatAgentReplyForChat(deal.current_state, output);
   // После свежей диагностики — блок «Сроки» (расчёт кодом).
   if (!output._directText && output.diagnostic_output) chatText += formatTimeline(baseInput.timeline);
+  // Что делать дальше: «ок» — следующий шаг, иначе — правка (её учтут и пересоберут).
+  if (!output._directText && nextState === 'DIAGNOSING') {
+    chatText += '\n\n---\n\n_Напишите «ок» — составлю стратегию. Если в оценке что-то не так или есть новые факты — напишите, пересоберу оценку._';
+  } else if (!output._directText && nextState === 'STRATEGY_SELECTION') {
+    chatText += '\n\n---\n\n_Напишите «ок» — напишу касания. Если стратегию или список «Обязательно в касаниях» нужно поправить — напишите что, пересоберу._';
+  }
   return { nextState, chatText, raw: output };
 }
 

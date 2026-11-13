@@ -369,4 +369,15 @@ module.exports = [
     },
     messages: ['дальше'],
   },
+  {
+    name: 'manager_corrects_diagnosis_and_strategy',
+    description: 'Правка после оценки пересобирает оценку, правка после стратегии — стратегию; «давай стратегию» / «пиши касания» идут дальше',
+    deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
+    agents: {
+      diagnostic: [diagnostic()],
+      strategy: [strategy(), strategy({ strategy_summary: 'учтено: собственник в отпуске до 20-го' })],
+      composer: [composer('C')],
+    },
+    messages: ['перепиши оценку с учётом сроков', 'давай стратегию', 'собственник в отпуске до 20-го', 'пиши касания'],
+  },
 ];

@@ -44,6 +44,55 @@
               "confirmed_facts": [],
               "open_questions": []
             },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
             "strategy_output": {
               "deal_health": "под риском",
               "primary_strategy": {
@@ -135,6 +184,55 @@
               "previous_touchpoints": [],
               "confirmed_facts": [],
               "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
             },
             "strategy_output": {
               "deal_health": "под риском",
@@ -256,6 +354,55 @@
               "confirmed_facts": [],
               "open_questions": []
             },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
+            },
             "strategy_output": {
               "deal_health": "под риском",
               "primary_strategy": {
@@ -347,6 +494,55 @@
               "previous_touchpoints": [],
               "confirmed_facts": [],
               "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
             },
             "strategy_output": {
               "deal_health": "под риском",
@@ -467,6 +663,55 @@
               "previous_touchpoints": [],
               "confirmed_facts": [],
               "open_questions": []
+            },
+            "diagnostic_output": {
+              "scores": {
+                "financial": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "бюджет 420 тыс согласован"
+                  ],
+                  "confidence": "high"
+                },
+                "need": {
+                  "status": "Подтверждено",
+                  "evidence": [
+                    "открытие магазина"
+                  ],
+                  "confidence": "high"
+                },
+                "trust": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "одна встреча"
+                  ],
+                  "confidence": "medium"
+                },
+                "authority": {
+                  "status": "Неизвестно",
+                  "evidence": [],
+                  "confidence": "low"
+                },
+                "urgency": {
+                  "status": "Вероятно",
+                  "evidence": [
+                    "срок размыт"
+                  ],
+                  "confidence": "medium"
+                }
+              },
+              "primary_blocker": {
+                "criterion": "authority",
+                "reason": "ЛПР не выявлен",
+                "evidence": []
+              },
+              "patterns_detected": [],
+              "conflicts_with_manager": [],
+              "clarification_needed": {
+                "required": false,
+                "questions": []
+              },
+              "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
             },
             "strategy_output": {
               "deal_health": "под риском",

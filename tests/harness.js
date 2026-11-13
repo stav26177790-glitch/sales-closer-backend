@@ -20,7 +20,7 @@ const RUNNER = path.join(ROOT, 'agentRunner.js');
 
 const TODAY_TOKEN = '<TODAY>';
 // Как в engine/advance.js: «сегодня» по Москве.
-const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
+const today = () => process.env.KLOUZER_TODAY || new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
 
 // Дата меняется каждый день — в снимках заменяем её на постоянную метку.
 function normalize(value) {

@@ -49,7 +49,9 @@ const COMPOSER_MAX_TOKENS = 8000;
 // stateMachine.js. Порядок ключей сохранён: стратегия, история каналов
 // (только для первой попытки), фидбэк (для доработок), лимиты длины, номер итерации.
 function buildComposerInput(baseInput, deal, { feedback, channelHistory, iteration }) {
-  const input = { ...baseInput, strategy_output: deal.last_strategy_output };
+  // diagnostic_output: промпты composer'а и reviewer'а опираются на него
+  // (триггеры клиента с цитатами, блокер), но код его не передавал (прогон 2026-11-13).
+  const input = { ...baseInput, diagnostic_output: deal.last_diagnostic_output, strategy_output: deal.last_strategy_output };
   if (channelHistory !== undefined) input.channel_history = channelHistory;
   if (feedback !== undefined) {
     // 2026-11-12: на доработке composer должен видеть свои прошлые касания —
@@ -172,10 +174,10 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   return { output, nextState: 'DIAGNOSING' };
 }
 
-const NO_ASSESSMENT = /не\s+зна|не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк\w*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
+const NO_ASSESSMENT = /не\s+зна|не\s+указ|не\s+дал|не\s+задан|не\s+заполн|нет\s+оценк|оценк[а-яё]*\s+нет|отсутств|неизвестн|^[\s\-—–?]*$/i;
 
 // Записи «оценки совпадают / расхождений нет» — не расхождения.
-const NO_CONFLICT = /совпада|расхождени\w*\s+нет|нет\s+расхожд|без\s+расхожд/i;
+const NO_CONFLICT = /совпада|расхождени[а-яё]*\s+нет|нет\s+расхожд|без\s+расхожд/i;
 
 // Записи conflicts_with_manager, где у менеджера действительно есть своя
 // оценка и агент с ней НЕ согласен.

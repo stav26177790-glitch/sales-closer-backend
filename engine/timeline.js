@@ -40,6 +40,9 @@ const DAY_MS = 864e5;
 // Дата по Москве: менеджеры работают по московскому времени, а сервер — в UTC
 // (после 21:00 МСК дата в UTC была бы «вчерашней» для расчёта сроков).
 function moscowToday() {
+  // Только для тестов: виртуальный прогон (tests/virtual) фиксирует «сегодня».
+  const fixed = process.env.KLOUZER_TODAY;
+  if (fixed && /^\d{4}-\d{2}-\d{2}$/.test(fixed)) return fixed;
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(new Date());
 }
 
@@ -139,6 +142,10 @@ const wdays = (n) => `${n} ${plural(n, 'рабочий день', 'рабочи�
 // других отраслей её не предлагаем. Не задана (старые вызовы, тесты) — как signage.
 function computeTimeline({ today, clientDeadline, productionDays, installDaysMin = 2, installDaysMax = 3, industry }) {
   const isSignage = !industry || industry === 'signage';
+  // Слова для текста: у вывесок — монтаж; в других отраслях — запуск/финальный этап.
+  const W = isSignage
+    ? { inst: 'монтаж', instGen: 'монтажа', instIns: 'монтаже', start: 'старта (согласования макета)' }
+    : { inst: 'запуск', instGen: 'запуска', instIns: 'запуске', start: 'старта' };
   const iso = /^\d{4}-\d{2}-\d{2}$/;
   const prod = Number(productionDays);
   if (!iso.test(String(today)) || !iso.test(String(clientDeadline)) || !(prod > 0)) return null;
@@ -176,10 +183,10 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
     verdict = 'успеваем впритык, без запаса';
   } else if (installedEarliest <= readyBy) {
     status = 'впритык';
-    verdict = `успеваем впритык, только если монтаж займёт ${iMin} ${plural(iMin, 'день', 'дня', 'дней')}`;
+    verdict = `успеваем впритык, только если ${W.inst} займёт ${iMin} ${plural(iMin, 'день', 'дня', 'дней')}`;
   } else {
     status = 'не успеваем';
-    verdict = `при обычном сроке не успеваем: опоздание ${wdays(-workingDaysBetween(installedEarliest, readyBy))} даже при быстром монтаже`;
+    verdict = `при обычном сроке не успеваем: опоздание ${wdays(-workingDaysBetween(installedEarliest, readyBy))} даже при быстром ${W.instIns}`;
   }
 
   // Временная вывеска — считаем, только когда постоянную не успеваем или впритык.
@@ -203,8 +210,8 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
   const install = iMin === iMax ? `${iMin}` : `${iMin}–${iMax}`;
   const shiftNote = buffer < 0 ? ` Каждый рабочий день задержки старта сдвигает готовность ${isSignage ? 'постоянной вывески' : 'заказа'} на рабочий день.` : '';
   const lastStartText = latestStart >= today
-    ? `Последний день старта (согласования макета) с учётом монтажа ${iMax} дн. — ${humanDate(latestStart)}.`
-    : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= today && latestStartBestCase !== latestStart ? ` (при монтаже за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
+    ? `Последний день ${W.start} с учётом ${W.instGen} ${iMax} дн. — ${humanDate(latestStart)}.`
+    : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= today && latestStartBestCase !== latestStart ? ` (при ${W.instIns} за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
 
   return {
     today,
@@ -223,7 +230,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
     temp_banner: tempBanner,
     summary:
       `Старт сегодня, ${humanDate(today)}: производство ${wdays(prod)} — до ${humanDate(productionDone)}, ` +
-      `монтаж ${install} раб. дн. — готово ${iMin === iMax ? humanDate(installedLatest) : `${humanDate(installedEarliest)} – ${humanDate(installedLatest)}`}. ` +
+      `${W.inst} ${install} раб. дн. — готово ${iMin === iMax ? humanDate(installedLatest) : `${humanDate(installedEarliest)} – ${humanDate(installedLatest)}`}. ` +
       `Клиенту нужно к ${humanDate(clientDeadline)} (готово не позже ${humanDate(readyBy)}): ${verdict}. ${lastStartText}${shiftNote}` +
       (tempBanner ? ` ${tempBanner.summary}` : ''),
     rules: 'Считаются только рабочие дни (без выходных и праздников РФ). Даты готовности и последний день старта в касаниях — только из этого расчёта, сам не считай.'

@@ -81,6 +81,16 @@ function isPureApproval(text) {
   return clauses.every(clause => PURE_APPROVAL_PHRASES.has(clause));
 }
 
+// Этапы оценки и стратегии: «ок» или просьба идти дальше («давай стратегию»,
+// «пиши касания») — переход к следующему шагу; всё остальное — правка или
+// новые факты, по которым результат пересобирается (живой тест 2026-11-13:
+// «перепиши оценку с учётом сроков» молча запустило стратегию).
+const GO_NEXT_RE = /^(ок|окей|да|давай|дальше|го|хорошо|согласен|согласна)?[\s,.!]*((давай|делай|сделай|составь|пиши|напиши|переходи(м)?|перейди|к)\s+)*(стратеги[а-яё]*|касани[а-яё]*)[\s.!]*$/i;
+function isGoAhead(text) {
+  const raw = String(text || '').trim();
+  return isPureApproval(raw) || GO_NEXT_RE.test(raw);
+}
+
 // Определяет, является ли сообщение менеджера ВОПРОСОМ к агенту (просьбой
 // подсказать/посоветовать), а не инструкцией по правке текста касаний.
 // Раньше такие сообщения ("может продолжить с Александром?", "что ответить
@@ -170,6 +180,7 @@ function logIntentClassificationShadow(managerInput, isApproval, isQuestion, dea
 }
 
 module.exports = {
+  isGoAhead,
   isEndSessionCommand,
   isPureApproval,
   isManagerQuestion,

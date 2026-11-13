@@ -89,7 +89,8 @@ function formatClientTriggers(triggers) {
     .filter((t) => t && t.trigger)
     .map((t) => {
       const evidence = t.evidence ? ` ${t.evidence}` : '';
-      const who = t.who ? ` (${t.who})` : '';
+      // «Марина (контактное лицо)» → «(Марина, контактное лицо)», без двойных скобок.
+      const who = t.who ? ` (${String(t.who).replace(/\s*\(\s*/g, ', ').replace(/\)/g, '').trim()})` : '';
       return `- **${t.trigger}:**${evidence}${who}`;
     });
   return items.length ? `\n\n## Что важно клиенту\n\n${items.join('\n')}` : '';
