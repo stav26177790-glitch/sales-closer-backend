@@ -129,13 +129,14 @@ function formatTouchpoint(m, i) {
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 
-// Замечание проверки для менеджера — первые 2 предложения (полный текст уходит composer'у).
+// Замечание проверки для менеджера: до ~350 символов, обрезка по концу
+// предложения (не на «1.» в нумерации). Полный текст уходит редактору.
 function shortNote(text) {
   const t = String(text || '').replace(/\s+/g, ' ').trim();
-  if (!t) return '';
-  const parts = t.match(/[^.!?]+[.!?]+(\s|$)/g) || [t];
-  const short = parts.slice(0, 2).join('').trim();
-  return short.length < t.length ? `${short} …` : short;
+  if (!t || t.length <= 350) return t;
+  let cut = -1;
+  for (const m of t.slice(0, 350).matchAll(/[а-яёa-z»)"][.!?](\s|$)/gi)) cut = m.index + 2;
+  return cut > 80 ? `${t.slice(0, cut).trim()} …` : `${t.slice(0, 330).trim()} …`;
 }
 
 // Критерии ФОРМУЛЫ ЗАКРЫТИЯ (diagnostic_output.scores). До 2026-11-13 в чате
