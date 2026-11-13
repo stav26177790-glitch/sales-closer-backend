@@ -13,7 +13,7 @@
  *    (последний день старта, последний день запуска баннера, дата клиента),
  *    а текст называет этот срок как ещё не наступивший, — и не даёт его одобрить.
  */
-const { addWorkingDays, humanDate } = require('./timeline');
+const { addWorkingDays, humanDate, computeTimeline } = require('./timeline');
 
 const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const DATE_RE = new RegExp(`(\\d{1,2})\\s+(${MONTHS.join('|')})`, 'gi');
@@ -62,7 +62,7 @@ function sendDate(timing, today, known = {}) {
 
 // Сроки из расчёта, которые нельзя называть будущими после их наступления.
 function deadlines(timeline) {
-  if (!timeline || !timeline.today) return [];
+  if (!timeline || !timeline.today || !timeline.if_start_today) return [];
   const out = [];
   if (timeline.latest_start_date && timeline.latest_start_date >= timeline.today) out.push(timeline.latest_start_date);
   if (timeline.temp_banner?.latest_start_date) out.push(timeline.temp_banner.latest_start_date);
@@ -72,7 +72,7 @@ function deadlines(timeline) {
 // [{ touchpoint_number, fixes }] — касания, которые уходят после срока и называют его.
 function findScheduleIssues(messages, timeline) {
   const dl = deadlines(timeline);
-  if (!dl.length) return [];
+  if (!timeline || !timeline.if_start_today) return [];
   const today = timeline.today;
   const out = [];
   const known = {};
@@ -85,6 +85,14 @@ function findScheduleIssues(messages, timeline) {
     const fixes = dl
       .filter((d) => sent > d && mentioned.has(d))
       .map((d) => `Касание уходит ${humanDate(sent)}, а в тексте срок ${humanDate(d)} — к отправке он уже пройдёт. Либо отправить касание не позже ${humanDate(d)} (поменять timing), либо убрать этот срок и честно говорить о реальной дате готовности на день отправки.`);
+    // Дата готовности «при старте сегодня» в касании, которое уходит позже.
+    const s0 = timeline.if_start_today || {};
+    if (sent > today && (mentioned.has(s0.installed_earliest) || mentioned.has(s0.installed_latest))) {
+      const later = computeTimeline({ today: sent, clientDeadline: timeline.client_deadline, productionDays: timeline.production_working_days, installDaysMin: Number(String(timeline.install_working_days).split('–')[0]), installDaysMax: Number(String(timeline.install_working_days).split('–').pop()) });
+      const s1 = later?.if_start_today;
+      const real = s1 ? (s1.installed_earliest === s1.installed_latest ? humanDate(s1.installed_latest) : `${humanDate(s1.installed_earliest)} – ${humanDate(s1.installed_latest)}`) : null;
+      fixes.push(`Касание уходит ${humanDate(sent)}, а дата готовности в тексте посчитана для старта ${humanDate(today)}.${real ? ` При старте ${humanDate(sent)} — готово ${real} (см. timeline.ready_if_start_on).` : ''}`);
+    }
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
   return out;

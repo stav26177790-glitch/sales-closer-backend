@@ -224,6 +224,16 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
       installed_earliest: installedEarliest,
       installed_latest: installedLatest
     },
+    // Если старт позже сегодня — когда будет готово. Для касаний, которые уходят
+    // не сегодня: «при старте сегодня — 3–4 декабря» в касании от 25 ноября
+    // было бы неправдой (живой тест 2026-11-13).
+    ready_if_start_on: Array.from({ length: 10 }, (_, k) => {
+      const start = addWorkingDays(today, k + 1);
+      const done = addWorkingDays(start, prod);
+      const a = addWorkingDays(done, iMin);
+      const b = addWorkingDays(done, iMax);
+      return `старт ${humanDate(start)} → готово ${a === b ? humanDate(b) : `${humanDate(a)} – ${humanDate(b)}`}`;
+    }),
     latest_start_date: latestStart,
     buffer_working_days: buffer,
     status,
