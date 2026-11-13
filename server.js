@@ -9,6 +9,9 @@ const { formatTimeline } = require('./engine/chat');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+// Сколько запросов сейчас в работе — для мягкого завершения при деплое (см. SIGTERM внизу).
+let inFlight = 0;
+app.use((req, res, next) => { inFlight++; res.on('close', () => { inFlight--; }); next(); });
 
 const POST_COMPOSING_STATES = new Set(['COMPOSING', 'REVIEWING', 'ESCALATION', 'MEMORY_UPDATE', 'FINAL_OUTPUT']);
 const STALE_DAYS = 14;
@@ -198,3 +201,17 @@ const server = app.listen(PORT, () => console.log(`Sales Closer AI backend on :$
 server.requestTimeout = 15 * 60 * 1000;
 server.headersTimeout = 15 * 60 * 1000 + 5000;
 server.keepAliveTimeout = 65 * 1000;
+
+// Деплой на Render: новый экземпляр принимает запросы, старому через 60 с
+// приходит SIGTERM. Раньше Node завершался сразу — ход менеджера, который
+// ещё считался (касания идут 2–4 минуты), обрывался: «Load failed»
+// (живой тест 2026-11-13). Теперь: не принимаем новые запросы, ждём, пока
+// закончатся начатые, и только потом выходим (Render добьёт SIGKILL по
+// истечении shutdown delay — по умолчанию 30 с, можно поднять до 300).
+process.on('SIGTERM', () => {
+  console.log(`[shutdown] SIGTERM — жду завершения запросов: ${inFlight}`);
+  server.close(() => process.exit(0));
+  const timer = setInterval(() => {
+    if (inFlight <= 0) { clearInterval(timer); process.exit(0); }
+  }, 1000);
+});
