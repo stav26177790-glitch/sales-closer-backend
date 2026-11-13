@@ -131,8 +131,27 @@ const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 
 // Замечание проверки для менеджера: до ~350 символов, обрезка по концу
 // предложения (не на «1.» в нумерации). Полный текст уходит редактору.
+// Внутренние названия полей менеджеру не показываем (живой тест 2026-11-13:
+// «в поле personalization_elements… body касания… пункта 6 must_include»).
+const FIELD_WORDS = [
+  [/(в |в поле )?personalization_elements/gi, 'в деталях персонализации'],
+  [/value_for_recipient/gi, 'выгода адресата'],
+  [/must_include(_coverage)?/gi, 'обязательных пунктов'],
+  [/fix_instructions/gi, 'замечаниях'],
+  [/touchpoint_sequence/gi, 'плане касаний'],
+  [/(strategy|composer|reviewer|diagnostic)_output/gi, 'результате'],
+  [/temp_banner|ready_if_start_on|if_start_today|working_days_ahead|latest_start_date/gi, 'расчёте сроков'],
+  [/\btimeline\b/gi, 'расчёте сроков'],
+  [/(в самом тексте |в тексте |в поле |в )?\bbody\b( касания)?/gi, 'в тексте касания'],
+  [/\b(timing|channel|subject|kind)\b/gi, (w) => ({ timing: 'время отправки', channel: 'канал', subject: 'тема', kind: 'тип касания' }[w.toLowerCase()])],
+  [/`/g, '']
+];
+function humanizeNote(text) {
+  return FIELD_WORDS.reduce((t, [re, to]) => t.replace(re, to), String(text || ''));
+}
+
 function shortNote(text) {
-  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  const t = humanizeNote(text).replace(/\s+/g, ' ').trim();
   if (!t || t.length <= 350) return t;
   let cut = -1;
   for (const m of t.slice(0, 350).matchAll(/[а-яёa-z»)"][.!?](\s|$)/gi)) cut = m.index + 2;
@@ -431,7 +450,7 @@ function formatAgentReplyForChat(state, output) {
       }
       const details = (r.messages_reviewed || r?.reviewer_output?.messages_reviewed || []).map(m => {
         const problems = m.failed_criteria?.length ? `\n  Проблемы: ${translateCriteria(m.failed_criteria)}` : '';
-        const fixes = m.fix_instructions ? `\n  Правки: ${m.fix_instructions}` : '';
+        const fixes = m.fix_instructions ? `\n  Правки: ${humanizeNote(m.fix_instructions)}` : '';
         return `- **Касание ${m.touchpoint_number}:** ${m.verdict}${problems}${fixes}`;
       }).join('\n');
       const next = verdict === 'ОДОБРЕНО' ? '' : '\n\n_Следующее сообщение запустит доработку касаний._';
