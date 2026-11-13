@@ -33,13 +33,10 @@ function formatUsage(usage) {
   return `in ${usage.input_tokens ?? '?'}${cache}, out ${usage.output_tokens ?? '?'}`;
 }
 
+const { parseModelJson } = require('../engine/jsonRepair');
+// Разбор + починка типовых поломок JSON (прямые кавычки внутри строк и т.п.).
 function parseAgentText(rawOutput) {
-  try {
-    const jsonMatch = rawOutput.match(/```json\n([\s\S]*?)\n```/);
-    return jsonMatch ? JSON.parse(jsonMatch[1]) : JSON.parse(rawOutput);
-  } catch {
-    return null;
-  }
+  return parseModelJson(rawOutput);
 }
 
 const { recordAgentCall } = require('../engine/agentLog');

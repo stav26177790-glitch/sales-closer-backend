@@ -19,21 +19,13 @@ const { cleanDiagnostic } = require('./diagnosticCleanup');
 // verdict читался как "не одобрено", composer получал этот мусор как фидбэк и сам
 // съезжал в свободный текст вместо JSON. Пытаемся восстановить JSON здесь же —
 // снимаем обёртку ```json / ``` и парсим второй раз.
+const { parseModelJson } = require('./jsonRepair');
 function tryRecoverFromRawOutput(result) {
   if (!result || typeof result !== 'object') return result;
   if (!result.parse_error || typeof result.raw_output !== 'string') return result;
-  const cleaned = result.raw_output
-    .trim()
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/i, '')
-    .replace(/```\s*$/i, '');
-  try {
-    return JSON.parse(cleaned);
-  } catch (e) {
-    // Не получилось (например, ответ действительно оборван) — возвращаем как было,
-    // чтобы сработали существующие диагностические заглушки с сырым текстом.
-    return result;
-  }
+  // Не получилось и с починкой — возвращаем как было, чтобы сработали
+  // существующие диагностические заглушки с сырым текстом.
+  return parseModelJson(result.raw_output) || result;
 }
 
 // Вызов агента + восстановление ответа в обёртке ```json (см. выше).

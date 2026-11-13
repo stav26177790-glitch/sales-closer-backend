@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node static-checks.js && node test_intake_round_limit.js && node tests/snapshots.test.js && node tests/runner.test.js && node tests/timeline.test.js && node tests/phraseCheck.test.js && node tests/errors.test.js && node tests/mustInclude.test.js && node tests/scheduleCheck.test.js && node tests/autoCompose.test.js && node tests/touchPlan.test.js && node tests/progress.test.js && node tests/diagnosticCleanup.test.js && node tests/strategyCleanup.test.js && node tests/virtual/run.js",
+    "test": "node static-checks.js && node test_intake_round_limit.js && node tests/snapshots.test.js && node tests/runner.test.js && node tests/timeline.test.js && node tests/phraseCheck.test.js && node tests/errors.test.js && node tests/mustInclude.test.js && node tests/scheduleCheck.test.js && node tests/autoCompose.test.js && node tests/touchPlan.test.js && node tests/progress.test.js && node tests/diagnosticCleanup.test.js && node tests/strategyCleanup.test.js && node tests/jsonRepair.test.js && node tests/virtual/run.js",
     "test:virtual": "node tests/virtual/run.js --full",
     "test:update-snapshots": "node tests/snapshots.test.js --update"
   },
@@ -14,8 +14,8 @@
     "@anthropic-ai/sdk": "^0.32.0",
     "@supabase/supabase-js": "^2.45.0",
     "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   },
   "engines": {
     "node": ">=22"
