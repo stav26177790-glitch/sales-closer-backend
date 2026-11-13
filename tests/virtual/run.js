@@ -36,6 +36,8 @@ const issue = (deal, sev, what) => report.push({ deal, sev, what });
 (async () => {
   for (const d of deals) {
     if (d.agents._reviewerTwice) { d.agents.reviewer.push(d.agents.reviewer[0]); delete d.agents._reviewerTwice; }
+    // Касания по плану пишет writer; в сценариях ответы записаны как composer — тот же формат.
+    if (d.agents.composer && !d.agents.writer && d.agents.strategy) { d.agents.writer = d.agents.composer; delete d.agents.composer; }
     let r;
     try { r = await runScenario(d); } catch (e) { issue(d.name, 'КРИТИЧНО', `прогон упал: ${e.message}`); continue; }
     console.log(`\n\n████ ${d.name} — ${d.description}`);
@@ -102,12 +104,14 @@ const issue = (deal, sev, what) => report.push({ deal, sev, what });
     if (calls.some((c) => !(c.input.working_days_ahead || c.input.facts?.working_days_ahead))) issue(d.name, 'вход', 'агент не получил календарь рабочих дней');
 
     // 5. Обязательно в касаниях
-    const strat = calls.find((c) => c.agent === 'composer')?.input.strategy_output;
+    const strat = calls.find((c) => c.agent === 'composer')?.input.strategy_output
+      || calls.find((c) => c.agent === 'reviewer')?.input.strategy_output;
+    if (strat?.touch_plan) console.log('\n' + require(path.join(ROOT, 'engine/touchPlan')).formatTouchPlan(strat.touch_plan));
     const mi = strat?.must_include || [];
     console.log(`\n[must_include: ${mi.length}]`);
     mi.forEach((x, i) => console.log(`  ${i + 1}. ${x}`));
     const cover = composerOut?.must_include_coverage || [];
-    if (mi.length && cover.length !== mi.length) issue(d.name, 'обязательное', `composer отчитался о ${cover.length} пунктах из ${mi.length}`);
+    if (mi.length && cover.length && cover.length !== mi.length) issue(d.name, 'обязательное', `composer отчитался о ${cover.length} пунктах из ${mi.length}`);
   }
 
   console.log('\n\n════════ НАЙДЕНО ════════');

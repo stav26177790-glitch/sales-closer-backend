@@ -23,6 +23,7 @@ const { callAgentSafe, runComposer, keepApprovedTouches } = require('./pipeline'
 const { applyPhraseCheck } = require('./phraseCheck');
 const { applyMustIncludeCheck } = require('./mustInclude');
 const { applyScheduleCheck } = require('./scheduleCheck');
+const { pinToPlan } = require('./touchPlan');
 
 // Канал касания → ключ лимита длины («Звонок», «call», «WhatsApp»…).
 function channelKey(channel) {
@@ -40,13 +41,23 @@ const messagesOf = (out) => out?.messages || out?.composer_output?.messages || [
 // Проверки кода без модели: длина, запрещённые фразы, календарь.
 // Вердикт в форме reviewer'а; касания без замечаний — ОДОБРЕНО (чтобы при
 // доработке их не переписывали).
-function codeChecks(composerOutput, timeline) {
+function codeChecks(composerOutput, timeline, plan) {
   const msgs = messagesOf(composerOutput);
   const r = {
     verdict: 'ОДОБРЕНО',
     source: 'code',
     messages_reviewed: msgs.map((m, i) => ({ touchpoint_number: Number(m?.touchpoint_number ?? i + 1), verdict: 'ОДОБРЕНО' }))
   };
+  // Каждое касание плана должно быть написано (writer иногда пропускает).
+  if (Array.isArray(plan)) {
+    const have = new Set(msgs.map((m, i) => Number(m?.touchpoint_number ?? i + 1)));
+    for (const p of plan) {
+      if (have.has(p.touchpoint_number)) continue;
+      r.messages_reviewed.push({ touchpoint_number: p.touchpoint_number, verdict: 'НА ДОРАБОТКУ', code_checked: true, failed_criteria: ['missing_touch'],
+        fix_instructions: `Касание ${p.touchpoint_number} из плана не написано (${p.channel}, ${p.timing}${p.goal ? `: ${p.goal}` : ''}) — написать.` });
+      r.verdict = 'НА ДОРАБОТКУ';
+    }
+  }
   msgs.forEach((m, i) => {
     const max = CONFIG.MAX_MESSAGE_LENGTH[channelKey(m?.channel)];
     const len = String(m?.body || '').length;
@@ -99,12 +110,13 @@ async function runEditor(baseInput, deal, composerOutput, verdict) {
     .filter(({ n }) => nums.has(n))
     .map(({ m, n }) => {
       const r = rejected.find((x) => Number(x.touchpoint_number) === n);
-      return { touch: m, fix_instructions: r?.fix_instructions || (r?.failed_criteria || []).join(', ') };
+      const planned = (deal.last_strategy_output?.touch_plan || []).find((p) => p.touchpoint_number === n);
+      return { touch: m, fix_instructions: r?.fix_instructions || (r?.failed_criteria || []).join(', '), ...(planned ? { plan: { facts: planned.facts, must_include: planned.must_include, value: planned.value } } : {}) };
     });
   if (!touchesToFix.length) return null;
   // Чередование экспертное/эмпатичное — это структура цепочки (вставить кружок,
   // переставить касания), точечной правкой не решается → полная переработка composer.
-  if (rejected.some((m) => (m.failed_criteria || []).includes('alternation'))) return null;
+  if (rejected.some((m) => (m.failed_criteria || []).some((c) => c === 'alternation' || c === 'missing_touch'))) return null;
   const t = baseInput.timeline;
   const result = await callAgentSafe('editor', {
     touches_to_fix: touchesToFix,
@@ -126,7 +138,28 @@ async function runEditor(baseInput, deal, composerOutput, verdict) {
     const f = fixed.find((x) => Number(x?.touchpoint_number) === n);
     return f && f.body ? { ...m, ...f, touchpoint_number: m.touchpoint_number ?? n } : m;
   });
-  return { ...composerOutput, messages };
+  const plan = deal.last_strategy_output?.touch_plan;
+  return Array.isArray(plan) ? pinToPlan({ ...composerOutput, messages }, plan) : { ...composerOutput, messages };
+}
+
+// «Совет» reviewer'а — касание можно отправлять: не переделываем и не
+// показываем менеджеру как «не принято» (живой тест 2026-11-13: проверка
+// возвращала касания с собственными сомнениями «это не проблема, но…»).
+function applySeverity(reviewerOutput) {
+  const r = reviewedOf(reviewerOutput);
+  if (!r || !Array.isArray(r.messages_reviewed)) return reviewerOutput;
+  let anyRejected = false;
+  for (const m of r.messages_reviewed) {
+    if (m?.verdict && m.verdict !== 'ОДОБРЕНО' && /совет/i.test(String(m.severity || '')) && !m.code_checked) {
+      m.advice = m.fix_instructions;
+      m.verdict = 'ОДОБРЕНО';
+      m.failed_criteria = [];
+      m.fix_instructions = '';
+    }
+    if (m?.verdict && m.verdict !== 'ОДОБРЕНО') anyRejected = true;
+  }
+  if (!anyRejected && r.messages_reviewed.length && r.verdict !== 'ПЕРЕСБОРКА') r.verdict = 'ОДОБРЕНО';
+  return reviewerOutput;
 }
 
 function reviewedOf(r) {
@@ -194,7 +227,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       return { composer_output: composerOutput, reviewer_output: null, approved: false, rounds, reviews };
     }
 
-    const code = codeChecks(composerOutput, timeline);
+    const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan);
     if (code.verdict !== 'ОДОБРЕНО') trace.push(`код вернул ${bad(code)}`);
     if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);
@@ -215,6 +248,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     reviews++;
     reviewerOutput = result?.reviewer_output || result;
     const traceAt = trace.length;
+    applySeverity(reviewerOutput);
     const msgs = messagesOf(composerOutput);
     applyPhraseCheck(reviewerOutput, msgs);
     applyMustIncludeCheck(reviewerOutput, deal.last_strategy_output?.must_include, msgs.length);
@@ -230,7 +264,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       if (edited) {
         rounds++;
         trace.push('редактор');
-        const code2 = codeChecks(edited, timeline);
+        const code2 = codeChecks(edited, timeline, deal.last_strategy_output?.touch_plan);
         if (code2.verdict === 'ОДОБРЕНО') {
           const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
           return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });
@@ -256,4 +290,4 @@ function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra =
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }
 
-module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf };
+module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity };

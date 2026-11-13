@@ -55,6 +55,12 @@ const AGENTS = {
     model: SONNET, temperature: 0.1, industryCases: false, industryKnowledge: true, cache: true,
     knowledge: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md', '24_client_triggers.md', '25_after_kp_playbook.md']
   },
+  // Пишет касания по плану, который посчитал код (engine/touchPlan.js).
+  // Короткий промпт вместо composer'а (1300 строк + все кейсы) — 2026-11-13.
+  writer: {
+    model: SONNET, temperature: 0.4, industryCases: false, industryKnowledge: true, cache: true,
+    knowledge: []
+  },
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
   editor: {

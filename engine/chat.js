@@ -3,6 +3,7 @@
  * переводы названий и критериев, касания, вложения, итог сессии.
  * Только форматирование, без вызовов агентов и базы.
  */
+const { formatTouchPlan } = require('./touchPlan');
 
 // Достаёт массив касаний независимо от того, есть ли лишний уровень вложенности
 // composer_output.composer_output.messages или нет.
@@ -260,7 +261,8 @@ const CRITERIA_LABELS = {
   client_value: 'не показана ценность для клиента (что даёт следующий шаг адресату)',
   must_include: 'не выполнен обязательный пункт сделки',
   schedule: 'касание уходит позже срока, который в нём назван',
-  alternation: 'два экспертных или два эмпатичных касания подряд'
+  alternation: 'два экспертных или два эмпатичных касания подряд',
+  missing_touch: 'касание из плана не написано'
 };
 
 // Переводит список технических кодов в читаемую строку через запятую.
@@ -382,6 +384,7 @@ function formatAgentReplyForChat(state, output) {
         Array.isArray(s.must_include) && s.must_include.length
           ? `### Обязательно в касаниях\n\n${s.must_include.map((x, i) => `${i + 1}. ${x}`).join('\n')}`
           : null,
+        formatTouchPlan(s.touch_plan) || null,
         mainBlocker ? `**Главный блокер:** ${mainBlocker}` : null,
         // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
         // strategy_agent.md отдаёт поле "recommended_next_action" — из-за

@@ -9,6 +9,7 @@ const { findBannedPhrases } = require('./phraseCheck');
 const db = require('../db');
 const { CONFIG } = require('./config');
 const { formatFinalSummary } = require('./chat');
+const { pinToPlan } = require('./touchPlan');
 
 // Если agentRunner не смог распарсить ответ модели (например, потому что модель
 // обернула JSON в markdown-разметку ```json ... ```), он возвращает
@@ -92,7 +93,38 @@ function keepApprovedTouches(newOutput, prevOutput, reviewerOutput) {
   return { output: { ...newOutput, messages }, kept };
 }
 
+// Вход writer'а: план касаний (даты, факты на день отправки, пункты по касаниям
+// посчитаны кодом) + то, что нужно для текста. Без 300 КБ инструкций и кейсов.
+function buildWriterInput(baseInput, deal, { feedback, iteration }) {
+  const s = deal.last_strategy_output || {};
+  const input = {
+    today: baseInput.today,
+    deal: baseInput.deal,
+    touch_plan: s.touch_plan,
+    must_include: s.must_include || [],
+    working_days_ahead: baseInput.working_days_ahead,
+    value_focus: s.value_focus,
+    strategy: { name: s.primary_strategy?.name || s.primary_strategy, goal: s.primary_strategy?.goal, do_not_use: s.do_not_use },
+    client_triggers: deal.last_diagnostic_output?.client_triggers || [],
+    materials: { source_materials: baseInput.materials?.source_materials },
+    message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
+    iteration
+  };
+  if (feedback !== undefined) {
+    if (deal.last_composer_output) input.previous_composer_output = deal.last_composer_output;
+    input.previous_composer_feedback = feedback;
+  }
+  return input;
+}
+
+// Касания пишет writer по плану (новые стратегии) или composer (старые сделки без плана).
 async function runComposer(baseInput, deal, options) {
+  const plan = deal.last_strategy_output?.touch_plan;
+  if (Array.isArray(plan) && plan.length) {
+    const result = await callAgentSafe('writer', buildWriterInput(baseInput, deal, options), COMPOSER_MAX_TOKENS);
+    const out = result?.composer_output || result;
+    return pinToPlan(out, plan);
+  }
   const result = await callAgentSafe('composer', buildComposerInput(baseInput, deal, options), COMPOSER_MAX_TOKENS);
   return result?.composer_output || result;
 }

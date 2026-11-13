@@ -5,7 +5,7 @@
 const assert = require('assert');
 const dbPath = require.resolve('../db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {}, children: [], paths: [] };
-const { codeChecks } = require('../engine/autoCompose');
+const { codeChecks, applySeverity } = require('../engine/autoCompose');
 
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
@@ -47,5 +47,19 @@ check('текст «сразу после звонка» — продолжен�
     { touchpoint_number: 2, channel: 'WhatsApp', timing: 'Сразу после звонка', body: 'b' },
     { touchpoint_number: 3, channel: 'Кружок', timing: '17 ноября', body: 'c' }] }, null);
   assert.equal(r.verdict, 'ОДОБРЕНО');
+});
+check('«совет» проверки не возвращает касание; «ошибка» — возвращает (живой «Зерно 4»)', () => {
+  const r = { verdict: 'НА ДОРАБОТКУ', messages_reviewed: [
+    { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', severity: 'совет', fix_instructions: 'Дата ещё актуальна, это не проблема, но можно мягче.' },
+    { touchpoint_number: 4, verdict: 'НА ДОРАБОТКУ', severity: 'совет', fix_instructions: 'Чуть теплее.' }] };
+  applySeverity(r);
+  assert.equal(r.verdict, 'ОДОБРЕНО');
+  assert.equal(r.messages_reviewed[0].advice, 'Дата ещё актуальна, это не проблема, но можно мягче.');
+  const r2 = { verdict: 'НА ДОРАБОТКУ', messages_reviewed: [
+    { touchpoint_number: 3, verdict: 'НА ДОРАБОТКУ', severity: 'ошибка', fix_instructions: 'Угроза «слот уйдёт».' },
+    { touchpoint_number: 4, verdict: 'НА ДОРАБОТКУ', severity: 'совет', fix_instructions: 'Чуть теплее.' }] };
+  applySeverity(r2);
+  assert.equal(r2.verdict, 'НА ДОРАБОТКУ');
+  assert.deepEqual(r2.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number), [3]);
 });
 console.log(`autoCompose: ${n} проверок пройдено`);

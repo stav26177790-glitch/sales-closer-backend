@@ -104,7 +104,7 @@ module.exports = [
       strategy_summary: 'КП зависло у посредника. Честно сообщаем, что постоянная вывеска к 1 декабря не успевает, предлагаем временную к открытию и выходим на Андрея через Марину.'
     } }],
     composer: [(input) => ({ composer_output: {
-      must_include_coverage: input.strategy_output.must_include.map((_, i) => ({ item: i + 1, touchpoint_number: [1, 1, 2, 3, 1, 1][i] || 1 })),
+      must_include_coverage: (input.strategy_output || input).must_include.map((_, i) => ({ item: i + 1, touchpoint_number: [1, 1, 2, 3, 1, 1][i] || 1 })),
       messages: [
         { touchpoint_number: 1, channel: 'call_script', timing: 'Сегодня', value_for_recipient: [{ recipient: 'Марина', trigger: 'Надёжность', value: 'понятный план открытия 1 декабря и не нужно пересказывать Андрею сроки' }],
           body: 'Марина, добрый день! Звоню по вывеске для Покровки — хочу, чтобы открытие 1 декабря прошло спокойно.\n28 октября я писал: успеваем, если согласуем макет до 10 ноября. Этот день прошёл, поэтому честно по срокам: если запускаем постоянную вывеску сегодня, она будет готова 3–4 декабря, и каждый день ожидания сдвигает эту дату.\nЧтобы вы открылись 1 декабря уже с вывеской, есть вариант — временная вывеска к открытию: при запуске не позже 19 ноября она будет на месте к 1 декабря. Постоянная — следом, по цене из КП.\nДва шага, чтобы держать эти даты: пришлите, пожалуйста, логотип в векторе — без него не начать макет. И давайте я сам коротко объясню Андрею варианты — вам не придётся пересказывать детали. Вы не против, если позвоню ему?' },
@@ -119,7 +119,7 @@ module.exports = [
       // а текст для Андрея после сокращения потерял «по цене из КП».
       const msgs = input.composer_output.messages;
       const body = (n) => (msgs.find((m) => m.touchpoint_number === n) || {}).body || '';
-      const checks = input.strategy_output.must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: [1, 1, 2, 3, 1, 1][i] || 1 }));
+      const checks = (input.strategy_output || input).must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: [1, 1, 2, 3, 1, 1][i] || 1 }));
       if (!/логотип/i.test(msgs.map((m) => m.body).join(' '))) checks[0].done = false;
       if (!/10 ноября/.test(body(1))) checks[1].done = false;
       return review([rv(1), rv(2), rv(3)], checks);
@@ -219,10 +219,12 @@ module.exports = [
     strategy: [{ strategy_output: {
       primary_strategy: { name: 'Охват всех участников решения', goal: 'Получить логотип и согласие Марины на разговор с Андреем', rationale: 'Решает Андрей, КП зависло у посредника' },
       touchpoint_sequence: [
-        { number: 1, kind: 'экспертное', type: 'Повод + честные сроки', channel: 'WhatsApp', timing: 'Сегодня', goal: 'Логотип и честно о сроках', key_message: 'Макет как на первой точке; открыться 1 декабря можно с временной вывеской', value_for_client: 'Марина получает макет, который можно сразу показать Андрею' },
-        { number: 2, kind: 'эмпатичное', type: 'Кружок', channel: 'Кружок', timing: '16 ноября', goal: 'Участие, снять напряжение', key_message: 'Понимаю, перед открытием много дел — помогу с Андреем', value_for_client: 'Марине спокойнее' },
-        { number: 3, kind: 'экспертное', type: 'Материалы для ЛПР', channel: 'WhatsApp', timing: '16 ноября', goal: 'Текст Андрею или его контакт', key_message: 'Вариант открыться 1 декабря с вывеской', value_for_client: 'Марине не пересказывать сроки' },
-        { number: 4, kind: 'экспертное', type: 'Совместное событие с ЛПР', channel: 'Звонок', timing: 'Только если Марина даст контакт', goal: 'Решение Андрея', key_message: 'Открытие в срок, цена из КП', value_for_client: 'Решение без сравнения подрядчиков' }
+        { number: 1, kind: 'экспертное', day: 0, recipient: 'Марине', type: 'Повод + честные сроки', channel: 'WhatsApp', goal: 'Логотип и честно о сроках', key_message: 'Макет как на первой точке; открыться 1 декабря можно с временной вывеской', value_for_client: 'Марина получает макет, который можно сразу показать Андрею' },
+        { number: 2, kind: 'эмпатичное', day: 1, recipient: 'Марине', type: 'Кружок', channel: 'Кружок', goal: 'Участие, снять напряжение', key_message: 'Понимаю, перед открытием много дел — помогу с Андреем', value_for_client: 'Марине спокойнее' },
+        { number: 3, kind: 'экспертное', day: 2, recipient: 'Марине (текст для Андрея)', type: 'Материалы для ЛПР', channel: 'WhatsApp', goal: 'Текст Андрею или его контакт', key_message: 'Вариант открыться 1 декабря с вывеской', value_for_client: 'Марине не пересказывать сроки' },
+        { number: 4, kind: 'экспертное', condition: 'только если Марина даст контакт Андрея', recipient: 'Андрею', type: 'Совместное событие с ЛПР', channel: 'Звонок', goal: 'Решение Андрея', key_message: 'Открытие в срок, цена из КП', value_for_client: 'Решение без сравнения подрядчиков' },
+        { number: 5, kind: 'эмпатичное', day: 4, recipient: 'Марине', type: 'Кружок', channel: 'Кружок', goal: 'Последний день для временной вывески — без давления', key_message: 'Можно открыться с вывеской', value_for_client: 'Успеть к открытию' },
+        { number: 6, kind: 'экспертное', day: 8, recipient: 'Марине', type: 'Реальная дата постоянной', channel: 'WhatsApp', goal: 'Честно о дате постоянной вывески на день отправки', key_message: 'Когда будет готово при старте сейчас', value_for_client: 'Ясная дата' }
       ],
       channel_rotation: ['WhatsApp', 'Звонок', 'Голосовое'],
       value_focus: { trigger: 'Надёжность', for_contact: 'Марине не нужно пересказывать Андрею сроки — у неё будет готовый макет и короткий текст', for_decision_maker: 'Вторая точка открывается 1 декабря с вывеской, постоянная — по тому же макету и по цене из КП, без доплат; договор и гарантия 12 месяцев', facts_to_use: ['Точное повторение вывески первой точки → гости узнают кофейню сразу', 'Своё производство → названную дату держим'] },
@@ -252,18 +254,17 @@ module.exports = [
         body: `Марина, добрый день! По постоянной вывеске: при старте сегодня она будет готова ${ready}. Если вывеска для Покровки ещё нужна — пришлите логотип, сделаем точь-в-точь как на первой точке.` });
       const cover = [{ item: 1, touchpoint_number: 1 }, { item: 2, touchpoint_number: 1 }, { item: 3, touchpoint_number: 3 }, { item: 4, touchpoint_number: 4 }, { item: 5, touchpoint_number: 1 }, { item: 6, touchpoint_number: 1 }];
       return [
-        // Вариант 1 (типичные промахи): текст для Андрея сразу вторым — два экспертных подряд;
-        // последнее касание (25.11) с датой готовности на 13-е.
-        { composer_output: { must_include_coverage: cover, messages: [T1, FWD(2, 'Через 1 раб. дн. — 16 ноября (пн), если Марина не ответила'), CALL(3), VOICE(4), LAST(5, '3–4 декабря')] } },
-        // Вариант 2: чередование — структурная правка, поэтому полная переработка composer.
-        (input) => {
-          const fb = JSON.stringify(input.previous_composer_feedback || {});
-          if (!/15 декабря/.test(fb) || !/чередуем/.test(fb)) throw new Error('composer не получил подсказки кода (дата, чередование)');
-          return { composer_output: { must_include_coverage: cover, messages: [T1, KRUG, FWD(3, 'Через 2 раб. дн. — 17 ноября (вт), если Марина не ответила'), CALL(4), VOICE(5), LAST(6, '15–16 декабря')] } };
-        }
+        // Writer по плану, но в касании 6 (25.11) взял дату готовности «на сегодня» — 3–4 декабря.
+        { composer_output: { must_include_coverage: cover, messages: [T1, KRUG, FWD(3, ''), CALL(4), VOICE(5), LAST(6, '3–4 декабря')] } }
       ];
     })(),
-    reviewer: [(input) => review([1, 2, 3, 4, 5, 6].map((n) => rv(n)), input.strategy_output.must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: [1, 1, 3, 4, 1, 1][i] })))],
+    // Код вернул касание 6 (дата готовности на 13-е) → editor правит только его.
+    editor: [(input) => {
+      const fb = JSON.stringify(input.touches_to_fix || []);
+      if (!/15 декабря/.test(fb) || (input.touches_to_fix || []).length !== 1) throw new Error('editor должен получить только касание 6 с правильной датой');
+      return { editor_output: { messages: [{ touchpoint_number: 6, body: 'Марина, добрый день! По постоянной вывеске: при старте сегодня она будет готова 15–16 декабря. Если вывеска для Покровки ещё нужна — пришлите логотип, сделаем точь-в-точь как на первой точке.' }] } };
+    }],
+    reviewer: [(input) => review([1, 2, 3, 4, 5, 6].map((n) => rv(n)), (input.strategy_output || input).must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: 1 })))],
     memory: [memory({ what_we_know: 'ЛПР — Андрей, через Марину; логотип не прислан', what_blocks: 'нет контакта с ЛПР', what_was_done: '5 касаний: логотип, сроки, текст Андрею', what_is_next: 'логотип и согласие на звонок Андрею', key_insight: 'временная вывеска даёт открытие в срок' })]
   }
 },
@@ -311,10 +312,12 @@ module.exports = [
         { touchpoint_number: 1, channel: 'whatsapp', timing: 'Сегодня', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'вариант под задачу салона и бюджет' }],
           body: 'Ольга, добрый день! Отправлял вам КП на вывеску для «Лаванды». Чтобы предложить вариант точно под салон — подскажите, на что вы смотрите в первую очередь: чтобы вывеску было видно с улицы, стиль салона или бюджет? И к какой дате она нужна — тогда сразу скажу, как успеть.' },
         { touchpoint_number: 2, kind: 'эмпатичное', channel: 'Кружок', timing: 'Через 3 дня, если нет ответа', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'не тратить время на неактуальное' }],
-          body: '[Видео 20 сек] Ольга, добрый день! Записал коротко, чтобы не отвлекать: вопрос с вывеской сейчас актуален, или вернуться позже? Если актуален — скажите, что важнее всего, подберу вариант под салон.' }
+          body: '[Видео 20 сек] Ольга, добрый день! Записал коротко, чтобы не отвлекать: вопрос с вывеской сейчас актуален, или вернуться позже? Если актуален — скажите, что важнее всего, подберу вариант под салон.' },
+        { touchpoint_number: 3, channel: 'Звонок', timing: '', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'честно понять, актуально ли' }],
+          body: 'Ольга, добрый день! [пауза] Звоню по вывеске для «Лаванды». Кстати, можно один вопрос? Вопрос сейчас актуален — или вернуться к нему позже? Если актуален — что для вас важнее всего, чтобы вывеска подошла салону?' }
       ]
     } })],
-    reviewer: [review([rv(1), rv(2)], [{ item: 1, done: true, touchpoint_number: 1 }])],
+    reviewer: [review([rv(1), rv(2), rv(3)], [{ item: 1, done: true, touchpoint_number: 1 }])],
     memory: [memory({ what_we_know: 'ЛПР — Ольга', what_blocks: 'нет срочности', what_was_done: 'вопрос о критериях', what_is_next: 'ответ Ольги', key_insight: 'выяснить дату' })]
   }
 },
@@ -395,7 +398,8 @@ module.exports = [
     strategy: [{ strategy_output: {
       primary_strategy: { name: 'Активация срочности', goal: 'Получить согласование макета сегодня-завтра', rationale: 'Запас по срокам кончился сегодня' },
       touchpoint_sequence: [
-        { number: 1, type: 'Сроки как забота', channel: 'Звонок', timing: 'Сегодня до обеда', goal: 'Ирина ускоряет согласование в офисе', key_message: 'Сегодня — последний день, чтобы открыться 3 декабря с постоянной вывеской', value_for_client: 'Точка открывается в срок, Ирине — готовые аргументы для офиса' }
+        { number: 1, type: 'Сроки как забота', channel: 'Звонок', timing: 'Сегодня до обеда', goal: 'Ирина ускоряет согласование в офисе', key_message: 'Сегодня — последний день, чтобы открыться 3 декабря с постоянной вывеской', value_for_client: 'Точка открывается в срок, Ирине — готовые аргументы для офиса' },
+        { number: 2, type: 'Текст для офиса', channel: 'WhatsApp', same_contact_as: 1, timing: 'Сразу после звонка', goal: 'Текст для офиса сети', key_message: 'Точка откроется 3 декабря с вывеской', value_for_client: 'Ирине не объяснять сроки самой' }
       ],
       channel_rotation: ['Звонок', 'WhatsApp'],
       value_focus: { trigger: 'Надёжность', for_contact: 'Ирине — короткий текст для офиса, не нужно объяснять сроки самой', for_decision_maker: 'Новая точка открывается 3 декабря с вывеской; если согласование задержится — временная вывеска к открытию', facts_to_use: ['Производственный план → точно в оговорённый день'] },
@@ -415,7 +419,7 @@ module.exports = [
           body: 'Ирина, текст для офиса:\n«Добрый день! Чтобы новая точка открылась 3 декабря с вывеской, макет нужно согласовать сегодня — тогда монтаж 1–2 декабря. Если нужно больше времени — к открытию поставим временную вывеску. Цена — по КП, без доплат.»' }
       ]
     } }],
-    reviewer: [(input) => review([rv(1), rv(2)], input.strategy_output.must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: i === 0 ? 2 : 1 })))],
+    reviewer: [(input) => review([rv(1), rv(2)], (input.strategy_output || input).must_include.map((_, i) => ({ item: i + 1, done: true, touchpoint_number: i === 0 ? 2 : 1 })))],
     memory: [memory({ what_we_know: 'офис согласует', what_blocks: 'согласование', what_was_done: 'звонок + текст офису', what_is_next: 'согласование сегодня', key_insight: 'впритык' })]
   }
 },

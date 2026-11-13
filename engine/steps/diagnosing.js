@@ -8,6 +8,7 @@
 const { callAgentSafe, runMemoryUpdate, cleanManagerConflicts } = require('../pipeline');
 const { isDisqualificationStrategy } = require('../chat');
 const { attachMustInclude } = require('../mustInclude');
+const { buildTouchPlan } = require('../touchPlan');
 const { isGoAhead } = require('../intent');
 
 // Стратегия по текущей оценке (+ правка менеджера к прошлой стратегии, если есть).
@@ -22,6 +23,11 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
   output.strategy_output = strategyResult?.strategy_output || strategyResult;
   // «Обязательно в касаниях»: пункты стратегии + пункты по срокам из расчёта кодом.
   attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
+  // План касаний: даты, факты на день отправки, чередование, пункты по касаниям — кодом.
+  if (output.strategy_output && typeof output.strategy_output === 'object') {
+    const plan = buildTouchPlan(output.strategy_output, baseInput.timeline, baseInput.today);
+    if (plan) output.strategy_output.touch_plan = plan;
+  }
 
   if (output.strategy_output?.deal_health === 'потеряна') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {

@@ -424,6 +424,26 @@ module.exports = [
     messages: ['дальше'],
   },
   {
+    name: 'plan_first_writer_path',
+    description: 'Стратегия с шагами → код строит план касаний (даты, факты, пункты) → writer пишет по плану, код закрепляет канал/дату/тип → проверка',
+    deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
+    agents: {
+      strategy: [strategy({
+        touchpoint_sequence: [
+          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником' },
+          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие' }
+        ],
+        must_include: ['Касание 1: выгода созвона для Ивана']
+      })],
+      writer: [{ composer_output: { messages: [
+        { touchpoint_number: 1, channel: 'email', timing: 'когда-нибудь', body: 'Иван, добрый день! Давайте созвонимся с собственником — вам не придётся пересказывать.' },
+        { touchpoint_number: 2, body: '[Видео 20 сек] Иван, понимаю, сейчас много дел — коротко напомню о главном.' }
+      ] } }],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['ок', 'ок'],
+  },
+  {
     name: 'escalation_close_word',
     description: 'После эскалации «закрыть» — итог без переспроса',
     deal: { ...AT_COMPOSING, current_state: 'ESCALATION', composer_iterations: 3 },
