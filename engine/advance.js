@@ -14,6 +14,7 @@ const { isEndSessionCommand } = require('./intent');
 const { formatAgentReplyForChat, formatTimeline } = require('./chat');
 const { STEP_HANDLERS } = require('./steps');
 const { computeTimeline, moscowToday } = require('./timeline');
+const { workingDaysAhead } = require('./scheduleCheck');
 
 
 function daysSilentNow(deal) {
@@ -60,6 +61,9 @@ async function advanceInternal(dealId, managerInput) {
     // мусор вроде "2025-01-session-1". today передаётся один раз здесь и
     // автоматически доходит до всех агентов через `...baseInput`.
     today: moscowToday(),
+    // Календарь рабочих дней вперёд — чтобы timing касаний был датой, а не
+    // «через 5 дней» (живой тест 2026-11-13: касание уходило после срока, который называло).
+    working_days_ahead: workingDaysAhead(moscowToday()),
     // Сроки, посчитанные кодом (engine/timeline.js). null — если в сделке нет
     // даты клиента или срока производства.
     timeline: computeTimeline({

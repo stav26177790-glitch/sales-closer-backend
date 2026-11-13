@@ -37,7 +37,7 @@ function timelineItems(timeline) {
   const b = timeline.temp_banner;
   if (b && b.fits_client_deadline) {
     items.push(
-      `Сроки (расчёт): дата «запустить не позже ${humanDate(b.latest_start_date)}» — только для временной вывески. Не писать её как срок, до которого можно ждать с основным заказом.`
+      `Сроки (расчёт): дата «запустить не позже ${humanDate(b.latest_start_date)}» — только для временной вывески. Не писать её как срок, до которого можно ждать с основным заказом. Касания, которые уходят позже ${humanDate(b.latest_start_date)}, эту дату не называют.`
     );
   }
   return items;

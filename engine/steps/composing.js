@@ -13,6 +13,7 @@ const { CONFIG } = require('../config');
 const { applyPhraseCheck } = require('../phraseCheck');
 const { formatAgentReplyForChat } = require('../chat');
 const { applyMustIncludeCheck } = require('../mustInclude');
+const { applyScheduleCheck } = require('../scheduleCheck');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
@@ -159,6 +160,9 @@ async function sendToReview({ dealId, deal, baseInput }) {
   // касание на доработку, даже если reviewer его одобрил.
   const { missed } = applyMustIncludeCheck(output.reviewer_output, deal.last_strategy_output?.must_include, msgs?.length);
   if (missed.length) console.log(`[mustInclude] Не выполнены пункты: ${missed.map((m) => `${m.item}→касание ${m.touchpoint_number}`).join(', ')}`);
+  // Касание уходит позже срока, который называет (например, «до 19 ноября» 20-го).
+  const { hits: late } = applyScheduleCheck(output.reviewer_output, msgs, baseInput.timeline);
+  if (late.length) console.log(`[scheduleCheck] Срок пройдёт к отправке: касания ${late.map((h) => h.touchpoint_number).join(', ')}`);
   const verdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
   if (verdict === 'ОДОБРЕНО') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {

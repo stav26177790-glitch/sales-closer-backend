@@ -16,6 +16,10 @@
  *                                             если изменение поведения задумано)
  *   node tests/snapshots.test.js --only имя — один сценарий
  */
+// «Сегодня» фиксировано: в агентов уходит календарь рабочих дней вперёд —
+// без фиксации снимки менялись бы каждый день.
+process.env.KLOUZER_TODAY = process.env.KLOUZER_TODAY || '2026-11-13';
+
 const fs = require('fs');
 const path = require('path');
 const { runScenario } = require('./harness');

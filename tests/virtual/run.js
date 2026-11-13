@@ -15,6 +15,7 @@ const _log = console.log;
 console.log = (...a) => { if (FULL || String(a[0]).startsWith('\n\n════') || String(a[0]).startsWith('[') && !String(a[0]).startsWith('[agentRunner') && !String(a[0]).startsWith('[must_include') ) _log(...a); };
 const { runScenario } = require(path.join(ROOT, 'tests/harness'));
 const { findBannedPhrases } = require(path.join(ROOT, 'engine/phraseCheck'));
+const { findScheduleIssues } = require(path.join(ROOT, 'engine/scheduleCheck'));
 const deals = require('./deals');
 console.warn = () => {};
 
@@ -97,6 +98,8 @@ const issue = (deal, sev, what) => report.push({ deal, sev, what });
       if (!m.timing) issue(d.name, 'касание', `касание ${m.touchpoint_number}: нет timing`);
     });
     for (const h of findBannedPhrases(msgs)) issue(d.name, 'касание', `касание ${h.touchpoint_number}: запрещённая фраза`);
+    for (const h of findScheduleIssues(msgs, tl)) issue(d.name, 'касание', `касание ${h.touchpoint_number}: уходит позже срока, который называет`);
+    if (calls.some((c) => !c.input.working_days_ahead)) issue(d.name, 'вход', 'агент не получил календарь рабочих дней');
 
     // 5. Обязательно в касаниях
     const strat = calls.find((c) => c.agent === 'composer')?.input.strategy_output;
