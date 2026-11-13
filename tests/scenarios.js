@@ -380,4 +380,29 @@ module.exports = [
     },
     messages: ['перепиши оценку с учётом сроков', 'давай стратегию', 'собственник в отпуске до 20-го', 'пиши касания'],
   },
+  {
+    name: 'code_fix_gets_extra_attempt',
+    description: '3 попытки composer исчерпаны, но на доработке только ошибка, найденная кодом (точная подсказка) → ещё попытка, а не эскалация',
+    deal: {
+      ...AT_COMPOSING,
+      current_state: 'REVIEWING',
+      composer_iterations: 3,
+      last_reviewer_output: {
+        verdict: 'НА ДОРАБОТКУ',
+        messages_reviewed: [
+          { touchpoint_number: 1, verdict: 'ОДОБРЕНО' },
+          { touchpoint_number: 2, verdict: 'НА ДОРАБОТКУ', failed_criteria: ['schedule'], code_checked: true, fix_instructions: 'Касание уходит 25 ноября, при старте 25 ноября — готово 15–16 декабря.' }
+        ]
+      }
+    },
+    agents: { composer: [composer('FIX')] },
+    messages: ['дальше'],
+  },
+  {
+    name: 'escalation_close_word',
+    description: 'После эскалации «закрыть» — итог без переспроса',
+    deal: { ...AT_COMPOSING, current_state: 'ESCALATION', composer_iterations: 3 },
+    agents: { memory: [memory(1)] },
+    messages: ['закрыть'],
+  },
 ];

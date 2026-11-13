@@ -6,6 +6,14 @@
 const { runComposer, runMemoryUpdate, keepApprovedTouches } = require('../pipeline');
 const { CONFIG } = require('../config');
 
+// На доработке только касания, которые вернул КОД (у них точная подсказка).
+const CODE_CRITERIA = new Set(['schedule', 'must_include', 'no_stop_words']);
+function onlyCodeFixes(reviewerOutput) {
+  const r = reviewerOutput?.messages_reviewed ? reviewerOutput : reviewerOutput?.reviewer_output;
+  const rejected = (r?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО');
+  return rejected.length > 0 && rejected.every((m) => m.code_checked && (m.failed_criteria || []).every((c) => CODE_CRITERIA.has(c)));
+}
+
 async function reviewing({ dealId, deal, baseInput }) {
   const output = {};
   const iterations = deal.composer_iterations || 1;
@@ -15,7 +23,7 @@ async function reviewing({ dealId, deal, baseInput }) {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal);
     return { nextState: 'FINAL_OUTPUT', output };
   }
-  if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS) {
+  if (iterations >= CONFIG.MAX_COMPOSER_ITERATIONS + (onlyCodeFixes(deal.last_reviewer_output) ? CONFIG.CODE_FIX_EXTRA_ITERATIONS : 0)) {
     return { nextState: 'ESCALATION', output };
   }
   const reworked = await runComposer(baseInput, deal, {
@@ -29,4 +37,4 @@ async function reviewing({ dealId, deal, baseInput }) {
   return { nextState: 'COMPOSING', output };
 }
 
-module.exports = { reviewing };
+module.exports = { reviewing, onlyCodeFixes };

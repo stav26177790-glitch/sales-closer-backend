@@ -33,7 +33,9 @@ async function awaitingRetry(ctx) {
     const iterations = deal.composer_iterations || 1;
     const output = {};
     output.composer_output = await runComposer(baseInput, deal, {
-      feedback: { source: 'manager', manager_feedback: deal.pending_escalation_feedback },
+      // Плюс последние замечания проверки: раньше composer получал только
+      // слова менеджера и не знал точных подсказок (например, верную дату).
+      feedback: { source: 'manager', manager_feedback: deal.pending_escalation_feedback, reviewer_feedback: deal.last_reviewer_output },
       iteration: iterations + 1
     });
     // composer_iterations двигаем как обычно (реальная новая попытка), а
@@ -70,6 +72,14 @@ async function escalation(ctx) {
     return retriesExhausted(ctx,
       `Статус: лимит ручных попыток доработки (${CONFIG.MAX_ESCALATION_RETRIES}) после эскалации уже исчерпан — сессия завершена с последним вариантом текста.`,
       false);
+  }
+  // «закрыть» / «оставить как есть» сразу после эскалации — закрываем без переспроса.
+  if (/^\s*(закр[а-яё]*|оставь(те)? как есть|оставить как есть)([\s.,!]|$)|^\s*нет[.!]?\s*$/i.test(managerInput || '')) {
+    const output = {};
+    output._finalText = await runMemoryUpdate(ctx.dealId, ctx.baseInput, deal, {
+      statusNote: 'Статус: сессия завершена вручную — после эскалации менеджер решил оставить текст как есть.'
+    });
+    return { nextState: 'FINAL_OUTPUT', output };
   }
   return {
     nextState: 'ESCALATION',

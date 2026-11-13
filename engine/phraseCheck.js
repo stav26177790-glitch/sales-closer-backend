@@ -53,6 +53,7 @@ function applyPhraseCheck(reviewerOutput, messages) {
     if (!m) { m = { touchpoint_number: h.touchpoint_number }; reviewed.push(m); }
     if (m.verdict === 'ОДОБРЕНО' || !m.verdict) m.verdict = 'НА ДОРАБОТКУ';
     m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'no_stop_words'])];
+    m.code_checked = true;
     m.fix_instructions = [m.fix_instructions, ...h.fixes].filter(Boolean).join(' ');
   }
   if (r.verdict === 'ОДОБРЕНО' || !r.verdict) r.verdict = 'НА ДОРАБОТКУ';

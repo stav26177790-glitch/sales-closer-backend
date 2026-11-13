@@ -102,6 +102,7 @@ function applyMustIncludeCheck(reviewerOutput, mustInclude, messageCount) {
     m.verdict = m.verdict === 'ПЕРЕСБОРКА' ? m.verdict : 'НА ДОРАБОТКУ';
     m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'must_include'])];
     const fix = `Обязательный пункт сделки: ${text}${c.fix ? ` ${c.fix}` : ''}`;
+    m.code_checked = true;
     m.fix_instructions = [m.fix_instructions, fix].filter(Boolean).join(' ');
     missed.push({ item: idx + 1, touchpoint_number: n });
   }

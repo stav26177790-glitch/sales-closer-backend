@@ -91,7 +91,7 @@ function findScheduleIssues(messages, timeline) {
       const later = computeTimeline({ today: sent, clientDeadline: timeline.client_deadline, productionDays: timeline.production_working_days, installDaysMin: Number(String(timeline.install_working_days).split('–')[0]), installDaysMax: Number(String(timeline.install_working_days).split('–').pop()) });
       const s1 = later?.if_start_today;
       const real = s1 ? (s1.installed_earliest === s1.installed_latest ? humanDate(s1.installed_latest) : `${humanDate(s1.installed_earliest)} – ${humanDate(s1.installed_latest)}`) : null;
-      fixes.push(`Касание уходит ${humanDate(sent)}, а дата готовности в тексте посчитана для старта ${humanDate(today)}.${real ? ` При старте ${humanDate(sent)} — готово ${real} (см. timeline.ready_if_start_on).` : ''}`);
+      fixes.push(`Касание уходит ${humanDate(sent)}, а дата готовности в тексте посчитана для старта ${humanDate(today)}.${real ? ` При старте ${humanDate(sent)} — готово ${real}.` : ''}`);
     }
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
@@ -109,6 +109,7 @@ function applyScheduleCheck(reviewerOutput, messages, timeline) {
     if (!m) { m = { touchpoint_number: h.touchpoint_number }; reviewed.push(m); }
     if (m.verdict === 'ОДОБРЕНО' || !m.verdict) m.verdict = 'НА ДОРАБОТКУ';
     m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'schedule'])];
+    m.code_checked = true;
     m.fix_instructions = [m.fix_instructions, ...h.fixes].filter(Boolean).join(' ');
   }
   if (r.verdict === 'ОДОБРЕНО' || !r.verdict) r.verdict = 'НА ДОРАБОТКУ';
