@@ -425,7 +425,7 @@ function formatFinalSummary(memoryOutput, strategyOutput, composerOutput, status
 const TIMELINE_STATUS_LABEL = { 'с запасом': 'УСПЕВАЕМ', 'впритык': 'ВПРИТЫК', 'не успеваем': 'НЕ УСПЕВАЕМ', 'дата прошла': 'ПРОВЕРЬТЕ ДАТУ' };
 function formatTimeline(timeline) {
   if (!timeline) {
-    return '\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства._';
+    return '\n\n_Сроки не посчитаны: в сделке не указаны дата, к которой нужно клиенту, и срок производства. Нажмите «Сроки» в шапке сделки, заполните и сохраните — расчёт появится в чате._';
   }
   const label = TIMELINE_STATUS_LABEL[timeline.status] || timeline.status;
   return `\n\n## Сроки — ${label}\n\n${timeline.summary}\n\n_${timeline.rules.split('.')[0]}._`;
