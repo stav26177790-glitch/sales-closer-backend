@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const { advance } = require('./stateMachine');
+const { friendlyError } = require('./engine/errors');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
@@ -68,7 +69,8 @@ app.get('/api/deals', requireManager, async (req, res) => {
     const deals = await db.listDeals(req.managerId);
     res.json({ deals: deals.map(withFlags) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -84,7 +86,8 @@ app.post('/api/deals', requireManager, async (req, res) => {
     );
     res.json({ deal });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -96,7 +99,8 @@ app.get('/api/deals/:id/history', requireManager, async (req, res) => {
     const messages = await db.getMessages(req.params.id);
     res.json({ deal, messages });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -114,7 +118,7 @@ app.post('/api/deals/:id/continue', requireManager, async (req, res) => {
     res.json({ deal: updatedDeal, reply: result.chatText, state: result.nextState });
   } catch (e) {
     console.error('[CONTINUE ERROR]', e);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -130,7 +134,8 @@ app.patch('/api/deals/:id/experience', requireManager, async (req, res) => {
     const updated = await db.updateDealState(req.params.id, { experience_decision: decision });
     res.json({ deal: withFlags(updated) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -142,7 +147,8 @@ app.patch('/api/deals/:id/dismiss-stale', requireManager, async (req, res) => {
     const updated = await db.updateDealState(req.params.id, { stale_dismissed: true });
     res.json({ deal: withFlags(updated) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -156,7 +162,8 @@ app.patch('/api/deals/:id/timeline', requireManager, async (req, res) => {
     const updated = await db.updateDealState(req.params.id, fields);
     res.json({ deal: withFlags(updated) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
@@ -168,7 +175,8 @@ app.delete('/api/deals/:id', requireManager, async (req, res) => {
     await db.deleteDeal(req.params.id);
     res.json({ ok: true });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[API ERROR]', req.method, req.path, e);
+    res.status(500).json({ error: friendlyError(e) });
   }
 });
 
