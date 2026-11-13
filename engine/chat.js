@@ -210,7 +210,8 @@ const CRITERIA_LABELS = {
   tone_fit: 'тон не соответствует типу клиента',
   attachment_honesty: 'вложение содержит недостоверные данные или создаёт риск завышенного ожидания',
   broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)',
-  client_value: 'не показана ценность для клиента (что даёт следующий шаг адресату)'
+  client_value: 'не показана ценность для клиента (что даёт следующий шаг адресату)',
+  must_include: 'не выполнен обязательный пункт сделки'
 };
 
 // Переводит список технических кодов в читаемую строку через запятую.
@@ -328,6 +329,9 @@ function formatAgentReplyForChat(state, output) {
       const lines = [
         '## Стратегия\n\n' + renderKeyValueList(withTranslatedStrategyName(s.primary_strategy), STRATEGY_LABELS),
         formatValueFocus(s.value_focus),
+        Array.isArray(s.must_include) && s.must_include.length
+          ? `### Обязательно в касаниях\n\n${s.must_include.map((x, i) => `${i + 1}. ${x}`).join('\n')}`
+          : null,
         mainBlocker ? `**Главный блокер:** ${mainBlocker}` : null,
         // Баг №30: раньше здесь читалось s.recommended_next_step, а схема
         // strategy_agent.md отдаёт поле "recommended_next_action" — из-за

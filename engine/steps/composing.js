@@ -11,6 +11,7 @@
 const { callAgentSafe, runComposer, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
 const { applyPhraseCheck } = require('../phraseCheck');
+const { applyMustIncludeCheck } = require('../mustInclude');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
@@ -135,6 +136,10 @@ async function sendToReview({ dealId, deal, baseInput }) {
   const msgs = deal.last_composer_output?.messages || deal.last_composer_output?.composer_output?.messages;
   const { hits } = applyPhraseCheck(output.reviewer_output, msgs);
   if (hits.length) console.log(`[phraseCheck] Запрещённые фразы в касаниях: ${hits.map((h) => h.touchpoint_number).join(', ')}`);
+  // Обязательные пункты сделки (strategy_output.must_include): невыполненный —
+  // касание на доработку, даже если reviewer его одобрил.
+  const { missed } = applyMustIncludeCheck(output.reviewer_output, deal.last_strategy_output?.must_include, msgs?.length);
+  if (missed.length) console.log(`[mustInclude] Не выполнены пункты: ${missed.map((m) => `${m.item}→касание ${m.touchpoint_number}`).join(', ')}`);
   const verdict = output.reviewer_output?.verdict || output.reviewer_output?.reviewer_output?.verdict;
   if (verdict === 'ОДОБРЕНО') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {

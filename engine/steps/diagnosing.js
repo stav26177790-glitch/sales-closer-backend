@@ -4,11 +4,14 @@
  */
 const { callAgentSafe, runMemoryUpdate } = require('../pipeline');
 const { isDisqualificationStrategy } = require('../chat');
+const { attachMustInclude } = require('../mustInclude');
 
 async function diagnosing({ dealId, deal, baseInput }) {
   const output = {};
   const strategyResult = await callAgentSafe('strategy', { ...baseInput, diagnostic_output: deal.last_diagnostic_output });
   output.strategy_output = strategyResult?.strategy_output || strategyResult;
+  // «Обязательно в касаниях»: пункты стратегии + пункты по срокам из расчёта кодом.
+  attachMustInclude(output.strategy_output, baseInput.timeline);
 
   if (output.strategy_output?.deal_health === 'потеряна') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {

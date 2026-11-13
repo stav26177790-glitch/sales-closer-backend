@@ -179,7 +179,8 @@
               },
               "main_blocker": "ЛПР не участвует в переговорах",
               "recommended_next_action": "предложить встречу с собственником",
-              "strategy_summary": "без ЛПР сделка не двинется"
+              "strategy_summary": "без ЛПР сделка не двинется",
+              "must_include": []
             }
           }
         }
@@ -195,7 +196,8 @@
             },
             "main_blocker": "ЛПР не участвует в переговорах",
             "recommended_next_action": "предложить встречу с собственником",
-            "strategy_summary": "без ЛПР сделка не двинется"
+            "strategy_summary": "без ЛПР сделка не двинется",
+            "must_include": []
           }
         }
       ]
