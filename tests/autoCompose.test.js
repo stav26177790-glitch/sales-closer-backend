@@ -62,4 +62,18 @@ check('«совет» проверки не возвращает касание;
   assert.equal(r2.verdict, 'НА ДОРАБОТКУ');
   assert.deepEqual(r2.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number), [3]);
 });
+check('Зерно 5: материал для пересылки Андрею — лимит письма (1500), а не мессенджера', () => {
+  const plan = [{ touchpoint_number: 1, recipient: 'Марина (управляющая) — материал для пересылки Андрею', channel: 'WhatsApp' }];
+  const body = 'Марина, вот текст для Андрея, можно просто переслать.\n' + 'Андрей, добрый день. Для открытия 1 декабря есть два варианта. '.repeat(12);
+  assert.ok(body.length > 600 && body.length < 1500);
+  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body }] }, null, plan);
+  assert.equal(r.messages_reviewed[0].verdict, 'ОДОБРЕНО');
+  const r2 = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body }] }, null, [{ touchpoint_number: 1, recipient: 'Марина' }]);
+  assert.equal(r2.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
+});
+check('Зерно 5: кружок с «[фото похожей работы]» — на доработку как речь в камеру', () => {
+  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'Кружок (WhatsApp/Telegram)', kind: 'эмпатичное', timing: '19 ноября', body: 'Марина, добрый день. Нашёл объект. [фото похожей работы — если есть] Покажите Андрею?' }] }, null, null);
+  assert.equal(r.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
+  assert.ok(r.messages_reviewed[0].failed_criteria.includes('circle_format'));
+});
 console.log(`autoCompose: ${n} проверок пройдено`);

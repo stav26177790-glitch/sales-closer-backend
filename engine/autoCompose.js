@@ -42,6 +42,11 @@ const messagesOf = (out) => out?.messages || out?.composer_output?.messages || [
 // Проверки кода без модели: длина, запрещённые фразы, календарь.
 // Вердикт в форме reviewer'а; касания без замечаний — ОДОБРЕНО (чтобы при
 // доработке их не переписывали).
+function isForwardMaterial(step, m) {
+  const t = [step?.recipient, step?.goal, step?.key_message, m?.recipient].filter(Boolean).join(' ');
+  return /пересыл|переслать|для передачи/i.test(t);
+}
+
 function codeChecks(composerOutput, timeline, plan) {
   const msgs = messagesOf(composerOutput);
   const r = {
@@ -59,8 +64,11 @@ function codeChecks(composerOutput, timeline, plan) {
       r.verdict = 'НА ДОРАБОТКУ';
     }
   }
+  const planStep = (m, i) => (Array.isArray(plan) ? plan.find((p) => p.touchpoint_number === Number(m?.touchpoint_number ?? i + 1)) : null);
   msgs.forEach((m, i) => {
-    const max = CONFIG.MAX_MESSAGE_LENGTH[channelKey(m?.channel)];
+    // Материал для пересылки ЛПР (живой «Зерно 5»): это не реплика в чате, а готовый
+    // текст-«одна страница» — лимит как у письма, иначе проверка режет суть стратегии.
+    const max = isForwardMaterial(planStep(m, i), m) ? CONFIG.MAX_MESSAGE_LENGTH.email : CONFIG.MAX_MESSAGE_LENGTH[channelKey(m?.channel)];
     const len = String(m?.body || '').length;
     if (max && len > max) {
       const x = r.messages_reviewed[i];
@@ -70,6 +78,18 @@ function codeChecks(composerOutput, timeline, plan) {
       x.fix_instructions = `Сократить: ${len} из ${max} символов для этого канала. Обязательные пункты не выбрасывать — перенести в другое касание.`;
       r.verdict = 'НА ДОРАБОТКУ';
     }
+  });
+  // Кружок — речь менеджера в камеру, а не текст с вложениями (живой «Зерно 5»:
+  // «[фото похожей работы — если есть]» в кружке, проверка не приняла, менеджеру — недоделка).
+  msgs.forEach((m, i) => {
+    if (!/кружок|видео/i.test(String(m?.channel || ''))) return;
+    if (!/\[(фото|ссылк|вложен|скрин|прикреп|картин)/i.test(String(m?.body || ''))) return;
+    const x = r.messages_reviewed[i];
+    x.verdict = 'НА ДОРАБОТКУ';
+    x.code_checked = true;
+    x.failed_criteria = [...new Set([...(x.failed_criteria || []), 'circle_format'])];
+    x.fix_instructions = [x.fix_instructions, 'Кружок — это речь менеджера в камеру на 20–40 секунд: живые фразы от первого лица, без вложений в квадратных скобках и без списков. Работу показать в кадре словами («вот, смотрите — похожая вывеска»), сроки — одной фразой.'].filter(Boolean).join(' ');
+    r.verdict = 'НА ДОРАБОТКУ';
   });
   // Воронка владельца: касания после КП чередуются экспертное / эмпатичное.
   // Условные ветки («только если…») — не следующий шаг цепочки, их пропускаем.
@@ -296,4 +316,4 @@ function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra =
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }
 
-module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity };
+module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, isForwardMaterial };
