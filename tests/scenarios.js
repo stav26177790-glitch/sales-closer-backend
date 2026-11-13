@@ -74,8 +74,8 @@ const strategy = (overrides = {}) => ({
 const composer = (label, body) => ({
   composer_output: {
     messages: [
-      { touchpoint_number: 1, channel: 'whatsapp', body: body || `Касание ${label}: Иван, добрый день! Предлагаю созвониться с собственником в четверг.` },
-      { touchpoint_number: 2, channel: 'email', subject: `Тема ${label}`, body: `Письмо ${label}: материалы по монтажу во вложении.`, attachment: { title: 'График монтажа', content: 'неделя 1 — замер, неделя 2 — монтаж' } },
+      { touchpoint_number: 1, kind: 'эмпатичное', channel: 'whatsapp', body: body || `Касание ${label}: Иван, добрый день! Предлагаю созвониться с собственником в четверг.` },
+      { touchpoint_number: 2, kind: 'экспертное', channel: 'email', subject: `Тема ${label}`, body: `Письмо ${label}: материалы по монтажу во вложении.`, attachment: { title: 'График монтажа', content: 'неделя 1 — замер, неделя 2 — монтаж' } },
     ],
   },
 });

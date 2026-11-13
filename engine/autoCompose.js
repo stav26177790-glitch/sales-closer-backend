@@ -64,7 +64,12 @@ function codeChecks(composerOutput, timeline) {
   let prev = null;
   msgs.forEach((m, i) => {
     if (/только если/i.test(String(m?.timing || ''))) return;
-    const kind = String(m?.kind || '').toLowerCase();
+    // «Сразу после звонка/кружка» — продолжение того же касания (текст вдогонку), не новый шаг.
+    if (/сразу после/i.test(String(m?.timing || ''))) return;
+    // composer не всегда ставит kind (живой тест 2026-11-13). По воронке владельца
+    // эмпатичные касания — короткие видео (кружки), поэтому без kind: кружок/видео/
+    // голосовое — эмпатичное, остальное (текст, звонок) — экспертное.
+    const kind = String(m?.kind || (/кружок|видео|голосов|voice/i.test(String(m?.channel || '')) ? 'эмпатичное' : 'экспертное')).toLowerCase();
     const k = /экспер/.test(kind) ? 'экспертное' : /эмпат/.test(kind) ? 'эмпатичное' : null;
     if (k && prev && k === prev.kind) {
       const x = r.messages_reviewed[i];

@@ -692,11 +692,13 @@
               "messages": [
                 {
                   "touchpoint_number": 1,
+                  "kind": "эмпатичное",
                   "channel": "whatsapp",
                   "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
                 },
                 {
                   "touchpoint_number": 2,
+                  "kind": "экспертное",
                   "channel": "email",
                   "subject": "Тема C",
                   "body": "Письмо C: материалы по монтажу во вложении.",
@@ -717,11 +719,13 @@
             "messages": [
               {
                 "touchpoint_number": 1,
+                "kind": "эмпатичное",
                 "channel": "whatsapp",
                 "body": "Касание C: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
               },
               {
                 "touchpoint_number": 2,
+                "kind": "экспертное",
                 "channel": "email",
                 "subject": "Тема C",
                 "body": "Письмо C: материалы по монтажу во вложении.",

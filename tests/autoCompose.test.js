@@ -26,12 +26,26 @@ check('условное касание («только если…») цепоч
     { touchpoint_number: 4, kind: 'экспертное', channel: 'WhatsApp', timing: '17 ноября', body: 'd' }] }, null);
   assert.deepEqual(bad(r), []);
 });
-check('без поля kind — не проверяем', () => {
-  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'a' }, { touchpoint_number: 2, channel: 'WhatsApp', body: 'b' }] }, null);
-  assert.equal(r.verdict, 'ОДОБРЕНО');
+check('без поля kind: текст/звонок — экспертное, кружок — эмпатичное (живой «Зерно 3»)', () => {
+  const r = codeChecks({ messages: [
+    { touchpoint_number: 1, channel: 'Звонок', timing: 'Сегодня', body: 'a' },
+    { touchpoint_number: 2, channel: 'WhatsApp', timing: '16 ноября', body: 'b' },
+    { touchpoint_number: 3, channel: 'WhatsApp', timing: 'только если Марина дала контакт', body: 'c' },
+    { touchpoint_number: 4, channel: 'WhatsApp', timing: '20 ноября', body: 'd' },
+    { touchpoint_number: 5, channel: 'WhatsApp (Кружок)', timing: '24 ноября', body: 'e' }] }, null);
+  assert.deepEqual(bad(r), [2, 4]);
+  const ok = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'a' }, { touchpoint_number: 2, channel: 'Кружок', body: 'b' }, { touchpoint_number: 3, channel: 'Email', body: 'c' }] }, null);
+  assert.equal(ok.verdict, 'ОДОБРЕНО');
 });
 check('кружок длиннее 600 символов — на сокращение', () => {
   const r = codeChecks({ messages: [{ touchpoint_number: 1, kind: 'эмпатичное', channel: 'Кружок', body: 'x'.repeat(700) }] }, null);
   assert.deepEqual(bad(r), [1]);
+});
+check('текст «сразу после звонка» — продолжение того же касания, не новый шаг', () => {
+  const r = codeChecks({ messages: [
+    { touchpoint_number: 1, channel: 'Звонок', timing: 'Сегодня', body: 'a' },
+    { touchpoint_number: 2, channel: 'WhatsApp', timing: 'Сразу после звонка', body: 'b' },
+    { touchpoint_number: 3, channel: 'Кружок', timing: '17 ноября', body: 'c' }] }, null);
+  assert.equal(r.verdict, 'ОДОБРЕНО');
 });
 console.log(`autoCompose: ${n} проверок пройдено`);

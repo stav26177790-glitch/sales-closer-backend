@@ -256,7 +256,7 @@ module.exports = [
         (input) => {
           const fb = JSON.stringify(input.previous_composer_feedback || {});
           if (!/15 декабря/.test(fb) || !/чередуем/.test(fb)) throw new Error('composer не получил подсказки кода (дата, чередование)');
-          return { composer_output: { must_include_coverage: cover, messages: [T1, KRUG, FWD(3, 'Сразу после кружка — 16 ноября (пн)'), CALL(4), VOICE(5), LAST(6, '15–16 декабря')] } };
+          return { composer_output: { must_include_coverage: cover, messages: [T1, KRUG, FWD(3, 'Через 2 раб. дн. — 17 ноября (вт), если Марина не ответила'), CALL(4), VOICE(5), LAST(6, '15–16 декабря')] } };
         }
       ];
     })(),
@@ -307,8 +307,8 @@ module.exports = [
       messages: [
         { touchpoint_number: 1, channel: 'whatsapp', timing: 'Сегодня', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'вариант под задачу салона и бюджет' }],
           body: 'Ольга, добрый день! Отправлял вам КП на вывеску для «Лаванды». Чтобы предложить вариант точно под салон — подскажите, на что вы смотрите в первую очередь: чтобы вывеску было видно с улицы, стиль салона или бюджет? И к какой дате она нужна — тогда сразу скажу, как успеть.' },
-        { touchpoint_number: 2, channel: 'call_script', timing: 'Через 3 дня, если нет ответа', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'не тратить время на неактуальное' }],
-          body: 'Ольга, добрый день! Звоню по вывеске для «Лаванды». Скажите честно — вопрос сейчас актуален, или вернуться к нему позже? Если актуален — что важнее всего, чтобы решение подошло салону?' }
+        { touchpoint_number: 2, kind: 'эмпатичное', channel: 'Кружок', timing: 'Через 3 дня, если нет ответа', value_for_recipient: [{ recipient: 'Ольга', trigger: 'не определён', value: 'не тратить время на неактуальное' }],
+          body: '[Видео 20 сек] Ольга, добрый день! Записал коротко, чтобы не отвлекать: вопрос с вывеской сейчас актуален, или вернуться позже? Если актуален — скажите, что важнее всего, подберу вариант под салон.' }
       ]
     } })],
     reviewer: [review([rv(1), rv(2)], [{ item: 1, done: true, touchpoint_number: 1 }])],
@@ -457,15 +457,17 @@ module.exports = [
       strategy_summary: 'Посредник. Помогаем Сергею продать проект ТЦ и выходим на ЛПР с его согласия.'
     } }],
     composer: [{ composer_output: {
-      must_include_coverage: [{ item: 1, touchpoint_number: 1 }, { item: 2, touchpoint_number: 2 }],
+      must_include_coverage: [{ item: 1, touchpoint_number: 1 }, { item: 2, touchpoint_number: 3 }],
       messages: [
         { touchpoint_number: 1, channel: 'whatsapp', timing: 'Сегодня', value_for_recipient: [{ recipient: 'Сергей', trigger: 'не определён', value: 'не отвечать на технические вопросы ТЦ самому' }],
           body: 'Сергей, добрый день! По «Галерее»: технические вопросы у ТЦ обычно про согласование с городом и навигацию — давайте я отвечу на них сам на короткой встрече втроём, вам не придётся пересказывать. Подскажите, кто в ТЦ принимает решение и на что он смотрит в первую очередь — сроки, цена, согласование?' },
-        { touchpoint_number: 2, channel: 'email', timing: 'Через 2 дня', subject: 'Вывеска и навигация для ТЦ «Галерея» — на одной странице', value_for_recipient: [{ recipient: 'Сергей', trigger: 'не определён', value: 'готовый материал для клиента' }, { recipient: 'ТЦ «Галерея»', trigger: 'не определён', value: 'вывеска и навигация от одного подрядчика, без штрафов' }],
+        { touchpoint_number: 2, kind: 'эмпатичное', channel: 'Кружок', timing: 'Завтра, если нет ответа', value_for_recipient: [{ recipient: 'Сергей', trigger: 'не определён', value: 'поддержка перед клиентом' }],
+          body: '[Видео 20 сек] Сергей, добрый день! Понимаю, клиент думает — это нормально. Подготовлю для «Галереи» одну страницу, чтобы вам было проще защитить проект.' },
+        { touchpoint_number: 3, channel: 'email', timing: 'Через 2 дня', subject: 'Вывеска и навигация для ТЦ «Галерея» — на одной странице', value_for_recipient: [{ recipient: 'Сергей', trigger: 'не определён', value: 'готовый материал для клиента' }, { recipient: 'ТЦ «Галерея»', trigger: 'не определён', value: 'вывеска и навигация от одного подрядчика, без штрафов' }],
           body: 'Сергей, одностраничник для «Галереи» — можно переслать как есть:\n«ТЦ получает вывеску на фасад и навигацию от одного подрядчика: замер, дизайн, производство, монтаж и согласование с городом — без штрафов и без координации нескольких подрядчиков. Работаем по договору, гарантия 12 месяцев. Ответим на вопросы на встрече за 20 минут.»' }
       ]
     } }],
-    reviewer: [review([rv(1), rv(2)], [{ item: 1, done: true, touchpoint_number: 1 }, { item: 2, done: true, touchpoint_number: 2 }])],
+    reviewer: [review([rv(1), rv(2), rv(3)], [{ item: 1, done: true, touchpoint_number: 1 }, { item: 2, done: true, touchpoint_number: 3 }])],
     memory: [memory({ what_we_know: 'посредник', what_blocks: 'ЛПР ТЦ', what_was_done: 'предложена встреча втроём', what_is_next: 'ответ Сергея', key_insight: 'через посредника' })]
   }
 },

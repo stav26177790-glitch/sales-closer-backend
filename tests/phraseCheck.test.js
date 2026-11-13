@@ -45,4 +45,11 @@ check('упрёк «вы говорили, что пришлёте» ловит�
   assert.ok(findBannedPhrases(bad)[0].fixes[0].includes('Помните, мы проговаривали'));
 });
 
+check('выдуманный кейс «пока ждал ответа — смонтировали…» ловится', () => {
+  const bad = [{ touchpoint_number: 4, body: 'Пока ждал ответа — смонтировали кофейню очень похожего формата: объёмные буквы на козырьке.' }];
+  const ok = [{ touchpoint_number: 4, body: 'В КП я приложил фото похожих работ — объёмные буквы на козырьке.' }];
+  assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [4]);
+  assert.equal(findBannedPhrases(ok).length, 0);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);

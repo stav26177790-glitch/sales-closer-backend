@@ -129,6 +129,15 @@ function formatTouchpoint(m, i) {
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 
+// Замечание проверки для менеджера — первые 2 предложения (полный текст уходит composer'у).
+function shortNote(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!t) return '';
+  const parts = t.match(/[^.!?]+[.!?]+(\s|$)/g) || [t];
+  const short = parts.slice(0, 2).join('').trim();
+  return short.length < t.length ? `${short} …` : short;
+}
+
 // Критерии ФОРМУЛЫ ЗАКРЫТИЯ (diagnostic_output.scores). До 2026-11-13 в чате
 // это называлось «Оценка по СОПРАНО» — неверно: СОПРАНО — методика вопросов
 // клиенту, а пять критериев — формула закрытия владельца (ФВ, ОП, ЛПР, Д, ЗС).
@@ -390,7 +399,7 @@ function formatAgentReplyForChat(state, output) {
       const r = output?.reviewer_output?.messages_reviewed ? output.reviewer_output : output?.reviewer_output?.reviewer_output;
       const left = (r?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО');
       const notes = left.length
-        ? left.map((m) => `- **Касание ${m.touchpoint_number}:** ${m.fix_instructions || translateCriteria(m.failed_criteria) || 'не принято проверкой'}`).join('\n')
+        ? left.map((m) => `- **Касание ${m.touchpoint_number}:** ${shortNote(m.fix_instructions) || translateCriteria(m.failed_criteria) || 'не принято проверкой'}`).join('\n')
         : '- проверка не дала вердикт';
       return `${touches}\n\n---\n\n### Проверка приняла не всё\n\n${notes}\n\n_Клоузер сделал ${check.rounds} ${check.rounds === 1 ? 'вариант' : check.rounds < 5 ? 'варианта' : 'вариантов'} и проверил каждый. Напишите, как поправить, — доработаю и проверю снова. Или «ок», чтобы принять как есть._`;
     }

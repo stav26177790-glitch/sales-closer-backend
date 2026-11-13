@@ -151,11 +151,13 @@
               "messages": [
                 {
                   "touchpoint_number": 1,
+                  "kind": "эмпатичное",
                   "channel": "whatsapp",
                   "body": "Касание A: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
                 },
                 {
                   "touchpoint_number": 2,
+                  "kind": "экспертное",
                   "channel": "email",
                   "subject": "Тема A",
                   "body": "Письмо A: материалы по монтажу во вложении.",
@@ -309,11 +311,13 @@
               "messages": [
                 {
                   "touchpoint_number": 1,
+                  "kind": "эмпатичное",
                   "channel": "whatsapp",
                   "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
                 },
                 {
                   "touchpoint_number": 2,
+                  "kind": "экспертное",
                   "channel": "email",
                   "subject": "Тема D",
                   "body": "Письмо D: материалы по монтажу во вложении.",
@@ -334,11 +338,13 @@
             "messages": [
               {
                 "touchpoint_number": 1,
+                "kind": "эмпатичное",
                 "channel": "whatsapp",
                 "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
               },
               {
                 "touchpoint_number": 2,
+                "kind": "экспертное",
                 "channel": "email",
                 "subject": "Тема D",
                 "body": "Письмо D: материалы по монтажу во вложении.",
@@ -493,11 +499,13 @@
               "messages": [
                 {
                   "touchpoint_number": 1,
+                  "kind": "эмпатичное",
                   "channel": "whatsapp",
                   "body": "Касание D: Иван, добрый день! Предлагаю созвониться с собственником в четверг."
                 },
                 {
                   "touchpoint_number": 2,
+                  "kind": "экспертное",
                   "channel": "email",
                   "subject": "Тема D",
                   "body": "Письмо D: материалы по монтажу во вложении.",
