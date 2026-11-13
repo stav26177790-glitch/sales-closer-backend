@@ -120,7 +120,10 @@ function channelLabel(channel) {
 function formatTouchpoint(m, i) {
   const channel = m.channel ? ` · ${channelLabel(m.channel)}` : '';
   const subject = m.subject ? `**Тема:** ${m.subject}\n\n` : '';
-  return `### Касание ${i + 1}${channel}\n${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
+  // Когда и при каком условии отправлять (например, «только если Марина дала
+  // контакт Андрея»). Раньше менеджер этого не видел — живой тест 2026-11-13.
+  const timing = m.timing ? `_Когда: ${String(m.timing).replace(/_/g, ' ').trim()}_\n\n` : '';
+  return `### Касание ${i + 1}${channel}\n${timing}${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
 }
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
