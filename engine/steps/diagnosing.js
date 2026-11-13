@@ -9,6 +9,7 @@ const { callAgentSafe, runMemoryUpdate, cleanManagerConflicts } = require('../pi
 const { isDisqualificationStrategy } = require('../chat');
 const { attachMustInclude } = require('../mustInclude');
 const { buildTouchPlan } = require('../touchPlan');
+const { cleanStrategy } = require('../strategyCleanup');
 const { isGoAhead } = require('../intent');
 
 // Стратегия по текущей оценке (+ правка менеджера к прошлой стратегии, если есть).
@@ -22,6 +23,7 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
   const strategyResult = await callAgentSafe('strategy', input);
   output.strategy_output = strategyResult?.strategy_output || strategyResult;
   // «Обязательно в касаниях»: пункты стратегии + пункты по срокам из расчёта кодом.
+  cleanStrategy(output.strategy_output);
   attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
   // План касаний: даты, факты на день отправки, чередование, пункты по касаниям — кодом.
   if (output.strategy_output && typeof output.strategy_output === 'object') {

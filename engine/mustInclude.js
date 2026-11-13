@@ -82,6 +82,29 @@ function managerPromises(sourceText, today) {
   return out;
 }
 
+// Клиент обещал прислать (логотип, реквизиты, фото…): «Марина (29.10): … Логотип пришлю.»
+// Живой «Зерно 5» (2026-11-13): стратегия этот пункт пропустила → ищет код.
+const CLIENT_SEND_RE = /(пришл[юёе][мт]?|вышл[юе][мт]?|отправл[юя]|скину|скинем|предоставлю|сброшу)/i; // «передам клиенту» — не нам, не считаем
+function clientPromises(sourceText) {
+  if (!sourceText) return [];
+  const out = [];
+  const lineRe = /^\s*([А-ЯЁ][а-яё]+)\s*\((\d{1,2})\.(\d{1,2})\)\s*:\s*(.+)$/gm;
+  for (const m of String(sourceText).matchAll(lineRe)) {
+    if (/^(я|менеджер)$/i.test(m[1])) continue;
+    for (const sentence of m[4].split(/(?<=[.!?])\s+/)) {
+      if (!CLIENT_SEND_RE.test(sentence)) continue;
+      out.push({ who: m[1], said: `${m[2].padStart(2, '0')}.${m[3].padStart(2, '0')}`, quote: sentence.trim() });
+    }
+  }
+  return out;
+}
+
+function clientPromiseItems(sourceText, existing) {
+  return clientPromises(sourceText)
+    .filter((p) => !existing.some((x) => x.includes(p.quote.slice(0, 15)) || (x.includes(p.said) && /пришл|обещал/i.test(x))))
+    .map((p) => `Переписка: ${p.said} ${p.who} написала/написал «${p.quote}» — если ещё не прислано, в первом касании ${p.who} попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).`);
+}
+
 function promiseItems(sourceText, today, existing) {
   return managerPromises(sourceText, today)
     .filter((p) => !existing.some((x) => x.includes(p.dateText) || x.includes(p.quote.slice(0, 25))))
@@ -94,7 +117,7 @@ function buildMustInclude(strategyOutput, timeline, sourceText) {
   const dropped = timeline ? raw.filter(isTimelineItem) : [];
   if (dropped.length) console.warn(`[mustInclude] Пункты стратегии про даты убраны (даты даёт расчёт): ${dropped.length}`);
   const fromStrategy = raw.filter((x) => !dropped.includes(x)).slice(0, MAX_STRATEGY_ITEMS);
-  const all = [...fromStrategy, ...promiseItems(sourceText, timeline?.today, fromStrategy), ...timelineItems(timeline)];
+  const all = [...fromStrategy, ...clientPromiseItems(sourceText, fromStrategy), ...promiseItems(sourceText, timeline?.today, fromStrategy), ...timelineItems(timeline)];
   return [...new Set(all)];
 }
 
@@ -145,4 +168,4 @@ function applyMustIncludeCheck(reviewerOutput, mustInclude, messageCount) {
   return { reviewerOutput, missed };
 }
 
-module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems, isTimelineItem, managerPromises };
+module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems, isTimelineItem, managerPromises, clientPromises };
