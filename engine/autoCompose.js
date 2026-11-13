@@ -86,6 +86,49 @@ function codeChecks(composerOutput, timeline) {
   return r;
 }
 
+// Точечная доработка: editor получает только касания с замечаниями и сами
+// замечания, меняет только их. Возвращает новый composer_output или null
+// (тогда — полная переработка composer'ом).
+async function runEditor(baseInput, deal, composerOutput, verdict) {
+  const msgs = messagesOf(composerOutput);
+  const rejected = (reviewedOf(verdict)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО');
+  const nums = new Set(rejected.map((m) => Number(m.touchpoint_number)));
+  const numOf = (m, i) => Number(m?.touchpoint_number ?? i + 1);
+  const touchesToFix = msgs
+    .map((m, i) => ({ m, n: numOf(m, i) }))
+    .filter(({ n }) => nums.has(n))
+    .map(({ m, n }) => {
+      const r = rejected.find((x) => Number(x.touchpoint_number) === n);
+      return { touch: m, fix_instructions: r?.fix_instructions || (r?.failed_criteria || []).join(', ') };
+    });
+  if (!touchesToFix.length) return null;
+  // Чередование экспертное/эмпатичное — это структура цепочки (вставить кружок,
+  // переставить касания), точечной правкой не решается → полная переработка composer.
+  if (rejected.some((m) => (m.failed_criteria || []).includes('alternation'))) return null;
+  const t = baseInput.timeline;
+  const result = await callAgentSafe('editor', {
+    touches_to_fix: touchesToFix,
+    other_touches: msgs.filter((m, i) => !nums.has(numOf(m, i))),
+    must_include: deal.last_strategy_output?.must_include || [],
+    facts: {
+      today: baseInput.today,
+      timeline: t ? { summary: t.summary, if_start_today: t.if_start_today, ready_if_start_on: t.ready_if_start_on, temp_banner: t.temp_banner, latest_start_date: t.latest_start_date } : null,
+      working_days_ahead: baseInput.working_days_ahead
+    },
+    deal: baseInput.deal
+  }, 6000);
+  const fixed = result?.editor_output?.messages || result?.composer_output?.messages || result?.messages;
+  if (!Array.isArray(fixed) || !fixed.length) return null;
+  // Меняем только касания с замечаниями — остальные остаются дословно.
+  const messages = msgs.map((m, i) => {
+    const n = numOf(m, i);
+    if (!nums.has(n)) return m;
+    const f = fixed.find((x) => Number(x?.touchpoint_number) === n);
+    return f && f.body ? { ...m, ...f, touchpoint_number: m.touchpoint_number ?? n } : m;
+  });
+  return { ...composerOutput, messages };
+}
+
 function reviewedOf(r) {
   return r?.messages_reviewed ? r : r?.reviewer_output;
 }
@@ -114,6 +157,16 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
   let skipCompose = !!startWith;
   if (startWith) composerOutput = startWith;
   while (rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
+    // Доработка по замечаниям проверки — сначала точечно редактором.
+    const byVerdict = !skipCompose && fb && cur.last_reviewer_output && fb === cur.last_reviewer_output;
+    if (byVerdict) {
+      const edited = await runEditor(baseInput, deal, cur.last_composer_output, fb);
+      if (edited) {
+        rounds++;
+        composerOutput = edited;
+        skipCompose = true;
+      }
+    }
     if (!skipCompose) {
       const fresh = await runComposer(baseInput, cur, {
         feedback: fb,
@@ -161,7 +214,19 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       return done(composerOutput, reviewerOutput, true, rounds, reviews);
     }
     console.log(`[autoCompose] круг ${rounds}: проверка не приняла касания`);
-    if (reviews >= CONFIG.AUTO_REVIEWS) break;
+    if (reviews >= CONFIG.AUTO_REVIEWS) {
+      // Проверок больше не делаем (время) — последние замечания вносит editor.
+      const edited = await runEditor(baseInput, deal, composerOutput, reviewerOutput);
+      if (edited) {
+        rounds++;
+        const code2 = codeChecks(edited, timeline);
+        if (code2.verdict === 'ОДОБРЕНО') {
+          const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
+          return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums });
+        }
+      }
+      break;
+    }
     fb = reviewerOutput;
     cur = { ...cur, last_reviewer_output: reviewerOutput };
   }
@@ -170,9 +235,9 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
 
 // Касания помечаются как прошедшие цикл проверки: «ок» менеджера на них —
 // это принятие итога, а не запуск проверки.
-function done(composerOutput, reviewerOutput, approved, rounds, reviews) {
+function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra = {}) {
   const out = composerOutput && typeof composerOutput === 'object'
-    ? { ...composerOutput, _check: { approved, rounds, reviews } }
+    ? { ...composerOutput, _check: { approved, rounds, reviews, ...extra } }
     : composerOutput;
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }

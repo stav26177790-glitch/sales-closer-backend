@@ -288,29 +288,44 @@ module.exports = [
     description: 'Автоцикл: «ок» на стратегию → composer → reviewer НА ДОРАБОТКУ → composer → reviewer ОДОБРЕНО — всё в одном ходе; «ок» → итог',
     deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
-      composer: [composer('A'), composer('B')],
+      composer: [composer('A')],
+      editor: [composer('B')],
       reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('ОДОБРЕНО')],
       memory: [memory(1)],
     },
     messages: ['ок', 'ок'],
   },
   {
-    name: 'auto_loop_shows_notes_when_not_approved',
-    description: 'Автоцикл: проверка трижды не приняла → менеджер видит касания и что осталось; «ок» → итог с пометкой',
+    name: 'auto_loop_editor_fixes_after_second_review',
+    description: 'Автоцикл: проверка дважды не приняла → editor вносит последние замечания без третьей проверки → «проверены и доработаны»; «ок» → итог с пометкой',
     deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
-      composer: [composer('A'), composer('B'), composer('C')],
-      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
+      composer: [composer('A')],
+      editor: [composer('B'), composer('C')],
+      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
+      memory: [memory(1)],
+    },
+    messages: ['ок', 'ок'],
+  },
+  {
+    name: 'auto_loop_shows_notes_when_not_approved',
+    description: 'Автоцикл: editor не смог (пустой ответ) → полная переработка composer → проверка снова не приняла → менеджер видит касания и замечания; «ок» → итог с пометкой',
+    deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
+    agents: {
+      composer: [composer('A'), composer('B')],
+      editor: [{ editor_output: { messages: [] } }, { editor_output: { messages: [] } }],
+      reviewer: [reviewer('НА ДОРАБОТКУ'), reviewer('НА ДОРАБОТКУ')],
       memory: [memory(1)],
     },
     messages: ['ок', 'ок'],
   },
   {
     name: 'rework_keeps_approved_touches',
-    description: 'Автоцикл: reviewer одобрил касание 1 и вернул 2; composer на доработке переписал оба — код возвращает одобренное касание 1 дословно',
+    description: 'Автоцикл: reviewer одобрил касание 1 и вернул 2; editor вернул оба — код берёт от него только касание 2, касание 1 остаётся дословно',
     deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
-      composer: [composer('A'), composer('B')],
+      composer: [composer('A')],
+      editor: [composer('B')],
       reviewer: [{
         reviewer_output: {
           verdict: 'НА ДОРАБОТКУ',
@@ -356,10 +371,11 @@ module.exports = [
   },
   {
     name: 'message_length_violation',
-    description: 'Автоцикл: касание длиннее лимита канала → проверка кода → composer сокращает БЕЗ вызова reviewer → reviewer одобряет',
+    description: 'Автоцикл: касание длиннее лимита канала → проверка кода → editor сокращает БЕЗ вызова reviewer → reviewer одобряет',
     deal: { ...BASE_DEAL, current_state: 'STRATEGY_SELECTION', last_diagnostic_output: diagnostic().diagnostic_output, last_strategy_output: strategy().strategy_output },
     agents: {
-      composer: [composer('LONG', 'Очень длинное сообщение. '.repeat(30)), composer('E')],
+      composer: [composer('LONG', 'Очень длинное сообщение. '.repeat(30))],
+      editor: [composer('E')],
       reviewer: [reviewer('ОДОБРЕНО')],
     },
     messages: ['ок'],
@@ -404,7 +420,7 @@ module.exports = [
     name: 'legacy_reviewing_reworks_in_auto_loop',
     description: 'Старая сделка в REVIEWING: любое сообщение → доработка по замечаниям в автоцикле → проверено',
     deal: { ...AT_COMPOSING, current_state: 'REVIEWING', last_reviewer_output: reviewer('НА ДОРАБОТКУ').reviewer_output },
-    agents: { composer: [composer('FIX')], reviewer: [reviewer('ОДОБРЕНО')] },
+    agents: { editor: [composer('FIX')], reviewer: [reviewer('ОДОБРЕНО')] },
     messages: ['дальше'],
   },
   {

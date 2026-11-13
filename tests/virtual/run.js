@@ -99,7 +99,7 @@ const issue = (deal, sev, what) => report.push({ deal, sev, what });
     });
     for (const h of findBannedPhrases(msgs)) issue(d.name, 'касание', `касание ${h.touchpoint_number}: запрещённая фраза`);
     for (const h of findScheduleIssues(msgs, tl)) issue(d.name, 'касание', `касание ${h.touchpoint_number}: уходит позже срока, который называет`);
-    if (calls.some((c) => !c.input.working_days_ahead)) issue(d.name, 'вход', 'агент не получил календарь рабочих дней');
+    if (calls.some((c) => !(c.input.working_days_ahead || c.input.facts?.working_days_ahead))) issue(d.name, 'вход', 'агент не получил календарь рабочих дней');
 
     // 5. Обязательно в касаниях
     const strat = calls.find((c) => c.agent === 'composer')?.input.strategy_output;

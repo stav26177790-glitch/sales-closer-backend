@@ -71,7 +71,10 @@ async function accept({ dealId, deal, baseInput }) {
     composer_output: deal.last_composer_output,
     strategy_output: deal.last_strategy_output,
     reviewer_output: deal.last_reviewer_output,
-    statusNote: check.approved ? undefined : 'Статус: касания приняты менеджером, хотя проверка не приняла часть из них (замечания были показаны).'
+    statusNote: check.approved ? undefined
+      : (check.fixedAfterReview?.length
+        ? `Статус: касания ${check.fixedAfterReview.join(', ')} исправлены по замечаниям второй проверки без повторной проверки; менеджер принял.`
+        : 'Статус: касания приняты менеджером, хотя проверка не приняла часть из них (замечания были показаны).')
   });
   return { nextState: 'FINAL_OUTPUT', output };
 }

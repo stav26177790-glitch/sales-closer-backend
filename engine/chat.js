@@ -392,6 +392,10 @@ function formatAgentReplyForChat(state, output) {
         // Касания составлены до автоцикла (старые сделки).
         return touches + '\n\n---\n\n_Напишите «ок» — проверю и при необходимости доработаю касания. Или пришлите правку._';
       }
+      if (!check.approved && Array.isArray(check.fixedAfterReview) && check.fixedAfterReview.length) {
+        const many = check.fixedAfterReview.length > 1;
+        return `## ✅ Касания проверены и доработаны\n\n${touches}\n\n---\n\n_${many ? 'Касания' : 'Касание'} ${check.fixedAfterReview.join(', ')} ${many ? 'исправлены' : 'исправлено'} по замечаниям второй проверки (повторно не ${many ? 'проверялись' : 'проверялось'} — посмотрите). «ок» — сохранить итог сессии; если что-то поправить — напишите._`;
+      }
       if (check.approved) {
         return `## ✅ Касания проверены\n\n${touches}\n\n---\n\n_«ок» — сохранить итог сессии. Если что-то поправить — напишите, доработаю и проверю снова._`;
       }
