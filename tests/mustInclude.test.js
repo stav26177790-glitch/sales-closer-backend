@@ -88,4 +88,20 @@ check('пункт стратегии с датами готовности уби
   assert.equal(list.length, 4);
 });
 
+check('прошедшее условие менеджера из переписки добавляется кодом (живой «Зерно 4»)', () => {
+  const { managerPromises } = require('../engine/mustInclude');
+  const src = 'Марина (28.10): успеете ли к 1 декабря?\nЯ (28.10): Марина, добрый день! Успеваем, если согласуем макет до 10 ноября. Уточните, пожалуйста: буквы на фасад?\nЯ (31.10): Отправил КП: 185 000 ₽, срок 12 рабочих дней.';
+  const p = managerPromises(src, '2026-11-13');
+  assert.equal(p.length, 1);
+  assert.equal(p[0].said, '28.10');
+  assert.ok(p[0].quote.startsWith('Успеваем, если согласуем макет до 10 ноября'));
+  const list = buildMustInclude({ must_include: ['Попросить логотип'] }, zerno, src);
+  assert.ok(list[1].startsWith('Переписка: 28.10 менеджер писал клиенту «Успеваем, если согласуем макет до 10 ноября.»'));
+  // стратегия уже включила этот пункт — не дублируем
+  const list2 = buildMustInclude({ must_include: ['Касание 1: сослаться на «успеваем, если согласуем макет до 10 ноября»'] }, zerno, src);
+  assert.equal(list2.filter((x) => x.startsWith('Переписка')).length, 0);
+  // дата ещё не наступила — не пункт
+  assert.equal(managerPromises('Я (12.11): Успеем, если согласуем до 20 ноября.', '2026-11-13').length, 0);
+});
+
 console.log(`mustInclude: ${n} проверок пройдено`);

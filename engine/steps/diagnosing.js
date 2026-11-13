@@ -21,7 +21,7 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
   const strategyResult = await callAgentSafe('strategy', input);
   output.strategy_output = strategyResult?.strategy_output || strategyResult;
   // «Обязательно в касаниях»: пункты стратегии + пункты по срокам из расчёта кодом.
-  attachMustInclude(output.strategy_output, baseInput.timeline);
+  attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
 
   if (output.strategy_output?.deal_health === 'потеряна') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {

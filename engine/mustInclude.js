@@ -53,20 +53,55 @@ function isTimelineItem(text) {
   return TIMELINE_ITEM_RE.test(text);
 }
 
+// Условия по срокам, которые МЕНЕДЖЕР уже называл клиенту в переписке
+// («Я (28.10): Успеваем, если согласуем макет до 10 ноября»), а дата прошла.
+// Живой «Зерно 4» (2026-11-13): стратегия этот пункт пропустила, хотя в двух
+// прошлых прогонах находила — модель нестабильна, поэтому ищет код.
+const MONTHS_RU = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+function managerPromises(sourceText, today) {
+  if (!sourceText || !today) return [];
+  const out = [];
+  const lineRe = /^\s*(?:я|менеджер)\s*\((\d{1,2})\.(\d{1,2})\)\s*:\s*(.+)$/gim;
+  for (const m of String(sourceText).matchAll(lineRe)) {
+    const said = `${m[1].padStart(2, '0')}.${m[2].padStart(2, '0')}`;
+    const text = m[3];
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    for (const sentence of sentences) {
+      if (!/(успеваем|успеем|успеть|сделаем|будет готов|смонтируем|изготовим)/i.test(sentence)) continue;
+      const d = sentence.match(new RegExp(`(?:до|к)\\s+(\\d{1,2})(?:\\.(\\d{1,2})|\\s+(${MONTHS_RU.join('|')}))`, 'i'));
+      if (!d) continue;
+      const day = Number(d[1]);
+      const month = d[2] ? Number(d[2]) : MONTHS_RU.indexOf(d[3].toLowerCase()) + 1;
+      if (!(month >= 1 && month <= 12)) continue;
+      const year = Number(today.slice(0, 4)) - (month > Number(today.slice(5, 7)) + 6 ? 1 : 0);
+      const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      if (iso >= today) continue;
+      out.push({ said, quote: sentence.trim(), dateText: d[3] ? `${day} ${d[3]}` : `${day}.${String(month).padStart(2, '0')}` });
+    }
+  }
+  return out;
+}
+
+function promiseItems(sourceText, today, existing) {
+  return managerPromises(sourceText, today)
+    .filter((p) => !existing.some((x) => x.includes(p.dateText) || x.includes(p.quote.slice(0, 25))))
+    .map((p) => `Переписка: ${p.said} менеджер писал клиенту «${p.quote}» — эта дата прошла. Хотя бы в одном касании контактному лицу честно сослаться на это и сказать, что изменилось, — иначе клиент услышит «обещали и не делаете».`);
+}
+
 // Итоговый список: пункты стратегии + пункты по срокам, без повторов.
-function buildMustInclude(strategyOutput, timeline) {
+function buildMustInclude(strategyOutput, timeline, sourceText) {
   const raw = Array.isArray(strategyOutput?.must_include) ? strategyOutput.must_include.map(itemText).filter(Boolean) : [];
   const dropped = timeline ? raw.filter(isTimelineItem) : [];
   if (dropped.length) console.warn(`[mustInclude] Пункты стратегии про даты убраны (даты даёт расчёт): ${dropped.length}`);
   const fromStrategy = raw.filter((x) => !dropped.includes(x)).slice(0, MAX_STRATEGY_ITEMS);
-  const all = [...fromStrategy, ...timelineItems(timeline)];
+  const all = [...fromStrategy, ...promiseItems(sourceText, timeline?.today, fromStrategy), ...timelineItems(timeline)];
   return [...new Set(all)];
 }
 
 // Вписывает итоговый список в strategy_output (его получают composer и reviewer).
-function attachMustInclude(strategyOutput, timeline) {
+function attachMustInclude(strategyOutput, timeline, sourceText) {
   if (!strategyOutput || typeof strategyOutput !== 'object') return strategyOutput;
-  strategyOutput.must_include = buildMustInclude(strategyOutput, timeline);
+  strategyOutput.must_include = buildMustInclude(strategyOutput, timeline, sourceText);
   return strategyOutput;
 }
 
@@ -110,4 +145,4 @@ function applyMustIncludeCheck(reviewerOutput, mustInclude, messageCount) {
   return { reviewerOutput, missed };
 }
 
-module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems, isTimelineItem };
+module.exports = { buildMustInclude, attachMustInclude, applyMustIncludeCheck, timelineItems, isTimelineItem, managerPromises };
