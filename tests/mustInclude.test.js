@@ -4,7 +4,7 @@
  */
 const assert = require('assert');
 const t = require('../engine/timeline');
-const { buildMustInclude, applyMustIncludeCheck } = require('../engine/mustInclude');
+const { buildMustInclude, applyMustIncludeCheck, isTimelineItem } = require('../engine/mustInclude');
 // pipeline тянет db.js (Supabase) — подменяем пустышкой, как в harness.js.
 const dbPath = require.resolve('../db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {}, children: [], paths: [] };
@@ -104,4 +104,13 @@ check('прошедшее условие менеджера из перепис�
   assert.equal(managerPromises('Я (12.11): Успеем, если согласуем до 20 ноября.', '2026-11-13').length, 0);
 });
 
+check('Зерно 5 (вечер): обещание логотипа уже есть у стратегии в своей формулировке — код не дублирует; «Дата «запустить не позже 19 ноября»» — пункт про даты, убирается', () => {
+  const src = 'Марина (29.10): На козырёк. Логотип пришлю. Бюджет у нас примерно 150–200 тысяч.';
+  const out = buildMustInclude({ must_include: [
+    'Касание 1 (звонок Марине): попросить логотип в векторе — Марина обещала 29 октября («Логотип пришлю»); просьба по шаблону',
+    'Дата «запустить не позже 19 ноября (чт)» — только для временной вывески; касания, которые уходят позже 19 ноября, эту дату не называют.'
+  ] }, null, src);
+  assert.equal(out.filter((x) => /логотип/i.test(x)).length, 1);
+  assert.ok(isTimelineItem('Дата «запустить не позже 19 ноября (чт)» — только для временной вывески'));
+});
 console.log(`mustInclude: ${n} проверок пройдено`);

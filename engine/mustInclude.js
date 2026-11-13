@@ -48,7 +48,7 @@ function timelineItems(timeline) {
 // готов 20–24 ноября» — смешала «старт сегодня» и «старт до 19-го»; composer
 // мог бы перенести эту ошибку в касание. Такие пункты отбрасываем.
 const MONTH = '(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)';
-const TIMELINE_ITEM_RE = new RegExp(`timeline|из расчёта|(готов[а-яё]*|старт[а-яё]*|запуск[а-яё]*)[^.;]*\\d{1,2}([–-]\\d{1,2})?\\s+${MONTH}`, 'i');
+const TIMELINE_ITEM_RE = new RegExp(`timeline|из расчёта|(готов[а-яё]*|старт[а-яё]*|запуск[а-яё]*|запуст[а-яё]*)[^.;]*\\d{1,2}([–-]\\d{1,2})?\\s+${MONTH}`, 'i');
 function isTimelineItem(text) {
   return TIMELINE_ITEM_RE.test(text);
 }
@@ -99,9 +99,26 @@ function clientPromises(sourceText) {
   return out;
 }
 
+// Сравнение без регистра, кавычек и знаков: стратегия пишет «Логотип пришлю» без точки,
+// «29 октября» вместо «29.10» — живой «Зерно 5» (13.11, вечер) дал пункт дважды.
+const norm = (t) => String(t).toLowerCase().replace(/ё/g, 'е').replace(/[^а-яa-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+function sameClientPromise(item, p) {
+  const x = norm(item);
+  const q = norm(p.quote);
+  if (q && x.includes(q.slice(0, 12))) return true;
+  if (!/пришл|обещал|прислат|прислан/.test(x)) return false;
+  // та же дата («08.11» или «8 ноября»)
+  const [dd, mm] = p.said.split('.').map(Number);
+  if (x.includes(norm(p.said)) || x.includes(`${dd} ${MONTHS_RU[mm - 1]}`)) return true;
+  // что обещано: слова рядом с глаголом («логотип», «реквизиты», «фото»)
+  const words = q.split(' ');
+  const i = words.findIndex((w) => CLIENT_SEND_RE.test(w));
+  const near = [...words.slice(Math.max(0, i - 2), i), ...words.slice(i + 1, i + 3)].filter((w) => w.length >= 4);
+  return near.some((w) => x.includes(w.slice(0, 6)));
+}
 function clientPromiseItems(sourceText, existing) {
   return clientPromises(sourceText)
-    .filter((p) => !existing.some((x) => x.includes(p.quote.slice(0, 15)) || (x.includes(p.said) && /пришл|обещал/i.test(x))))
+    .filter((p) => !existing.some((x) => sameClientPromise(x, p)))
     .map((p) => `Переписка: ${p.who} (${p.said}): «${p.quote}» — если ещё не прислано, в первом касании ${p.who} попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).`);
 }
 
