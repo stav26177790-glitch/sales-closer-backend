@@ -110,7 +110,7 @@ function formatValueFocus(v) {
 // Название канала для заголовка касания: агент пишет и «whatsapp», и «WhatsApp».
 const CHANNEL_LABELS = {
   whatsapp: 'WhatsApp', telegram: 'Telegram', email: 'Email', 'e-mail': 'Email',
-  voice: 'Голосовое', call_script: 'Звонок', call: 'Звонок', phone: 'Звонок', sms: 'SMS'
+  voice: 'Голосовое', 'кружок': 'Кружок (видео)', call_script: 'Звонок', call: 'Звонок', phone: 'Звонок', sms: 'SMS'
 };
 function channelLabel(channel) {
   if (!channel) return '';
@@ -129,18 +129,35 @@ function formatTouchpoint(m, i) {
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };
 
-// Ключи критериев СОПРАНО (diagnostic_output.scores) — раньше рендерились
-// сырыми английскими именами ("financial: Риск", "authority: Риск"),
-// в отличие от значений статуса, которые агент и так пишет по-русски
-// ("Риск", "Неизвестно", "Подтверждено"). Тот же класс проблемы, что и
-// с STRATEGY_LABELS/CRITERIA_LABELS ниже — здесь просто был пропущен.
+// Критерии ФОРМУЛЫ ЗАКРЫТИЯ (diagnostic_output.scores). До 2026-11-13 в чате
+// это называлось «Оценка по СОПРАНО» — неверно: СОПРАНО — методика вопросов
+// клиенту, а пять критериев — формула закрытия владельца (ФВ, ОП, ЛПР, Д, ЗС).
+// Ключи в данных прежние (financial/need/…) — без миграции живых сделок.
 const SOPRANO_CRITERIA_KEY_LABELS = {
-  financial: 'Финансы',
-  need: 'Потребность',
-  trust: 'Доверие',
-  authority: 'Полномочия (ЛПР)',
-  urgency: 'Срочность'
+  financial: 'ФВ — финансовая возможность',
+  need: 'ОП — осознанная потребность',
+  authority: 'ЛПР — определён',
+  trust: 'Д — доверие',
+  urgency: 'ЗС — здесь и сейчас'
 };
+const FORMULA_ORDER = ['financial', 'need', 'authority', 'trust', 'urgency'];
+
+// СОПРАНО — только что не собрано и рекомендации менеджеру (не влияет на касания).
+const SOPRANO_LETTERS = { 'С': 'Ситуация', 'О1': 'Опыт', 'П': 'Проблемы', 'Р': 'Решение', 'А': 'Аналоги', 'Н': 'Нюансы', 'О2': 'Ограничения' };
+function formatSoprano(diag) {
+  const s = diag?.soprano;
+  const recs = Array.isArray(diag?.soprano_recommendations) ? diag.soprano_recommendations.filter(Boolean).slice(0, 3) : [];
+  if ((!s || typeof s !== 'object') && !recs.length) return '';
+  const gaps = s && typeof s === 'object'
+    ? Object.entries(SOPRANO_LETTERS)
+      .filter(([k]) => s[k] && !/^собран/i.test(String(s[k].status || '')))
+      .map(([k, name]) => `${name}${s[k].status ? ` (${String(s[k].status).toLowerCase()})` : ''}`)
+    : [];
+  if (!gaps.length && !recs.length) return '\n\n**СОПРАНО:** сведения собраны.';
+  const gapLine = gaps.length ? `\n\nНе собрано: ${gaps.join(', ')}.` : '';
+  const recLines = recs.length ? `\n\nРекомендую уточнить у клиента:\n${recs.map((r) => `- ${r}`).join('\n')}` : '';
+  return `\n\n### СОПРАНО — что уточнить${gapLine}${recLines}`;
+}
 
 function translateCriterionKey(key) {
   return SOPRANO_CRITERIA_KEY_LABELS[key] || key;
@@ -213,7 +230,8 @@ const CRITERIA_LABELS = {
   broken_trust_protocol: 'не соблюдён протокол при сломанном доверии клиента (нет независимого подтверждения или явного права на отказ)',
   client_value: 'не показана ценность для клиента (что даёт следующий шаг адресату)',
   must_include: 'не выполнен обязательный пункт сделки',
-  schedule: 'касание уходит позже срока, который в нём назван'
+  schedule: 'касание уходит позже срока, который в нём назван',
+  alternation: 'два экспертных или два эмпатичных касания подряд'
 };
 
 // Переводит список технических кодов в читаемую строку через запятую.
@@ -296,7 +314,8 @@ function formatAgentReplyForChat(state, output) {
       const diag = output?.diagnostic_output || output;
       const c = diag?.criteria_assessment || diag?.scores;
       if (!c) return JSON.stringify(diag, null, 2);
-      const lines = Object.entries(c).map(([k, v]) => {
+      const ordered = [...FORMULA_ORDER.filter((k) => k in c), ...Object.keys(c).filter((k) => !FORMULA_ORDER.includes(k))];
+      const lines = ordered.map((k) => [k, c[k]]).map(([k, v]) => {
         const status = v?.status || v;
         const comment = v?.comment || v?.explanation || '';
         return `- **${translateCriterionKey(k)}:** ${status}${comment ? ' — ' + comment : ''}`;
@@ -308,7 +327,7 @@ function formatAgentReplyForChat(state, output) {
       const summary = typeof diag?.diagnostic_summary === 'string' && diag.diagnostic_summary.trim()
         ? `\n\n**Вывод:** ${diag.diagnostic_summary.trim()}`
         : '';
-      return `## Оценка по СОПРАНО\n\n${lines.join('\n')}${formatClientTriggers(diag?.client_triggers)}${summary}${conflictText}`;
+      return `## Формула закрытия\n\n${lines.join('\n')}${formatClientTriggers(diag?.client_triggers)}${summary}${formatSoprano(diag)}${conflictText}`;
     }
     case 'CONFLICT_RESOLUTION': {
       // Баг №32: раньше здесь читалось только conflicts_explained — поля с

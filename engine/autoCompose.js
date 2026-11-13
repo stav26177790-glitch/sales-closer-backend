@@ -59,6 +59,23 @@ function codeChecks(composerOutput, timeline) {
       r.verdict = 'НА ДОРАБОТКУ';
     }
   });
+  // Воронка владельца: касания после КП чередуются экспертное / эмпатичное.
+  // Условные ветки («только если…») — не следующий шаг цепочки, их пропускаем.
+  let prev = null;
+  msgs.forEach((m, i) => {
+    if (/только если/i.test(String(m?.timing || ''))) return;
+    const kind = String(m?.kind || '').toLowerCase();
+    const k = /экспер/.test(kind) ? 'экспертное' : /эмпат/.test(kind) ? 'эмпатичное' : null;
+    if (k && prev && k === prev.kind) {
+      const x = r.messages_reviewed[i];
+      x.verdict = 'НА ДОРАБОТКУ';
+      x.code_checked = true;
+      x.failed_criteria = [...new Set([...(x.failed_criteria || []), 'alternation'])];
+      x.fix_instructions = [x.fix_instructions, `Два ${k === 'экспертное' ? 'экспертных' : 'эмпатичных'} касания подряд (${prev.n} и ${x.touchpoint_number}) — по воронке их чередуем: сделать это касание ${k === 'экспертное' ? 'эмпатичным (короткое видео-кружок)' : 'экспертным'} или поменять порядок.`].filter(Boolean).join(' ');
+      r.verdict = 'НА ДОРАБОТКУ';
+    }
+    if (k) prev = { kind: k, n: r.messages_reviewed[i].touchpoint_number };
+  });
   applyPhraseCheck(r, msgs);
   applyScheduleCheck(r, msgs, timeline);
   return r;

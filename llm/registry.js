@@ -38,7 +38,8 @@ const AGENTS = {
     knowledge: [
       '02_sales_formula.md', '06_trust.md', '07_decision_authority.md', '08_urgency.md',
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
-      '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md'
+      '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md',
+      '25_after_kp_playbook.md'
     ]
   },
   composer: {
@@ -46,12 +47,13 @@ const AGENTS = {
     knowledge: [
       '09_touchpoint_engine.md', '10b_scripts_post_kp_meeting.md', '11_touchpoint_library.md',
       '14_style_guide.md', '15_objection_expensive.md', '15b_objection_library.md',
-      '17_trust_building.md', '22_presentation.md', '23_lpr_tactics.md', '24_client_triggers.md'
+      '17_trust_building.md', '22_presentation.md', '23_lpr_tactics.md', '24_client_triggers.md',
+      '25_after_kp_playbook.md'
     ]
   },
   reviewer: {
     model: SONNET, temperature: 0.1, industryCases: false, industryKnowledge: true, cache: true,
-    knowledge: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md', '24_client_triggers.md']
+    knowledge: ['14_style_guide.md', '09_touchpoint_engine.md', '01_sales_methodology.md', '24_client_triggers.md', '25_after_kp_playbook.md']
   },
   memory: {
     model: HAIKU, temperature: 0.1, industryCases: false, cache: false,
