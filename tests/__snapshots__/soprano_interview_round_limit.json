@@ -135,7 +135,7 @@
         },
         {
           "agent": "diagnostic",
-          "maxTokens": null,
+          "maxTokens": 6000,
           "input": {
             "today": "<TODAY>",
             "working_days_ahead": [
@@ -341,7 +341,7 @@
         },
         {
           "agent": "diagnostic",
-          "maxTokens": null,
+          "maxTokens": 6000,
           "input": {
             "today": "<TODAY>",
             "working_days_ahead": [

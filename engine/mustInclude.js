@@ -102,7 +102,7 @@ function clientPromises(sourceText) {
 function clientPromiseItems(sourceText, existing) {
   return clientPromises(sourceText)
     .filter((p) => !existing.some((x) => x.includes(p.quote.slice(0, 15)) || (x.includes(p.said) && /пришл|обещал/i.test(x))))
-    .map((p) => `Переписка: ${p.said} ${p.who} написала/написал «${p.quote}» — если ещё не прислано, в первом касании ${p.who} попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).`);
+    .map((p) => `Переписка: ${p.who} (${p.said}): «${p.quote}» — если ещё не прислано, в первом касании ${p.who} попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).`);
 }
 
 function promiseItems(sourceText, today, existing) {

@@ -173,7 +173,7 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   if (plannerResult?.planner_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
-  const diagnosticResult = await callAgentSafe('diagnostic', { ...baseInput, planner_output: output.planner_output });
+  const diagnosticResult = await callAgentSafe('diagnostic', { ...baseInput, planner_output: output.planner_output }, 6000); // + СОПРАНО — 4000 мало
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
   if (output.diagnostic_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };

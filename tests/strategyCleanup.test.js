@@ -23,7 +23,7 @@ check('«Марина (29.10): На козырёк. Логотип пришлю.
   const list = buildMustInclude({ must_include: ['Касание 1: уточнить, показала ли КП'] }, null, src);
   assert.ok(list.some((x) => x.includes('«Логотип пришлю.»') && x.includes('Помните, мы проговаривали')));
   const list2 = buildMustInclude({ must_include: ['Касание 1 (Марине): попросить логотип — обещала 29.10 («Логотип пришлю»)'] }, null, src);
-  assert.equal(list2.filter((x) => x.startsWith('Переписка: 29.10')).length, 0);
+  assert.equal(list2.filter((x) => x.startsWith('Переписка: Марина (29.10)')).length, 0);
 });
 check('«Получил, передам клиенту» посредника — не обещание прислать нам', () => {
   assert.equal(clientPromises('Сергей (05.11): Получил, передам клиенту, клиент думает.').length, 0);

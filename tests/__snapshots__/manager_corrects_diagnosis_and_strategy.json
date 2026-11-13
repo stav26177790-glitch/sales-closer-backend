@@ -185,7 +185,7 @@
       "agentCalls": [
         {
           "agent": "strategy",
-          "maxTokens": null,
+          "maxTokens": 8000,
           "input": {
             "today": "<TODAY>",
             "working_days_ahead": [
@@ -313,7 +313,7 @@
       "agentCalls": [
         {
           "agent": "strategy",
-          "maxTokens": null,
+          "maxTokens": 8000,
           "input": {
             "today": "<TODAY>",
             "working_days_ahead": [

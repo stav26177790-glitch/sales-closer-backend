@@ -444,6 +444,15 @@ module.exports = [
     messages: ['ок', 'ок'],
   },
   {
+    name: 'strategy_unparsed_not_shown_as_empty',
+    description: 'Ответ стратегии не разобран: первая — остаёмся на оценке с просьбой повторить; пересборка — прежняя стратегия остаётся',
+    deal: { ...BASE_DEAL, current_state: 'DIAGNOSING', last_diagnostic_output: diagnostic().diagnostic_output },
+    agents: {
+      strategy: [{ parse_error: true, raw_output: '{"strategy_output": {"primary_strategy": {"name": "Охват' }, strategy(), { parse_error: true, raw_output: 'обрезано' }],
+    },
+    messages: ['ок', 'ок', 'пересобери стратегию'],
+  },
+  {
     name: 'escalation_close_word',
     description: 'После эскалации «закрыть» — итог без переспроса',
     deal: { ...AT_COMPOSING, current_state: 'ESCALATION', composer_iterations: 3 },

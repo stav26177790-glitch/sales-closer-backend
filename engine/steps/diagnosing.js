@@ -20,8 +20,19 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
     input.manager_correction = correction;
     input.previous_strategy_output = deal.last_strategy_output;
   }
-  const strategyResult = await callAgentSafe('strategy', input);
+  // 8000: после перестройки стратегия отдаёт шаги плана с полями (day, condition,
+  // recipient…) — на 4000 ответ обрезался и не разбирался (живой «Зерно 5», 2026-11-13).
+  const strategyResult = await callAgentSafe('strategy', input, 8000);
   output.strategy_output = strategyResult?.strategy_output || strategyResult;
+  // Ответ не разобран — не показываем пустую стратегию как настоящую.
+  const s = output.strategy_output;
+  if (!s || typeof s !== 'object' || s.parse_error || !(s.primary_strategy || (Array.isArray(s.touchpoint_sequence) && s.touchpoint_sequence.length))) {
+    console.warn('[strategy] Ответ стратегии не разобран — стратегия не обновлена');
+    if (correction && deal.last_strategy_output) {
+      return { nextState: 'STRATEGY_SELECTION', output: { _directText: '⚠️ Не получилось пересобрать стратегию: ответ модели не разобрался. Стратегия осталась прежней — напишите правку ещё раз.' } };
+    }
+    return { nextState: 'DIAGNOSING', output: { _directText: '⚠️ Не получилось составить стратегию: ответ модели не разобрался. Напишите «ок» ещё раз.' } };
+  }
   // «Обязательно в касаниях»: пункты стратегии + пункты по срокам из расчёта кодом.
   cleanStrategy(output.strategy_output);
   attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
