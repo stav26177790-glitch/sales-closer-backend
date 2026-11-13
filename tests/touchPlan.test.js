@@ -50,4 +50,17 @@ check('после writer канал, дата и тип — из плана', ()
 check('без шагов стратегии — плана нет (старый путь composer)', () => {
   assert.equal(buildTouchPlan({}, tl, '2026-11-13'), null);
 });
+check('Зерно 5: звонок эмп → сообщение эксп «сразу после» → кружок эмп → сообщение эксп — ничего не ломать и не вставлять', () => {
+  const p5 = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'эмпатичное', day: 0, timing: 'Сегодня' },
+    { number: 2, channel: 'Мессенджер', kind: 'экспертное', day: 0, same_contact_as: 1, timing: 'В тот же день, сразу после звонка' },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', day: 2, condition: 'Только если Марина даст контакт' },
+    { number: 4, channel: 'Кружок (WhatsApp/Telegram)', kind: 'эмпатичное', day: 4 },
+    { number: 5, channel: 'Мессенджер', kind: 'экспертное', day: 6 }
+  ] }, tl, '2026-11-13');
+  assert.equal(p5.length, 5);
+  assert.ok(!p5.some((x) => x.inserted));
+  assert.equal(p5[3].channel, 'Кружок (WhatsApp/Telegram)');
+  assert.equal(p5[3].kind, 'эмпатичное');
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

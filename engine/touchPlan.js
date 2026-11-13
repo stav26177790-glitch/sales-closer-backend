@@ -117,7 +117,12 @@ function buildTouchPlan(strategyOutput, timeline, today) {
   const ordered = [];
   let prev = null;
   for (const s of steps) {
-    if (s.conditional || s.sameContact) { ordered.push(s); continue; }
+    // Условный шаг может не случиться — в чередовании не участвует.
+    if (s.conditional) { ordered.push(s); continue; }
+    // «Сразу после» тому же контакту — уходит наверняка: не правим его, но он задаёт тип
+    // для следующего шага (иначе «звонок эмп → сообщение эксп → кружок эмп» ломался:
+    // кружок превращался в WhatsApp и вставлялся лишний кружок).
+    if (s.sameContact) { ordered.push(s); prev = s; continue; }
     if (prev && prev.kind === s.kind) {
       if (s.kind === 'экспертное') {
         const day = s.day > prev.day + 1 ? Math.floor((prev.day + s.day) / 2) : prev.day + 1;
