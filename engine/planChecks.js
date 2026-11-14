@@ -36,8 +36,12 @@ const MOSCOW_FIXES = {
 
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
+// «Каждый день ожидания сдвигает дату» — один раз на цепочку; повтор — давление (прогон 14.11).
+const SHIFT_RE = /кажд[а-яё]* (рабоч[а-яё]* )?(день|дня)[^.!?]{0,40}сдвига/i;
+
 // [{ touchpoint_number, fixes }]
 function findPlanIssues(messages, plan, sourceText = '') {
+  let shiftSaidIn = null;
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
@@ -52,7 +56,11 @@ function findPlanIssues(messages, plan, sourceText = '') {
     } else if (lastN && LAST_CHANCE_RE.test(t)) {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
-    if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
+    if (SHIFT_RE.test(t)) {
+      if (shiftSaidIn == null) shiftSaidIn = n;
+      else fixes.push(`«Каждый день ожидания сдвигает дату» уже сказано в касании ${shiftSaidIn} — повтор давит. Здесь — только дата на день отправки, без этой фразы.`);
+    }
+        if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
     if (moscowOrUnknown && UNLIT_RE.test(t)) fixes.push(MOSCOW_FIXES.unlit);
     if (moscowOrUnknown && BANNER_RE.test(t) && !INSIDE_RE.test(t)) fixes.push(MOSCOW_FIXES.banner);
     if (moscowOrUnknown && BOX_RE.test(t) && !INLAY_RE.test(t)) fixes.push(MOSCOW_FIXES.box);

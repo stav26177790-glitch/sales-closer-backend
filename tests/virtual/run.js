@@ -51,7 +51,7 @@ function withPlanAndHooks(resp) {
     }
     for (const m of msgs) {
       if (m.hook) continue;
-      const opening = String(m.body || '').replace(/\[[^\]]*\]/g, ' ').trim().split(/\s+/).slice(0, 2).join(' ');
+      const opening = String(m.body || '').replace(/\[[^\]]*\]/g, ' ').trim().split(/\s+/).slice(0, 6).join(' ');
       m.hook = { quote, prep: 'Перед касанием: позвоните на производство по проекту клиента.', opening };
     }
     return out;

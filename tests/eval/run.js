@@ -105,7 +105,7 @@ async function judge(sit, finalTouches, plan, diagnosticSummary) {
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,
     conversation: [sit.first, sit.reply].filter(Boolean).join('\n\n--- ответ клиента после касаний ---\n\n'),
     what_this_situation_checks: sit.expect, diagnostic_summary: diagnosticSummary,
-    touch_plan: (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal })),
+    touch_plan: (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, facts: p.facts })),
     touches: finalTouches
   }, null, 1);
   const startedAt = Date.now();

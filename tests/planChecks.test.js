@@ -49,4 +49,11 @@ check('временная вывеска: в Москве — только «в�
   assert.equal(findPlanIssues([{ touchpoint_number: 1, body: 'Марина, временную вывеску поставим внутри, в витрине — успевает к открытию.' }], plan, 'Покровка').length, 0);
   assert.equal(findPlanIssues([{ touchpoint_number: 1, body: t }], plan, 'Магазин в Тверской области').length, 0);
 });
+check('«каждый день ожидания сдвигает дату» — только в одном касании', () => {
+  const r = findPlanIssues([
+    { touchpoint_number: 1, body: 'При старте сегодня готово 4 декабря. Каждый рабочий день ожидания сдвигает эту дату.' },
+    { touchpoint_number: 3, body: 'Марина, напомню: каждый день задержки сдвигает готовность.' }
+  ], plan, '');
+  assert.deepEqual(r.map((h) => h.touchpoint_number), [3]);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

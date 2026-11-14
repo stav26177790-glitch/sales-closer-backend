@@ -66,6 +66,24 @@ function guessCriterion(step) {
   return null;
 }
 
+// Экспертные поводы, которые видны прямо из переписки (Москва — 902-ПП; латиница — 168-ФЗ).
+const NOT_MOSCOW_RE = /(област|обл\.|подмосков|край\b|республик|санкт-петербург|спб|петербург|казан|екатеринбург|новосибирск|краснодар|нижн[а-яё]* новгород|самар|ростов|уф[аеы]\b|перм|воронеж|тул[аеы]\b|твер|калуг|ярослав|владимир|рязан|химк|подольск|люберц|мытищ|балаших|красногорск|одинцов|королёв|королев)/i;
+function contextHints(context) {
+  const src = String(context?.source || '');
+  const client = String(context?.client || '');
+  const out = [];
+  const moscow = !NOT_MOSCOW_RE.test(src);
+  if (moscow && /козыр[её]к|козырьк/i.test(src)) {
+    out.push('Экспертный повод (902-ПП): клиент писал про козырёк — в Москве на самом козырьке вывеску нельзя, только во фризе козырька (п. 18.3.4). Спросить, есть ли у козырька фриз и какой высоты, — как заботу, чтобы вывеску не пришлось снимать. Без пугалок.');
+  } else if (moscow && /фриз/i.test(src)) {
+    out.push('Экспертный повод (902-ПП): у фасада есть фриз — вывеска только на нём, буквы до 70% высоты фриза (п. 18.3). Уточнить высоту фриза — как заботу.');
+  }
+  if (/«[^»]*[A-Za-z]{2,}[^»]*»|\b[A-Z]{3,}\b/.test(`${client}\n${src}`)) {
+    out.push('Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов.');
+  }
+  return out;
+}
+
 // Какие критерии касания должны сдвинуть: всё, что не «Подтверждено».
 function criteriaToMove(scores) {
   if (!scores || typeof scores !== 'object') return [];
@@ -89,7 +107,9 @@ function projectedSize(regularSteps) {
 // а если план уже полный — дополнительной целью к подходящему шагу.
 function coverCriteria(steps, scores) {
   const need = criteriaToMove(scores);
-  const covered = new Set(steps.filter((s) => !s.conditional).flatMap((s) => [s.criterion, ...(s.also || [])]).filter(Boolean));
+  // Условные касания (звонок ЛПР «если даст контакт», текст «если не организовала») тоже
+  // закрывают свой критерий — иначе код дописывал лишнее касание на ЛПР (прогон 14.11).
+  const covered = new Set(steps.flatMap((s) => [s.criterion, ...(s.also || [])]).filter(Boolean));
   const missing = need.filter((c) => !covered.has(c));
   if (!missing.length) return steps;
   const out = [...steps];
@@ -110,7 +130,8 @@ function coverCriteria(steps, scores) {
         goal: CRITERIA[c].goal, key_message: '', value: '', criterion: c, added_for_criterion: true });
       continue;
     }
-    const host = regular().filter((s) => !s.sameContact).pop();
+    // Деньги, доверие, сроки — не в кружок (прогон 14.11: кружок стал списком компромиссов).
+    const host = regular().filter((s) => !s.sameContact && (c === 'ОП' || c === 'ЛПР' || s.kind === 'экспертное')).pop();
     if (host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
   }
   // Новые шаги — в конце (их день позже всех), порядок остальных не трогаем.
@@ -181,7 +202,7 @@ function targetOf(item, steps) {
  * @returns {Array} план: [{ touchpoint_number, send_date, timing, channel, kind, recipient,
  *   condition, goal, key_message, value, must_include: [...], facts: {...} }]
  */
-function buildTouchPlan(strategyOutput, timeline, today, scores) {
+function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   const seq = Array.isArray(strategyOutput?.touchpoint_sequence) ? strategyOutput.touchpoint_sequence : [];
   if (!seq.length || !today) return null;
   let steps = seq.map((s, i) => ({
@@ -206,8 +227,23 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
     if (s.sameContact) s.day = lastDay; else lastDay = s.day;
   }
 
+  // «Есть ли шанс / честный ответ» в середине цепочки — убираем: это вопрос только
+  // «последнего шанса», его код ставит последним сам (прогон 14.11, касание 6 «Зерна»).
+  const LC_GOAL_RE = /шанс|честн[а-яё]* ответ|сделка потеряна|скажите как есть|проект ещё (актуал|в приоритет)/i;
+  const regularIdx = steps.map((x, i) => (!x.conditional && !x.sameContact ? i : -1)).filter((i) => i >= 0);
+  const lastRegular = regularIdx[regularIdx.length - 1];
+  steps = steps.filter((x, i) => x.conditional || x.sameContact || i === lastRegular || !LC_GOAL_RE.test(`${x.goal || ''} ${x.key_message || ''}`));
+
   // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании.
   steps = coverCriteria(steps, scores);
+
+  // Подсказки из переписки (прогон 14.11: повод про козырёк по 902-ПП не появился ни разу) —
+  // в первое экспертное касание как обязательный пункт.
+  const hints = contextHints(context);
+  if (hints.length) {
+    const target = steps.find((x) => !x.conditional && !x.sameContact && x.kind === 'экспертное');
+    if (target) target.hints = [...(target.hints || []), ...hints];
+  }
 
   // Пункты «Обязательно» — по исходным номерам, до вставок.
   const items = Array.isArray(strategyOutput?.must_include) ? strategyOutput.must_include : [];
@@ -262,8 +298,8 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
   if (lastChance) {
     // Его критерий (если был) переносим на предыдущее касание — покрытие формулы не теряем.
     const lost = [lastChance.criterion, ...(lastChance.also || [])].filter((c) => c && c !== 'ЗС');
-    const host = own[own.length - 2];
     for (const c of lost) {
+      const host = own.slice(0, -1).filter((x) => c === 'ОП' || c === 'ЛПР' || x.kind === 'экспертное').pop();
       const coveredElsewhere = steps.some((x) => x !== lastChance && !x.conditional && (x.criterion === c || (x.also || []).includes(c)));
       if (!coveredElsewhere && host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
     }
@@ -306,7 +342,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
       value: s.value,
       criterion: s.criterion ? CRITERIA[s.criterion].label : null,
       also_criteria: (s.also || []).map((c) => CRITERIA[c].label),
-      must_include: s.orig != null ? (byOrig[s.orig] || []) : [],
+      must_include: [...(s.orig != null ? (byOrig[s.orig] || []) : []), ...(s.hints || [])],
       facts: factsFor(send || today, timeline),
       inserted: !!s.inserted,
       last_chance: !!s.lastChance,
@@ -333,4 +369,4 @@ function pinToPlan(composerOutput, plan) {
   return { ...composerOutput, messages };
 }
 
-module.exports = { buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };
+module.exports = { contextHints, NOT_MOSCOW_RE, buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };

@@ -134,9 +134,10 @@ check('критерий не указан — угадывается по цел
     { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 4, goal: 'Что стоит за «дороговато»' }
   ] }, tl, '2026-11-13');
   assert.deepEqual(p.map((x) => (x.criterion || '').split(' —')[0]), ['ЛПР', 'ЗС', 'ЗС']);
-  // третье — «последний шанс»; его «ФВ» не теряется, а уходит в предыдущее касание
+  // третье — «последний шанс»; его «ФВ» не теряется, а уходит в экспертное касание (не в кружок)
   assert.ok(p[2].last_chance);
-  assert.ok(p[1].also_criteria.includes('ФВ — финансовая возможность'));
+  assert.ok(p[0].also_criteria.includes('ФВ — финансовая возможность'));
+  assert.ok(!p[1].also_criteria.length);
 });
 // Владелец 14.11: последнее касание — «последний шанс»: сказать как есть, не тратить время клиента.
 check('«последний шанс» — только последнее касание цепочки от трёх; условные и вдогонку не считаются', () => {
@@ -177,6 +178,28 @@ check('интервал по ситуации: срок не горит — ме
   assert.equal(buildTouchPlan(seq, far, '2026-11-13')[2].send_date, '2026-11-18');
   const urgent = buildTouchPlan(seq, tl, '2026-11-13');
   assert.deepEqual(urgent.map((x) => x.send_date), ['2026-11-13', '2026-11-13', '2026-11-16', '2026-11-17']);
+});
+// Прогон «Зерна» на настоящей модели (14.11).
+check('прогон 14.11: условные касания закрывают ЛПР — лишнего касания на ЛПР нет; «есть ли шанс» в середине убирается', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'ЗС' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'только если Марина даст контакт Андрея', criterion: 'ЛПР' },
+    { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 3, criterion: 'Д' },
+    { number: 4, channel: 'Звонок', kind: 'эмпатичное', day: 5, criterion: 'ЗС', goal: 'Получить честный ответ: есть ли шанс или сделка потеряна' },
+    { number: 5, channel: 'WhatsApp', kind: 'экспертное', day: 7, criterion: 'ФВ' }
+  ] }, tl, '2026-11-13', { authority: { status: 'Риск' }, urgency: { status: 'Риск' }, trust: { status: 'Вероятно' }, financial: { status: 'Вероятно' } });
+  assert.ok(!p.some((x) => /честный ответ: есть ли шанс/.test(x.goal || '')), 'шанс в середине остался');
+  assert.ok(!p.some((x) => x.added_for_criterion), 'добавлено лишнее касание');
+  assert.equal(p.filter((x) => !x.condition && /ЛПР/.test(x.criterion || '')).length, 0);
+});
+check('подсказки из переписки: козырёк в Москве → 902-ПП; латиница → 168-ФЗ; не Москва — без 902-ПП', () => {
+  const { contextHints } = require('../engine/touchPlan');
+  assert.ok(/фризе козырька/.test(contextHints({ source: 'Марина: На козырёк. Покровка' }).join(' ')));
+  assert.ok(!/902/.test(contextHints({ source: 'Салон в Химках, вывеска на козырёк' }).join(' ')));
+  assert.ok(/168-ФЗ/.test(contextHints({ source: 'Название «AURUM» латиницей', client: 'Салон «Аурум»' }).join(' ')));
+  const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0 }, { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 2 }] }, tl, '2026-11-13', null, { source: 'На козырёк' });
+  assert.ok(p[1].must_include.some((m) => /902-ПП/.test(m)));
+  assert.ok(!p[0].must_include.length);
 });
 // Владелец 14.11: касание в выходной — уточнять у клиента.
 check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {

@@ -39,12 +39,19 @@ function quoteInSource(quote, source) {
 
 // Касание начинается с повода: первые слова opening — в начале текста
 // (после приветствия и ремарок звонка «[Марина берёт трубку]»).
-const OPENING_ZONE = 700;
+// Мягко (прогон 14.11: editor трижды не мог «попасть» в фразу у первого звонка ЛПР):
+// приветствие и [заглушки] не считаем; достаточно любых 4 слов подряд из повода
+// в начале текста (у звонка начало длиннее — ремарки и «удобно говорить?»).
+const OPENING_ZONE = 900;
+const GREETING_RE = /^(добрый (день|вечер)|здравствуйте|привет|доброе утро)\s*/;
 function openingAtStart(opening, body) {
-  const o = norm(opening).split(' ').filter(Boolean).slice(0, 6).join(' ');
-  if (!o) return false;
+  const o = norm(String(opening || '').replace(/\[[^\]]*\]/g, ' ')).replace(GREETING_RE, '');
+  const w = o.split(' ').filter(Boolean);
+  if (!w.length) return false;
   const start = norm(String(body || '').replace(/\[[^\]]*\]/g, ' ')).slice(0, OPENING_ZONE);
-  return start.includes(o);
+  if (w.length < 4) return start.includes(w.join(' '));
+  for (let i = 0; i + 4 <= Math.min(w.length, 12); i++) if (start.includes(w.slice(i, i + 4).join(' '))) return true;
+  return false;
 }
 
 // Менеджеры работают удалённо — поводы «заехал / был на производстве» неправда.
