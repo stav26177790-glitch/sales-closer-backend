@@ -25,7 +25,11 @@ const NOT_MOSCOW_RE = /(област|обл\.|подмосков|край\b|ре
 const UNLIT_RE = /(буквы|вывеск[а-яё]*|надпись)[^.!?]{0,30}без подсветки|без подсветки[^.!?]{0,20}(букв|вывеск)|несветов/i;
 const BOX_RE = /(световой |лайт)?короб[а-яё]* вместо|вместо (отдельных )?букв[^.!?]{0,20}короб/i;
 const INLAY_RE = /инкрустац/i;
+// Временная вывеска (владелец 14.11): в Москве — только внутри помещения.
+const BANNER_RE = /баннер|временн[а-яё]* вывеск/i;
+const INSIDE_RE = /внутри|изнутри|в витрин|в помещени|в зале|в окн/i;
 const MOSCOW_FIXES = {
+  banner: 'Временная вывеска в Москве — только внутри помещения (902-ПП запрещает баннерную ткань на фасаде): сказать «временную вывеску поставим внутри, в витрине / в зале». Если объект точно не в Москве — уточнить город.',
   unlit: 'Буквы без подсветки в Москве предлагать нельзя (902-ПП). Убрать этот вариант; если объект точно не в Москве — сначала уточнить город.',
   box: 'Короб вместо букв в Москве — только по технологии «инкрустация» или «псевдоинкрустация» (902-ПП): так и сказать, иначе не предлагать.'
 };
@@ -50,6 +54,7 @@ function findPlanIssues(messages, plan, sourceText = '') {
     }
     if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
     if (moscowOrUnknown && UNLIT_RE.test(t)) fixes.push(MOSCOW_FIXES.unlit);
+    if (moscowOrUnknown && BANNER_RE.test(t) && !INSIDE_RE.test(t)) fixes.push(MOSCOW_FIXES.banner);
     if (moscowOrUnknown && BOX_RE.test(t) && !INLAY_RE.test(t)) fixes.push(MOSCOW_FIXES.box);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });

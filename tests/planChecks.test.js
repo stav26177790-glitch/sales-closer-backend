@@ -43,4 +43,10 @@ check('Москва, 902-ПП: короб вместо букв — только
   assert.ok(findPlanIssues([{ touchpoint_number: 2, body: bad }], plan, '').some((h) => /инкрустац/.test(h.fixes.join(' '))));
   assert.equal(findPlanIssues([{ touchpoint_number: 2, body: ok }], plan, '').length, 0);
 });
+check('временная вывеска: в Москве — только «внутри»; не Москва — без требования', () => {
+  const t = 'Марина, баннер успевает к открытию — гости найдут вас с первого дня.';
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, body: t }], plan, 'кофейня на Покровке').some((h) => /внутри помещения/.test(h.fixes.join(' '))));
+  assert.equal(findPlanIssues([{ touchpoint_number: 1, body: 'Марина, временную вывеску поставим внутри, в витрине — успевает к открытию.' }], plan, 'Покровка').length, 0);
+  assert.equal(findPlanIssues([{ touchpoint_number: 1, body: t }], plan, 'Магазин в Тверской области').length, 0);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

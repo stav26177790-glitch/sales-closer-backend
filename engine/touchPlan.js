@@ -37,6 +37,9 @@ const CRITERIA = {
 // Порядок как в «Правиле 7 касаний» владельца: кейсы (Д) → дедлайн (ЗС) → персональное (ФВ).
 const CRITERIA_ORDER = ['ЛПР', 'Д', 'ЗС', 'ФВ', 'ОП'];
 const MAX_TOUCHES = 7; // спящий режим — после 7 касаний без ответа
+const CALM_GAP = 3;    // рабочих дней между касаниями, когда срок не горит
+// Срочно: есть дата клиента и запас не больше 5 рабочих дней (или уже не успеваем).
+const isUrgent = (tl) => !!tl && (tl.status !== 'с запасом' || Number(tl.buffer_working_days) <= 5);
 const LAST_CHANCE_GOAL = 'Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.';
 
 function criterionOf(v) {
@@ -159,7 +162,7 @@ function factsFor(sendIso, timeline) {
   const b = timeline.temp_banner;
   if (b && b.fits_client_deadline) {
     out.temp_banner = sendIso <= b.latest_start_date
-      ? `Временная вывеска к открытию ещё успевает: запустить не позже ${humanDate(b.latest_start_date)}. Эта дата — только для неё.`
+      ? `Временная вывеска к открытию ещё успевает: запустить не позже ${humanDate(b.latest_start_date)}. Эта дата — только для неё. В Москве — только внутри помещения (на фасаде 902-ПП запрещает баннерную ткань); не в Москве — на фасаде, если позволяют правила города.`
       : `Временную вывеску к открытию уже не успеть (последний день запуска был ${humanDate(b.latest_start_date)}) — её и эту дату не упоминать.`;
   }
   return out;
@@ -237,6 +240,19 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
     prev = ordered[ordered.length - 1];
   }
   steps = ordered;
+
+  // Интервал между касаниями — по ситуации (владелец 14.11: «от триггера, если есть
+  // срочность — быстрее»). Срок не горит (нет даты клиента или запас больше недели) —
+  // между касаниями не меньше 3 рабочих дней (документ владельца: 3–7 дней).
+  if (!isUrgent(timeline)) {
+    let lastDay = null;
+    for (const s of steps) {
+      if (s.conditional) continue;
+      if (s.sameContact) { if (lastDay != null) s.day = lastDay; continue; }
+      if (lastDay != null && s.day < lastDay + CALM_GAP) s.day = lastDay + CALM_GAP;
+      lastDay = s.day;
+    }
+  }
 
   // «Последний шанс» (владелец 14.11): последнее касание цепочки — попросить сказать
   // как есть, чтобы не тратить время клиента. Только последним и только в цепочке

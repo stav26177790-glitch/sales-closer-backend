@@ -29,6 +29,11 @@ const HOLIDAYS = new Set([
   '2027-02-23', '2027-03-08', '2027-05-03', '2027-05-10', '2027-06-14', '2027-11-04'
 ]);
 
+// Где можно временную вывеску (владелец 14.11): в Москве — только внутри помещения
+// (902-ПП, п. 10.1.18: баннерная ткань на фасаде запрещена); не в Москве — на фасаде,
+// если позволяют правила города.
+const TEMP_PLACE = 'Где разместить: в Москве — только внутри помещения (баннерная ткань на фасаде запрещена 902-ПП); не в Москве — на фасаде, если позволяют правила города.';
+
 // Временная вывеска (баннер) к открытию, если постоянную не успеваем —
 // от владельца 2026-11-12: изготовление 3–4 рабочих дня + монтаж.
 // Монтаж — 2–3 рабочих дня, как у постоянной: график монтажей тоже распланирован
@@ -207,7 +212,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
       fits_client_deadline: bLatest <= readyBy,
       latest_start_date: bLatestStart,
       summary: bLatest <= readyBy
-        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — при старте ${start === today ? 'сегодня' : humanDate(start)} готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}. Эта дата — только для баннера: постоянная вывеска при любом дне задержки старта сдвигается на столько же рабочих дней.`
+        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — при старте ${start === today ? 'сегодня' : humanDate(start)} готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}. Эта дата — только для баннера: постоянная вывеска при любом дне задержки старта сдвигается на столько же рабочих дней. ${TEMP_PLACE}`
         : `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — к дате клиента тоже не успеваем (готова ${humanDate(bLatest)}).`
     };
   }

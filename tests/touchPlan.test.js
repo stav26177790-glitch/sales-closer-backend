@@ -164,6 +164,20 @@ check('время суток меняется: со 2-го дня утром →
   assert.ok(!/утром|днём|вечером/.test(p[0].timing) && !/утром|днём|вечером/.test(p[1].timing));
   assert.deepEqual(p.slice(2).map((x) => x.timing.split(', ').pop()), ['утром', 'днём', 'вечером', 'утром']);
 });
+check('интервал по ситуации: срок не горит — между касаниями не меньше 3 рабочих дней; горит — как в стратегии', () => {
+  const seq = { touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 0, same_contact_as: 1 },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 1 },
+    { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 2 }
+  ] };
+  const calm = buildTouchPlan(seq, null, '2026-11-13');
+  assert.deepEqual(calm.map((x) => x.send_date), ['2026-11-13', '2026-11-13', '2026-11-18', '2026-11-23']);
+  const far = t.computeTimeline({ today: '2026-11-13', clientDeadline: '2027-02-01', productionDays: 7 });
+  assert.equal(buildTouchPlan(seq, far, '2026-11-13')[2].send_date, '2026-11-18');
+  const urgent = buildTouchPlan(seq, tl, '2026-11-13');
+  assert.deepEqual(urgent.map((x) => x.send_date), ['2026-11-13', '2026-11-13', '2026-11-16', '2026-11-17']);
+});
 // Владелец 14.11: касание в выходной — уточнять у клиента.
 check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }, { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }] }, tl, '2026-11-14');
