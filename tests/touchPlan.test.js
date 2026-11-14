@@ -63,14 +63,15 @@ check('Зерно 5: звонок эмп → сообщение эксп «ср�
   assert.equal(p5[3].channel, 'Кружок (WhatsApp/Telegram)');
   assert.equal(p5[3].kind, 'эмпатичное');
 });
-check('Зерно 6: условие «не ответила» — без «после согласия», с датой «не раньше»', () => {
+check('Зерно 6 → прогон 14.11: «не ответила» — обычное касание с датой (не условие, без «после согласия»)', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'эмпатичное', day: 0 },
     { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 1, condition: 'Только если Марина не ответила на касания 1–2' },
     { number: 3, channel: 'Звонок', kind: 'экспертное', day: 0, condition: 'Только если Марина даст контакт Андрея' }
   ] }, tl, '2026-11-13');
   assert.ok(!/после согласия/.test(p[1].timing));
-  assert.ok(/не раньше 16 ноября/.test(p[1].timing), p[1].timing);
+  assert.equal(p[1].condition, '');
+  assert.equal(p[1].send_date, '2026-11-16', p[1].timing);
   assert.ok(/после согласия/.test(p[2].timing));
 });
 check('Зерно 6 (ответ клиента): «Если после касания 1 Марина не организовала звонок» — не согласие, без «после согласия»', () => {
@@ -211,6 +212,19 @@ check('деньги — только звонок или Zoom: касание н
   ] }, tl, '2026-11-13');
   assert.equal(p[0].channel, 'Звонок');
   assert.equal(p[2].channel, 'Zoom');
+});
+check('прогон 14.11: «если нет ответа» — обычное касание по дате, не условное; касания идут по хронологии', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'только если Марина даст контакт Андрея' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 4, condition: 'только если нет ответа после касания 1' },
+    { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 2 }
+  ] }, tl, '2026-11-13');
+  const regular = p.filter((x) => !x.condition);
+  assert.ok(regular.length >= 3 && regular.some((x) => x.channel === 'Кружок' && !x.inserted));
+  const dates = regular.map((x) => x.send_date);
+  assert.deepEqual(dates, [...dates].sort());
+  assert.ok(p.some((x) => x.condition && /даст контакт/.test(x.condition)));
 });
 // Владелец 14.11: касание в выходной — уточнять у клиента.
 check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {

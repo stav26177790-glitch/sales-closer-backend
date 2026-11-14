@@ -123,7 +123,7 @@ msk-viveska.ru и metallbukva.ru (владелец 2026-11-14: «ориенти�
 «Яркая Реклама» (msk-viveska.ru; все работы — https://msk-viveska.ru/galereya):
 | Клиент | Тип объекта | Что сделали | Где посмотреть |
 |---|---|---|---|
-| «Капи» | кафе в ТЦ | вывеска кафе | https://msk-viveska.ru/napravleniya/vyveski-dlya-torgovyh-centrov |
+| «Капи» | кафе в ТЦ (для уличного кафе лучше бар на фасаде, «Мята», Smoke Dog) | вывеска кафе | https://msk-viveska.ru/napravleniya/vyveski-dlya-torgovyh-centrov |
 | бар (без названия) | бар | вывеска на фасаде | https://msk-viveska.ru/napravleniya/vyveski-dlya-restoranov |
 | Smoke Dog | сеть кальянных | логотип из нержавейки с контражурной подсветкой, в интерьере / на каменной стене | галерея |
 | «Мята» | — | вывеска с ретро-лампами | галерея |

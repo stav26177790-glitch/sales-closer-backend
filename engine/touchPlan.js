@@ -142,7 +142,14 @@ function coverCriteria(steps, scores) {
   return out;
 }
 
-const isConditional = (s) => /только если|если (марина|он|она|контакт)|после согласия/i.test(String(s?.condition || '') + ' ' + String(s?.timing || ''));
+// «Если нет ответа / не организовала» — не условие, а обычный путь молчащего клиента
+// (прогон 14.11: такие шаги считались условными — ломались порядок дат и «последний шанс»).
+// Условные — только шаги, которые случатся при согласии (даст контакт, согласится).
+const SILENCE_RE = /нет ответа|не ответ|без ответа|не организ|не дал|не даст|молч|не получ|не согласовал|не вернул/i;
+const isConditional = (s) => {
+  const t = String(s?.condition || '') + ' ' + String(s?.timing || '');
+  return /только если|если (марина|он|она|контакт)|после согласия/i.test(t) && !SILENCE_RE.test(t);
+};
 const isSameContact = (s) => s?.same_contact_as != null || /сразу после|в тот же день после|после звонка/i.test(String(s?.timing || ''));
 
 function kindOf(s) {
@@ -224,6 +231,26 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     criterion: criterionOf(s?.criterion) || (s?.same_contact_as != null ? null : guessCriterion(s))
   }));
 
+  // По датам: обычные касания (вместе с текстом «сразу после» к ним) — по дню отправки;
+  // условные остаются на своих местах. Иначе номера шли не по хронологии (прогон 14.11).
+  {
+    const units = [];
+    for (const x of steps) {
+      if (x.conditional) continue;
+      if (x.sameContact && units.length) units[units.length - 1].push(x); else units.push([x]);
+    }
+    const sorted = units.slice().sort((a, b) => a[0].day - b[0].day);
+    const out = [];
+    let k = 0;
+    let started = false;
+    for (const x of steps) {
+      if (x.conditional) { out.push(x); continue; }
+      if (x.sameContact && started) continue; // уже вошёл в свою группу
+      out.push(...sorted[k++]); started = true;
+    }
+    steps = out;
+  }
+
   // «Сразу после / в тот же день после звонка» — тот же день, что предыдущий шаг.
   let lastDay = 0;
   for (const s of steps) {
@@ -271,7 +298,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
         const day = s.day > prev.day + 1 ? Math.floor((prev.day + s.day) / 2) : prev.day + 1;
         if (s.day <= day) s.day = day + 1;
         ordered.push({ orig: null, day, conditional: false, sameContact: false, condition: '', channel: 'Кружок', kind: 'эмпатичное',
-          recipient: prev.recipient, goal: 'Коротко и тепло поддержать: участие в ситуации клиента, главный шаг — без давления', key_message: '', value: 'клиенту спокойнее: о нём помнят и помогают', inserted: true });
+          recipient: prev.recipient, goal: 'Кружок с поводом: реальная деталь проекта клиента или новая идея по нему (кейс, вопрос по макету, звонок на производство) — тепло, 20–40 секунд, один шаг, без продажи в лоб', key_message: '', value: 'клиент видит, что о его проекте думают и работают', inserted: true });
       } else {
         s.kind = 'экспертное';
         if (/кружок|видео|голосов/i.test(s.channel)) s.channel = 'WhatsApp';

@@ -64,4 +64,8 @@ check('деньги в мессенджере — на доработку; зв�
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
+check('прогон 14.11: «в понедельник в 10:00 наберу вас» — давление; «удобно, если наберу?» — ок', () => {
+  assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: 'Марина, в понедельник в 10:00 наберу вас.' }], plan, '').length, 1);
+  assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: 'Марина, удобно, если наберу в понедельник утром?' }], plan, '').length, 0);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

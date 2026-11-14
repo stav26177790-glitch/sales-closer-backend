@@ -65,6 +65,9 @@ function findPlanIssues(messages, plan, sourceText = '') {
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     if (MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
+        // «В понедельник в 10:00 наберу вас» без вопроса — давление (прогон 14.11): спросить согласие.
+    const callAnnounce = t.split(/(?<=[.!?])\s+/).find((x) => /(^|[^а-яё])(наберу|позвоню|перезвоню)([^а-яё]|$)/i.test(x) && !/\?|удобно|если|можно|хорошо|договорил|как и/i.test(x));
+    if (callAnnounce) fixes.push(`Звонок объявлен без согласия клиента («${callAnnounce.slice(0, 80)}») — давление. Спросить: «Удобно, если наберу в понедельник утром?»`);
         if (SHIFT_RE.test(t)) {
       if (shiftSaidIn == null) shiftSaidIn = n;
       else fixes.push(`«Каждый день ожидания сдвигает дату» уже сказано в касании ${shiftSaidIn} — повтор давит. Здесь — только дата на день отправки, без этой фразы.`);
