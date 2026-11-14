@@ -135,7 +135,7 @@ function codeChecks(composerOutput, timeline, plan, sourceText) {
   // старые сделки без плана пишет composer, у него повода нет.
   if (hasPlan) applyHookCheck(r, msgs, sourceText);
   // «Последний шанс» — только последним; альтернатива подешевле — с риском / отходом от ТЗ.
-  applyPlanChecks(r, msgs, hasPlan ? plan : null);
+  applyPlanChecks(r, msgs, hasPlan ? plan : null, sourceText);
   return r;
 }
 

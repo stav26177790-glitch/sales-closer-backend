@@ -19,10 +19,22 @@ const ALT_RE = /под ваш бюджет|уложиться в бюджет|ч
 const RISK_RE = /риск|отход[а-яё]* от|отступ[а-яё]* от|от (тз|техзадани|исходного (задания|проекта))|компромисс|(будет|станет|получится) (хуже|меньше|проще|тусклее|неравномерн)|ценой (того|чего)/i;
 const COMPROMISE_FIX = 'Альтернатива подешевле — это отход от ТЗ (логика компромисса): прямо сказать клиенту, что мы отходим от ТЗ и в чём риск. Например: «Чтобы вы не переплачивали, подберу варианты под ваш бюджет. Но скажу честно: это отход от ТЗ — если уменьшить буквы, вывеску хуже видно издалека; если реже поставить диоды, может быть неравномерное свечение». Новых цен не называть — «посчитаю и пришлю».';
 
+// Москва, 902-ПП (владелец 14.11): буквы без подсветки — нельзя; короб — только инкрустация /
+// псевдоинкрустация. Город не всегда известен: проверяем, если в переписке нет явного «не Москва».
+const NOT_MOSCOW_RE = /(област|обл\.|подмосков|край\b|республик|санкт-петербург|спб|петербург|казан|екатеринбург|новосибирск|краснодар|нижн[а-яё]* новгород|самар|ростов|уф[аеы]\b|перм|воронеж|тул[аеы]\b|твер|калуг|ярослав|владимир|рязан)/i;
+const UNLIT_RE = /(буквы|вывеск[а-яё]*|надпись)[^.!?]{0,30}без подсветки|без подсветки[^.!?]{0,20}(букв|вывеск)|несветов/i;
+const BOX_RE = /(световой |лайт)?короб[а-яё]* вместо|вместо (отдельных )?букв[^.!?]{0,20}короб/i;
+const INLAY_RE = /инкрустац/i;
+const MOSCOW_FIXES = {
+  unlit: 'Буквы без подсветки в Москве предлагать нельзя (902-ПП). Убрать этот вариант; если объект точно не в Москве — сначала уточнить город.',
+  box: 'Короб вместо букв в Москве — только по технологии «инкрустация» или «псевдоинкрустация» (902-ПП): так и сказать, иначе не предлагать.'
+};
+
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
 // [{ touchpoint_number, fixes }]
-function findPlanIssues(messages, plan) {
+function findPlanIssues(messages, plan, sourceText = '') {
+  const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
   const out = [];
@@ -37,13 +49,15 @@ function findPlanIssues(messages, plan) {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
     if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
+    if (moscowOrUnknown && UNLIT_RE.test(t)) fixes.push(MOSCOW_FIXES.unlit);
+    if (moscowOrUnknown && BOX_RE.test(t) && !INLAY_RE.test(t)) fixes.push(MOSCOW_FIXES.box);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
   return out;
 }
 
-function applyPlanChecks(verdict, messages, plan) {
-  const hits = findPlanIssues(messages, plan);
+function applyPlanChecks(verdict, messages, plan, sourceText = '') {
+  const hits = findPlanIssues(messages, plan, sourceText);
   if (!hits.length || !verdict || typeof verdict !== 'object') return { verdict, hits };
   const reviewed = Array.isArray(verdict.messages_reviewed) ? verdict.messages_reviewed : (verdict.messages_reviewed = []);
   for (const h of hits) {
