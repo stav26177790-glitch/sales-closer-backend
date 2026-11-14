@@ -516,4 +516,39 @@ module.exports = [
     agents: { planner: [planner(true)] },
     messages: ['Клиент интересуется вывеской.'],
   },
+  {
+    name: 'path_client_replied_rebuilds',
+    description: 'Режим пути: после касаний менеджер приносит ответ клиента → оценка → стратегия → новые касания, без «ок»',
+    path: true,
+    deal: {
+      ...BASE_DEAL, current_state: 'COMPOSING', client_deadline: '2026-12-15', production_days: 10,
+      last_diagnostic_output: diagnostic().diagnostic_output,
+      last_strategy_output: strategy().strategy_output,
+      last_composer_output: { messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Иван, добрый день!' }], _check: { approved: true, rounds: 1, reviews: 1 } }
+    },
+    agents: {
+      planner: [planner(false)],
+      diagnostic: [diagnostic()],
+      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'договориться о звонке собственнику после отпуска' }] })],
+      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, body: 'Иван, понял, собственник в отпуске до 20-го. Давайте я подготовлю всё к его возвращению — созвонимся 23-го?' }] } }],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['Иван (16.11): Собственник в отпуске до 20-го, решать будет он.'],
+  },
+  {
+    name: 'path_text_edit_rewrites_only_text',
+    description: 'Режим пути: явная правка текста («касание 1 короче») — переписываются только тексты, путь не перестраивается',
+    path: true,
+    deal: {
+      ...BASE_DEAL, current_state: 'COMPOSING', client_deadline: '2026-12-15', production_days: 10,
+      last_diagnostic_output: diagnostic().diagnostic_output,
+      last_strategy_output: strategy().strategy_output,
+      last_composer_output: { messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Иван, добрый день! Длинный текст про созвон с собственником в четверг.' }], _check: { approved: true, rounds: 1, reviews: 1 } }
+    },
+    agents: {
+      composer: [composer('короче', 'Иван, добрый день! Созвонимся с собственником в четверг?')],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['касание 1 короче'],
+  },
 ];

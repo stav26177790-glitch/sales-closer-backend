@@ -113,4 +113,10 @@ check('Зерно 5 (вечер): обещание логотипа уже ес�
   assert.equal(out.filter((x) => /логотип/i.test(x)).length, 1);
   assert.ok(isTimelineItem('Дата «запустить не позже 19 ноября (чт)» — только для временной вывески'));
 });
+check('обещание выполнено позже («Логотип во вложении» / «Марина прислала логотип») — пункт не добавляется', () => {
+  const src = 'Марина (29.10): На козырёк. Логотип пришлю.\nМарина (31.10): Спасибо, покажу Андрею.';
+  assert.equal(buildMustInclude({}, null, src).length, 1);
+  assert.equal(buildMustInclude({}, null, src + '\nМарина (16.11): Логотип во вложении, Андрей смотрит.').length, 0);
+  assert.equal(buildMustInclude({}, null, src + '\nМарина прислала логотип').length, 0);
+});
 console.log(`mustInclude: ${n} проверок пройдено`);

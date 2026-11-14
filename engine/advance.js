@@ -174,6 +174,8 @@ async function advanceInternal(dealId, managerInput, opts = {}) {
     || formatAgentReplyForChat(deal.current_state, output);
   // После свежей диагностики — блок «Сроки» (расчёт кодом).
   if (!output._directText && output.diagnostic_output) chatText += formatTimeline(baseInput.timeline);
+  // Путь перестраивается по новым фактам (клиент ответил) — одна строка сверху.
+  if (output._rebuildNote && chatText) chatText = `${output._rebuildNote}\n\n${chatText}`;
   // Что делать дальше: «ок» — следующий шаг, иначе — правка (её учтут и пересоберут).
   // В режиме пути (engine/autoFlow.js) следующий шаг делает сам Клоузер — подсказки не нужны.
   if (opts.path) {

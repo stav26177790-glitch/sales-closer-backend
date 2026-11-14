@@ -106,13 +106,42 @@ async function managerEdit({ deal, baseInput, managerInput }) {
   return { nextState: 'COMPOSING', output: composedOutput(res) };
 }
 
+// 5. Режим пути (решение владельца 13.11): после касаний менеджер приносит НОВЫЕ ФАКТЫ —
+// клиент ответил, прислал логотип, сдвинулось открытие. Клоузер перестраивает весь путь:
+// оценка → стратегия → касания (дальше engine/autoFlow.js продолжает сам).
+// Правкой текста считаем только явную команду («касание 2 короче», «убери баннер»).
+const TEXT_EDIT_RE = /^\s*(в\s+)?(касани[еяию]\s*№?\s*\d|короче|покороче|длиннее|теплее|мягче|жёстче|жестче|убери|убрать|замени|заменить|перепиши|исправь|поправь|переформулируй|сократи|без\s)/i;
+const CLIENT_REPLY_RE = /(ответил|ответила|написал|написала|сказал|сказала|перезвонил|перезвонила|прислал|прислала|клиент|[А-ЯЁ][а-яё]+\s*\(\d{1,2}[.\/]\d{1,2}\)\s*:)/;
+function isNewFacts(text) {
+  const t = String(text || '').trim();
+  if (!t) return false;
+  if (TEXT_EDIT_RE.test(t) && !CLIENT_REPLY_RE.test(t)) return false;
+  if (CLIENT_REPLY_RE.test(t) || t.length > 200) return true;
+  return !isManagerQuestion(t);
+}
+
+async function rebuildPath({ baseInput, managerInput }) {
+  const { runIntakeStep } = require('../pipeline');
+  const { output, nextState } = await runIntakeStep(baseInput, 1);
+  output._intake_rounds = 1;
+  output._awaitingCorrectionConfirmation = false;
+  output._pendingManagerFeedback = null;
+  output._rebuildNote = '_Учёл новое — перестраиваю путь: оценка → стратегия → касания._';
+  // Сроки считаются из шапки сделки — если менеджер пишет о новой дате, напомнить.
+  if (/(перенес|сдвин|новая дат|теперь к|открыти[ея][^.]{0,30}\d)/i.test(String(managerInput || ''))) {
+    output._rebuildNote += '\n\n_Если изменилась дата, к которой нужно клиенту, — обновите «Сроки» в шапке сделки: расчёт берётся оттуда._';
+  }
+  return { nextState, output };
+}
+
 async function composing(ctx) {
   const { deal, managerInput } = ctx;
   if (deal.awaiting_correction_confirmation) return awaitingCorrection(ctx);
+  if (ctx.opts?.path && !isPureApproval(managerInput) && isNewFacts(managerInput)) return rebuildPath(ctx);
   // Теневой режим: сравниваем решение списков фраз с LLM-классификатором.
   logIntentClassificationShadow(managerInput, isPureApproval(managerInput), isManagerQuestion(managerInput), deal.id);
   if (isPureApproval(managerInput)) return accept(ctx);
   return isManagerQuestion(managerInput) ? managerQuestion(ctx) : managerEdit(ctx);
 }
 
-module.exports = { channelKey, composing, validateMessageLength, composedOutput };
+module.exports = { channelKey, composing, validateMessageLength, composedOutput, isNewFacts };

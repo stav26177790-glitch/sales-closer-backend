@@ -93,10 +93,17 @@ function clientPromises(sourceText) {
     if (/^(я|менеджер)$/i.test(m[1])) continue;
     for (const sentence of m[4].split(/(?<=[.!?])\s+/)) {
       if (!CLIENT_SEND_RE.test(sentence)) continue;
-      out.push({ who: m[1], said: `${m[2].padStart(2, '0')}.${m[3].padStart(2, '0')}`, quote: sentence.trim() });
+      out.push({ who: m[1], said: `${m[2].padStart(2, '0')}.${m[3].padStart(2, '0')}`, quote: sentence.trim(), at: m.index + m[0].length });
     }
   }
-  return out;
+  // Обещание уже выполнено — дальше в переписке «логотип во вложении / прислала логотип»
+  // (путь перестраивается по ответу клиента — не просить второй раз).
+  const text = String(sourceText);
+  return out.filter((p) => {
+    const words = p.quote.toLowerCase().replace(/ё/g, 'е').split(/[^а-яa-z]+/).filter((w) => w.length >= 5 && !CLIENT_SEND_RE.test(w));
+    const after = text.slice(p.at).toLowerCase().replace(/ё/g, 'е');
+    return !words.some((w) => new RegExp(`${w.slice(0, 6)}[а-я]*[^.!?\\n]{0,40}(во вложени|прикреп|отправил|прислал|держите|вот )|(прислал|отправил|скинул|вот|держите)[а-я]*[^.!?\\n]{0,20}${w.slice(0, 6)}`).test(after));
+  }).map(({ at, ...p }) => p);
 }
 
 // Сравнение без регистра, кавычек и знаков: стратегия пишет «Логотип пришлю» без точки,
