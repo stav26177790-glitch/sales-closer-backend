@@ -82,12 +82,19 @@ async function test(name, fn) {
     assert.ok(r.system[0].text.includes('КЕЙСЫ ПО ОТРАСЛИ: signage'), 'кейсы отрасли должны быть в промпте composer');
   });
 
-  await test('strategy: без кэша — системный промпт строкой, как до шага 4', async () => {
+  await test('strategy: с кэшем (14.11) — системный промпт блоком с cache_control', async () => {
     nextResponse = reply('{"strategy_output":{}}');
     await callAgent('strategy', INPUT);
-    assert.strictEqual(typeof requests[0].system, 'string');
-    assert.strictEqual(requests[0].system, buildSystemPrompt('strategy', 'signage'));
+    assert.ok(Array.isArray(requests[0].system));
+    assert.deepStrictEqual(requests[0].system[0].cache_control, { type: 'ephemeral' });
+    assert.strictEqual(requests[0].system[0].text, buildSystemPrompt('strategy', 'signage'));
     assert.strictEqual(requests[0].max_tokens, 4000);
+  });
+
+  await test('planner: без кэша — системный промпт строкой', async () => {
+    nextResponse = reply('{"planner_output":{}}');
+    await callAgent('planner', INPUT);
+    assert.strictEqual(typeof requests[0].system, 'string');
   });
 
   await test('Файл отрасли (knowledge/industry/signage.md) — только для сделок по вывескам и только нужным агентам', async () => {
@@ -106,9 +113,9 @@ async function test(name, fn) {
     assert.ok(AGENTS.composer.knowledge.includes('23_lpr_tactics.md'), 'composer без тактики выхода на ЛПР');
   });
 
-  await test('Кэш включён ровно у composer, reviewer, advisor, writer', async () => {
+  await test('Кэш включён у composer, reviewer, advisor, writer и (14.11) diagnostic, strategy, editor', async () => {
     const cached = Object.entries(AGENTS).filter(([, c]) => c.cache).map(([n]) => n).sort();
-    assert.deepStrictEqual(cached, ['advisor', 'composer', 'reviewer', 'writer']);
+    assert.deepStrictEqual(cached, ['advisor', 'composer', 'diagnostic', 'editor', 'reviewer', 'strategy', 'writer']);
   });
 
   await test('Вход агента — JSON с отступом 2, как раньше', async () => {

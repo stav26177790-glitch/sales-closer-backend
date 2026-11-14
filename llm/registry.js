@@ -25,7 +25,9 @@ const AGENTS = {
     knowledge: []
   },
   diagnostic: {
-    model: SONNET, temperature: 0.2, industryCases: false, cache: false,
+    // cache: true (14.11) — промпт ~100 тыс. символов одинаков у всех сделок: при прогонах
+    // набора и при нескольких менеджерах сразу повторный вызов в течение 5 минут — в 10 раз дешевле.
+    model: SONNET, temperature: 0.2, industryCases: false, cache: true,
     knowledge: [
       '01_sales_methodology.md', '02_sales_formula.md', '03_signal_dictionary.md',
       '04_financial_capacity.md', '05_need.md', '06_trust.md', '07_decision_authority.md',
@@ -34,7 +36,8 @@ const AGENTS = {
     ]
   },
   strategy: {
-    model: SONNET, temperature: 0.3, industryCases: true, industryKnowledge: true, cache: false,
+    // cache: true (14.11) — самый большой промпт (~200 тыс. символов), одинаков у всех сделок отрасли.
+    model: SONNET, temperature: 0.3, industryCases: true, industryKnowledge: true, cache: true,
     knowledge: [
       '02_sales_formula.md', '06_trust.md', '07_decision_authority.md', '08_urgency.md',
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
@@ -64,7 +67,8 @@ const AGENTS = {
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
   editor: {
-    model: SONNET, temperature: 0.3, industryCases: false, industryKnowledge: true, cache: false,
+    // cache: true (14.11) — за путь вызывается до 2 раз подряд.
+    model: SONNET, temperature: 0.3, industryCases: false, industryKnowledge: true, cache: true,
     knowledge: []
   },
   memory: {

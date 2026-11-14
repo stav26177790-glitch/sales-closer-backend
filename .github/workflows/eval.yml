@@ -1,0 +1,48 @@
+# Прогон набора ситуаций на настоящей модели (tests/eval) — по кнопке.
+# GitHub → Actions → «Прогон набора ситуаций» → Run workflow.
+# Нужен секрет репозитория ANTHROPIC_API_KEY (Settings → Secrets and variables → Actions).
+# Стоит денег: все 16 ситуаций с оценкой судьёй — порядка $15–25.
+name: Прогон набора ситуаций
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Номера ситуаций через запятую (пусто — все 16)'
+        required: false
+        default: ''
+      concurrency:
+        description: 'Сколько ситуаций параллельно'
+        required: false
+        default: '3'
+      judge:
+        description: 'Оценка судьёй (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Зависимости
+        run: npm ci || npm install
+      - name: Прогон
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARGS="--concurrency ${{ inputs.concurrency }}"
+          if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only ${{ inputs.only }}"; fi
+          if [ "${{ inputs.judge }}" = "false" ]; then ARGS="$ARGS --no-judge"; fi
+          node tests/eval/run.js $ARGS
+      - name: Отчёт
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval-report/
+          if-no-files-found: warn
