@@ -22,6 +22,7 @@ const { CONFIG } = require('./config');
 const { callAgentSafe, runComposer, keepApprovedTouches } = require('./pipeline');
 const { applyPhraseCheck } = require('./phraseCheck');
 const { applyHookCheck } = require('./hookCheck');
+const { applyPlanChecks } = require('./planChecks');
 const { applyMustIncludeCheck } = require('./mustInclude');
 const { applyScheduleCheck } = require('./scheduleCheck');
 const { pinToPlan } = require('./touchPlan');
@@ -133,6 +134,8 @@ function codeChecks(composerOutput, timeline, plan, sourceText) {
   // Повод касания (владелец 14.11) — только для касаний по плану (writer);
   // старые сделки без плана пишет composer, у него повода нет.
   if (hasPlan) applyHookCheck(r, msgs, sourceText);
+  // «Последний шанс» — только последним; альтернатива подешевле — с риском / отходом от ТЗ.
+  applyPlanChecks(r, msgs, hasPlan ? plan : null);
   return r;
 }
 

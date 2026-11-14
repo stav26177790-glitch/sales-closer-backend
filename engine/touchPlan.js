@@ -15,7 +15,7 @@
  *   - раскладывает пункты «Обязательно в касаниях» по касаниям.
  * Writer пишет по этому плану; канал, дата и тип после него закрепляются кодом.
  */
-const { addWorkingDays, humanDate, computeTimeline } = require('./timeline');
+const { addWorkingDays, humanDate, computeTimeline, isWorkingDay } = require('./timeline');
 
 const DEFAULT_DAYS = [0, 1, 3, 5, 8, 11, 15];
 
@@ -36,6 +36,7 @@ const CRITERIA = {
 };
 const CRITERIA_ORDER = ['ЛПР', 'ЗС', 'ФВ', 'Д', 'ОП'];
 const MAX_TOUCHES = 7; // спящий режим — после 7 касаний без ответа
+const LAST_CHANCE_GOAL = 'Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.';
 
 function criterionOf(v) {
   const t = String(v || '').toUpperCase().replace(/Ё/g, 'Е');
@@ -236,8 +237,29 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
   }
   steps = ordered;
 
+  // «Последний шанс» (владелец 14.11): последнее касание цепочки — попросить сказать
+  // как есть, чтобы не тратить время клиента. Только последним и только в цепочке
+  // от трёх касаний (одно-два касания после ответа клиента — ещё не «последний шанс»).
+  const own = steps.filter((s) => !s.conditional && !s.sameContact);
+  const lastChance = own.length >= 3 ? own[own.length - 1] : null;
+  if (lastChance) {
+    // Его критерий (если был) переносим на предыдущее касание — покрытие формулы не теряем.
+    const lost = [lastChance.criterion, ...(lastChance.also || [])].filter((c) => c && c !== 'ЗС');
+    const host = own[own.length - 2];
+    for (const c of lost) {
+      const coveredElsewhere = steps.some((x) => x !== lastChance && !x.conditional && (x.criterion === c || (x.also || []).includes(c)));
+      if (!coveredElsewhere && host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
+    }
+    lastChance.lastChance = true;
+    lastChance.criterion = 'ЗС';
+    lastChance.also = [];
+    lastChance.goal = LAST_CHANCE_GOAL;
+  }
+
   return steps.map((s, i) => {
     const send = s.conditional ? null : (s.day === 0 ? today : addWorkingDays(today, s.day));
+    // Выходной или праздник (бывает только «сегодня»): владелец 14.11 — уточнять у клиента.
+    const weekend = !!send && !isWorkingDay(send);
     const dateText = send ? humanDate(send) : null;
     // «После согласия, в тот же день» — только для условий-согласий (контакт, звонок).
     // Живой «Зерно 6»: «Только если Марина не ответила на касания 1–2 — после
@@ -247,7 +269,8 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
     const condDate = !consent && s.day > 0 ? `, не раньше ${humanDate(addWorkingDays(today, s.day))}` : '';
     const timing = s.conditional
       ? `${s.condition || 'Только при условии'}${consent ? ' — после согласия, в тот же день' : condDate}`
-      : s.sameContact ? `${dateText}, сразу после предыдущего касания` : `${s.day === 0 ? 'Сегодня, ' : ''}${dateText}`;
+      : s.sameContact ? `${dateText}, сразу после предыдущего касания`
+        : `${s.day === 0 ? 'Сегодня, ' : ''}${dateText}${weekend ? ` — выходной: уточните у клиента, удобно ли на связи; если нет — ${humanDate(addWorkingDays(today, 1))}` : ''}`;
     return {
       touchpoint_number: i + 1,
       send_date: send,
@@ -263,7 +286,9 @@ function buildTouchPlan(strategyOutput, timeline, today, scores) {
       also_criteria: (s.also || []).map((c) => CRITERIA[c].label),
       must_include: s.orig != null ? (byOrig[s.orig] || []) : [],
       facts: factsFor(send || today, timeline),
-      inserted: !!s.inserted
+      inserted: !!s.inserted,
+      last_chance: !!s.lastChance,
+      weekend
     };
   });
 }
@@ -281,7 +306,7 @@ function pinToPlan(composerOutput, plan) {
   if (!Array.isArray(msgs) || !Array.isArray(plan)) return composerOutput;
   const messages = msgs.map((m, i) => {
     const p = plan.find((x) => x.touchpoint_number === Number(m?.touchpoint_number ?? i + 1));
-    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind, criterion: p.criterion || null } : m;
+    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind, criterion: p.criterion || null, last_chance: !!p.last_chance } : m;
   });
   return { ...composerOutput, messages };
 }

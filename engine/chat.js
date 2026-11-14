@@ -126,7 +126,7 @@ function formatTouchpoint(m, i) {
   // контакт Андрея»). Раньше менеджер этого не видел — живой тест 2026-11-13.
   const timing = m.timing ? `_Когда: ${String(m.timing).replace(/_/g, ' ').trim()}_\n\n` : '';
   // Тип и критерий формулы закрытия — только для касаний по плану (владелец 14.11).
-  const kind = m.criterion && m.kind ? ` · ${m.kind} · ${String(m.criterion).split(' —')[0]}` : '';
+  const kind = m.criterion && m.kind ? ` · ${m.last_chance ? 'последний шанс' : `${m.kind} · ${String(m.criterion).split(' —')[0]}`}` : '';
   // Повод должен быть правдой: что менеджер делает перед касанием.
   const prepText = String(m.hook?.prep || '').replace(/^\s*перед касанием:?\s*/i, '').trim();
   const prep = prepText ? `**Перед касанием:** ${prepText}\n\n` : '';

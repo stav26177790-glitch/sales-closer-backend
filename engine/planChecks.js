@@ -1,0 +1,61 @@
+/**
+ * engine/planChecks.js — проверки касаний по плану (владелец 14.11).
+ *
+ * 1. «Последний шанс» — последнее касание цепочки: попросить сказать как есть,
+ *    чтобы не тратить время клиента. Этот вопрос — ТОЛЬКО в последнем касании
+ *    (живой «Зерно 7»: «есть ли у меня реальный шанс?» стоял и после того, как
+ *    клиент ожил), и в последнем он обязателен.
+ * 2. Компромисс при «дорого»: «подберу варианты под ваш бюджет, чтобы вы не
+ *    переплачивали» → альтернативы (меньше размер, реже диоды, пластиковый борт…).
+ *    Владелец: «нужно использовать логику компромисса — „есть риск“: менеджер
+ *    должен объяснить клиенту, что мы отходим от ТЗ». Альтернатива без слов о
+ *    риске / отходе от ТЗ — на доработку.
+ */
+
+const LAST_CHANCE_RE = /(есть ли|остал[а-яё]* ли)[^.?!]{0,30}шанс|скажите (как есть|прямо|в открытую|открыто)|как есть[^.?!]{0,40}(актуал|интерес|нужн)|не (буду|стану) (больше )?(вас )?(беспокоить|отвлекать|тратить)|не тратить (больше )?ваше время|что я сделал не так/i;
+const LAST_CHANCE_HINT = '«Марина, скажите как есть: проект ещё актуален? Если нет — не буду больше отвлекать, чтобы не тратить ваше время. Если да — договоримся о следующем шаге.» Можно мягкую провокацию: «Понимаю, что моё решение, возможно, не подошло. Подскажите, что стало причиной?»';
+
+const ALT_RE = /под ваш бюджет|уложиться в бюджет|чтобы вы не переплачивали|подешевле|уменьш[а-яё]* (размер|высот|букв|логотип)|буквы поменьше|пластиков[а-яё]* борт|расстановк[а-яё]* диод|реже (шаг|диод|постав)|без подсветки|подсвет[а-яё]* только логотип|короб вместо|вместо алюмини/i;
+const RISK_RE = /риск|отход[а-яё]* от|отступ[а-яё]* от|от (тз|техзадани|исходного (задания|проекта))|компромисс|(будет|станет|получится) (хуже|меньше|проще|тусклее|неравномерн)|ценой (того|чего)/i;
+const COMPROMISE_FIX = 'Альтернатива подешевле — это отход от ТЗ (логика компромисса): прямо сказать клиенту, что мы отходим от ТЗ и в чём риск. Например: «Чтобы вы не переплачивали, подберу варианты под ваш бюджет. Но скажу честно: это отход от ТЗ — если уменьшить буквы, вывеску хуже видно издалека; если реже поставить диоды, может быть неравномерное свечение». Новых цен не называть — «посчитаю и пришлю».';
+
+const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
+
+// [{ touchpoint_number, fixes }]
+function findPlanIssues(messages, plan) {
+  const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
+  const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
+  const out = [];
+  (messages || []).forEach((m, i) => {
+    const n = Number(m?.touchpoint_number ?? i + 1);
+    const t = textOf(m);
+    const fixes = [];
+    const p = byN.get(n);
+    if (p?.last_chance) {
+      if (!LAST_CHANCE_RE.test(t)) fixes.push(`Это касание — «последний шанс»: попросить сказать как есть, чтобы не тратить время клиента. ${LAST_CHANCE_HINT}`);
+    } else if (lastN && LAST_CHANCE_RE.test(t)) {
+      fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
+    }
+    if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
+    if (fixes.length) out.push({ touchpoint_number: n, fixes });
+  });
+  return out;
+}
+
+function applyPlanChecks(verdict, messages, plan) {
+  const hits = findPlanIssues(messages, plan);
+  if (!hits.length || !verdict || typeof verdict !== 'object') return { verdict, hits };
+  const reviewed = Array.isArray(verdict.messages_reviewed) ? verdict.messages_reviewed : (verdict.messages_reviewed = []);
+  for (const h of hits) {
+    let m = reviewed.find((x) => Number(x?.touchpoint_number) === h.touchpoint_number);
+    if (!m) { m = { touchpoint_number: h.touchpoint_number }; reviewed.push(m); }
+    m.verdict = 'НА ДОРАБОТКУ';
+    m.code_checked = true;
+    m.failed_criteria = [...new Set([...(m.failed_criteria || []), 'plan'])];
+    m.fix_instructions = [m.fix_instructions, ...h.fixes].filter(Boolean).join(' ');
+  }
+  verdict.verdict = 'НА ДОРАБОТКУ';
+  return { verdict, hits };
+}
+
+module.exports = { findPlanIssues, applyPlanChecks, LAST_CHANCE_RE, ALT_RE, RISK_RE };

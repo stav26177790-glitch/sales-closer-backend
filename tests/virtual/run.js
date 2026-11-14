@@ -43,6 +43,12 @@ function withPlanAndHooks(resp) {
     msgs.sort((a, b) => a.touchpoint_number - b.touchpoint_number);
     const src = String(input?.materials?.source_materials?.text || '').replace(/\[Сообщение менеджера \d+\]/g, ' ').trim();
     const quote = src.split(/\s+/).slice(0, 4).join(' ');
+    // «Последний шанс» (14.11): сыгранный текст последнего касания — с просьбой сказать как есть.
+    const { LAST_CHANCE_RE } = require('../../engine/planChecks');
+    for (const p of input?.touch_plan || []) {
+      const m = msgs.find((x) => Number(x.touchpoint_number) === p.touchpoint_number);
+      if (p.last_chance && m && !LAST_CHANCE_RE.test(m.body || '')) m.body = `${m.body || ''} Скажите как есть: проект ещё актуален? Если нет — не буду больше отвлекать.`.trim();
+    }
     for (const m of msgs) {
       if (m.hook) continue;
       const opening = String(m.body || '').replace(/\[[^\]]*\]/g, ' ').trim().split(/\s+/).slice(0, 2).join(' ');

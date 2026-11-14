@@ -367,7 +367,9 @@
                   "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
                   "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
                 },
-                "inserted": false
+                "inserted": false,
+                "last_chance": false,
+                "weekend": false
               }
             ],
             "must_include": [],
@@ -575,7 +577,9 @@
                     "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
                     "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
                   },
-                  "inserted": false
+                  "inserted": false,
+                  "last_chance": false,
+                  "weekend": false
                 }
               ]
             },
@@ -592,7 +596,8 @@
                   "channel": "WhatsApp",
                   "timing": "Сегодня, 13 ноября (пт)",
                   "kind": "экспертное",
-                  "criterion": "ЛПР — определён"
+                  "criterion": "ЛПР — определён",
+                  "last_chance": false
                 }
               ]
             }
@@ -697,7 +702,9 @@
                   "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
                   "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
                 },
-                "inserted": false
+                "inserted": false,
+                "last_chance": false,
+                "weekend": false
               }
             ]
           }
@@ -717,7 +724,8 @@
                 "channel": "WhatsApp",
                 "timing": "Сегодня, 13 ноября (пт)",
                 "kind": "экспертное",
-                "criterion": "ЛПР — определён"
+                "criterion": "ЛПР — определён",
+                "last_chance": false
               }
             ],
             "_check": {

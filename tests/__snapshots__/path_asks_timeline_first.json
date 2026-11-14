@@ -288,7 +288,9 @@
                 "facts": {
                   "dates": "Дат готовности не называть — сроки не посчитаны."
                 },
-                "inserted": false
+                "inserted": false,
+                "last_chance": false,
+                "weekend": false
               }
             ],
             "must_include": [],
@@ -464,7 +466,9 @@
                   "facts": {
                     "dates": "Дат готовности не называть — сроки не посчитаны."
                   },
-                  "inserted": false
+                  "inserted": false,
+                  "last_chance": false,
+                  "weekend": false
                 }
               ]
             },
@@ -481,7 +485,8 @@
                   "channel": "WhatsApp",
                   "timing": "Сегодня, 13 ноября (пт)",
                   "kind": "экспертное",
-                  "criterion": "ЛПР — определён"
+                  "criterion": "ЛПР — определён",
+                  "last_chance": false
                 }
               ]
             }
@@ -582,7 +587,9 @@
                 "facts": {
                   "dates": "Дат готовности не называть — сроки не посчитаны."
                 },
-                "inserted": false
+                "inserted": false,
+                "last_chance": false,
+                "weekend": false
               }
             ]
           }
@@ -602,7 +609,8 @@
                 "channel": "WhatsApp",
                 "timing": "Сегодня, 13 ноября (пт)",
                 "kind": "экспертное",
-                "criterion": "ЛПР — определён"
+                "criterion": "ЛПР — определён",
+                "last_chance": false
               }
             ],
             "_check": {

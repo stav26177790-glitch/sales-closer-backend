@@ -133,7 +133,33 @@ check('критерий не указан — угадывается по цел
     { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2, goal: 'Последний день для временной вывески — без давления' },
     { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 4, goal: 'Что стоит за «дороговато»' }
   ] }, tl, '2026-11-13');
-  assert.deepEqual(p.map((x) => (x.criterion || '').split(' —')[0]), ['ЛПР', 'ЗС', 'ФВ']);
+  assert.deepEqual(p.map((x) => (x.criterion || '').split(' —')[0]), ['ЛПР', 'ЗС', 'ЗС']);
+  // третье — «последний шанс»; его «ФВ» не теряется, а уходит в предыдущее касание
+  assert.ok(p[2].last_chance);
+  assert.ok(p[1].also_criteria.includes('ФВ — финансовая возможность'));
+});
+// Владелец 14.11: последнее касание — «последний шанс»: сказать как есть, не тратить время клиента.
+check('«последний шанс» — только последнее касание цепочки от трёх; условные и вдогонку не считаются', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'эмпатичное', day: 0, criterion: 'ЛПР' },
+    { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 0, same_contact_as: 1 },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 2 },
+    { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 4, criterion: 'ФВ' },
+    { number: 5, channel: 'Звонок', kind: 'экспертное', condition: 'только если Марина даст контакт' }
+  ] }, tl, '2026-11-13');
+  assert.deepEqual(p.map((x) => x.last_chance), [false, false, false, true, false]);
+  assert.ok(/как есть/.test(p[3].goal));
+  const short = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0 }, { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }] }, tl, '2026-11-13');
+  assert.ok(short.every((x) => !x.last_chance));
+});
+// Владелец 14.11: касание в выходной — уточнять у клиента.
+check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }, { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }] }, tl, '2026-11-14');
+  assert.ok(p[0].weekend);
+  assert.ok(/выходной: уточните у клиента.*16 ноября \(пн\)/.test(p[0].timing), p[0].timing);
+  assert.ok(!p[1].weekend);
+  const wd = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13');
+  assert.ok(!wd[0].weekend && !/выходной/.test(wd[0].timing));
 });
 check('без оценки — план как раньше (старые сделки)', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13');
