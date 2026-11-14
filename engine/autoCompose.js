@@ -257,6 +257,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
 
   // startWith — уже готовые касания (сделки, начатые до этой версии): сначала проверить, не переписывая.
   let skipCompose = !!startWith;
+  let reviewOnly = null;
   if (startWith) composerOutput = startWith;
   while (rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
     // Доработка по замечаниям проверки — сначала точечно редактором.
@@ -269,6 +270,12 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         composerOutput = edited;
         skipCompose = true;
         trace.push('редактор');
+        // Повторная проверка — только тех касаний, что правил редактор (время: живой
+        // «Зерно 6» — reviewer 65 с на круг; остальные касания уже одобрены).
+        if (reviews > 0) {
+          const nums = (reviewedOf(fb)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => Number(m.touchpoint_number));
+          reviewOnly = [...new Set([...(reviewOnly || []), ...nums])].sort((a, b) => a - b);
+        }
       } else {
         trace.push('редактор не смог');
       }
@@ -281,6 +288,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         iteration: rounds + 1
       });
       rounds++;
+      reviewOnly = null; // переписано целиком — проверять всё
       trace.push(rounds === 1 && !fb ? 'составил' : 'переписал');
       // Касания, одобренные на прошлом круге, возвращаем дословно.
       composerOutput = fb && cur.last_reviewer_output && fb === cur.last_reviewer_output
@@ -312,7 +320,8 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       ...baseInput,
       diagnostic_output: deal.last_diagnostic_output,
       strategy_output: deal.last_strategy_output,
-      composer_output: composerOutput
+      composer_output: composerOutput,
+      ...(reviews > 0 && reviewOnly && reviewOnly.length ? { review_only: reviewOnly } : {})
     }, 12000);
     reviews++;
     reviewerOutput = result?.reviewer_output || result;

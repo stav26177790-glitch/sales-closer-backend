@@ -90,9 +90,10 @@ check('bug17', 'Все ключи checklist reviewer\'а зарегистрир�
   if (!src.reviewer) return { pass: false, detail: `не найден файл ${paths.reviewer}` };
   if (!src.stateMachine) return { pass: false, detail: `не найден файл ${paths.stateMachine}` };
 
-  const checklistBlockMatch = src.reviewer.match(/"checklist":\s*{([^}]*)}/);
-  if (!checklistBlockMatch) return { pass: false, detail: 'блок "checklist" не найден в reviewer_agent.md' };
-  const checklistKeys = [...checklistBlockMatch[1].matchAll(/"([a-z_]+)":/g)].map((m) => m[1]);
+  // С 2026-11-14 reviewer не выводит checklist (время) — ключи перечислены строкой «Ключи `failed_criteria`: …».
+  const checklistBlockMatch = src.reviewer.match(/Ключи `failed_criteria`:([\s\S]*?);/);
+  if (!checklistBlockMatch) return { pass: false, detail: 'список «Ключи `failed_criteria`» не найден в reviewer_agent.md' };
+  const checklistKeys = [...checklistBlockMatch[1].matchAll(/([a-z_]{4,})/g)].map((m) => m[1]);
   if (!checklistKeys.length) return { pass: false, detail: 'не удалось распарсить ключи checklist' };
 
   const labelsBlockMatch = src.stateMachine.match(/CRITERIA_LABELS\s*=\s*{([^}]*)}/s);
