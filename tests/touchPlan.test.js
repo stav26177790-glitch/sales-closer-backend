@@ -63,4 +63,14 @@ check('Зерно 5: звонок эмп → сообщение эксп «ср�
   assert.equal(p5[3].channel, 'Кружок (WhatsApp/Telegram)');
   assert.equal(p5[3].kind, 'эмпатичное');
 });
+check('Зерно 6: условие «не ответила» — без «после согласия», с датой «не раньше»', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'эмпатичное', day: 0 },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 1, condition: 'Только если Марина не ответила на касания 1–2' },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', day: 0, condition: 'Только если Марина даст контакт Андрея' }
+  ] }, tl, '2026-11-13');
+  assert.ok(!/после согласия/.test(p[1].timing));
+  assert.ok(/не раньше 16 ноября/.test(p[1].timing), p[1].timing);
+  assert.ok(/после согласия/.test(p[2].timing));
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

@@ -142,8 +142,13 @@ function buildTouchPlan(strategyOutput, timeline, today) {
   return steps.map((s, i) => {
     const send = s.conditional ? null : (s.day === 0 ? today : addWorkingDays(today, s.day));
     const dateText = send ? humanDate(send) : null;
+    // «После согласия, в тот же день» — только для условий-согласий (контакт, звонок).
+    // Живой «Зерно 6»: «Только если Марина не ответила на касания 1–2 — после
+    // согласия, в тот же день» — бессмыслица; для «не ответила» — дата из плана.
+    const consent = /контакт|соглас|организ|даст|разреш/i.test(String(s.condition || ''));
+    const condDate = !consent && s.day > 0 ? `, не раньше ${humanDate(addWorkingDays(today, s.day))}` : '';
     const timing = s.conditional
-      ? `${s.condition || 'Только при условии'} — после согласия, в тот же день`
+      ? `${s.condition || 'Только при условии'}${consent ? ' — после согласия, в тот же день' : condDate}`
       : s.sameContact ? `${dateText}, сразу после предыдущего касания` : `${s.day === 0 ? 'Сегодня, ' : ''}${dateText}`;
     return {
       touchpoint_number: i + 1,
