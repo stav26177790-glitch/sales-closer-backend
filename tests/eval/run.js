@@ -130,9 +130,16 @@ async function runSituation(sit) {
         parts.push({ label, text: r.chatText, state: r.nextState });
         await db.api.addMessage(db.deal.id, 'agent', r.chatText, r.nextState);
       });
-    } catch (e) { errors.push(`${label}: ${e.message}`); }
+    } catch (e) {
+      errors.push(`${label}: ${e.message}`);
+      if (/verification_required|can't receive replies/i.test(e.message)) { console.error('Организация Anthropic требует верификации — прогон остановлен.'); process.exit(3); }
+    }
   };
   await say(sit.first, 'переписка');
+  // Сделка без срока: Клоузер просит «сроки — или напишите «без срока»» — отвечаем как менеджер.
+  if (!db.deal.last_composer_output?.messages?.length && /без срока/i.test(String(parts[parts.length - 1]?.text || ''))) {
+    await say('без срока', 'без срока');
+  }
   const firstTouches = db.deal.last_composer_output?.messages || [];
   const firstPlan = db.deal.last_strategy_output?.touch_plan || [];
   if (sit.reply) await say(sit.reply, 'ответ клиента');
