@@ -1,6 +1,6 @@
 /** Текст оценки: совет обойти контактное лицо убирается кодом (живые «Зерно 4/5»). */
 const assert = require('assert');
-const { cleanSummary, ensureBudgetRecommendation } = require('../engine/diagnosticCleanup');
+const { cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation } = require('../engine/diagnosticCleanup');
 let n = 0;
 const check = (name, fn) => { fn(); n++; console.log(`  ✓ ${name}`); };
 check('«Это решение нужно предложить Андрею напрямую, не через Марину.» — убрано', () => {
@@ -29,5 +29,14 @@ check('«дороговато» в переписке, бюджета в рек�
   assert.equal(ensureBudgetRecommendation(d, 'дороговато'), false);
   const e = { soprano_recommendations: [] };
   assert.equal(ensureBudgetRecommendation(e, 'Спасибо, покажу Андрею'), false);
+});
+check('СОПРАНО «Аналоги» не собраны — рекомендация про альтернативы (после бюджета); собраны — нет', () => {
+  const d = { soprano: { 'А': { status: 'нет' } }, soprano_recommendations: ['Бюджет (СОПРАНО: Ограничения): уточнить', 'Кто делал первую точку', 'Смотрят ли других'] };
+  assert.equal(ensureAlternativesRecommendation(d), true);
+  assert.equal(d.soprano_recommendations.length, 3);
+  assert.ok(/бюджет/i.test(d.soprano_recommendations[0]));
+  assert.ok(/пожертвовать/.test(d.soprano_recommendations[1]));
+  assert.equal(ensureAlternativesRecommendation(d), false);
+  assert.equal(ensureAlternativesRecommendation({ soprano: { 'А': { status: 'собрано' } }, soprano_recommendations: [] }), false);
 });
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

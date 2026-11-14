@@ -44,12 +44,16 @@ function loadAgentPrompt(agentName) {
   return fs.readFileSync(filePath, 'utf8');
 }
 
-// Знания об отрасли сделки: knowledge/industry/<отрасль>.md. Файла может не быть.
+// Знания об отрасли сделки: knowledge/industry/<отрасль>.md и дополнения
+// <отрасль>_*.md (например, signage_902pp.md — правила Москвы). Файлов может не быть.
 function loadIndustryKnowledge(industry) {
   if (!industry || !/^[a-z0-9_]+$/.test(industry)) return '';
-  const filePath = path.join(KNOWLEDGE_BASE_PATH, 'industry', `${industry}.md`);
-  if (!fs.existsSync(filePath)) return '';
-  return `\n\n---\n# ОТРАСЛЬ СДЕЛКИ: ${industry}\n---\n\n${fs.readFileSync(filePath, 'utf8')}\n`;
+  const dir = path.join(KNOWLEDGE_BASE_PATH, 'industry');
+  const main = path.join(dir, `${industry}.md`);
+  if (!fs.existsSync(main)) return '';
+  const extras = fs.readdirSync(dir).filter((f) => f.startsWith(`${industry}_`) && f.endsWith('.md')).sort();
+  const parts = [main, ...extras.map((f) => path.join(dir, f))].map((f) => fs.readFileSync(f, 'utf8'));
+  return `\n\n---\n# ОТРАСЛЬ СДЕЛКИ: ${industry}\n---\n\n${parts.join('\n\n---\n\n')}\n`;
 }
 
 function buildSystemPrompt(agentName, industry) {

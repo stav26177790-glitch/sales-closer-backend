@@ -51,4 +51,24 @@ function ensureBudgetRecommendation(diag, sourceText) {
   return true;
 }
 
-module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation };
+// СОПРАНО «А — Аналоги» (владелец, 14.11): «на этапе СОПРАНО менеджер должен уточнить об
+// альтернативах — это даёт ему преимущество при отработке возражений», «должен был заранее»
+// (до КП). Не собрано —
+// добавляем рекомендацию кодом: что клиент готов изменить, если бюджет не сойдётся, и с чем
+// сравнивает. Это задел для «дорого»: альтернативы (логика компромисса) клиент назвал сам.
+function ensureAlternativesRecommendation(diag) {
+  if (!diag || typeof diag !== 'object') return false;
+  const a = diag.soprano && typeof diag.soprano === 'object' ? diag.soprano['А'] : null;
+  if (a && /^собран/i.test(String(a.status || ''))) return false;
+  const recs = Array.isArray(diag.soprano_recommendations) ? diag.soprano_recommendations : [];
+  if (recs.some((r) => /альтернатив|пожертвова|можно (изменить|упростить)|готов[ы]? (изменить|поменять)/i.test(String(r)))) return false;
+  const rec = 'Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. ' +
+    '«Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» ' +
+    'Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.';
+  // Бюджет (если есть) — первым, альтернативы — вторыми.
+  const budgetFirst = recs.length && /бюджет/i.test(String(recs[0])) ? [recs[0], rec, ...recs.slice(1)] : [rec, ...recs];
+  diag.soprano_recommendations = budgetFirst.slice(0, 3);
+  return true;
+}
+
+module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation };
