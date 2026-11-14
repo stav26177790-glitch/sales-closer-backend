@@ -161,6 +161,29 @@ async function test(name, fn) {
     assert.ok(sent.includes('[середина сокращена]'));
   });
 
+  await test('DeepSeek (LLM_PROVIDER=deepseek): тот же вызов, свой адрес и ключ, модель v4-pro, рассуждения выключены', async () => {
+    const saved = { ...process.env };
+    process.env.LLM_PROVIDER = 'deepseek';
+    process.env.DEEPSEEK_API_KEY = 'test-key';
+    for (const p of Object.keys(require.cache)) {
+      if (p.startsWith(path.join(ROOT, 'llm')) || p === path.join(ROOT, 'agentRunner.js')) delete require.cache[p];
+    }
+    try {
+      const ds = require('../agentRunner');
+      assert.deepStrictEqual(clientOptions, { maxRetries: 4, baseURL: 'https://api.deepseek.com/anthropic', apiKey: 'test-key' });
+      nextResponse = reply('{"strategy_output":{}}');
+      await ds.callAgent('strategy', INPUT);
+      assert.strictEqual(requests[0].model, 'deepseek-v4-pro');
+      assert.deepStrictEqual(requests[0].thinking, { type: 'disabled' });
+      requests.length = 0;
+      nextResponse = reply('{"memory_output":{}}');
+      await ds.callAgent('memory', INPUT);
+      assert.strictEqual(requests[0].model, 'deepseek-v4-flash');
+    } finally {
+      process.env = saved;
+    }
+  });
+
   console.log = realLog;
   console.warn = realWarn;
   for (const [mark, name] of results) console.log(`${mark} ${name}`);

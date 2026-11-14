@@ -12,7 +12,8 @@ const MESSAGES = {
 function classifyError(e) {
   const status = e && (e.status || e.statusCode);
   const text = String((e && e.message) || '').toLowerCase();
-  if (text.includes('credit balance') || text.includes('billing')) return 'balance';
+  // 402 / «Insufficient Balance» — так DeepSeek сообщает, что кончились деньги на счёте.
+  if (status === 402 || text.includes('credit balance') || text.includes('billing') || text.includes('insufficient balance')) return 'balance';
   if (status === 401 || status === 403 || text.includes('x-api-key') || text.includes('authentication_error')) return 'auth';
   if (status === 429 || status === 529 || text.includes('overloaded') || text.includes('rate_limit')) return 'busy';
   if ((status >= 500 && status < 600) || text.includes('connection') || text.includes('timeout') || text.includes('timed out') || text.includes('fetch failed')) return 'unavailable';

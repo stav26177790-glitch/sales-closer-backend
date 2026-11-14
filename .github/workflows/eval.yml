@@ -1,7 +1,8 @@
 # Прогон набора ситуаций на настоящей модели (tests/eval) — по кнопке.
 # GitHub → Actions → «Прогон набора ситуаций» → Run workflow.
-# Нужен секрет репозитория ANTHROPIC_API_KEY (Settings → Secrets and variables → Actions).
-# Стоит денег: все 16 ситуаций с оценкой судьёй — порядка $15–25.
+# Нужен секрет репозитория с ключом провайдера (Settings → Secrets and variables → Actions):
+#   DEEPSEEK_API_KEY (провайдер deepseek) или ANTHROPIC_API_KEY (anthropic).
+# Стоит денег: все 16 ситуаций с судьёй — DeepSeek ≈ $10–20, Claude ≈ $35–45.
 name: Прогон набора ситуаций
 
 on:
@@ -14,11 +15,15 @@ on:
       concurrency:
         description: 'Сколько ситуаций параллельно'
         required: false
-        default: '3'
+        default: '2'
       judge:
         description: 'Оценка судьёй (true/false)'
         required: false
         default: 'true'
+      provider:
+        description: 'Провайдер моделей: deepseek или anthropic'
+        required: false
+        default: 'deepseek'
 
 jobs:
   eval:
@@ -28,11 +33,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Зависимости
         run: npm ci || npm install
       - name: Прогон
         env:
+          LLM_PROVIDER: ${{ inputs.provider }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           ARGS="--concurrency ${{ inputs.concurrency }}"

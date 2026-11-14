@@ -9,6 +9,9 @@ check('нет денег на счёте API → «закончился бала
   assert.equal(classifyError(e), 'balance');
   assert.ok(friendlyError(e).startsWith('Закончился баланс'));
 });
+check('DeepSeek: 402 Insufficient Balance → «закончился баланс»', () => {
+  assert.equal(classifyError(Object.assign(new Error('402 {"error":{"message":"Insufficient Balance"}}'), { status: 402 })), 'balance');
+});
 check('неверный ключ → сообщить руководителю', () => {
   assert.equal(classifyError(Object.assign(new Error('401 invalid x-api-key'), { status: 401 })), 'auth');
 });

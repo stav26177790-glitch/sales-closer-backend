@@ -11,15 +11,16 @@
  *  - в лог пишется время, токены (в т.ч. из кэша) и причина остановки:
  *    по ним видно стоимость и обрезанные ответы (stop: max_tokens).
  */
-const Anthropic = require('@anthropic-ai/sdk');
 const { validateAgentOutput } = require('../outputSchemas');
 const { getAgentConfig } = require('./registry');
 const { buildSystemPrompt, toApiSystem } = require('./prompt');
 const { compressInput } = require('./input');
+const { createClient, providerConfig } = require('./provider');
 
-// ANTHROPIC_API_KEY читается из env автоматически.
+// Провайдер (Claude или DeepSeek) — llm/provider.js, env LLM_PROVIDER. Формат запроса один (Anthropic).
 // maxRetries: SDK повторяет только 408/409/429/5xx и сетевые ошибки.
-const client = new Anthropic({ maxRetries: 4 });
+const client = createClient();
+const EXTRA_PARAMS = providerConfig().extraParams;
 
 function dealLabelOf(inputData) {
   return inputData?.deal?.client || inputData?.deal?.id || 'unknown_deal';
@@ -55,7 +56,8 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
     max_tokens: maxTokens,
     temperature: config.temperature,
     system: toApiSystem(agentName, systemPrompt),
-    messages: [{ role: 'user', content: JSON.stringify(compressInput(inputData, agentName), null, 2) }]
+    messages: [{ role: 'user', content: JSON.stringify(compressInput(inputData, agentName), null, 2) }],
+    ...EXTRA_PARAMS
   });
 
   console.log(

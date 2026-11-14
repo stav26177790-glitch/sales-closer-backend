@@ -5,7 +5,8 @@
  * Как менеджер: первое сообщение (ситуация + переписка) → путь без остановок
  * (оценка → стратегия → проверенные касания); если есть ответ клиента — второе
  * сообщение и перестройка пути. База — в памяти (как в tests/harness.js), агенты —
- * настоящие (llm/runner.js), нужен ANTHROPIC_API_KEY.
+ * настоящие (llm/runner.js), нужен ключ провайдера (llm/provider.js: LLM_PROVIDER=deepseek →
+ * DEEPSEEK_API_KEY; по умолчанию Claude → ANTHROPIC_API_KEY).
  *
  * После каждой ситуации — независимая оценка касаний отдельным запросом к модели
  * (судья не видел, как касания писались) по чек-листу из правил владельца.
@@ -30,22 +31,16 @@ const ONLY = argVal('--only') ? new Set(argVal('--only').split(',').map(Number))
 const CONCURRENCY = Number(argVal('--concurrency') || 2);
 const JUDGE = !args.includes('--no-judge');
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('Нет ANTHROPIC_API_KEY — прогон на настоящей модели невозможен.');
+const provider = require(path.join(ROOT, 'llm', 'provider.js'));
+const PROVIDER = provider.providerConfig();
+if (!PROVIDER.apiKey) {
+  console.error(`Нет ${PROVIDER.keyEnv} (провайдер ${PROVIDER.name}) — прогон на настоящей модели невозможен.`);
   process.exit(2);
 }
+console.log(`Провайдер: ${PROVIDER.name}, модели: ${PROVIDER.models.main} / ${PROVIDER.models.small}`);
 
-// ---------- цена (USD за 1 млн токенов) ----------
-const PRICE = {
-  sonnet: { in: 3, out: 15, cacheWrite: 3.75, cacheRead: 0.3 },
-  haiku: { in: 1, out: 5, cacheWrite: 1.25, cacheRead: 0.1 }
-};
-function costOf(model, u) {
-  if (!u) return 0;
-  const p = /haiku/i.test(model || '') ? PRICE.haiku : PRICE.sonnet;
-  return ((u.input_tokens || 0) * p.in + (u.output_tokens || 0) * p.out +
-    (u.cache_creation_input_tokens || 0) * p.cacheWrite + (u.cache_read_input_tokens || 0) * p.cacheRead) / 1e6;
-}
+// ---------- цена (USD) — по тарифу провайдера, llm/provider.js ----------
+const costOf = (model, u) => provider.costOf(model, u);
 
 // ---------- окружение: база в памяти, журнал вызовов ----------
 const calls = []; // { situation, agent, usage, ms }
@@ -97,8 +92,7 @@ function loadEngine(dbApi) {
 // ---------- судья: независимая оценка касаний ----------
 const RUBRIC = fs.readFileSync(path.join(__dirname, 'rubric.md'), 'utf8');
 async function judge(sit, finalTouches, plan, diagnosticSummary) {
-  const Anthropic = require('@anthropic-ai/sdk');
-  const client = new Anthropic({ maxRetries: 4 });
+  const client = provider.createClient();
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
   const model = getAgentConfig('reviewer').model;
   const user = JSON.stringify({
@@ -109,8 +103,8 @@ async function judge(sit, finalTouches, plan, diagnosticSummary) {
     touches: finalTouches
   }, null, 1);
   const startedAt = Date.now();
-  const r = await client.messages.create({ model, max_tokens: 6000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }] });
-  const text = r.content.map((c) => c.text || '').join('');
+  const r = await client.messages.create({ model, max_tokens: 6000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
+  const text = r.content.filter((c) => c.type === 'text').map((c) => c.text || '').join('');
   calls.push({ situation: sit.id, agent: 'judge', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
   const m = text.match(/\{[\s\S]*\}/);
   try { return JSON.parse(m ? m[0] : text); } catch { return { parse_error: true, raw: text.slice(0, 4000) }; }
@@ -133,6 +127,7 @@ async function runSituation(sit) {
     } catch (e) {
       errors.push(`${label}: ${e.message}`);
       if (/verification_required|can't receive replies/i.test(e.message)) { console.error('Организация Anthropic требует верификации — прогон остановлен.'); process.exit(3); }
+      if (e.status === 401 || e.status === 402 || /insufficient balance|authentication/i.test(e.message)) { console.error(`Провайдер ${PROVIDER.name} не принял ключ или кончился баланс (${e.status}) — прогон остановлен.`); process.exit(3); }
     }
   };
   await say(sit.first, 'переписка');
@@ -181,7 +176,7 @@ function md(results) {
   const no = send.filter((t) => t.send === 'нет').length;
   const L = [];
   L.push(`# Прогон набора ситуаций — ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`);
-  L.push(`«Сегодня» в прогоне: ${process.env.KLOUZER_TODAY}. Ситуаций: ${results.length}. Цена: **$${total.toFixed(2)}**.`);
+  L.push(`«Сегодня» в прогоне: ${process.env.KLOUZER_TODAY}. Ситуаций: ${results.length}. Провайдер: ${PROVIDER.name} (${PROVIDER.models.main} / ${PROVIDER.models.small}). Цена: **$${total.toFixed(2)}**.`);
   L.push('');
   L.push(`**Касаний оценено: ${send.length}. Отправил бы как есть: ${asIs} (${send.length ? Math.round(asIs / send.length * 100) : 0}%), с мелкой правкой: ${minor}, нет: ${no}.** Планка владельца — 8 из 10 «как есть».`);
   L.push('');

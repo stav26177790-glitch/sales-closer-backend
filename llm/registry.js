@@ -5,8 +5,10 @@
  * Шапки промптов agents/*.md (строки «Модель:», «Температура:») не читаются
  * кодом и местами расходятся с этим файлом — источник правды здесь.
  */
-const SONNET = 'claude-sonnet-4-6';
-const HAIKU = 'claude-haiku-4-5-20251001';
+// Модели — от провайдера (llm/provider.js, env LLM_PROVIDER): SONNET = «основная»
+// (claude-sonnet-4-6 / deepseek-v4-pro), HAIKU = «простая» (claude-haiku-4-5 / deepseek-v4-flash).
+const { providerConfig } = require('./provider');
+const { main: SONNET, small: HAIKU } = providerConfig().models;
 
 // industryKnowledge — подключать ли knowledge/industry/<отрасль>.md (факты
 // компании как результат для клиента; есть не для всех отраслей).
