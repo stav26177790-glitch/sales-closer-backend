@@ -73,4 +73,11 @@ check('Зерно 6: условие «не ответила» — без «по�
   assert.ok(/не раньше 16 ноября/.test(p[1].timing), p[1].timing);
   assert.ok(/после согласия/.test(p[2].timing));
 });
+check('Зерно 6 (ответ клиента): «Если после касания 1 Марина не организовала звонок» — не согласие, без «после согласия»', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Мессенджер', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'Мессенджер', kind: 'экспертное', condition: 'Если после касания 1 Марина не организовала звонок с Андреем' }
+  ] }, tl, '2026-11-13');
+  assert.ok(!/после согласия/.test(p[1].timing), p[1].timing);
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

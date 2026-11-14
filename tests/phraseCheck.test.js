@@ -59,5 +59,11 @@ check('живой «Зерно 4»: угроза «слот уйдёт» и «н
   assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [3, 5]);
   assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Согласуем макет сейчас — держим за вами ближайший слот, и дата не сдвинется.' }]).length, 0);
 });
+check('Зерно 6: «если решение по баннеру не принято до конца сегодня — … без вывески совсем» — давление', () => {
+  const hits = findBannedPhrases([{ touchpoint_number: 4, body: 'Если решение по баннеру не принято до конца сегодня — к 1 декабря он уже не успеет, и открытие пройдёт без вывески совсем.' }]);
+  assert.ok(hits.length >= 1);
+  // честный факт о дате без давления — можно
+  assert.equal(findBannedPhrases([{ touchpoint_number: 4, body: 'Сегодня последний день, когда баннер успевает к открытию. Если актуально — напишите «да».' }]).length, 0);
+});
 
 console.log(`phraseCheck: ${passed} проверок пройдено`);
