@@ -36,6 +36,13 @@ const MOSCOW_FIXES = {
 
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
+// Деньги — только звонок или Zoom (владелец 14.11). В письменном касании — не обсуждать
+// бюджет, «дорого», скидки, варианты под бюджет, стоимость; предложить созвониться.
+// Цена из КП как факт («по КП 185 000 ₽») — можно.
+const MONEY_TALK_RE = /бюджет|дорог|дешевл|скидк|переплач|стоимост|сколько (будет )?стоит|под ваш бюджет|подешевле|уложиться в/i;
+const VOICE_CHANNEL_RE = /звонок|zoom|зум|видеозвон|встреч/i;
+const MONEY_FIX = 'Всё, что касается денег (бюджет, «дорого», стоимость, варианты под бюджет), — только звонком или в Zoom (правило владельца). В этом касании о деньгах не писать: предложить короткий созвон — «по стоимости удобнее голосом: созвонимся сегодня на 5 минут?»';
+
 // «Каждый день ожидания сдвигает дату» — один раз на цепочку; повтор — давление (прогон 14.11).
 const SHIFT_RE = /кажд[а-яё]* (рабоч[а-яё]* )?(день|дня)[^.!?]{0,40}сдвига/i;
 
@@ -56,13 +63,16 @@ function findPlanIssues(messages, plan, sourceText = '') {
     } else if (lastN && LAST_CHANCE_RE.test(t)) {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
-    if (SHIFT_RE.test(t)) {
+    const channel = String(m?.channel || byN.get(n)?.channel || '');
+    if (MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
+        if (SHIFT_RE.test(t)) {
       if (shiftSaidIn == null) shiftSaidIn = n;
       else fixes.push(`«Каждый день ожидания сдвигает дату» уже сказано в касании ${shiftSaidIn} — повтор давит. Здесь — только дата на день отправки, без этой фразы.`);
     }
         if (ALT_RE.test(t) && !RISK_RE.test(t)) fixes.push(COMPROMISE_FIX);
     if (moscowOrUnknown && UNLIT_RE.test(t)) fixes.push(MOSCOW_FIXES.unlit);
-    if (moscowOrUnknown && BANNER_RE.test(t) && !INSIDE_RE.test(t)) fixes.push(MOSCOW_FIXES.banner);
+    // «Внутри» нужно, когда баннер предлагают поставить, а не когда спрашивают о его цене.
+    if (moscowOrUnknown && BANNER_RE.test(t) && /успе|постав|размест|повес|к открытию|монтаж/i.test(t) && !INSIDE_RE.test(t)) fixes.push(MOSCOW_FIXES.banner);
     if (moscowOrUnknown && BOX_RE.test(t) && !INLAY_RE.test(t)) fixes.push(MOSCOW_FIXES.box);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });

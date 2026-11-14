@@ -78,6 +78,10 @@ function contextHints(context) {
   } else if (moscow && /фриз/i.test(src)) {
     out.push('Экспертный повод (902-ПП): у фасада есть фриз — вывеска только на нём, буквы до 70% высоты фриза (п. 18.3). Уточнить высоту фриза — как заботу.');
   }
+  // Методика переписки владельца: зависло больше 2 недель — обязательно кружок с новой идеей.
+  if (Number(context?.daysSilent) >= 14) {
+    out.push({ kind: 'эмпатичное', text: 'Реанимация (тишина больше 2 недель): кружок с новой идеей по проекту — «появилась пара идей по вашему проекту, уверен, вам будет интересно». Идея — реальная (кейс, повод из переписки), не выдуманная.' });
+  }
   if (/«[^»]*[A-Za-z]{2,}[^»]*»|\b[A-Z]{3,}\b/.test(`${client}\n${src}`)) {
     out.push('Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов.');
   }
@@ -239,10 +243,11 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 
   // Подсказки из переписки (прогон 14.11: повод про козырёк по 902-ПП не появился ни разу) —
   // в первое экспертное касание как обязательный пункт.
-  const hints = contextHints(context);
-  if (hints.length) {
-    const target = steps.find((x) => !x.conditional && !x.sameContact && x.kind === 'экспертное');
-    if (target) target.hints = [...(target.hints || []), ...hints];
+  for (const h of contextHints(context)) {
+    const kind = typeof h === 'object' ? h.kind : 'экспертное';
+    const text = typeof h === 'object' ? h.text : h;
+    const target = steps.find((x) => !x.conditional && !x.sameContact && x.kind === kind);
+    if (target) target.hints = [...(target.hints || []), text];
   }
 
   // Пункты «Обязательно» — по исходным номерам, до вставок.
@@ -276,6 +281,13 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     prev = ordered[ordered.length - 1];
   }
   steps = ordered;
+
+  // Деньги — только звонок или Zoom (владелец 14.11, правило): касание, которое двигает ФВ
+  // (бюджет, «дорого», варианты под бюджет), — звонок, если стратегия не поставила Zoom.
+  for (const x of steps) {
+    const money = x.criterion === 'ФВ' || (x.also || []).includes('ФВ');
+    if (money && !/звонок|zoom|зум|видеозвон|встреч/i.test(String(x.channel || ''))) { x.channel = 'Звонок'; x.kind = 'экспертное'; }
+  }
 
   // Интервал между касаниями — по ситуации (владелец 14.11: «от триггера, если есть
   // срочность — быстрее»). Срок не горит (нет даты клиента или запас больше недели) —

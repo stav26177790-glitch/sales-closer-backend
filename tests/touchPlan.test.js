@@ -197,9 +197,20 @@ check('подсказки из переписки: козырёк в Москв�
   assert.ok(/фризе козырька/.test(contextHints({ source: 'Марина: На козырёк. Покровка' }).join(' ')));
   assert.ok(!/902/.test(contextHints({ source: 'Салон в Химках, вывеска на козырёк' }).join(' ')));
   assert.ok(/168-ФЗ/.test(contextHints({ source: 'Название «AURUM» латиницей', client: 'Салон «Аурум»' }).join(' ')));
+  const re = contextHints({ source: 'Тишина', daysSilent: 21 }).find((h) => typeof h === 'object');
+  assert.ok(re && re.kind === 'эмпатичное' && /новой идеей/.test(re.text));
   const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0 }, { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 2 }] }, tl, '2026-11-13', null, { source: 'На козырёк' });
   assert.ok(p[1].must_include.some((m) => /902-ПП/.test(m)));
   assert.ok(!p[0].must_include.length);
+});
+check('деньги — только звонок или Zoom: касание на ФВ в мессенджере становится звонком, Zoom остаётся', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'ФВ' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2, criterion: 'Д' },
+    { number: 3, channel: 'Zoom', kind: 'экспертное', day: 4, criterion: 'ФВ' }
+  ] }, tl, '2026-11-13');
+  assert.equal(p[0].channel, 'Звонок');
+  assert.equal(p[2].channel, 'Zoom');
 });
 // Владелец 14.11: касание в выходной — уточнять у клиента.
 check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {
