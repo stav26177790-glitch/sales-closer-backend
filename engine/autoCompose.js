@@ -128,7 +128,7 @@ function codeChecks(composerOutput, timeline, plan, sourceText) {
     }
     if (k) prev = { kind: k, n: r.messages_reviewed[i].touchpoint_number };
   });
-  applyPhraseCheck(r, msgs);
+  applyPhraseCheck(r, msgs, sourceText);
   applyScheduleCheck(r, msgs, timeline);
   // Повод касания (владелец 14.11) — только для касаний по плану (writer);
   // старые сделки без плана пишет composer, у него повода нет.
@@ -338,7 +338,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     const msgs = messagesOf(composerOutput);
     applyCodeOwnership(reviewerOutput, msgs, deal.last_strategy_output?.touch_plan);
     applySeverity(reviewerOutput);
-    applyPhraseCheck(reviewerOutput, msgs);
+    applyPhraseCheck(reviewerOutput, msgs, sourceTextOf(baseInput));
     applyMustIncludeCheck(reviewerOutput, deal.last_strategy_output?.must_include, msgs.length);
     applyScheduleCheck(reviewerOutput, msgs, timeline);
     trace.splice(traceAt, 0, verdictOf(reviewerOutput) === 'ОДОБРЕНО' ? 'проверка приняла' : `проверка вернула ${bad(reviewerOutput) || '(вердикт не прочитан)'}`);

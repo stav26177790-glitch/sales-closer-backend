@@ -8,6 +8,7 @@
  *   3. сохраняет результат в deals и возвращает текст для чата.
  * Плюс защита от дублей и очередь запросов по одной сделке (баг №34).
  */
+const { detectBrand } = require('./brand');
 const db = require('../db');
 const { runMemoryUpdate } = require('./pipeline');
 const { isEndSessionCommand } = require('./intent');
@@ -80,6 +81,8 @@ async function advanceInternal(dealId, managerInput, opts = {}) {
       product: deal.product,
       deal_size: deal.deal_size,
       industry: deal.industry,
+      // Бренд (вывески): цифры опыта и гарантии — только своего (engine/brand.js, 14.11).
+      brand: detectBrand(deal),
       last_contact: deal.last_contact,
       // Менеджер вводит «дней без ответа» при создании сделки, дальше число
       // устаревало. Считаем на сегодня: введённое + дни с даты создания.

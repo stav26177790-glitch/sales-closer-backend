@@ -35,7 +35,7 @@ const BANNED = [
     // Живой «Зерно 7» (14.11): кружок «Вот, смотрите — похожая вывеска, которую мы делали».
     // Источник — наш же пример в инструкции writer (убран). Кейс — только из данных.
     re: /(похож|подобн)[а-яё]* (вывеск|букв|работ|проект)[а-яё]*,? (котор|что)[а-яё]* мы (делали|сделали|монтировали|ставили|изготовил)|вот,? смотрите/i,
-    fix: 'Убрать «похожую вывеску, которую мы делали» / «вот, смотрите» — это выдуманный кейс (его нет в данных сделки). Кейс — только из данных; в тексте — шаблон «[фото похожей работы — если есть]», в кружке — без него.'
+    fix: 'Убрать «похожую вывеску, которую мы делали» / «вот, смотрите» — кейс без названия звучит выдуманным. Назвать реальный кейс того же типа бизнеса из кейсов компании (файл отрасли): «делали вывеску для кафе «Капи» — [фото работы «Капи» — из портфолио]»; в кружке — словами, без скобок.'
   },
   {
     // Владелец 14.11: менеджеры работают удалённо — «заехал / был на производстве» неправда.
@@ -54,16 +54,21 @@ const BANNED = [
   }
 ];
 
+const { unknownCases } = require('./cases');
+const UNKNOWN_CASE_FIX = (names) => `Кейс «${names.join('», «')}» не найден ни в кейсах компании (файл отрасли), ни в переписке — это выдумка. Взять реальный кейс того же типа бизнеса из списка или убрать.`;
+
 function touchText(m) {
   return [m?.subject, m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 }
 
 // [{ touchpoint_number, fixes: [..] }] — только касания с нарушениями.
-function findBannedPhrases(messages) {
+function findBannedPhrases(messages, sourceText = '') {
   const out = [];
   (messages || []).forEach((m, i) => {
     const text = touchText(m);
     const fixes = BANNED.filter((b) => b.re.test(text)).map((b) => b.fix);
+    const unknown = unknownCases(text, sourceText);
+    if (unknown.length) fixes.push(UNKNOWN_CASE_FIX(unknown));
     if (fixes.length) out.push({ touchpoint_number: Number(m?.touchpoint_number ?? i + 1), fixes });
   });
   return out;
@@ -71,8 +76,8 @@ function findBannedPhrases(messages) {
 
 // Накладывает программную проверку на ответ reviewer'а: касание с запрещённой
 // фразой — НА ДОРАБОТКУ, общий вердикт — не ОДОБРЕНО.
-function applyPhraseCheck(reviewerOutput, messages) {
-  const hits = findBannedPhrases(messages);
+function applyPhraseCheck(reviewerOutput, messages, sourceText = "") {
+  const hits = findBannedPhrases(messages, sourceText);
   if (!hits.length || !reviewerOutput || typeof reviewerOutput !== 'object') return { reviewerOutput, hits };
   const r = reviewerOutput.reviewer_output && !reviewerOutput.messages_reviewed ? reviewerOutput.reviewer_output : reviewerOutput;
   const reviewed = Array.isArray(r.messages_reviewed) ? r.messages_reviewed : (r.messages_reviewed = []);

@@ -83,4 +83,26 @@ check('ИИ-штампы из «Зерно 7» ловятся', () => {
   assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, разбирался сейчас с похожей вывеской и вспомнил про ваше открытие.' }]).length, 0);
 });
 
+// Владелец 14.11: «рейтингов нет, но есть масса кейсов — заход через кейсы».
+check('кейс из списка компании — можно; выдуманный кейс по названию — ловится; из переписки — можно', () => {
+  assert.equal(findBannedPhrases([{ touchpoint_number: 5, body: 'Марина, делали вывеску для кафе «Капи» в ТЦ — пришлю фото.' }]).length, 0);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 5, body: 'Делали логотип с контражуром для Smoke Dog — очень похоже на ваш.' }]).length, 0);
+  const bad = findBannedPhrases([{ touchpoint_number: 5, body: 'Марина, недели две назад делали вывеску для кофейни «Бариста» — похоже на ваш формат.' }]);
+  assert.equal(bad.length, 1);
+  assert.ok(/Бариста/.test(bad[0].fixes.join(' ')));
+  assert.equal(findBannedPhrases([{ touchpoint_number: 5, body: 'Делали вывеску для «Зерна» на первой точке?' }], 'Кофейня «Зерно»: нужна как на первой точке — делали вывеску для «Зерна» не мы').length, 0);
+});
+check('каждое название из engine/cases.js есть в signage.md', () => {
+  const md = require('fs').readFileSync(require('path').join(__dirname, '..', 'knowledge/industry/signage.md'), 'utf8');
+  const { CASE_NAMES } = require('../engine/cases');
+  const aliases = new Set(['Смоук Дог', 'Кауфман', 'Н-Дорс', 'Е ХАУС', 'Соколов']);
+  for (const c of CASE_NAMES) if (!aliases.has(c)) assert.ok(md.includes(c), c);
+});
+check('бренд по продукту: металл — «Металл Буква Экспресс», иначе «Яркая Реклама»; не вывески — нет', () => {
+  const { detectBrand } = require('../engine/brand');
+  assert.equal(detectBrand({ industry: 'signage', product: 'Буквы из нержавеющей стали' }), 'Металл Буква Экспресс');
+  assert.equal(detectBrand({ industry: 'signage', product: 'Световая вывеска (объёмные буквы с подсветкой)' }), 'Яркая Реклама');
+  assert.equal(detectBrand({ industry: 'saas', product: 'CRM' }), null);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);

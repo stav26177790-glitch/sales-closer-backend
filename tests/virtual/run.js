@@ -140,7 +140,7 @@ const pathVariants = [];
       for (const dt of datesIn(text)) if (!allowedDates.has(dt)) issue(d.name, 'касание', `касание ${m.touchpoint_number}: дата «${dt}» не из расчёта и не из переписки`);
       if (d.deal.industry !== 'signage' && /вывеск|баннер/i.test(text)) issue(d.name, 'касание', `касание ${m.touchpoint_number}: вывеска/баннер в сделке не по вывескам`);
       if ((!tl || !tl.temp_banner) && /временн\w* вывеск|баннер/i.test(text)) issue(d.name, 'касание', `касание ${m.touchpoint_number}: временная вывеска, хотя расчёт её не даёт`);
-      if (/гаранти[а-яё]*[^.]{0,20}\b([2-9]|\d{2,})\s*(год|лет)|рейтинг|отзыв|\b\d+\s*%\s*клиент/i.test(text)) issue(d.name, 'касание', `касание ${m.touchpoint_number}: похоже на выдуманный факт/цифру`);
+      if (/гаранти[а-яё]*[^.]{0,20}\b([46-9]|\d{2,})\s*(год|лет)|рейтинг|отзыв|\b\d+\s*%\s*(клиент|рекоменд)/i.test(text)) issue(d.name, 'касание', `касание ${m.touchpoint_number}: похоже на выдуманный факт/цифру`);
       console.log(`  [длина] касание ${m.touchpoint_number} (${m.channel}): ${String(m.body||'').length} симв.`);
       if (!m.timing) issue(d.name, 'касание', `касание ${m.touchpoint_number}: нет timing`);
     });
