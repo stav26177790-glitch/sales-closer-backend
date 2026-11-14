@@ -10,7 +10,7 @@ const db = require('../db');
 const { CONFIG } = require('./config');
 const { formatFinalSummary } = require('./chat');
 const { pinToPlan } = require('./touchPlan');
-const { cleanDiagnostic } = require('./diagnosticCleanup');
+const { cleanDiagnostic, ensureBudgetRecommendation } = require('./diagnosticCleanup');
 
 // Если agentRunner не смог распарсить ответ модели (например, потому что модель
 // обернула JSON в markdown-разметку ```json ... ```), он возвращает
@@ -221,6 +221,7 @@ function realManagerConflicts(conflicts, userAssessment) {
 function cleanManagerConflicts(diag, baseInput) {
   // Все пути диагностики проходят здесь: правила владельца для текста оценки — кодом.
   cleanDiagnostic(diag);
+  ensureBudgetRecommendation(diag, baseInput?.materials?.source_materials?.text);
   if (!Array.isArray(diag?.conflicts_with_manager) || !diag.conflicts_with_manager.length) return;
   const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
   if (real.length !== diag.conflicts_with_manager.length) {

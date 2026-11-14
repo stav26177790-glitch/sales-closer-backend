@@ -1,6 +1,6 @@
 /** Текст оценки: совет обойти контактное лицо убирается кодом (живые «Зерно 4/5»). */
 const assert = require('assert');
-const { cleanSummary } = require('../engine/diagnosticCleanup');
+const { cleanSummary, ensureBudgetRecommendation } = require('../engine/diagnosticCleanup');
 let n = 0;
 const check = (name, fn) => { fn(); n++; console.log(`  ✓ ${name}`); };
 check('«Это решение нужно предложить Андрею напрямую, не через Марину.» — убрано', () => {
@@ -19,5 +19,15 @@ check('«Второй блокер — срочность» → ЗС; обычн
   assert.ok(cleanSummary('Второй блокер — срочность. Дедлайн прошёл.').text.startsWith('Второй блокер — ЗС (здесь и сейчас)'));
   const plain = 'Главный блокер — ЛПР. Марина собирает варианты.';
   assert.equal(cleanSummary(plain).text, plain);
+});
+check('«дороговато» в переписке, бюджета в рекомендациях нет — код добавляет рекомендацию про бюджет (СОПРАНО: Ограничения)', () => {
+  const d = { soprano_recommendations: ['Уточнить критерии выбора', 'Спросить про конкурентов', 'Как Андрей решает'] };
+  assert.equal(ensureBudgetRecommendation(d, 'Марина (16.11): Андрей говорит дороговато'), true);
+  assert.equal(d.soprano_recommendations.length, 3);
+  assert.ok(/бюджет/i.test(d.soprano_recommendations[0]));
+  // уже есть про бюджет — не дублируем; нет возражения по цене — не трогаем
+  assert.equal(ensureBudgetRecommendation(d, 'дороговато'), false);
+  const e = { soprano_recommendations: [] };
+  assert.equal(ensureBudgetRecommendation(e, 'Спасибо, покажу Андрею'), false);
 });
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

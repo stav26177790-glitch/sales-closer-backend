@@ -35,4 +35,20 @@ function cleanDiagnostic(diag) {
   return removed;
 }
 
-module.exports = { cleanDiagnostic, cleanSummary };
+// СОПРАНО «О — Ограничения» (владелец, 14.11): бюджет менеджер должен был выяснить,
+// но получается не всегда. Если в переписке возражение по цене, а среди рекомендаций
+// нет бюджета — добавляем рекомендацию кодом (она ведёт к ответу на «дорого»).
+const PRICE_OBJECTION_RE = /(дорог|дороговат|дешевле|не укладыва|бюджет(а)? не хват|предлагают за|у других (дешевле|за))/i;
+function ensureBudgetRecommendation(diag, sourceText) {
+  if (!diag || typeof diag !== 'object') return false;
+  if (!PRICE_OBJECTION_RE.test(String(sourceText || ''))) return false;
+  const recs = Array.isArray(diag.soprano_recommendations) ? diag.soprano_recommendations : [];
+  if (recs.some((r) => /бюджет|сколько заложил|ориентир по (цене|стоимости)/i.test(String(r)))) return false;
+  const rec = 'Бюджет (СОПРАНО: Ограничения): клиент говорит о цене — уточнить ориентир по бюджету и с чем сравнивает. ' +
+    '«Чтобы предложить подходящий вариант — какой бюджет заложили на вывеску и с чем сравниваете?» ' +
+    'Без этого ответ на «дорого» — гадание; скидку не предлагать.';
+  diag.soprano_recommendations = [rec, ...recs].slice(0, 3);
+  return true;
+}
+
+module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation };
