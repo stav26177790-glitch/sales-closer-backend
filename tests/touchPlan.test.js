@@ -88,7 +88,7 @@ const zernoScores = {
   trust: { status: 'Вероятно' }, urgency: { status: 'Риск' }
 };
 check('критерии к закрытию — всё, что не «Подтверждено»; названия разбираются', () => {
-  assert.deepEqual(criteriaToMove(zernoScores), ['ЛПР', 'ЗС', 'ФВ', 'Д']);
+  assert.deepEqual(criteriaToMove(zernoScores), ['ЛПР', 'Д', 'ЗС', 'ФВ']);
   assert.equal(criterionOf('ФВ — финансовая возможность'), 'ФВ');
   assert.equal(criterionOf('Д'), 'Д');
   assert.equal(criterionOf('ЛПР'), 'ЛПР');
@@ -151,6 +151,18 @@ check('«последний шанс» — только последнее ка�
   assert.ok(/как есть/.test(p[3].goal));
   const short = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0 }, { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }] }, tl, '2026-11-13');
   assert.ok(short.every((x) => !x.last_chance));
+});
+check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 0, same_contact_as: 1 },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 2 },
+    { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 4 },
+    { number: 5, channel: 'Кружок', kind: 'эмпатичное', day: 6 },
+    { number: 6, channel: 'Звонок', kind: 'экспертное', day: 8 }
+  ] }, tl, '2026-11-13');
+  assert.ok(!/утром|днём|вечером/.test(p[0].timing) && !/утром|днём|вечером/.test(p[1].timing));
+  assert.deepEqual(p.slice(2).map((x) => x.timing.split(', ').pop()), ['утром', 'днём', 'вечером', 'утром']);
 });
 // Владелец 14.11: касание в выходной — уточнять у клиента.
 check('касание «сегодня» в субботу — пометка «выходной: уточните у клиента», иначе понедельник', () => {

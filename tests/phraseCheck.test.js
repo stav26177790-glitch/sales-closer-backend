@@ -105,4 +105,11 @@ check('бренд по продукту: металл — «Металл Бук�
   assert.equal(detectBrand({ industry: 'saas', product: 'CRM' }), null);
 });
 
+check('«Правило 7 касаний»: пустые напоминания ловятся, вопрос-температура — нет', () => {
+  for (const t of ['Марина, ну как, решили?', 'Есть какие-то новости?', 'Хорошо, будем на связи!', 'Просто напоминаю о нашем КП.']) {
+    assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: t }]).length, 1, t);
+  }
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, к какому варианту склоняетесь — баннер сейчас или сразу постоянная?' }]).length, 0);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);
