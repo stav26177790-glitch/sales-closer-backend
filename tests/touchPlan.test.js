@@ -80,4 +80,63 @@ check('Зерно 6 (ответ клиента): «Если после каса�
   ] }, tl, '2026-11-13');
   assert.ok(!/после согласия/.test(p[1].timing), p[1].timing);
 });
+// Владелец 14.11 («Зерно 7»): «Клоузер бьёт только по ЛПР» — каждый неподтверждённый
+// критерий формулы закрытия двигает хотя бы одно касание.
+const { criteriaToMove, criterionOf } = require('../engine/touchPlan');
+const zernoScores = {
+  financial: { status: 'Вероятно' }, need: { status: 'Подтверждено' }, authority: { status: 'Риск' },
+  trust: { status: 'Вероятно' }, urgency: { status: 'Риск' }
+};
+check('критерии к закрытию — всё, что не «Подтверждено»; названия разбираются', () => {
+  assert.deepEqual(criteriaToMove(zernoScores), ['ЛПР', 'ЗС', 'ФВ', 'Д']);
+  assert.equal(criterionOf('ФВ — финансовая возможность'), 'ФВ');
+  assert.equal(criterionOf('Д'), 'Д');
+  assert.equal(criterionOf('ЛПР'), 'ЛПР');
+  assert.equal(criterionOf('trust'), 'Д');
+  assert.equal(criterionOf(''), null);
+});
+check('Зерно 7: стратегия вся про ЛПР → код добавляет касания на ЗС, ФВ, Д (не больше 7)', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'эмпатичное', day: 0, criterion: 'ЛПР', recipient: 'Марине' },
+    { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 0, same_contact_as: 1, criterion: 'ЛПР', recipient: 'Марине' },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'только если Марина даст контакт', criterion: 'ЛПР' },
+    { number: 4, channel: 'Кружок', kind: 'эмпатичное', day: 2, criterion: 'ЛПР', recipient: 'Марине' }
+  ] }, tl, '2026-11-13', zernoScores);
+  const regular = p.filter((x) => !x.condition);
+  const covered = new Set(regular.flatMap((x) => [x.criterion, ...x.also_criteria]).filter(Boolean).map((c) => c.split(' —')[0]));
+  for (const c of ['ЛПР', 'ЗС', 'ФВ', 'Д']) assert.ok(covered.has(c), `не покрыт ${c}`);
+  assert.ok(regular.length <= 7);
+  const kinds = regular.map((x) => x.kind);
+  for (let i = 1; i < kinds.length; i++) assert.notEqual(kinds[i], kinds[i - 1], kinds.join(','));
+  // Деньги, доверие, сроки — экспертные касания, не кружок.
+  for (const x of regular) if (/^(ФВ|Д|ЗС)/.test(x.criterion || '')) assert.equal(x.kind, 'экспертное', x.criterion);
+});
+check('шаг без критерия получает непокрытый критерий (сроки — экспертному, не кружку), новых касаний не добавляем', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, criterion: 'ЛПР' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 },
+    { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 4 }
+  ] }, tl, '2026-11-13', { authority: { status: 'Риск' }, urgency: { status: 'Риск' }, financial: { status: 'Подтверждено' } });
+  assert.equal(p.length, 3);
+  assert.equal(p[1].criterion, null);
+  assert.equal(p[2].criterion, 'ЗС — здесь и сейчас');
+});
+check('план уже из 7 касаний — непокрытый критерий добавляется целью к последнему, касаний не больше 7', () => {
+  const seq7 = [0, 1, 2, 3, 4, 5, 6].map((i) => ({ number: i + 1, channel: i % 2 ? 'Кружок' : 'WhatsApp', kind: i % 2 ? 'эмпатичное' : 'экспертное', day: i * 2, criterion: 'ЛПР' }));
+  const p = buildTouchPlan({ touchpoint_sequence: seq7 }, tl, '2026-11-13', { authority: { status: 'Риск' }, financial: { status: 'Неизвестно' } });
+  assert.equal(p.length, 7);
+  assert.ok(p.some((x) => x.also_criteria.includes('ФВ — финансовая возможность')));
+});
+check('критерий не указан — угадывается по цели касания', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, goal: 'Текст для пересылки Андрею' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2, goal: 'Последний день для временной вывески — без давления' },
+    { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 4, goal: 'Что стоит за «дороговато»' }
+  ] }, tl, '2026-11-13');
+  assert.deepEqual(p.map((x) => (x.criterion || '').split(' —')[0]), ['ЛПР', 'ЗС', 'ФВ']);
+});
+check('без оценки — план как раньше (старые сделки)', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13');
+  assert.equal(p.length, 1);
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

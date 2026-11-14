@@ -30,6 +30,28 @@ function datesIn(text) {
   return out;
 }
 
+function withPlanAndHooks(resp) {
+  return (input) => {
+    const out = JSON.parse(JSON.stringify(typeof resp === 'function' ? resp(input) : resp));
+    const box = out.composer_output || out;
+    const msgs = Array.isArray(box.messages) ? box.messages : (box.messages = []);
+    for (const p of input?.touch_plan || []) {
+      if (!msgs.some((m) => Number(m.touchpoint_number) === p.touchpoint_number)) {
+        msgs.push({ touchpoint_number: p.touchpoint_number, body: 'Добрый день! Коротко по вашему проекту — предлагаю один следующий шаг, как вам удобнее.' });
+      }
+    }
+    msgs.sort((a, b) => a.touchpoint_number - b.touchpoint_number);
+    const src = String(input?.materials?.source_materials?.text || '').replace(/\[Сообщение менеджера \d+\]/g, ' ').trim();
+    const quote = src.split(/\s+/).slice(0, 4).join(' ');
+    for (const m of msgs) {
+      if (m.hook) continue;
+      const opening = String(m.body || '').replace(/\[[^\]]*\]/g, ' ').trim().split(/\s+/).slice(0, 2).join(' ');
+      m.hook = { quote, prep: 'Перед касанием: позвоните на производство по проекту клиента.', opening };
+    }
+    return out;
+  };
+}
+
 const report = [];
 const issue = (deal, sev, what) => report.push({ deal, sev, what });
 
@@ -50,6 +72,11 @@ const pathVariants = [];
     if (d.agents._reviewerTwice) { d.agents.reviewer.push(d.agents.reviewer[0]); delete d.agents._reviewerTwice; }
     // Касания по плану пишет writer; в сценариях ответы записаны как composer — тот же формат.
     if (d.agents.composer && !d.agents.writer && d.agents.strategy) { d.agents.writer = d.agents.composer; delete d.agents.composer; }
+    // 14.11: writer отдаёт повод касания (hook), а план добавляет касания на непокрытые
+    // критерии формулы закрытия. Сыгранные ответы написаны до этого — дополняем их:
+    // повод из начала переписки, на добавленные касания — короткая заглушка.
+    // Сам повод проверяется в tests/hookCheck.test.js и сценариях path_*.
+    if (d.agents.writer && !d._hooked) { d.agents.writer = d.agents.writer.map(withPlanAndHooks); d._hooked = true; }
     let r;
     try { r = await runScenario(d); } catch (e) { issue(d.name, 'КРИТИЧНО', `прогон упал: ${e.message}`); continue; }
     if (!d.path && (d.deal.current_state || 'INIT') === 'INIT') {

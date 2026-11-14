@@ -7,6 +7,11 @@ const dbPath = require.resolve('../db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {}, children: [], paths: [] };
 const { codeChecks, applySeverity, applyCodeOwnership } = require('../engine/autoCompose');
 
+// Касания по плану проверяются и на повод (engine/hookCheck.js, 14.11). Здесь
+// проверяем другое — даём каждому касанию честный повод из «переписки» SRC.
+const SRC = 'Марина (29.10): На козырёк. Логотип пришлю.';
+const hooked = (m) => ({ ...m, hook: { quote: 'Логотип пришлю', prep: 'Перед касанием: позвоните на производство', opening: String(m.body).replace(/\[[^\]]*\]/g, ' ').trim().split(/\s+/).slice(0, 2).join(' ') } });
+
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
 const bad = (r) => r.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
@@ -66,9 +71,9 @@ check('Зерно 5: материал для пересылки Андрею —
   const plan = [{ touchpoint_number: 1, recipient: 'Марина (управляющая) — материал для пересылки Андрею', channel: 'WhatsApp' }];
   const body = 'Марина, вот текст для Андрея, можно просто переслать.\n' + 'Андрей, добрый день. Для открытия 1 декабря есть два варианта. '.repeat(12);
   assert.ok(body.length > 600 && body.length < 1500);
-  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body }] }, null, plan);
+  const r = codeChecks({ messages: [hooked({ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body })] }, null, plan, SRC);
   assert.equal(r.messages_reviewed[0].verdict, 'ОДОБРЕНО');
-  const r2 = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body }] }, null, [{ touchpoint_number: 1, recipient: 'Марина' }]);
+  const r2 = codeChecks({ messages: [hooked({ touchpoint_number: 1, channel: 'WhatsApp', kind: 'экспертное', timing: 'Сегодня', body })] }, null, [{ touchpoint_number: 1, recipient: 'Марина' }], SRC);
   assert.equal(r2.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
 });
 check('Зерно 5: кружок с «[фото похожей работы]» — на доработку как речь в камеру', () => {
@@ -91,8 +96,8 @@ check('Зерно 5 (вечер): по плану «звонок эмп → со
     { touchpoint_number: 4, channel: 'Кружок', kind: 'эмпатичное', timing: '19 ноября (чт)', body: 'Марина, привет из мастерской.' },
     { touchpoint_number: 5, channel: 'Мессенджер', kind: 'экспертное', timing: '23 ноября (пн)', body: 'Марина, честно спрошу.' }
   ];
-  const r = codeChecks({ messages: msgs }, null, plan);
-  assert.equal(r.verdict, 'ОДОБРЕНО');
+  const r = codeChecks({ messages: msgs.map(hooked) }, null, plan, SRC);
+  assert.equal(r.verdict, 'ОДОБРЕНО', JSON.stringify(r.messages_reviewed.filter((x) => x.verdict !== 'ОДОБРЕНО')));
   // без плана — то же: «сразу после» задаёт тип
   assert.equal(codeChecks({ messages: msgs }, null, null).verdict, 'ОДОБРЕНО');
 });

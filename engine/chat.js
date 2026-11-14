@@ -125,7 +125,12 @@ function formatTouchpoint(m, i) {
   // Когда и при каком условии отправлять (например, «только если Марина дала
   // контакт Андрея»). Раньше менеджер этого не видел — живой тест 2026-11-13.
   const timing = m.timing ? `_Когда: ${String(m.timing).replace(/_/g, ' ').trim()}_\n\n` : '';
-  return `### Касание ${i + 1}${channel}\n${timing}${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
+  // Тип и критерий формулы закрытия — только для касаний по плану (владелец 14.11).
+  const kind = m.criterion && m.kind ? ` · ${m.kind} · ${String(m.criterion).split(' —')[0]}` : '';
+  // Повод должен быть правдой: что менеджер делает перед касанием.
+  const prepText = String(m.hook?.prep || '').replace(/^\s*перед касанием:?\s*/i, '').trim();
+  const prep = prepText ? `**Перед касанием:** ${prepText}\n\n` : '';
+  return `### Касание ${i + 1}${channel}${kind}\n${timing}${prep}${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
 }
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };

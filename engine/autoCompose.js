@@ -21,6 +21,7 @@
 const { CONFIG } = require('./config');
 const { callAgentSafe, runComposer, keepApprovedTouches } = require('./pipeline');
 const { applyPhraseCheck } = require('./phraseCheck');
+const { applyHookCheck } = require('./hookCheck');
 const { applyMustIncludeCheck } = require('./mustInclude');
 const { applyScheduleCheck } = require('./scheduleCheck');
 const { pinToPlan } = require('./touchPlan');
@@ -37,6 +38,9 @@ function channelKey(channel) {
   return c;
 }
 
+// Переписка (все сообщения менеджера) + шапка сделки — здесь ищем цитату повода.
+const sourceTextOf = (baseInput) => [baseInput?.materials?.source_materials?.text, baseInput?.deal?.client, baseInput?.deal?.product].filter(Boolean).join('\n');
+
 const messagesOf = (out) => out?.messages || out?.composer_output?.messages || [];
 
 // Проверки кода без модели: длина, запрещённые фразы, календарь.
@@ -47,7 +51,7 @@ function isForwardMaterial(step, m) {
   return /пересыл|переслать|для передачи/i.test(t);
 }
 
-function codeChecks(composerOutput, timeline, plan) {
+function codeChecks(composerOutput, timeline, plan, sourceText) {
   const msgs = messagesOf(composerOutput);
   const r = {
     verdict: 'ОДОБРЕНО',
@@ -88,7 +92,7 @@ function codeChecks(composerOutput, timeline, plan) {
     x.verdict = 'НА ДОРАБОТКУ';
     x.code_checked = true;
     x.failed_criteria = [...new Set([...(x.failed_criteria || []), 'circle_format'])];
-    x.fix_instructions = [x.fix_instructions, 'Кружок — это речь менеджера в камеру на 20–40 секунд: живые фразы от первого лица, без вложений в квадратных скобках и без списков. Работу показать в кадре словами («вот, смотрите — похожая вывеска»), сроки — одной фразой.'].filter(Boolean).join(' ');
+    x.fix_instructions = [x.fix_instructions, 'Кружок — это речь менеджера в камеру на 20–40 секунд: живые фразы от первого лица, без вложений в квадратных скобках и без списков. Ничего не «показывать» в кадре и не рассказывать о других работах — только повод, участие и один шаг; сроки — одной фразой.'].filter(Boolean).join(' ');
     r.verdict = 'НА ДОРАБОТКУ';
   });
   // Воронка владельца: касания после КП чередуются экспертное / эмпатичное.
@@ -126,6 +130,9 @@ function codeChecks(composerOutput, timeline, plan) {
   });
   applyPhraseCheck(r, msgs);
   applyScheduleCheck(r, msgs, timeline);
+  // Повод касания (владелец 14.11) — только для касаний по плану (writer);
+  // старые сделки без плана пишет composer, у него повода нет.
+  if (hasPlan) applyHookCheck(r, msgs, sourceText);
   return r;
 }
 
@@ -159,7 +166,9 @@ async function runEditor(baseInput, deal, composerOutput, verdict) {
       timeline: t ? { summary: t.summary, if_start_today: t.if_start_today, ready_if_start_on: t.ready_if_start_on, temp_banner: t.temp_banner, latest_start_date: t.latest_start_date } : null,
       working_days_ahead: baseInput.working_days_ahead
     },
-    deal: baseInput.deal
+    deal: baseInput.deal,
+    // Для повода касания: цитата клиента берётся дословно отсюда.
+    source_materials: baseInput.materials?.source_materials?.text || ''
   }, 6000);
   const fixed = result?.editor_output?.messages || result?.composer_output?.messages || result?.messages;
   if (!Array.isArray(fixed) || !fixed.length) return null;
@@ -303,7 +312,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       return { composer_output: composerOutput, reviewer_output: null, approved: false, rounds, reviews };
     }
 
-    const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan);
+    const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput));
     if (code.verdict !== 'ОДОБРЕНО') trace.push(`код вернул ${bad(code)}`);
     if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);
@@ -344,7 +353,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       if (edited) {
         rounds++;
         trace.push('редактор');
-        const code2 = codeChecks(edited, timeline, deal.last_strategy_output?.touch_plan);
+        const code2 = codeChecks(edited, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput));
         if (code2.verdict === 'ОДОБРЕНО') {
           const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
           return done(edited, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });
@@ -355,7 +364,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         if (edited2) {
           rounds++;
           trace.push('редактор');
-          const code3 = codeChecks(edited2, timeline, deal.last_strategy_output?.touch_plan);
+          const code3 = codeChecks(edited2, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput));
           if (code3.verdict === 'ОДОБРЕНО') {
             const fixedNums = (reviewedOf(reviewerOutput)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number);
             return done(edited2, reviewerOutput, false, rounds, reviews, { fixedAfterReview: fixedNums, trace });

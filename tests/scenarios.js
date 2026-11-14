@@ -47,9 +47,12 @@ const scores = {
   urgency: { status: 'Вероятно', evidence: ['срок размыт'], confidence: 'medium' },
 };
 
-const diagnostic = ({ clarify = false, conflicts = [] } = {}) => ({
+// Всё подтверждено, кроме ЛПР — для сценариев с одним касанием (покрытие критериев, 14.11).
+const ONLY_AUTHORITY = { ...scores, trust: { status: 'Подтверждено' }, urgency: { status: 'Подтверждено' } };
+
+const diagnostic = ({ clarify = false, conflicts = [], scores: override } = {}) => ({
   diagnostic_output: {
-    scores,
+    scores: override || scores,
     primary_blocker: { criterion: 'authority', reason: 'ЛПР не выявлен', evidence: [] },
     patterns_detected: [],
     conflicts_with_manager: conflicts,
@@ -430,14 +433,16 @@ module.exports = [
     agents: {
       strategy: [strategy({
         touchpoint_sequence: [
-          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником' },
-          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие' }
+          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником', criterion: 'ЛПР' },
+          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие', criterion: 'Д' },
+          { number: 3, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 4, goal: 'сроки и шаг', criterion: 'ЗС' }
         ],
         must_include: ['Касание 1: выгода созвона для Ивана']
       })],
       writer: [{ composer_output: { messages: [
-        { touchpoint_number: 1, channel: 'email', timing: 'когда-нибудь', body: 'Иван, добрый день! Давайте созвонимся с собственником — вам не придётся пересказывать.' },
-        { touchpoint_number: 2, body: '[Видео 20 сек] Иван, понимаю, сейчас много дел — коротко напомню о главном.' }
+        { touchpoint_number: 1, channel: 'email', timing: 'когда-нибудь', hook: { quote: 'вывеска на фасад', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'Говорил с производством по вашей вывеске на фасад' }, body: 'Иван, добрый день! Говорил с производством по вашей вывеске на фасад — давайте созвонимся с собственником, вам не придётся пересказывать.' },
+        { touchpoint_number: 2, hook: { quote: 'вывеска на фасад', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'разбирался сейчас с похожей вывеской на фасад' }, body: '[Видео 20 сек] Иван, разбирался сейчас с похожей вывеской на фасад и вспомнил про вас — понимаю, сейчас много дел.' },
+        { touchpoint_number: 3, hook: { quote: 'вывеска на фасад', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'уточнял на производстве сроки по вашей вывеске на фасад' }, body: 'Иван, уточнял на производстве сроки по вашей вывеске на фасад — давайте зафиксируем старт, чтобы успеть к вашей дате.' }
       ] } }],
       reviewer: [reviewer('ОДОБРЕНО')],
     },
@@ -470,13 +475,15 @@ module.exports = [
       diagnostic: [diagnostic()],
       strategy: [strategy({
         touchpoint_sequence: [
-          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником' },
-          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие' }
+          { number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'предложить созвон с собственником', criterion: 'ЛПР' },
+          { number: 2, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Ивану', day: 2, goal: 'участие', criterion: 'Д' },
+          { number: 3, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 4, goal: 'сроки и шаг', criterion: 'ЗС' }
         ]
       })],
       writer: [{ composer_output: { messages: [
-        { touchpoint_number: 1, body: 'Иван, добрый день! Давайте созвонимся с собственником в четверг — вам не придётся пересказывать детали.' },
-        { touchpoint_number: 2, body: 'Иван, привет из мастерской! Понимаю, сейчас много дел. Если удобно — в четверг созвонимся втроём.' }
+        { touchpoint_number: 1, hook: { quote: 'покажу собственнику', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'Вы писали, что покажете собственнику КП' }, body: 'Иван, добрый день! Вы писали, что покажете собственнику КП — подготовил для него пару вопросов по фасаду. Давайте созвонимся в четверг втроём — вам не придётся пересказывать детали.' },
+        { touchpoint_number: 2, hook: { quote: 'Спасибо за КП, покажу собственнику', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'разбирался сейчас с похожей вывеской' }, body: 'Иван, разбирался сейчас с похожей вывеской и вспомнил про вас. Понимаю, сейчас много дел. Если удобно — в четверг созвонимся втроём.' },
+        { touchpoint_number: 3, hook: { quote: 'Спасибо за КП', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'позвонил на производство по вашему проекту' }, body: 'Иван, позвонил на производство по вашему проекту — давайте зафиксируем старт, чтобы успеть к вашей дате.' }
       ] } }],
       reviewer: [reviewer('ОДОБРЕНО')],
     },
@@ -489,9 +496,9 @@ module.exports = [
     deal: { ...BASE_DEAL, current_state: 'INIT' },
     agents: {
       planner: [planner(false)],
-      diagnostic: [diagnostic()],
-      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'созвон' }] })],
-      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, body: 'Иван, добрый день! Давайте созвонимся в четверг с собственником — вам не придётся пересказывать.' }] } }],
+      diagnostic: [diagnostic({ scores: ONLY_AUTHORITY })],
+      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'созвон', criterion: 'ЛПР' }] })],
+      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, hook: { quote: 'Спасибо за КП', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'Говорил с производством по вашему КП' }, body: 'Иван, добрый день! Говорил с производством по вашему КП — давайте созвонимся в четверг с собственником, вам не придётся пересказывать.' }] } }],
       reviewer: [reviewer('ОДОБРЕНО')],
     },
     messages: ['Переписка: Иван (10.11): Спасибо за КП.', 'без срока'],
@@ -528,9 +535,9 @@ module.exports = [
     },
     agents: {
       planner: [planner(false)],
-      diagnostic: [diagnostic()],
-      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'договориться о звонке собственнику после отпуска' }] })],
-      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, body: 'Иван, понял, собственник в отпуске до 20-го. Давайте я подготовлю всё к его возвращению — созвонимся 23-го?' }] } }],
+      diagnostic: [diagnostic({ scores: ONLY_AUTHORITY })],
+      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'договориться о звонке собственнику после отпуска', criterion: 'ЛПР' }] })],
+      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, hook: { quote: 'Собственник в отпуске до 20-го', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'понял, собственник в отпуске до 20-го' }, body: 'Иван, понял, собственник в отпуске до 20-го. Давайте я подготовлю всё к его возвращению — созвонимся 23-го?' }] } }],
       reviewer: [reviewer('ОДОБРЕНО')],
     },
     messages: ['Иван (16.11): Собственник в отпуске до 20-го, решать будет он.'],

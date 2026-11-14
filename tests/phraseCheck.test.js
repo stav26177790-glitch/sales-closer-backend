@@ -66,4 +66,21 @@ check('Зерно 6: «если решение по баннеру не прин
   assert.equal(findBannedPhrases([{ touchpoint_number: 4, body: 'Сегодня последний день, когда баннер успевает к открытию. Если актуально — напишите «да».' }]).length, 0);
 });
 
+check('Зерно 7: кружок «Вот, смотрите — похожая вывеска, которую мы делали» ловится', () => {
+  assert.equal(findBannedPhrases([{ touchpoint_number: 3, body: 'Марина, добрый день — записал короткое видео. Вот, смотрите — похожая вывеска, которую мы делали: объёмные буквы, логотип.' }]).length, 1);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 3, body: 'Похожие буквы, которые мы сделали для кафе, — пришлю фото.' }]).length, 1);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 3, body: '[фото похожей работы — если есть] Вывеска как на первой точке.' }]).length, 0);
+});
+check('менеджеры удалённо: «заехал / был на производстве» ловится, «позвонил на производство» — нет', () => {
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, был на производстве, видел похожую вывеску — вспомнил про вас.' }]).length, 1);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, заехал посмотреть вашу первую точку.' }]).length, 1);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, позвонил на производство по вашему проекту — есть вопрос по подсветке.' }]).length, 0);
+});
+check('ИИ-штампы из «Зерно 7» ловятся', () => {
+  for (const t of ['Марина, хочу сказать кое-что важное — пока есть время.', 'Записал видео, буквально полминуты.', 'Просто перешлите, займёт секунду.', 'Скажите прямо. Я не обижусь.', 'Хочу спросить честно: есть ли шанс?']) {
+    assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: t }]).length, 1, t);
+  }
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, разбирался сейчас с похожей вывеской и вспомнил про ваше открытие.' }]).length, 0);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);

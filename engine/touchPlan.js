@@ -19,6 +19,99 @@ const { addWorkingDays, humanDate, computeTimeline } = require('./timeline');
 
 const DEFAULT_DAYS = [0, 1, 3, 5, 8, 11, 15];
 
+// Формула 100% закрытия (владелец 14.11, «Зерно 7»: «Клоузер бьёт только по ЛПР»).
+// Каждый критерий, который ещё не «Подтверждено», двигает хотя бы одно касание.
+// Ключи оценки — прежние (diagnostic_output.scores).
+const CRITERIA = {
+  ФВ: { key: 'financial', label: 'ФВ — финансовая возможность',
+    goal: 'Снять вопрос денег: мягко выяснить, что стоит за ценой (бюджет, с чем сравнивают), и показать, что входит в цену КП. Без скидки — цена КП фиксирована.' },
+  ОП: { key: 'need', label: 'ОП — осознанная потребность',
+    goal: 'Укрепить потребность: что клиент получает с вывеской к своей дате — через его триггер.' },
+  ЛПР: { key: 'authority', label: 'ЛПР — определён',
+    goal: 'Дать контактному лицу готовый материал для ЛПР или предложить короткий совместный звонок — только с его согласия.' },
+  Д: { key: 'trust', label: 'Д — доверие',
+    goal: 'Добавить доверия реальными фактами о том, как работаем (только из файла отрасли): производство, договор, гарантия.' },
+  ЗС: { key: 'urgency', label: 'ЗС — здесь и сейчас',
+    goal: 'Перевести в «здесь и сейчас»: сроки на день отправки и один конкретный следующий шаг (Давайте / Чтобы / Если / То).' }
+};
+const CRITERIA_ORDER = ['ЛПР', 'ЗС', 'ФВ', 'Д', 'ОП'];
+const MAX_TOUCHES = 7; // спящий режим — после 7 касаний без ответа
+
+function criterionOf(v) {
+  const t = String(v || '').toUpperCase().replace(/Ё/g, 'Е');
+  if (/ЛПР|AUTHORITY|ПОЛНОМОЧ/.test(t)) return 'ЛПР';
+  if (/ФВ|FINANC|ФИНАНС|БЮДЖЕТ/.test(t)) return 'ФВ';
+  if (/ЗС|URGEN|ЗДЕСЬ|СРОЧН/.test(t)) return 'ЗС';
+  if (/ОП|NEED|ПОТРЕБН/.test(t)) return 'ОП';
+  if (/(^|[^А-Я])Д([^А-Я]|$)|TRUST|ДОВЕР/.test(t)) return 'Д';
+  return null;
+}
+
+// Стратегия не указала критерий (старые сделки, пропуск модели) — по цели касания.
+const GOAL_HINTS = [
+  ['ЛПР', /андре|лпр|собственник|руководител|директор|пересыл|контакт|совместн|напрямую/i],
+  ['ФВ', /бюджет|цен|дорог|деньг|оплат|стоимост|скидк/i],
+  ['ЗС', /срок|дат[аеуы]|последн|баннер|временн|запуск|старт|сегодня/i],
+  ['Д', /довери|гаранти|кейс|производств|договор|фото|отзыв|надёжн|надежн/i],
+  ['ОП', /потребност|открыти|гост|клиент[ыа] найдут|результат/i]
+];
+function guessCriterion(step) {
+  const t = [step?.goal, step?.key_message].filter(Boolean).join(' ');
+  for (const [c, re] of GOAL_HINTS) if (re.test(t)) return c;
+  return null;
+}
+
+// Какие критерии касания должны сдвинуть: всё, что не «Подтверждено».
+function criteriaToMove(scores) {
+  if (!scores || typeof scores !== 'object') return [];
+  return CRITERIA_ORDER.filter((c) => {
+    const st = String(scores[CRITERIA[c].key]?.status || '').toLowerCase();
+    return st && !/подтвержд/.test(st);
+  });
+}
+
+// Сколько касаний будет после чередования: два экспертных подряд → +кружок.
+function projectedSize(regularSteps) {
+  let size = 0; let prev = null;
+  for (const s of regularSteps) {
+    if (!s.sameContact && prev === 'экспертное' && s.kind === 'экспертное') size++;
+    size++; prev = s.kind;
+  }
+  return size;
+}
+
+// Непокрытые критерии: сначала — шагам без критерия, потом новыми шагами (до 7 касаний),
+// а если план уже полный — дополнительной целью к подходящему шагу.
+function coverCriteria(steps, scores) {
+  const need = criteriaToMove(scores);
+  const covered = new Set(steps.filter((s) => !s.conditional).flatMap((s) => [s.criterion, ...(s.also || [])]).filter(Boolean));
+  const missing = need.filter((c) => !covered.has(c));
+  if (!missing.length) return steps;
+  const out = [...steps];
+  const regular = () => out.filter((s) => !s.conditional);
+  for (const c of missing) {
+    const free = regular().find((s) => !s.criterion && !s.sameContact && (c === 'ОП' || c === 'ЛПР' || s.kind === 'экспертное'));
+    if (free) { free.criterion = c; continue; }
+    // Деньги, доверие, сроки — экспертное касание (расчёт, факты); потребность — можно тепло.
+    // Если перед ним тоже экспертное — чередование вставит кружок: учитываем в лимите 7.
+    const last = regular().pop();
+    const kind = c === 'ОП' && last?.kind === 'экспертное' ? 'эмпатичное' : 'экспертное';
+    const candidate = { kind, sameContact: false };
+    if (projectedSize([...regular(), candidate]) <= MAX_TOUCHES) {
+      const lastDay = Math.max(0, ...regular().map((s) => s.day));
+      out.push({ orig: null, day: lastDay + 2, conditional: false, sameContact: false, condition: '',
+        channel: kind === 'эмпатичное' ? 'Кружок' : 'WhatsApp', kind,
+        recipient: (out.find((s) => !s.conditional) || {}).recipient || '',
+        goal: CRITERIA[c].goal, key_message: '', value: '', criterion: c, added_for_criterion: true });
+      continue;
+    }
+    const host = regular().filter((s) => !s.sameContact).pop();
+    if (host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
+  }
+  // Новые шаги — в конце (их день позже всех), порядок остальных не трогаем.
+  return out;
+}
+
 const isConditional = (s) => /только если|если (марина|он|она|контакт)|после согласия/i.test(String(s?.condition || '') + ' ' + String(s?.timing || ''));
 const isSameContact = (s) => s?.same_contact_as != null || /сразу после|в тот же день после|после звонка/i.test(String(s?.timing || ''));
 
@@ -83,7 +176,7 @@ function targetOf(item, steps) {
  * @returns {Array} план: [{ touchpoint_number, send_date, timing, channel, kind, recipient,
  *   condition, goal, key_message, value, must_include: [...], facts: {...} }]
  */
-function buildTouchPlan(strategyOutput, timeline, today) {
+function buildTouchPlan(strategyOutput, timeline, today, scores) {
   const seq = Array.isArray(strategyOutput?.touchpoint_sequence) ? strategyOutput.touchpoint_sequence : [];
   if (!seq.length || !today) return null;
   let steps = seq.map((s, i) => ({
@@ -97,7 +190,8 @@ function buildTouchPlan(strategyOutput, timeline, today) {
     recipient: s?.recipient || '',
     goal: s?.goal || '',
     key_message: s?.key_message || '',
-    value: s?.value_for_client || ''
+    value: s?.value_for_client || '',
+    criterion: criterionOf(s?.criterion) || (s?.same_contact_as != null ? null : guessCriterion(s))
   }));
 
   // «Сразу после / в тот же день после звонка» — тот же день, что предыдущий шаг.
@@ -106,6 +200,9 @@ function buildTouchPlan(strategyOutput, timeline, today) {
     if (s.conditional) continue;
     if (s.sameContact) s.day = lastDay; else lastDay = s.day;
   }
+
+  // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании.
+  steps = coverCriteria(steps, scores);
 
   // Пункты «Обязательно» — по исходным номерам, до вставок.
   const items = Array.isArray(strategyOutput?.must_include) ? strategyOutput.must_include : [];
@@ -162,6 +259,8 @@ function buildTouchPlan(strategyOutput, timeline, today) {
       goal: s.goal,
       key_message: s.key_message,
       value: s.value,
+      criterion: s.criterion ? CRITERIA[s.criterion].label : null,
+      also_criteria: (s.also || []).map((c) => CRITERIA[c].label),
       must_include: s.orig != null ? (byOrig[s.orig] || []) : [],
       facts: factsFor(send || today, timeline),
       inserted: !!s.inserted
@@ -172,7 +271,7 @@ function buildTouchPlan(strategyOutput, timeline, today) {
 // Для менеджера под стратегией: «1. 13 ноября (пт) · Звонок · экспертное — Марине: цель».
 function formatTouchPlan(plan) {
   if (!Array.isArray(plan) || !plan.length) return '';
-  const lines = plan.map((p) => `${p.touchpoint_number}. ${p.condition ? `только если: ${p.condition.replace(/^только если\s*/i, '')}` : p.timing} · ${p.channel} · ${p.kind}${p.recipient ? ` — ${p.recipient}` : ''}${p.goal ? `: ${p.goal}` : ''}`);
+  const lines = plan.map((p) => `${p.touchpoint_number}. ${p.condition ? `только если: ${p.condition.replace(/^только если\s*/i, '')}` : p.timing} · ${p.channel} · ${p.kind}${p.criterion ? ` · ${p.criterion.split(' —')[0]}` : ''}${p.recipient ? ` — ${p.recipient}` : ''}${p.goal ? `: ${p.goal}` : ''}`);
   return `### План касаний\n\n${lines.join('\n')}`;
 }
 
@@ -182,9 +281,9 @@ function pinToPlan(composerOutput, plan) {
   if (!Array.isArray(msgs) || !Array.isArray(plan)) return composerOutput;
   const messages = msgs.map((m, i) => {
     const p = plan.find((x) => x.touchpoint_number === Number(m?.touchpoint_number ?? i + 1));
-    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind } : m;
+    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind, criterion: p.criterion || null } : m;
   });
   return { ...composerOutput, messages };
 }
 
-module.exports = { buildTouchPlan, formatTouchPlan, pinToPlan, factsFor };
+module.exports = { buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };
