@@ -76,4 +76,12 @@ check('дата клиента уже прошла — просим провер
   assert.equal(r.ready_by, undefined);
 });
 
+check('суббота (живой «Зерно 6», 14.11): старт — ближайший рабочий день, 16 ноября (пн), как «старт в понедельник»', () => {
+  const r = t.computeTimeline({ today: '2026-11-14', clientDeadline: '2026-12-01', productionDays: 12, industry: 'signage' });
+  assert.equal(r.start_date, '2026-11-16');
+  assert.ok(r.summary.startsWith('Старт в ближайший рабочий день, 16 ноября (пн)'));
+  const mon = t.computeTimeline({ today: '2026-11-16', clientDeadline: '2026-12-01', productionDays: 12, industry: 'signage' });
+  assert.deepEqual(r.if_start_today, mon.if_start_today);
+});
+
 console.log(`timeline: ${passed} проверок пройдено`);

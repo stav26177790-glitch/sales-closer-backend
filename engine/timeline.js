@@ -166,7 +166,12 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
   }
 
   const readyBy = lastWorkingDayBefore(clientDeadline);
-  const productionDone = addWorkingDays(today, prod);
+  // Сегодня выходной/праздник (живой «Зерно 6», суббота 14.11): старт реально в
+  // ближайший рабочий день — иначе даты на день оптимистичнее, чем «старт в пн».
+  let start = today;
+  while (!isWorkingDay(start)) start = addDays(start, 1);
+  const startWord = start === today ? 'сегодня' : `в ближайший рабочий день, ${humanDate(start)}`;
+  const productionDone = addWorkingDays(start, prod);
   const installedEarliest = addWorkingDays(productionDone, iMin);
   const installedLatest = addWorkingDays(productionDone, iMax);
   const latestStart = subtractWorkingDays(readyBy, prod + iMax);
@@ -192,8 +197,8 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
   // Временная вывеска — считаем, только когда постоянную не успеваем или впритык.
   let tempBanner = null;
   if (status !== 'с запасом' && isSignage) {
-    const bEarliest = addWorkingDays(today, TEMP_BANNER.productionMin + TEMP_BANNER.installMin);
-    const bLatest = addWorkingDays(today, TEMP_BANNER.productionMax + TEMP_BANNER.installMax);
+    const bEarliest = addWorkingDays(start, TEMP_BANNER.productionMin + TEMP_BANNER.installMin);
+    const bLatest = addWorkingDays(start, TEMP_BANNER.productionMax + TEMP_BANNER.installMax);
     const bLatestStart = subtractWorkingDays(readyBy, TEMP_BANNER.productionMax + TEMP_BANNER.installMax);
     tempBanner = {
       production_working_days: `${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax}`,
@@ -202,16 +207,16 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
       fits_client_deadline: bLatest <= readyBy,
       latest_start_date: bLatestStart,
       summary: bLatest <= readyBy
-        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — при старте сегодня готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}. Эта дата — только для баннера: постоянная вывеска при любом дне задержки старта сдвигается на столько же рабочих дней.`
+        ? `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — при старте ${start === today ? 'сегодня' : humanDate(start)} готова ${humanDate(bEarliest)} – ${humanDate(bLatest)}, к дате клиента успеваем; запустить не позже ${humanDate(bLatestStart)}. Эта дата — только для баннера: постоянная вывеска при любом дне задержки старта сдвигается на столько же рабочих дней.`
         : `Временная вывеска (баннер): ${TEMP_BANNER.productionMin}–${TEMP_BANNER.productionMax} раб. дн. + монтаж ${TEMP_BANNER.installMin}–${TEMP_BANNER.installMax} раб. дн. — к дате клиента тоже не успеваем (готова ${humanDate(bLatest)}).`
     };
   }
 
   const install = iMin === iMax ? `${iMin}` : `${iMin}–${iMax}`;
   const shiftNote = buffer < 0 ? ` Каждый рабочий день задержки старта сдвигает готовность ${isSignage ? 'постоянной вывески' : 'заказа'} на рабочий день.` : '';
-  const lastStartText = latestStart >= today
+  const lastStartText = latestStart >= start
     ? `Последний день ${W.start} с учётом ${W.instGen} ${iMax} дн. — ${humanDate(latestStart)}.`
-    : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= today && latestStartBestCase !== latestStart ? ` (при ${W.instIns} за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
+    : `Последний день старта был ${humanDate(latestStart)}${latestStartBestCase >= start && latestStartBestCase !== latestStart ? ` (при ${W.instIns} за ${iMin} дн. — ${humanDate(latestStartBestCase)})` : ''}.`;
 
   return {
     today,
@@ -219,6 +224,7 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
     ready_by: readyBy,
     production_working_days: prod,
     install_working_days: install,
+    start_date: start,
     if_start_today: {
       production_done: productionDone,
       installed_earliest: installedEarliest,
@@ -228,18 +234,18 @@ function computeTimeline({ today, clientDeadline, productionDays, installDaysMin
     // не сегодня: «при старте сегодня — 3–4 декабря» в касании от 25 ноября
     // было бы неправдой (живой тест 2026-11-13).
     ready_if_start_on: Array.from({ length: 10 }, (_, k) => {
-      const start = addWorkingDays(today, k + 1);
-      const done = addWorkingDays(start, prod);
+      const st = addWorkingDays(start, k + 1);
+      const done = addWorkingDays(st, prod);
       const a = addWorkingDays(done, iMin);
       const b = addWorkingDays(done, iMax);
-      return `старт ${humanDate(start)} → готово ${a === b ? humanDate(b) : `${humanDate(a)} – ${humanDate(b)}`}`;
+      return `старт ${humanDate(st)} → готово ${a === b ? humanDate(b) : `${humanDate(a)} – ${humanDate(b)}`}`;
     }),
     latest_start_date: latestStart,
     buffer_working_days: buffer,
     status,
     temp_banner: tempBanner,
     summary:
-      `Старт сегодня, ${humanDate(today)}: производство ${wdays(prod)} — до ${humanDate(productionDone)}, ` +
+      `Старт ${start === today ? `сегодня, ${humanDate(today)}` : startWord}: производство ${wdays(prod)} — до ${humanDate(productionDone)}, ` +
       `${W.inst} ${install} раб. дн. — готово ${iMin === iMax ? humanDate(installedLatest) : `${humanDate(installedEarliest)} – ${humanDate(installedLatest)}`}. ` +
       `Клиенту нужно к ${humanDate(clientDeadline)} (готово не позже ${humanDate(readyBy)}): ${verdict}. ${lastStartText}${shiftNote}` +
       (tempBanner ? ` ${tempBanner.summary}` : ''),
