@@ -330,7 +330,8 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 
   // «Есть ли шанс / честный ответ» в середине цепочки — убираем: это вопрос только
   // «последнего шанса», его код ставит последним сам (прогон 14.11, касание 6 «Зерна»).
-  const LC_GOAL_RE = /шанс|честн[а-яё]* ответ|сделка потеряна|скажите как есть|проект ещё (актуал|в приоритет)/i;
+  // + симулятор 15.11: «Попросить сказать как есть, чтобы не тратить время клиента» в середине пути.
+  const LC_GOAL_RE = /шанс|честн[а-яё]* ответ|сделка потеряна|сказ[а-яё]* как есть|не тратить [а-яё ]{0,12}время|проект ещё (актуал|в приоритет)|актуален ли проект/i;
   const regularIdx = steps.map((x, i) => (!x.conditional && !x.sameContact ? i : -1)).filter((i) => i >= 0);
   const lastRegular = regularIdx[regularIdx.length - 1];
   steps = steps.filter((x, i) => x.conditional || x.sameContact || i === lastRegular || !LC_GOAL_RE.test(`${x.goal || ''} ${x.key_message || ''}`));

@@ -222,6 +222,18 @@ check('симулятор 15.11: цепочка «сразу после» из 4
   assert.ok(p[p.length - 1].last_chance, JSON.stringify(p.map((x) => x.timing)));
   assert.equal(p.filter((x) => /сразу после/.test(x.timing)).length, 1);
 });
+check('симулятор 15.11: «попросить сказать как есть, чтобы не тратить время клиента» в середине пути — убирается (это только «последний шанс»)', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, goal: 'Возобновить контакт' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 3, goal: 'Показать участие' },
+    { number: 3, channel: 'WhatsApp', kind: 'экспертное', day: 6, goal: 'Попросить сказать как есть, чтобы не тратить время клиента' },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', day: 9, goal: 'Сверить дату открытия' },
+    { number: 5, channel: 'WhatsApp', kind: 'экспертное', day: 12, goal: 'Финал' }
+  ] }, tl, '2026-11-13', null, { source: 'x' });
+  const mid = p.slice(0, -1).filter((x) => /как есть/.test(x.goal || ''));
+  assert.equal(mid.length, 0, JSON.stringify(p.map((x) => x.goal)));
+  assert.ok(p[p.length - 1].last_chance);
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
