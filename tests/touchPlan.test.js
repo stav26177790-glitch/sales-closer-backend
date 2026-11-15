@@ -162,6 +162,15 @@ check('владелец 15.11: касание о деньгах — звонок
   assert.equal(buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { source: 'Покровка' })[0].channel, 'Звонок');
   assert.equal(buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { source: 'клиент не отвечает на звонки' })[0].channel, 'WhatsApp');
 });
+check('прогон 15.11 «Fresh Bowl»: «если после касания 4 нет движения», «не вышел на связь» — не условие, обычное касание пути', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0 },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'только если Сергей не вышел на связь после касания 1', day: 3 },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'только если после касания 2 нет движения', day: 6 }
+  ] }, tl, '2026-11-13');
+  assert.ok(p.every((x) => !x.condition), JSON.stringify(p.map((x) => x.condition)));
+  assert.ok(p[p.length - 1].last_chance);
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },

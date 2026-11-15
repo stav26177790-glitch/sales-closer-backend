@@ -84,11 +84,17 @@ function touchText(m) {
 }
 
 // [{ touchpoint_number, fixes: [..] }] — только касания с нарушениями.
+const REFERENCE_RE = /(дам|дать|дадим|пришлю|поделюсь|познаком\w*|свяж\w*)[^.!?\n]{0,40}(контакт|телефон|номер)[^.!?\n]{0,50}(клиент|заказчик|владел)|(контакт|телефон)[^.!?\n]{0,15}(нашего|наших|одного из)[^.!?\n]{0,15}(клиент|заказчик)|(клиент|заказчик)[^.!?\n]{0,40}готов[^.!?\n]{0,20}(рассказать|поговорить|пообщаться)/i;
+const REFERENCE_SRC_RE = /(контакт|телефон|номер)[^.!?\n]{0,40}(клиент|заказчик)|готов[^.!?\n]{0,20}(дать )?рекомендац|клиент[^.!?\n]{0,30}готов[^.!?\n]{0,20}(рассказать|поговорить)/i;
+const REFERENCE_FIX = 'Убрать предложение дать контакт нашего клиента / «клиент готов рассказать» — в материалах менеджера такого клиента нет, это выдумка (владелец 15.11). Доверие — реальными фактами: договор, гарантия по договору, выезд по гарантии за 3 рабочих дня, проверка с подсветкой до отгрузки, кейсы из базы.';
 function findBannedPhrases(messages, sourceText = '') {
   const out = [];
   (messages || []).forEach((m, i) => {
     const text = touchText(m);
     const fixes = BANNED.filter((b) => (b.test ? b.test(text) : b.re.test(text))).map((b) => b.fix);
+    // Прогон 15.11 «Fresh Bowl»: «могу дать контакт клиента, который расскажет» — выдумка, если менеджер
+    // в материалах такого клиента не называл (владелец 15.11: выдуманные не нужны).
+    if (REFERENCE_RE.test(text) && !REFERENCE_SRC_RE.test(String(sourceText || ''))) fixes.push(REFERENCE_FIX);
     const unknown = unknownCases(text, sourceText);
     if (unknown.length) fixes.push(UNKNOWN_CASE_FIX(unknown));
     if (fixes.length) out.push({ touchpoint_number: Number(m?.touchpoint_number ?? i + 1), fixes });
