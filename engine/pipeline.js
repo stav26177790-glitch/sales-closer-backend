@@ -151,6 +151,9 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
 // следующего состояния. Вынесена в отдельную функцию, чтобы её можно было
 // вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
 // при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
+const { dropNeedlessClarification } = require('./clarification');
+
+// opts.path — режим пути (сайт): ненужные вопросы planner/diagnostic снимаются (dropNeedlessClarification).
 // opts.noClarification — перестройка пути по новым фактам (ответ клиента): путь строится без
 // остановки на вопросы менеджеру (прогон DeepSeek «Зерно» 15.11: после ответа Марины planner
 // задал 4 вопроса вместо перестройки). Недостающее — «Неизвестно» в оценке, как при лимите раундов.
@@ -165,11 +168,13 @@ async function runIntakeStep(baseInput, intakeRounds = 1, opts = {}) {
   const roundLimitReached = intakeRounds >= CONFIG.MAX_INTAKE_ROUNDS || Boolean(opts.noClarification);
   const plannerResult = await callAgentSafe('planner', baseInput);
   output.planner_output = plannerResult?.planner_output;
+  if (opts.path) dropNeedlessClarification(output.planner_output, baseInput);
   if (plannerResult?.planner_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }
   const diagnosticResult = await callAgentSafe('diagnostic', { ...baseInput, planner_output: output.planner_output }, 6000); // + СОПРАНО — 4000 мало
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
+  if (opts.path) dropNeedlessClarification(output.diagnostic_output, baseInput);
   if (output.diagnostic_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }

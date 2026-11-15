@@ -93,7 +93,14 @@ const pathVariants = [];
       const keep = r.steps.filter((st) => !(['DIAGNOSING', 'STRATEGY_SELECTION'].includes(st.stateBefore) && isGoAhead(st.message))).map((st) => st.message);
       // Без сроков путь сначала спрашивает их — менеджер отвечает «без срока».
       if (!(d.deal.client_deadline && d.deal.production_days)) keep.splice(1, 0, 'без срока');
-      pathVariants.push({ ...d, name: `${d.name} [путь]`, path: true, messages: keep });
+      // 15.11: в режиме пути вопросы planner при длинном материале снимаются (pipeline.dropNeedlessClarification).
+      // Если классический прогон останавливался на них, в пути ответ менеджера идёт вместе с первым сообщением.
+      let agents = d.agents;
+      if (r.steps[1]?.stateBefore === 'SOPRANO_INTERVIEW' && String(keep[0] || '').length >= 300 && keep.length > 1) {
+        keep.splice(0, 2, `${keep[0]}\n\n${keep[1]}`);
+        agents = { ...d.agents, planner: d.agents.planner.slice(1) };
+      }
+      pathVariants.push({ ...d, agents, name: `${d.name} [путь]`, path: true, messages: keep });
     }
     console.log(`\n\n████ ${d.name} — ${d.description}`);
     console.log('Путь:', r.steps.map((s) => s.nextState).join(' → '));

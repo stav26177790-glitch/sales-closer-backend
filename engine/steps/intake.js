@@ -25,7 +25,7 @@ async function intake({ deal, baseInput, opts }) {
   // intake_rounds = 0 — была только проверка сроков, уточнений ещё не было.
   const isLoopingInterview = deal.current_state === 'SOPRANO_INTERVIEW';
   const intakeRounds = isLoopingInterview ? (deal.intake_rounds ?? 1) + 1 : 1;
-  const { output, nextState } = await runIntakeStep(baseInput, intakeRounds);
+  const { output, nextState } = await runIntakeStep(baseInput, intakeRounds, { path: Boolean(opts?.path) });
   output._intake_rounds = intakeRounds;
   if (output._intakeRoundLimitNote) {
     output._directText = `${output._intakeRoundLimitNote}\n\n${formatAgentReplyForChat(nextState, output)}`;
