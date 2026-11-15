@@ -31,10 +31,13 @@ async function ensureManager(user) {
   if (error) throw error;
 }
 
+const { parseClientDate } = require('./engine/clientDate');
+
 // Поля сроков сделки из тела запроса: только заданные и корректные.
 function timelineFields(src) {
   const out = {};
-  if (/^\d{4}-\d{2}-\d{2}$/.test(src?.client_deadline || '')) out.client_deadline = src.client_deadline;
+  const date = parseClientDate(src?.client_deadline);
+  if (date) out.client_deadline = date;
   const int = (v) => (Number.isInteger(Number(v)) && Number(v) >= 0 && v !== '' && v !== null ? Number(v) : undefined);
   if (int(src?.production_days) > 0) out.production_days = int(src.production_days);
   if (int(src?.install_days_min) !== undefined) out.install_days_min = int(src.install_days_min);

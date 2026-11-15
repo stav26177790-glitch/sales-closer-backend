@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./db');
+const { parseClientDate } = require('./engine/clientDate');
 const { advance } = require('./stateMachine');
 const { runPath } = require('./engine/autoFlow');
 const { friendlyError } = require('./engine/errors');
@@ -186,6 +187,13 @@ app.patch('/api/deals/:id/timeline', requireManager, async (req, res) => {
   try {
     const deal = await db.getDeal(req.params.id);
     if (deal.manager_id !== req.managerId) return res.status(403).json({ error: 'Нет доступа' });
+    // Дату написали, но не поняли — говорим прямо, а не сохраняем сроки без даты (живой «Зерно 9», 15.11).
+    if (String(req.body?.client_deadline || '').trim() && !parseClientDate(req.body.client_deadline)) {
+      return res.status(400).json({ error: 'Не понял дату. Напишите её так: 01.12.2026' });
+    }
+    if (!String(req.body?.client_deadline || '').trim() && !deal.client_deadline && String(req.body?.production_days || '').trim()) {
+      return res.status(400).json({ error: 'Укажите дату, к которой нужно клиенту, например 01.12.2026' });
+    }
     const fields = db.timelineFields(req.body);
     if (!Object.keys(fields).length) return res.status(400).json({ error: 'Нет корректных полей сроков' });
     const updated = await db.updateDealState(req.params.id, fields);
