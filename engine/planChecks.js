@@ -36,7 +36,9 @@ const MOSCOW_FIXES = {
 };
 
 const { voiceBlocked, DISCOUNT_FIGURE_RE } = require('./voice');
-const DISCOUNT_FIX = 'Скидку цифрой письменно не даём (правило 77): клиент не берёт трубку — в переписке можно говорить о бюджете и вариантах, но размер уступки — только голосом и в обмен на шаг к сделке. Убрать цифру скидки, оставить вопрос о бюджете.';
+const DISCOUNT_FIX = 'Скидку цифрой письменно не даём (правила 77, 78): размер уступки — голосом и в обмен на шаг к сделке. Письменно — только если клиент не берёт трубку / просит писать, и только в финальных касаниях пути, когда другие варианты исчерпаны (владелец 15.11). Здесь убрать цифру скидки, оставить вопрос о бюджете или предложить созвон.';
+const DISCOUNT_EXCHANGE_FIX = 'Скидка — только в обмен на шаг к сделке (правило 77): привязать к условию — «если оплачиваете / заключаем договор на этой неделе — тогда …». Просто так скидку не даём.';
+const EXCHANGE_RE = /если[^.!?\n]{0,60}(оплат|предоплат|договор|заключ|счёт|счет|запуска|заход|оформля|в работу)|(при|за) (оплат|предоплат)|в обмен/i;
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
 // Деньги — только звонок или Zoom (владелец 14.11). В письменном касании — не обсуждать
@@ -107,6 +109,10 @@ function firstPerson(text, re) {
 function findPlanIssues(messages, plan, sourceText = '') {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
+  // Финальные касания пути: «последний шанс» и обычное касание перед ним.
+  const regular = (plan || []).filter((p) => !p.condition);
+  const lcIdx = regular.findIndex((p) => p.last_chance);
+  const finalNs = new Set(lcIdx >= 0 ? regular.slice(Math.max(0, lcIdx - 1), lcIdx + 1).map((p) => p.touchpoint_number) : []);
   const isMoscow = MOSCOW_RE.test(String(sourceText || ''));
   let shiftSaidIn = null;
   const krugSeen = [];
@@ -127,8 +133,13 @@ function findPlanIssues(messages, plan, sourceText = '') {
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     // Голос в приоритете; голос недоступен (не берёт трубку, просит писать) — о деньгах можно
     // в переписке (владелец 15.11). Скидка цифрой письменно — нет (правило 77).
-    if (!VOICE_CHANNEL_RE.test(channel) && noVoice && DISCOUNT_FIGURE_RE.test(t)) fixes.push(DISCOUNT_FIX);
-    else if (!noVoice && MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум|сориентир/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
+    // Скидка цифрой письменно — только когда голос недоступен, в финальных касаниях (другие
+    // варианты исчерпаны) и в обмен на шаг к сделке (владелец 15.11).
+    if (!VOICE_CHANNEL_RE.test(channel) && DISCOUNT_FIGURE_RE.test(t)) {
+      if (!noVoice || !finalNs.has(n)) fixes.push(DISCOUNT_FIX);
+      else if (!EXCHANGE_RE.test(t)) fixes.push(DISCOUNT_EXCHANGE_FIX);
+    }
+    if (!noVoice && !DISCOUNT_FIGURE_RE.test(t) && MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум|сориентир/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
         // «В понедельник в 10:00 наберу вас» без вопроса — давление (прогон 14.11): спросить согласие.
     const callAnnounce = t.split(/(?<=[.!?])\s+/).find((x) => /(^|[^а-яё])(наберу|позвоню|перезвоню)([^а-яё]|$)/i.test(x) && !/\?|удобно|если|можно|хорошо|договорил|как и/i.test(x));
     if (callAnnounce) fixes.push(`Звонок объявлен без согласия клиента («${callAnnounce.slice(0, 80)}») — давление. Спросить: «Удобно, если наберу в понедельник утром?»`);

@@ -64,7 +64,7 @@ check('деньги в мессенджере — на доработку; зв�
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
-check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — нет', () => {
+check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));
   assert.ok(voiceBlocked('Марина (12.11): трубку не беру, пишите сюда — не могу говорить'));
@@ -76,6 +76,13 @@ check('владелец 15.11: голос недоступен (не берёт 
   const src = 'Покровка. клиент не отвечает на звонки';
   assert.equal(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, src).length, 0);
   assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, могу дать скидку 5% при оплате сегодня.' }], plan, src)
+    .some((h) => /Скидку цифрой письменно/.test(h.fixes.join(' '))));
+  // Финальные касания (3 — перед «последним шансом» 4): скидка цифрой письменно — можно, но в обмен (владелец 15.11).
+  assert.equal(findPlanIssues([{ touchpoint_number: 3, channel: 'WhatsApp', body: 'Марина, если заключаем договор на этой неделе — согласую для вас скидку 5%. По рукам?' }], plan, src).length, 0);
+  assert.ok(findPlanIssues([{ touchpoint_number: 3, channel: 'WhatsApp', body: 'Марина, могу дать скидку 5%.' }], plan, src)
+    .some((h) => /в обмен на шаг/.test(h.fixes.join(' '))));
+  // Финальное касание, но голос доступен — нет.
+  assert.ok(findPlanIssues([{ touchpoint_number: 3, channel: 'WhatsApp', body: 'Марина, если заключаем договор на этой неделе — скидка 5%.' }], plan, 'Покровка')
     .some((h) => /Скидку цифрой письменно/.test(h.fixes.join(' '))));
   // Без признака — по-прежнему звонком.
   assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /звонком или в Zoom/.test(h.fixes.join(' '))));
