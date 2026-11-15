@@ -1,6 +1,6 @@
 // Режим пути: «весь путь» / «следующий шаг» (владелец 15.11).
 const assert = require('assert');
-const { autoMode, modeCommand, modeOf } = require('../engine/pathMode');
+const { autoMode, modeCommand, modeOf, rebuildMode } = require('../engine/pathMode');
 const t = require('../engine/timeline');
 const { buildTouchPlan } = require('../engine/touchPlan');
 let n = 0;
@@ -22,6 +22,13 @@ check('команды менеджера: «весь путь», «клиент 
   assert.equal(modeCommand('следующий шаг'), 'step');
   assert.equal(modeCommand('Марина (17.11): Логотип во вложении'), null);
   assert.equal(modeCommand('касание 1 короче'), null);
+});
+check('перестройка («Котик»): «он всё равно не отвечает» → весь путь; клиент ожил → следующий шаг', () => {
+  assert.equal(rebuildMode('он все равно не отвечает'), 'full');
+  assert.equal(rebuildMode('клиент не отвечает на звонки'), 'full');
+  assert.equal(rebuildMode('написал дорого у вас'), 'step');
+  assert.equal(rebuildMode('сравнила с другим КП, Рога и копыта на 20% дешевле'), 'step');
+  assert.equal(rebuildMode('долго молчал, потом написал: сделаете на 30 — закажу'), 'step');
 });
 check('modeOf: из last_diagnostic_output._path_mode, по умолчанию full', () => {
   assert.equal(modeOf({ last_diagnostic_output: { _path_mode: 'step' } }), 'step');

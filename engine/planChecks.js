@@ -67,7 +67,44 @@ function overlap(a, b) {
   return k / Math.min(a.size, b.size);
 }
 
+// Разбор «Котик» (15.11): менеджер «уложилась, сделала», а в касаниях то «смотрела», то «проверял».
+const FIRST_PERSON_STEMS = ['проверил', 'проверял', 'понял', 'посчитал', 'разобрал', 'подготовил', 'смотрел',
+  'посмотрел', 'подумал', 'решил', 'записал', 'набрал', 'слышал', 'хотел', 'готовил', 'отправлял', 'отправил',
+  'сделал', 'нашёл', 'увидел', 'уточнил', 'обсудил', 'передал', 'договорился', 'уложился'];
+const stemRe = (forms) => new RegExp(`(^|[^а-яё])(${forms.join('|')})(?=[^а-яё]|$)`, 'gi');
+const MASC_RE = stemRe(FIRST_PERSON_STEMS.map((w) => w.replace('нашёл', 'нашел|нашёл')));
+const FEM_RE = stemRe(FIRST_PERSON_STEMS.map((w) => (w === 'нашёл' ? 'нашла' : w === 'договорился' ? 'договорилась'
+  : w === 'уложился' ? 'уложилась' : `${w}а`)));
+// Пол менеджера — по его же словам в материалах (заметки менеджера, «Я (дата): …»).
+const MANAGER_FEM_RE = /(^|[^а-яё])(я\s+)?(уложилась|сделала|отправила|отправляла|написала|позвонила|звонила|договорилась|подготовила|выслала|скинула|предложила|рассчитала|посчитала)(?=[^а-яё]|$)/i;
+const MANAGER_MASC_RE = /(^|[^а-яё])я\s+(уложился|сделал|отправил|отправлял|написал|позвонил|звонил|договорился|подготовил|выслал|скинул|предложил|рассчитал|посчитал)(?=[^а-яё]|$)/i;
+function managerGender(sourceText) {
+  const s = String(sourceText || '');
+  if (MANAGER_FEM_RE.test(s)) return 'f';
+  if (MANAGER_MASC_RE.test(s)) return 'm';
+  return null;
+}
+const MOSCOW_RE = /москв|мск([^а-яё]|$)|метро|м\.\s?[А-ЯЁ]|902-?пп/i;
+const PP902_RE = /902/;
+const INVENTED_ISSUES_RE = /(есть|нашл?[аи]?|нашёл|вижу|увидел[а]?) (пар[ау]|несколько|пару-тройку) (момент|нюанс|замечани)/i;
+
+// Только от первого лица: «Марина передала», «он решил», «собственник посмотрел» — не про менеджера.
+const THIRD_PERSON_RE = /^(он|она|оно|они|клиент|клиентка|собственник|руководитель|директор|управляющ[а-яё]*|кто|котор[а-яё]+|партн[её]р|дизайнер|монтажник[а-яё]*|бригада|юрист|технолог)$/i;
+function firstPerson(text, re) {
+  const out = [];
+  for (const x of String(text || '').matchAll(re)) {
+    const before = text.slice(0, x.index + x[1].length);
+    const prev = (before.match(/([А-ЯЁа-яёA-Za-z-]+)[\s)]*$/) || [])[1];
+    const sentenceStart = /(^|[.!?…\n]\s*|[—–-]\s*|\]\s*)$/.test(before);
+    if (prev && !sentenceStart && (/^[А-ЯЁ]/.test(prev) || THIRD_PERSON_RE.test(prev))) continue;
+    out.push(x[2]);
+  }
+  return out;
+}
+
 function findPlanIssues(messages, plan, sourceText = '') {
+  const gender = managerGender(sourceText);
+  const isMoscow = MOSCOW_RE.test(String(sourceText || ''));
   let shiftSaidIn = null;
   const krugSeen = [];
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
@@ -118,6 +155,15 @@ function findPlanIssues(messages, plan, sourceText = '') {
     }
     // Кружок — интрига + призыв к созвону (правило 73).
     if (/кружок|видео/i.test(channel) && (KRUG_DETAIL_RE.test(t) || !KRUG_CALL_RE.test(t) || t.length > KRUG_MAX)) fixes.push(KRUG_FIX);
+    // Род менеджера в глаголах от первого лица — один во всех касаниях.
+    const masc = firstPerson(t, MASC_RE);
+    const fem = firstPerson(t, FEM_RE);
+    if (gender === 'f' && masc.length) fixes.push(`Менеджер — женщина (по её словам в материалах): «${masc.slice(0, 3).join('», «')}» → в женском роде («проверила», «поняла», «посчитала»).`);
+    else if (gender === 'm' && fem.length) fixes.push(`Менеджер — мужчина (по его словам в материалах): «${fem.slice(0, 3).join('», «')}» → в мужском роде.`);
+    else if (!gender && masc.length && fem.length) fixes.push(`В одном касании глаголы менеджера в разном роде («${masc[0]}» и «${fem[0]}») — привести к одному.`);
+    // 902-ПП — только Москва; «есть пара моментов» — только реальные, из данных.
+    if (PP902_RE.test(t) && !isMoscow) fixes.push('902-ПП — правила Москвы, а город объекта в данных не указан. Убрать 902-ПП: «посмотрю ваш макет по требованиям города, чтобы не пришлось переделывать» (или уточнить город).');
+    if (INVENTED_ISSUES_RE.test(t) && !INVENTED_ISSUES_RE.test(String(sourceText || ''))) fixes.push('«Есть пара моментов» — обещание найденных проблем, которых в данных нет. Иначе: «посмотрю ваш макет по требованиям города — чтобы вывеску не пришлось переделывать».');
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
   return out;
@@ -139,4 +185,4 @@ function applyPlanChecks(verdict, messages, plan, sourceText = '') {
   return { verdict, hits };
 }
 
-module.exports = { findPlanIssues, applyPlanChecks, LAST_CHANCE_RE, ALT_RE, RISK_RE };
+module.exports = { managerGender, findPlanIssues, applyPlanChecks, LAST_CHANCE_RE, ALT_RE, RISK_RE };

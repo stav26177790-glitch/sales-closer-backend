@@ -12,7 +12,7 @@
 const { callAgentSafe, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
 const { composeUntilReady, channelKey } = require('../autoCompose');
-const { modeCommand, switchPathMode } = require('../pathMode');
+const { modeCommand, rebuildMode, switchPathMode } = require('../pathMode');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
@@ -123,7 +123,7 @@ function isNewFacts(text) {
 
 async function rebuildPath({ baseInput, managerInput }) {
   const { runIntakeStep } = require('../pipeline');
-  const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true, path: true, pathMode: 'step' });
+  const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true, path: true, pathMode: rebuildMode(managerInput) });
   delete output._intakeRoundLimitNote; // перестройка — не «не удалось уточнить», а обычный путь
   output._intake_rounds = 1;
   output._awaitingCorrectionConfirmation = false;

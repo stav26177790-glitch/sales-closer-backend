@@ -3,7 +3,7 @@
  * альтернатива подешевле — с логикой компромисса («есть риск», отход от ТЗ).
  */
 const assert = require('assert');
-const { findPlanIssues } = require('../engine/planChecks');
+const { findPlanIssues, managerGender } = require('../engine/planChecks');
 
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
@@ -107,5 +107,21 @@ check('кружок раскрывает идею («расскажу, как…
   const b = 'Сергей, добрый вечер! Всё думаю про вашу новую вывеску, чтобы светилась годами без сбоев — есть мысль. Созвонимся завтра?';
   const r = findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: a }, { touchpoint_number: 4, channel: 'Кружок', body: b }], plan);
   assert.ok(r.some((x) => x.touchpoint_number === 4 && x.fixes.some((f) => /повторяет/.test(f))));
+});
+check('«Котик»: род менеджера — по её словам; 902-ПП без Москвы и «пара моментов» — на правку', () => {
+  const src = 'После отправки КП котик не отвечает, в бюджет я уложилась, фотопривязку к фасаду сделала';
+  assert.equal(managerGender(src), 'f');
+  assert.equal(managerGender('Я отправил КП, клиент молчит'), 'm');
+  assert.equal(managerGender('Клиент молчит'), null);
+  const plan = [{ touchpoint_number: 1, channel: 'Звонок' }, { touchpoint_number: 2, channel: 'Звонок' }];
+  const r = findPlanIssues([
+    { touchpoint_number: 1, channel: 'Звонок', body: 'Котик, добрый день! Проверял ваш макет по 902-ПП — есть пара моментов. Понял, разобрал.' },
+    { touchpoint_number: 2, channel: 'Звонок', body: 'Котик, добрый день! Посмотрела ваш макет по требованиям города, посчитала варианты. Удобно созвониться?' }], plan, src);
+  const f1 = r.find((x) => x.touchpoint_number === 1)?.fixes.join(' ') || '';
+  assert.ok(/женщина/.test(f1) && /902-ПП — правила Москвы/.test(f1) && /пара моментов/.test(f1));
+  assert.ok(!r.some((x) => x.touchpoint_number === 2));
+  // Москва в данных — 902-ПП можно.
+  const r2 = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Посмотрела макет по 902-ПП — чтобы не пришлось переделывать. Удобно созвониться?' }], plan, 'кофейня в Москве, я отправила КП');
+  assert.ok(!r2.length);
 });
 console.log(`planChecks: ${n} проверок пройдено`);

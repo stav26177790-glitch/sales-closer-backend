@@ -46,6 +46,17 @@ function autoMode(text) {
   return OURS_RE.test(last) ? 'full' : 'step';
 }
 
+/**
+ * Режим при перестройке после новых фактов («Котик», 15.11): «он всё равно не отвечает» дважды
+ * давал одинаковый «следующий шаг» по кругу. Менеджер сообщает молчание (и не пересказывает
+ * ответ клиента) → весь путь до «последнего шанса»; иначе клиент ожил → следующий шаг.
+ */
+const CLIENT_SPOKE_RE = /(ответил|ответила|написал|написала|сказал|сказала|говорит|пишет|прислал|прислала|спросил|спросила|перезвонил|перезвонила)/i;
+function rebuildMode(managerInput) {
+  const t = String(managerInput || '');
+  return SILENCE_RE.test(t) && !CLIENT_SPOKE_RE.test(t) ? 'full' : 'step';
+}
+
 function modeOf(deal) {
   const m = deal?.last_diagnostic_output?._path_mode;
   return m === 'step' ? 'step' : 'full';
@@ -63,4 +74,4 @@ function switchPathMode({ deal, baseInput }, mode) {
   return { nextState: 'STRATEGY_SELECTION', output: { diagnostic_output: diagnostic, strategy_output: strategy } };
 }
 
-module.exports = { modeCommand, autoMode, modeOf, switchPathMode, FULL_RE, STEP_RE };
+module.exports = { modeCommand, autoMode, rebuildMode, modeOf, switchPathMode, FULL_RE, STEP_RE };

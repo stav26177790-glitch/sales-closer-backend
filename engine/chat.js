@@ -396,7 +396,9 @@ function formatAgentReplyForChat(state, output) {
         // strategy_agent.md отдаёт поле "recommended_next_action" — из-за
         // рассогласования имени поле никогда не рендерилось менеджеру,
         // хотя агент каждый раз генерирует конкретный следующий шаг.
-        s.recommended_next_action ? `**Следующий шаг:** ${s.recommended_next_action}` : null,
+        // «Котик» (15.11): подпись «Следующий шаг: записать кружок» спорила с планом (там звонок).
+        // Есть план касаний — следующий шаг виден в нём; подпись модели не показываем.
+        s.recommended_next_action && !(Array.isArray(s.touch_plan) && s.touch_plan.length) ? `**Следующий шаг:** ${s.recommended_next_action}` : null,
         // Баг №29: раньше здесь стояло "s.rationale ? ... : s.strategy_summary",
         // что выглядело как предпочтение rationale — но по схеме rationale
         // лежит ВНУТРИ primary_strategy, а не на верхнем уровне strategy_output,
