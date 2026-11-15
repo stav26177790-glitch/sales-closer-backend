@@ -198,9 +198,9 @@ check('латиница: «акрил + LED» в КП — не повод (пр�
   assert.ok(!/168-ФЗ/.test(hint({ source: 'КП: 185 000 ₽, акрил + LED, CRM', client: 'Кофейня «Зерно» 9' })));
   assert.ok(/168-ФЗ/.test(hint({ source: 'вывеска', client: 'Bar Nord' })));
 });
-check('кружок-реанимация: подсказка требует назвать саму идею', () => {
+check('кружок-реанимация: интрига по образцу владельца, идея — по телефону (правило 73)', () => {
   const h = contextHints({ source: 'x', client: 'y', daysSilent: 15 }).find((x) => typeof x === 'object');
-  assert.ok(/ИДЕЮ НАЗВАТЬ/.test(h.text));
+  assert.ok(/всё объясню по телефону/.test(h.text) && /НЕ рассказывать/.test(h.text));
 });
 check('подсказки из переписки: козырёк в Москве → 902-ПП; латиница → 168-ФЗ; не Москва — без 902-ПП', () => {
   const { contextHints } = require('../engine/touchPlan');
@@ -208,7 +208,7 @@ check('подсказки из переписки: козырёк в Москв�
   assert.ok(!/902/.test(contextHints({ source: 'Салон в Химках, вывеска на козырёк' }).join(' ')));
   assert.ok(/168-ФЗ/.test(contextHints({ source: 'Название «AURUM» латиницей', client: 'Салон «Аурум»' }).join(' ')));
   const re = contextHints({ source: 'Тишина', daysSilent: 21 }).find((h) => typeof h === 'object');
-  assert.ok(re && re.kind === 'эмпатичное' && /новой идеей/.test(re.text));
+  assert.ok(re && re.kind === 'эмпатичное' && /кружок-интрига/.test(re.text));
   const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0 }, { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 2 }] }, tl, '2026-11-13', null, { source: 'На козырёк' });
   assert.ok(p[1].must_include.some((m) => /902-ПП/.test(m)));
   assert.ok(!p[0].must_include.length);

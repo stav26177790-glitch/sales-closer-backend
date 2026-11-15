@@ -37,7 +37,11 @@ function withPlanAndHooks(resp) {
     const msgs = Array.isArray(box.messages) ? box.messages : (box.messages = []);
     for (const p of input?.touch_plan || []) {
       if (!msgs.some((m) => Number(m.touchpoint_number) === p.touchpoint_number)) {
-        msgs.push({ touchpoint_number: p.touchpoint_number, body: 'Добрый день! Коротко по вашему проекту — предлагаю один следующий шаг, как вам удобнее.' });
+        // Кружок по правилу 73 — интрига и призыв к созвону; остальные — общий текст.
+        const krug = /кружок|видео/i.test(String(p.channel || ''));
+        msgs.push({ touchpoint_number: p.touchpoint_number, body: krug
+          ? 'Добрый день, как вы? Решил записать короткое видео по вашему проекту — появилась идея, уверен, она вас заинтересует! Можем коротко набраться — всё объясню по телефону?'
+          : 'Добрый день! Коротко по вашему проекту — предлагаю один следующий шаг, как вам удобнее.' });
       }
     }
     msgs.sort((a, b) => a.touchpoint_number - b.touchpoint_number);

@@ -26,7 +26,7 @@ check('два экспертных подряд — второе на дораб
 check('условное касание («только если…») цепочку не ломает', () => {
   const r = codeChecks({ messages: [
     { touchpoint_number: 1, kind: 'экспертное', channel: 'WhatsApp', timing: 'Сегодня', body: 'a' },
-    { touchpoint_number: 2, kind: 'эмпатичное', channel: 'Кружок', timing: '16 ноября', body: 'b' },
+    { touchpoint_number: 2, kind: 'эмпатичное', channel: 'Кружок', timing: '16 ноября', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' },
     { touchpoint_number: 3, kind: 'экспертное', channel: 'Звонок', timing: 'Только если Марина даст контакт', body: 'c' },
     { touchpoint_number: 4, kind: 'экспертное', channel: 'WhatsApp', timing: '17 ноября', body: 'd' }] }, null);
   assert.deepEqual(bad(r), []);
@@ -37,20 +37,20 @@ check('без поля kind: текст/звонок — экспертное, �
     { touchpoint_number: 2, channel: 'WhatsApp', timing: '16 ноября', body: 'b' },
     { touchpoint_number: 3, channel: 'WhatsApp', timing: 'только если Марина дала контакт', body: 'c' },
     { touchpoint_number: 4, channel: 'WhatsApp', timing: '20 ноября', body: 'd' },
-    { touchpoint_number: 5, channel: 'WhatsApp (Кружок)', timing: '24 ноября', body: 'e' }] }, null);
+    { touchpoint_number: 5, channel: 'WhatsApp (Кружок)', timing: '24 ноября', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' }] }, null);
   assert.deepEqual(bad(r), [2, 4]);
-  const ok = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'a' }, { touchpoint_number: 2, channel: 'Кружок', body: 'b' }, { touchpoint_number: 3, channel: 'Email', body: 'c' }] }, null);
+  const ok = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' }, { touchpoint_number: 2, channel: 'Кружок', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' }, { touchpoint_number: 3, channel: 'Email', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' }] }, null);
   assert.equal(ok.verdict, 'ОДОБРЕНО');
 });
 check('кружок длиннее 600 символов — на сокращение', () => {
-  const r = codeChecks({ messages: [{ touchpoint_number: 1, kind: 'эмпатичное', channel: 'Кружок', body: 'x'.repeat(700) }] }, null);
+  const r = codeChecks({ messages: [{ touchpoint_number: 1, kind: 'эмпатичное', channel: 'Кружок', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?'.repeat(700) }] }, null);
   assert.deepEqual(bad(r), [1]);
 });
 check('текст «сразу после звонка» — продолжение того же касания, не новый шаг', () => {
   const r = codeChecks({ messages: [
     { touchpoint_number: 1, channel: 'Звонок', timing: 'Сегодня', body: 'a' },
     { touchpoint_number: 2, channel: 'WhatsApp', timing: 'Сразу после звонка', body: 'b' },
-    { touchpoint_number: 3, channel: 'Кружок', timing: '17 ноября', body: 'c' }] }, null);
+    { touchpoint_number: 3, channel: 'Кружок', timing: '17 ноября', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' }] }, null);
   assert.equal(r.verdict, 'ОДОБРЕНО');
 });
 check('«совет» проверки не возвращает касание; «ошибка» — возвращает (живой «Зерно 4»)', () => {
@@ -77,7 +77,7 @@ check('Зерно 5: материал для пересылки Андрею —
   assert.equal(r2.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
 });
 check('Зерно 5: кружок с «[фото похожей работы]» — на доработку как речь в камеру', () => {
-  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'Кружок (WhatsApp/Telegram)', kind: 'эмпатичное', timing: '19 ноября', body: 'Марина, добрый день. Нашёл объект. [фото похожей работы — если есть] Покажите Андрею?' }] }, null, null);
+  const r = codeChecks({ messages: [{ touchpoint_number: 1, channel: 'Кружок (WhatsApp/Telegram)', kind: 'эмпатичное', timing: '19 ноября', body: 'Марина, как вы? [фото похожей работы] Появилась идея — можем коротко набраться, всё объясню по телефону?' }] }, null, null);
   assert.equal(r.messages_reviewed[0].verdict, 'НА ДОРАБОТКУ');
   assert.ok(r.messages_reviewed[0].failed_criteria.includes('circle_format'));
 });
@@ -93,7 +93,7 @@ check('Зерно 5 (вечер): по плану «звонок эмп → со
     { touchpoint_number: 1, channel: 'Звонок', kind: 'эмпатичное', timing: 'Сегодня', body: 'Марина, добрый день.' },
     { touchpoint_number: 2, channel: 'Мессенджер', kind: 'экспертное', timing: '13 ноября (пт), сразу после предыдущего касания', body: 'Текст.' },
     { touchpoint_number: 3, channel: 'Звонок', kind: 'экспертное', timing: 'Только если Марина даст контакт', body: 'Андрей, добрый день.' },
-    { touchpoint_number: 4, channel: 'Кружок', kind: 'эмпатичное', timing: '19 ноября (чт)', body: 'Марина, привет из мастерской.' },
+    { touchpoint_number: 4, channel: 'Кружок', kind: 'эмпатичное', timing: '19 ноября (чт)', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' },
     { touchpoint_number: 5, channel: 'Мессенджер', kind: 'экспертное', timing: '23 ноября (пн)', body: 'Марина, честно спрошу.' }
   ];
   const r = codeChecks({ messages: msgs.map(hooked) }, null, plan, SRC);
@@ -109,7 +109,7 @@ check('Зерно 5 (вечер): reviewer спорит с кодом — дат
   ];
   const msgs = [
     { touchpoint_number: 2, channel: 'Мессенджер', body: 'Текст для Андрея' },
-    { touchpoint_number: 4, channel: 'Кружок (WhatsApp/Telegram)', body: 'Марина, добрый день' },
+    { touchpoint_number: 4, channel: 'Кружок (WhatsApp/Telegram)', body: 'Марина, как вы? Появилась идея — можем коротко набраться, всё объясню по телефону?' },
     { touchpoint_number: 5, channel: 'Мессенджер', body: 'постоянная вывеска при старте сегодня готова к 11–14 декабря' }
   ];
   const rv = { reviewer_output: { verdict: 'НА ДОРАБОТКУ', messages_reviewed: [
