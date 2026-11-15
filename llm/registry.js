@@ -66,7 +66,10 @@ const AGENTS = {
     model: SONNET, temperature: 0.4, industryCases: false, industryKnowledge: true, cache: true,
     // Методики владельца (рекомендации, 14.11): переписка и 7 касаний.
     // 15.11: writer пишет все касания (и сценарии звонков с «дорого») — методика возражений владельца.
-    knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '28_vozrazheniya_trening.md']
+    // 15.11 (проверка по просьбе владельца): writer пишет ВСЕ касания, но не видел библиотеку возражений,
+    // стиль и тактики ЛПР — они были только у старого composer.
+    knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '15b_objection_library.md',
+      '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md']
   },
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
