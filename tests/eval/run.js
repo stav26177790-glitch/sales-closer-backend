@@ -99,9 +99,13 @@ async function judge(sit, sets, diagnosticSummary) {
   const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: x.touches } : null);
   const user = JSON.stringify({
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,
-    conversation: [sit.first, sit.reply].filter(Boolean).join('\n\n--- ответ клиента после касаний ---\n\n'),
+    conversation: sit.steps
+      ? [sit.first, ...sit.steps.map((x) => `--- ${x.label} (сегодня ${x.today}) ---\n${x.text}`)].join('\n\n')
+      : [sit.first, sit.reply].filter(Boolean).join('\n\n--- ответ клиента после касаний ---\n\n'),
     what_this_situation_checks: sit.expect, diagnostic_summary: diagnosticSummary,
-    before_reply: setOf(sets.before), after_reply: setOf(sets.after)
+    before_reply: setOf(sets.before), after_reply: setOf(sets.after),
+    // Многоуровневая сделка: промежуточные шаги (после каждой дописки менеджера).
+    intermediate_stages: (sets.stages || []).map((x) => ({ after: x.label, today: x.today, ...setOf(x) }))
   }, null, 1);
   const startedAt = Date.now();
   const r = await client.messages.create({ model, max_tokens: 9000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
@@ -139,6 +143,19 @@ async function runSituation(sit) {
   const firstTouches = db.deal.last_composer_output?.messages || [];
   const firstPlan = db.deal.last_strategy_output?.touch_plan || [];
   if (sit.reply) await say(sit.reply, 'ответ клиента');
+  // Многоуровневая сделка (15.11): цепочка дописок менеджера, у каждой — своё «сегодня».
+  const stages = [];
+  const baseToday = process.env.KLOUZER_TODAY;
+  for (const st of sit.steps || []) {
+    if (st.today) process.env.KLOUZER_TODAY = st.today;
+    const before = db.deal.last_composer_output;
+    await say(st.text, st.label);
+    const d = db.deal;
+    stages.push({ label: st.label, today: process.env.KLOUZER_TODAY, expect: st.expect || [],
+      plan: d.last_strategy_output?.touch_plan || [], touches: d.last_composer_output !== before ? (d.last_composer_output?.messages || []) : [],
+      scores: d.last_diagnostic_output?.scores, chat: parts.filter((x) => x.label === st.label).map((x) => x.text).join('\n\n') });
+  }
+  process.env.KLOUZER_TODAY = baseToday;
   const deal = db.deal;
   const finalTouches = deal.last_composer_output?.messages || [];
   if (!finalTouches.length) errors.push(`касаний нет; состояние ${deal.current_state}; последний ответ: ${String(parts[parts.length - 1]?.text || '').slice(0, 300)}`);
@@ -153,7 +170,7 @@ async function runSituation(sit) {
   } catch (e) { errors.push(`codeChecks: ${e.message}`); }
   let verdict = null;
   if (JUDGE && finalTouches.length) {
-    const sets = sit.reply ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan } } : { before: { touches: finalTouches, plan } };
+    const sets = sit.reply || sit.steps ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan }, stages: stages.slice(0, -1) } : { before: { touches: finalTouches, plan } };
     try { verdict = await judge(sit, sets, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
   }
   return {
@@ -162,7 +179,8 @@ async function runSituation(sit) {
     diagnostic: { scores: deal.last_diagnostic_output?.scores, summary: deal.last_diagnostic_output?.diagnostic_summary, soprano_recommendations: deal.last_diagnostic_output?.soprano_recommendations },
     strategy: { name: deal.last_strategy_output?.strategy_name, goal: deal.last_strategy_output?.strategy_goal },
     plan, touches: finalTouches, check: deal.last_composer_output?._check || null,
-    first_round: sit.reply ? { plan: firstPlan, touches: firstTouches } : null,
+    first_round: sit.reply || sit.steps ? { plan: firstPlan, touches: firstTouches } : null,
+    stages,
     residual, verdict, chat: parts
   };
 }
@@ -210,8 +228,19 @@ function md(results) {
     if (r.verdict?.summary) L.push(`\n**Судья:** ${r.verdict.summary}`);
     for (const e of r.verdict?.expectations || []) L.push(`- ${e.met === 'да' ? '✅' : e.met === 'частично' ? '🟡' : '❌'} ${e.expectation}${e.comment ? ` — ${e.comment}` : ''}`);
     if (r.residual.length) { L.push('\n**Остались замечания проверок кода:**'); for (const x of r.residual) L.push(`- касание ${x.n}: ${x.fix}`); }
+    // Многоуровневая сделка: что Клоузер сделал после каждой дописки.
+    for (const st of r.stages || []) {
+      const mode = st.plan?.[0]?.path_mode === 'step' ? 'следующий шаг' : 'весь путь';
+      L.push(`\n#### Шаг «${st.label}» (сегодня ${st.today}) — ${mode}`);
+      if (st.expect?.length) L.push(`_Ожидается: ${st.expect.join('; ')}_`);
+      if (st.scores) L.push(`Оценка: ${Object.entries(st.scores).map(([k, v]) => `${k} ${v?.status || v}`).join(', ')}`);
+      L.push('\n**План:**');
+      for (const p of st.plan || []) L.push(`${p.touchpoint_number}. ${p.timing} · ${p.channel} · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion ? ` · ${String(p.criterion).split(' —')[0]}` : ''} — ${p.goal || ''}`);
+      st.touches.forEach((m, i) => { L.push(`\n**${m.touchpoint_number ?? i + 1} · ${m.channel || ''}** _${m.timing || ''}_`); L.push(String(m.body || '').split('\n').map((x) => `> ${x}`).join('\n')); });
+      if (!st.touches.length) L.push(`\n_Касания не менялись. Ответ Клоузера:_ ${String(st.chat || '').slice(0, 800)}`);
+    }
     // Два набора (владелец 15.11 — режимы пути): до ответа клиента и после (следующий шаг).
-    const sets = r.first_round
+    const sets = r.stages?.length ? [{ key: 'before_reply', title: 'Первый ход (до дописок)', plan: r.first_round.plan, touches: r.first_round.touches }, { key: 'after_reply', title: 'Итог (после последней дописки)', plan: r.plan, touches: r.touches }] : r.first_round
       ? [{ key: 'before_reply', title: 'До ответа клиента', plan: r.first_round.plan, touches: r.first_round.touches },
         { key: 'after_reply', title: 'После ответа клиента', plan: r.plan, touches: r.touches }]
       : [{ key: 'before_reply', title: 'Касания', plan: r.plan, touches: r.touches }];
