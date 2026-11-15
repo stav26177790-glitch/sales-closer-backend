@@ -230,7 +230,8 @@ check('прогон 14.11: «если нет ответа» — обычное �
     { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 2 }
   ] }, tl, '2026-11-13');
   const regular = p.filter((x) => !x.condition);
-  assert.ok(regular.length >= 3 && regular.some((x) => x.channel === 'Кружок' && !x.inserted));
+  // Кружок стоял последним → стал «последним шансом» в WhatsApp (кружок — интрига, не вопрос «как есть»).
+  assert.ok(regular.length >= 3 && regular.some((x) => x.last_chance && x.channel === 'WhatsApp'));
   const dates = regular.map((x) => x.send_date);
   assert.deepEqual(dates, [...dates].sort());
   assert.ok(p.some((x) => x.condition && /даст контакт/.test(x.condition)));

@@ -356,6 +356,9 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
       if (!coveredElsewhere && host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
     }
     lastChance.lastChance = true;
+    // «Последний шанс» — прямой вопрос «скажите как есть», а кружок — интрига (правило 73):
+    // в кружке выходила интрига вместо вопроса (прогон 16 ситуаций, «Арка», 15.11).
+    if (/кружок|видео/i.test(String(lastChance.channel || ''))) { lastChance.channel = 'WhatsApp'; lastChance.kind = 'экспертное'; }
     lastChance.criterion = 'ЗС';
     lastChance.also = [];
     lastChance.goal = LAST_CHANCE_GOAL;

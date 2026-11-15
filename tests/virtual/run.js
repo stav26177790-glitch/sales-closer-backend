@@ -104,6 +104,7 @@ const pathVariants = [];
         keep.splice(0, 2, `${keep[0]}\n\n${keep[1]}`);
         agents = { ...d.agents, planner: d.agents.planner.slice(1) };
       }
+      if (d.pathAgents) agents = { ...agents, ...d.pathAgents, writer: d.pathAgents.writer ? d.pathAgents.writer.map(withPlanAndHooks) : agents.writer };
       pathVariants.push({ ...d, agents, name: `${d.name} [путь]`, path: true, messages: keep });
     }
     console.log(`\n\n████ ${d.name} — ${d.description}`);

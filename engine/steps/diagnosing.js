@@ -14,7 +14,7 @@ const { isGoAhead } = require('../intent');
 const { modeOf } = require('../pathMode');
 
 // Стратегия по текущей оценке (+ правка менеджера к прошлой стратегии, если есть).
-async function runStrategy({ dealId, deal, baseInput }, correction) {
+async function runStrategy({ dealId, deal, baseInput, opts = {} }, correction) {
   const output = {};
   const input = { ...baseInput, diagnostic_output: deal.last_diagnostic_output, path_mode: modeOf(deal) };
   if (correction) {
@@ -43,6 +43,17 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
     if (plan) output.strategy_output.touch_plan = plan;
   }
 
+  // «Уже выбрали других» в режиме пути (методика владельца: «Не сливайся. Прямой вопрос»):
+  // не закрываем сделку молча, а даём одно касание — «что я сделал не так?» (прогон 15.11, «Мотор»).
+  if (output.strategy_output?.deal_health === 'потеряна' && opts.path) {
+    const s = output.strategy_output;
+    const recipient = (s.touchpoint_sequence || [])[0]?.recipient || '';
+    const seq = [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', day: 0, recipient,
+      goal: 'Прямой вопрос (методика владельца, «Уже купили / работаем с другими»): поблагодарить, что написал, и спросить «А можно вопрос прямой: что я сделал не так? Или что для вас было важнее в выборе? Мне правда важно понимать». Без уговоров, скидок и критики выбранного подрядчика; дверь открыта.' }];
+    s.touch_plan = buildTouchPlan({ touchpoint_sequence: seq, must_include: [] }, baseInput.timeline, baseInput.today, null, { mode: 'step', client: deal.client });
+    s._lost_provocation = true;
+    return { nextState: 'STRATEGY_SELECTION', output };
+  }
   if (output.strategy_output?.deal_health === 'потеряна') {
     output._finalText = await runMemoryUpdate(dealId, baseInput, deal, {
       strategy_output: output.strategy_output,

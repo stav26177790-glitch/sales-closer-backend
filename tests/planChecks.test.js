@@ -99,4 +99,13 @@ check('два кружка-копии в цепочке — второй на п
   assert.deepEqual(issues(a, b).map((x) => x.touchpoint_number), [4]);
   assert.equal(issues(a, c).length, 0);
 });
+check('кружок раскрывает идею («расскажу, как…») или повторяет идею прошлого кружка — на правку (прогон 15.11, «Нори»)', () => {
+  const plan = [{ touchpoint_number: 2, channel: 'Кружок' }, { touchpoint_number: 4, channel: 'Кружок' }];
+  const one = (b) => findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: b }], plan.slice(0, 1)).length;
+  assert.equal(one('Сергей, как вы? Появилась идея — расскажу, как проверяют подсветку. Наберёмся?'), 1);
+  const a = 'Сергей, как вы? Думал, как сделать, чтобы ваша новая вывеска светилась годами без сбоев — появилась идея. Наберёмся?';
+  const b = 'Сергей, добрый вечер! Всё думаю про вашу новую вывеску, чтобы светилась годами без сбоев — есть мысль. Созвонимся завтра?';
+  const r = findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: a }, { touchpoint_number: 4, channel: 'Кружок', body: b }], plan);
+  assert.ok(r.some((x) => x.touchpoint_number === 4 && x.fixes.some((f) => /повторяет/.test(f))));
+});
 console.log(`planChecks: ${n} проверок пройдено`);
