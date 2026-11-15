@@ -236,7 +236,28 @@ function md(results) {
   return L.join('\n');
 }
 
+// --rejudge <report.json>: только заново оценить судьёй касания готового прогона (без генерации) —
+// чтобы мерить правку правил судьи без колебаний модели (15.11). Цена — только судья (~$0,2).
+async function rejudge(file) {
+  const prev = JSON.parse(fs.readFileSync(file, 'utf8'));
+  fs.mkdirSync(OUT, { recursive: true });
+  const results = [];
+  for (const r of prev.results) {
+    const sit = SITUATIONS.find((x) => x.id === r.id);
+    if (!sit || (!r.touches?.length && !r.first_round?.touches?.length)) { results.push(r); continue; }
+    const sets = r.first_round ? { before: r.first_round, after: { touches: r.touches, plan: r.plan } } : { before: { touches: r.touches, plan: r.plan } };
+    let verdict = null;
+    try { verdict = await als.run(sit.id, () => judge(sit, sets, r.diagnostic?.summary)); } catch (e) { r.errors = [...(r.errors || []), `judge: ${e.message}`]; }
+    results.push({ ...r, verdict });
+    console.log(`← ${r.id} пересужено`);
+  }
+  fs.writeFileSync(path.join(OUT, 'report.md'), `_Пересуд касаний прогона ${path.basename(path.dirname(file))} (без новой генерации)._\n\n${md(results)}`);
+  fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify({ today: process.env.KLOUZER_TODAY, rejudge_of: file, calls, results }, null, 1));
+  console.log(`Готово: eval-report/report.md. Цена: $${calls.reduce((a, c) => a + c.cost, 0).toFixed(2)}`);
+}
+
 async function main() {
+  if (argVal('--rejudge')) return rejudge(argVal('--rejudge'));
   const list = SITUATIONS.filter((s) => !ONLY || ONLY.has(s.id));
   fs.mkdirSync(OUT, { recursive: true });
   console.log(`Прогон: ${list.length} ситуаций, параллельно ${CONCURRENCY}, «сегодня» ${process.env.KLOUZER_TODAY}, судья: ${JUDGE ? 'да' : 'нет'}`);

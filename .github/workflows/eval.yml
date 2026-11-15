@@ -24,6 +24,10 @@ on:
         description: 'Провайдер моделей: deepseek или anthropic'
         required: false
         default: 'deepseek'
+      rejudge:
+        description: 'Только пересудить готовый прогон: путь к report.json в ветке eval-reports (пусто — обычный прогон)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -45,6 +49,11 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
+          if [ -n "${{ inputs.rejudge }}" ]; then
+            git fetch --depth 1 origin eval-reports && git show "FETCH_HEAD:${{ inputs.rejudge }}" > /tmp/prev.json
+            node tests/eval/run.js --rejudge /tmp/prev.json
+            exit 0
+          fi
           ARGS="--concurrency ${{ inputs.concurrency }}"
           if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only ${{ inputs.only }}"; fi
           if [ "${{ inputs.judge }}" = "false" ]; then ARGS="$ARGS --no-judge"; fi
