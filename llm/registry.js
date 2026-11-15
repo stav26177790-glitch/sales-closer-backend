@@ -44,7 +44,7 @@ const AGENTS = {
       '02_sales_formula.md', '06_trust.md', '07_decision_authority.md', '08_urgency.md',
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
       '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md',
-      '25_after_kp_playbook.md', '26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md'
+      '25_after_kp_playbook.md', '26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '28_vozrazheniya_trening.md'
     ]
   },
   composer: {
@@ -65,7 +65,8 @@ const AGENTS = {
   writer: {
     model: SONNET, temperature: 0.4, industryCases: false, industryKnowledge: true, cache: true,
     // Методики владельца (рекомендации, 14.11): переписка и 7 касаний.
-    knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md']
+    // 15.11: writer пишет все касания (и сценарии звонков с «дорого») — методика возражений владельца.
+    knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '28_vozrazheniya_trening.md']
   },
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
@@ -83,7 +84,7 @@ const AGENTS = {
     knowledge: [
       '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
       '07_decision_authority.md', '23_lpr_tactics.md', '24_client_triggers.md',
-      '26_perepiska_metodika.md'
+      '26_perepiska_metodika.md', '28_vozrazheniya_trening.md'
     ]
   },
   intent_classifier: {
