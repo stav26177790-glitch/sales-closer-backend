@@ -102,7 +102,7 @@ const sentenceAt = (t, idx) => {
   const endRel = t.slice(idx).search(/[.!?\n]/);
   return t.slice(start, endRel < 0 ? undefined : idx + endRel + 1).trim().slice(0, 180);
 };
-function ensureEvidenceScores(diag, sourceText) {
+function ensureEvidenceScores(diag, sourceText, timeline) {
   const t = String(sourceText || '');
   if (!diag || typeof diag !== 'object' || !diag.scores || !t) return [];
   const changed = [];
@@ -127,6 +127,23 @@ function ensureEvidenceScores(diag, sourceText) {
   }
   const tr = t.search(TRUST_RE);
   if (tr >= 0 && !afterIs(t, tr, NEG_RE) && raise(diag, 'trust', 'Вероятно', 'Клиенту понравились наши работы / предложение')) changed.push('trust');
+  // Д открыт, клиент прогрет (деньги есть / ЛПР на связи) → встреча на производстве (владелец 15.11).
+  // Прогрет — по событиям (торг с условием, ЛПР на связи, встреча была, «понравилось»), а не по
+  // оценке модели: «бюджет 200 тыс.» в первом сообщении — ещё не прогрев (владелец: «довести, прогреть»).
+  const stOf = (k) => String(diag.scores?.[k]?.status || '');
+  const warm = events.length > 0;
+  if (diag.scores.trust && typeof diag.scores.trust === 'object') delete diag.scores.trust.next_step;
+  if (warm && !/подтвержд/i.test(stOf('trust')) && diag.scores.trust && typeof diag.scores.trust === 'object') diag.scores.trust.next_step = 'production';
+  if (warm && !/подтвержд/i.test(stOf('trust')))
+    events.push('Открыт главный критерий — Д. Клиент прогрет (деньги есть / ЛПР на связи) — сильнейший шаг доверия: пригласить ЛПР на встречу на нашем производстве — через его выгоду: своими глазами увидит, кто и как делает его вывеску и как проверяем подсветку до отгрузки, и решит без риска повторить прошлый опыт. Кейсы и «чем мы лучше» заново не повторять.');
+  // ЗС: клиент назвал дату, а запас 10 рабочих дней и меньше — сроки горят (владелец 15.11: «ЗС тоже
+  // есть, сроки же горят — хотя это можно проверить вопросом к клиенту»).
+  const tl = timeline && typeof timeline === 'object' ? timeline : null;
+  // «не успеваем» / «дата прошла» — ЗС не закрыт: нужна новая договорённость (временная вывеска, новая дата).
+  if (tl && (tl.status === 'впритык' || (tl.status === 'с запасом' && Number(tl.buffer_working_days) <= 10))) {
+    if (raise(diag, 'urgency', 'Подтверждено', `Срок клиента горит: ${tl.status}${tl.buffer_working_days != null ? `, запас ${tl.buffer_working_days} раб. дн.` : ''}`)) changed.push('urgency');
+    events.push('ЗС закрыт сроками (дата клиента, запас ≤ 10 рабочих дней): отдельных касаний на срочность не тратить — одним вопросом сверить «дата открытия в силе?» и держать слот как заботу о дате.');
+  }
   if (events.length) diag.deal_events = events; else delete diag.deal_events;
   return changed;
 }

@@ -34,6 +34,28 @@ const CRITERIA = {
   ЗС: { key: 'urgency', label: 'ЗС — здесь и сейчас',
     goal: 'Перевести в «здесь и сейчас» как заботу о планах клиента: сроки на день отправки, предложить забронировать слот на производстве, один конкретный шаг (Давайте / Чтобы / Если / То).' }
 };
+// Лестница доверия (владелец 15.11): кейсы и примеры → показ в Zoom → ВСТРЕЧА НА ПРОИЗВОДСТВЕ —
+// сильнейший инструмент («по практике ~95% клиентов заключаются после встречи на производстве»,
+// клиенту эту цифру не называть). Звать, когда клиент прогрет: деньги есть (торг) или ЛПР на связи,
+// а Д ещё не подтверждено. До этого — прогрев касаниями.
+const PRODUCTION_GOAL = 'Через выгоду ЛПР (владелец 15.11: «всё через выгоду для клиента»): пригласить на встречу на нашем производстве (акрил — Мытищи, сталь — Щёлково), чтобы он ПОЛУЧИЛ спокойствие за свой страх — своими глазами увидел, кто и как делает его вывеску и как её проверяют с подсветкой до отгрузки, и решил без риска повторить прошлый опыт. Начинать с того, что он получает («чтобы вы сами увидели, почему ваши буквы не погаснут через три месяца»), а не с «приглашаем на экскурсию». Конкретное время на выбор («во вторник в 11 или в среду в 15?»). Кейсы и «чем мы лучше» заново не повторять. Цифру «после встречи заключаются» клиенту не называть.';
+// Признак ставит diagnosticCleanup по событиям сделки (scores.trust.next_step = 'production').
+function warmForProduction(scores) {
+  return scores?.trust?.next_step === 'production' && !/подтвержд/i.test(String(scores?.trust?.status || ''));
+}
+function aimTrustAtProduction(steps, scores) {
+  if (!warmForProduction(scores)) return steps;
+  const target = steps.find((x) => !x.conditional && !x.sameContact && x.criterion === 'Д')
+    || steps.find((x) => !x.conditional && !x.sameContact && (x.also || []).includes('Д'));
+  if (!target) return steps;
+  if (target.criterion !== 'Д') { target.also = target.also.filter((c) => c !== 'Д'); target.also.push(target.criterion); target.criterion = 'Д'; }
+  target.goal = PRODUCTION_GOAL;
+  target.production_meeting = true;
+  if (/кружок/i.test(String(target.channel || ''))) target.channel = 'WhatsApp';
+  target.kind = 'экспертное';
+  return steps;
+}
+
 // Порядок как в «Правиле 7 касаний» владельца: кейсы (Д) → дедлайн (ЗС) → персональное (ФВ).
 const CRITERIA_ORDER = ['ЛПР', 'Д', 'ЗС', 'ФВ', 'ОП'];
 const MAX_TOUCHES = 7; // спящий режим — после 7 касаний без ответа
@@ -304,7 +326,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   }
 
   // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании (весь путь).
-  if (!stepMode) steps = coverCriteria(dropClosed(steps, scores), scores);
+  if (!stepMode) steps = aimTrustAtProduction(coverCriteria(dropClosed(steps, scores), scores), scores);
 
   // Подсказки из переписки (прогон 14.11: повод про козырёк по 902-ПП не появился ни разу) —
   // в первое экспертное касание как обязательный пункт.

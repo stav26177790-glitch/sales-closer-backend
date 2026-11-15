@@ -237,7 +237,7 @@ function cleanManagerConflicts(diag, baseInput) {
   cleanDiagnostic(diag);
   ensureBudgetRecommendation(diag, baseInput?.materials?.source_materials?.text);
   ensureAlternativesRecommendation(diag);
-  ensureEvidenceScores(diag, baseInput?.materials?.source_materials?.text);
+  ensureEvidenceScores(diag, baseInput?.materials?.source_materials?.text, baseInput?.timeline);
   if (!Array.isArray(diag?.conflicts_with_manager) || !diag.conflicts_with_manager.length) return;
   const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
   if (real.length !== diag.conflicts_with_manager.length) {

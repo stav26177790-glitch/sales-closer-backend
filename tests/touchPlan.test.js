@@ -197,6 +197,19 @@ check('принцип 15.11: касание на уже подтверждённ
   assert.ok(!p.some((x) => /^ЛПР/.test(x.criterion || '')), JSON.stringify(p.map((x) => x.criterion)));
   assert.ok(p[p.length - 1].last_chance);
 });
+check('владелец 15.11: Д открыт и клиент прогрет (события) — касание на Д = приглашение на производство через выгоду; без прогрева — нет', () => {
+  const seq = () => ({ touchpoint_sequence: [
+    { number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0, criterion: 'Д' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', day: 3, criterion: 'ЗС' }
+  ] });
+  const sc = (warm) => ({ financial: { status: 'Подтверждено' }, need: { status: 'Подтверждено' }, authority: { status: 'Подтверждено' }, urgency: { status: 'Вероятно' },
+    trust: { status: 'Вероятно', ...(warm ? { next_step: 'production' } : {}) } });
+  const p = buildTouchPlan(seq(), tl, '2026-11-13', sc(true), { source: 'x' });
+  const t = p.find((x) => /^Д/.test(x.criterion || ''));
+  assert.match(t.goal, /производстве/); assert.match(t.goal, /выгоду/); assert.equal(t.channel, 'WhatsApp');
+  const p2 = buildTouchPlan(seq(), tl, '2026-11-13', sc(false), { source: 'x' });
+  assert.ok(!p2.some((x) => /производстве/.test(x.goal || '')));
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
