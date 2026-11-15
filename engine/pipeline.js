@@ -151,7 +151,10 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
 // следующего состояния. Вынесена в отдельную функцию, чтобы её можно было
 // вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
 // при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
-async function runIntakeStep(baseInput, intakeRounds = 1) {
+// opts.noClarification — перестройка пути по новым фактам (ответ клиента): путь строится без
+// остановки на вопросы менеджеру (прогон DeepSeek «Зерно» 15.11: после ответа Марины planner
+// задал 4 вопроса вместо перестройки). Недостающее — «Неизвестно» в оценке, как при лимите раундов.
+async function runIntakeStep(baseInput, intakeRounds = 1, opts = {}) {
   const output = {};
   // Лимит достигнут — дальше НЕ возвращаемся в SOPRANO_INTERVIEW, даже если
   // planner/diagnostic снова просят уточнение. Оба агента уже отдают полную
@@ -159,7 +162,7 @@ async function runIntakeStep(baseInput, intakeRounds = 1) {
   // = true — это не блокирующая ошибка, а их собственный сигнал "было бы
   // лучше уточнить". Проходим дальше с тем, что есть; недостающие критерии
   // и так помечены "Неизвестно" внутри самой оценки agent'ом.
-  const roundLimitReached = intakeRounds >= CONFIG.MAX_INTAKE_ROUNDS;
+  const roundLimitReached = intakeRounds >= CONFIG.MAX_INTAKE_ROUNDS || Boolean(opts.noClarification);
   const plannerResult = await callAgentSafe('planner', baseInput);
   output.planner_output = plannerResult?.planner_output;
   if (plannerResult?.planner_output?.clarification_needed?.required && !roundLimitReached) {

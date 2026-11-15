@@ -122,7 +122,8 @@ function isNewFacts(text) {
 
 async function rebuildPath({ baseInput, managerInput }) {
   const { runIntakeStep } = require('../pipeline');
-  const { output, nextState } = await runIntakeStep(baseInput, 1);
+  const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true });
+  delete output._intakeRoundLimitNote; // перестройка — не «не удалось уточнить», а обычный путь
   output._intake_rounds = 1;
   output._awaitingCorrectionConfirmation = false;
   output._pendingManagerFeedback = null;

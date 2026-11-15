@@ -77,4 +77,9 @@ check('правило 73: кружок — интрига + призыв к со
   assert.equal(f('Марина, как вы? Появилась идея, уверен, вам понравится!'), 1, 'нет призыва к созвону');
   assert.equal(f('Марина, как вы? ' + 'очень тепло '.repeat(30) + 'Можем коротко набраться?'), 1, 'длинно');
 });
+check('«по стоимости временной сориентирую отдельно» в письме — не разговор о деньгах (прогон 15.11)', () => {
+  const plan = [{ touchpoint_number: 2, channel: 'Email' }];
+  assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'К 1 декабря — временный баннер внутри помещения. По стоимости временной сориентирую отдельно.' }], plan).length, 0);
+  assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'Если дорого — подберём вариант под ваш бюджет.' }], plan).length, 1);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

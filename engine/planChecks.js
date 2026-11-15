@@ -72,7 +72,7 @@ function findPlanIssues(messages, plan, sourceText = '') {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
-    if (MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
+    if (MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум|сориентир/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
         // «В понедельник в 10:00 наберу вас» без вопроса — давление (прогон 14.11): спросить согласие.
     const callAnnounce = t.split(/(?<=[.!?])\s+/).find((x) => /(^|[^а-яё])(наберу|позвоню|перезвоню)([^а-яё]|$)/i.test(x) && !/\?|удобно|если|можно|хорошо|договорил|как и/i.test(x));
     if (callAnnounce) fixes.push(`Звонок объявлен без согласия клиента («${callAnnounce.slice(0, 80)}») — давление. Спросить: «Удобно, если наберу в понедельник утром?»`);

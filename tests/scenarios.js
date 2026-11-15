@@ -543,6 +543,25 @@ module.exports = [
     messages: ['Иван (16.11): Собственник в отпуске до 20-го, решать будет он.'],
   },
   {
+    name: 'path_client_replied_rebuilds_despite_clarification',
+    description: 'Режим пути: ответ клиента, planner просит уточнений — путь всё равно перестраивается до касаний (DeepSeek «Зерно», 15.11)',
+    path: true,
+    deal: {
+      ...BASE_DEAL, current_state: 'COMPOSING', client_deadline: '2026-12-15', production_days: 10,
+      last_diagnostic_output: diagnostic().diagnostic_output,
+      last_strategy_output: strategy().strategy_output,
+      last_composer_output: { messages: [{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Иван, добрый день!' }], _check: { approved: true, rounds: 1, reviews: 1 } }
+    },
+    agents: {
+      planner: [planner(true)],
+      diagnostic: [diagnostic({ scores: ONLY_AUTHORITY })],
+      strategy: [strategy({ touchpoint_sequence: [{ number: 1, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ивану', day: 0, goal: 'договориться о звонке собственнику после отпуска', criterion: 'ЛПР' }] })],
+      writer: [{ composer_output: { messages: [{ touchpoint_number: 1, hook: { quote: 'Собственник в отпуске до 20-го', prep: 'Перед касанием: позвоните на производство и уточните, когда сможете показать макет.', opening: 'понял, собственник в отпуске до 20-го' }, body: 'Иван, понял, собственник в отпуске до 20-го. Давайте я подготовлю всё к его возвращению — созвонимся 23-го?' }] } }],
+      reviewer: [reviewer('ОДОБРЕНО')],
+    },
+    messages: ['Иван (16.11): Собственник в отпуске до 20-го, решать будет он.'],
+  },
+  {
     name: 'path_text_edit_rewrites_only_text',
     description: 'Режим пути: явная правка текста («касание 1 короче») — переписываются только тексты, путь не перестраивается',
     path: true,
