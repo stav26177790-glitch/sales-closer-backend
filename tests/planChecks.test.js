@@ -82,4 +82,12 @@ check('«по стоимости временной сориентирую от�
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'К 1 декабря — временный баннер внутри помещения. По стоимости временной сориентирую отдельно.' }], plan).length, 0);
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'Если дорого — подберём вариант под ваш бюджет.' }], plan).length, 1);
 });
+check('«не отвлекаю в выходной?» в рабочий день — на правку; в субботу — можно; «из чего складывается цена» в письме — деньги', () => {
+  const wed = [{ touchpoint_number: 8, channel: 'Звонок', send_date: '2026-11-25' }];
+  const sat = [{ touchpoint_number: 8, channel: 'Звонок', send_date: '2026-11-21' }];
+  const body = 'Марина, добрый день! Не отвлекаю в выходной? Скажите как есть: проект ещё актуален?';
+  assert.ok(findPlanIssues([{ touchpoint_number: 8, channel: 'Звонок', body }], wed).some((x) => x.fixes.some((f) => /рабочий день/.test(f))));
+  assert.ok(!findPlanIssues([{ touchpoint_number: 8, channel: 'Звонок', body }], sat).some((x) => x.fixes.some((f) => /рабочий день/.test(f))));
+  assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'Андрей, из чего складывается цена 185 000 ₽: акрил, LED, монтаж.' }], [{ touchpoint_number: 2, channel: 'Email' }]).length, 1);
+});
 console.log(`planChecks: ${n} проверок пройдено`);
