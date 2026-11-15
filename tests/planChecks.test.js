@@ -64,6 +64,22 @@ check('деньги в мессенджере — на доработку; зв�
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
+check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — нет', () => {
+  const { voiceBlocked } = require('../engine/voice');
+  assert.ok(voiceBlocked('клиент не отвечает на звонки'));
+  assert.ok(voiceBlocked('Марина (12.11): трубку не беру, пишите сюда — не могу говорить'));
+  assert.ok(voiceBlocked('Он не берёт трубку уже неделю'));
+  assert.ok(voiceBlocked('попросила писать только в WhatsApp'));
+  assert.ok(!voiceBlocked('Марина (31.10): Спасибо, покажу Андрею.'));
+  assert.ok(!voiceBlocked('созвонились, обсудили макет'));
+  const t = 'Марина, а что именно показалось дорого — сумма в целом или что-то конкретное? В какую сумму хотели бы уложиться?';
+  const src = 'Покровка. клиент не отвечает на звонки';
+  assert.equal(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, src).length, 0);
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, могу дать скидку 5% при оплате сегодня.' }], plan, src)
+    .some((h) => /Скидку цифрой письменно/.test(h.fixes.join(' '))));
+  // Без признака — по-прежнему звонком.
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /звонком или в Zoom/.test(h.fixes.join(' '))));
+});
 check('прогон 14.11: «в понедельник в 10:00 наберу вас» — давление; «удобно, если наберу?» — ок', () => {
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: 'Марина, в понедельник в 10:00 наберу вас.' }], plan, '').length, 1);
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: 'Марина, удобно, если наберу в понедельник утром?' }], plan, '').length, 0);

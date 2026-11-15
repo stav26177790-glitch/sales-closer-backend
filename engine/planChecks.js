@@ -35,6 +35,8 @@ const MOSCOW_FIXES = {
   box: 'Короб вместо букв в Москве — только по технологии «инкрустация» или «псевдоинкрустация» (902-ПП): так и сказать, иначе не предлагать.'
 };
 
+const { voiceBlocked, DISCOUNT_FIGURE_RE } = require('./voice');
+const DISCOUNT_FIX = 'Скидку цифрой письменно не даём (правило 77): клиент не берёт трубку — в переписке можно говорить о бюджете и вариантах, но размер уступки — только голосом и в обмен на шаг к сделке. Убрать цифру скидки, оставить вопрос о бюджете.';
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
 // Деньги — только звонок или Zoom (владелец 14.11). В письменном касании — не обсуждать
@@ -104,6 +106,7 @@ function firstPerson(text, re) {
 
 function findPlanIssues(messages, plan, sourceText = '') {
   const gender = managerGender(sourceText);
+  const noVoice = voiceBlocked(sourceText);
   const isMoscow = MOSCOW_RE.test(String(sourceText || ''));
   let shiftSaidIn = null;
   const krugSeen = [];
@@ -122,7 +125,10 @@ function findPlanIssues(messages, plan, sourceText = '') {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
-    if (MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум|сориентир/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
+    // Голос в приоритете; голос недоступен (не берёт трубку, просит писать) — о деньгах можно
+    // в переписке (владелец 15.11). Скидка цифрой письменно — нет (правило 77).
+    if (!VOICE_CHANNEL_RE.test(channel) && noVoice && DISCOUNT_FIGURE_RE.test(t)) fixes.push(DISCOUNT_FIX);
+    else if (!noVoice && MONEY_TALK_RE.test(t) && !VOICE_CHANNEL_RE.test(channel) && !/созвон|позвон|наберу|zoom|зум|сориентир/i.test(t.match(new RegExp('[^.!?]*(' + MONEY_TALK_RE.source + ')[^.!?]*', 'i'))?.[0] || '')) fixes.push(MONEY_FIX);
         // «В понедельник в 10:00 наберу вас» без вопроса — давление (прогон 14.11): спросить согласие.
     const callAnnounce = t.split(/(?<=[.!?])\s+/).find((x) => /(^|[^а-яё])(наберу|позвоню|перезвоню)([^а-яё]|$)/i.test(x) && !/\?|удобно|если|можно|хорошо|договорил|как и/i.test(x));
     if (callAnnounce) fixes.push(`Звонок объявлен без согласия клиента («${callAnnounce.slice(0, 80)}») — давление. Спросить: «Удобно, если наберу в понедельник утром?»`);

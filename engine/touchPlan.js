@@ -324,7 +324,10 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 
   // Деньги — только звонок или Zoom (владелец 14.11, правило): касание, которое двигает ФВ
   // (бюджет, «дорого», варианты под бюджет), — звонок, если стратегия не поставила Zoom.
-  for (const x of steps) {
+  // Голос недоступен (не берёт трубку, просит писать) — канал не меняем (владелец 15.11:
+  // «голос в приоритете, если нет такой возможности — другие каналы»).
+  const noVoice = require('./voice').voiceBlocked(context?.source);
+  for (const x of noVoice ? [] : steps) {
     const money = x.criterion === 'ФВ' || (x.also || []).includes('ФВ');
     if (money && !/звонок|zoom|зум|видеозвон|встреч/i.test(String(x.channel || ''))) { x.channel = 'Звонок'; x.kind = 'экспертное'; }
   }

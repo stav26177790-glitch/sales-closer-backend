@@ -154,6 +154,14 @@ check('«последний шанс» — только последнее ка�
   const short = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0 }, { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }] }, tl, '2026-11-13');
   assert.ok(short.every((x) => !x.last_chance));
 });
+check('владелец 15.11: касание о деньгах — звонок; голос недоступен (не берёт трубку) — канал остаётся мессенджером', () => {
+  const seq = { touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'ФВ' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 2 }
+  ] };
+  assert.equal(buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { source: 'Покровка' })[0].channel, 'Звонок');
+  assert.equal(buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { source: 'клиент не отвечает на звонки' })[0].channel, 'WhatsApp');
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
