@@ -29,6 +29,11 @@ check('перестройка («Котик»): «он всё равно не о
   assert.equal(rebuildMode('написал дорого у вас'), 'step');
   assert.equal(rebuildMode('сравнила с другим КП, Рога и копыта на 20% дешевле'), 'step');
   assert.equal(rebuildMode('долго молчал, потом написал: сделаете на 30 — закажу'), 'step');
+  // Прогон 15.11 «Fresh Bowl»: «не берёт трубку» — молчание; последнее событие решает.
+  assert.equal(rebuildMode('Звонила Ксении два раза — не берёт трубку.'), 'full');
+  assert.equal(rebuildMode('Созвонились в Zoom 23.11: Сергею понравились наши работы, про скидку сказал «подумаю». С тех пор три дня тишина — Ксения не отвечает ни на звонки, ни в телеграме.'), 'full');
+  assert.equal(rebuildMode('Ксения написала: Сергей пока молчит, думает.'), 'step');
+  assert.equal(rebuildMode('Ксения (19.11): Извините, говорить не могу — пишите сюда. Сергей говорит, дорого.'), 'step');
 });
 check('modeOf: из last_diagnostic_output._path_mode, по умолчанию full', () => {
   assert.equal(modeOf({ last_diagnostic_output: { _path_mode: 'step' } }), 'step');

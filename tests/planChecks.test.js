@@ -64,6 +64,12 @@ check('деньги в мессенджере — на доработку; зв�
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
+check('прогон 15.11 «Fresh Bowl»: «Как обещал в разговоре» у менеджера-женщины — на правку; «Сергей написал» — не про менеджера', () => {
+  const src = 'Я (06.11): Отправила КП: 240 000 ₽.';
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'Email', body: 'Сергей, добрый день! Как обещал в разговоре — отправляю кейс.' }], plan, src)
+    .some((h) => /женщина/.test(h.fixes.join(' '))));
+  assert.equal(findPlanIssues([{ touchpoint_number: 1, channel: 'Email', body: 'Сергей, добрый день! Как обещала — отправляю кейс. Ксения написала, что вы смотрели КП.' }], plan, src).length, 0);
+});
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));

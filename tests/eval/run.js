@@ -155,7 +155,6 @@ async function runSituation(sit) {
       plan: d.last_strategy_output?.touch_plan || [], touches: d.last_composer_output !== before ? (d.last_composer_output?.messages || []) : [],
       scores: d.last_diagnostic_output?.scores, chat: parts.filter((x) => x.label === st.label).map((x) => x.text).join('\n\n') });
   }
-  process.env.KLOUZER_TODAY = baseToday;
   const deal = db.deal;
   const finalTouches = deal.last_composer_output?.messages || [];
   if (!finalTouches.length) errors.push(`касаний нет; состояние ${deal.current_state}; последний ответ: ${String(parts[parts.length - 1]?.text || '').slice(0, 300)}`);
@@ -168,6 +167,7 @@ async function runSituation(sit) {
     const r = codeChecks({ messages: finalTouches }, timeline, plan, `${source}\n${deal.client}\n${deal.product}`);
     residual = (r.messages_reviewed || []).filter((x) => x.verdict !== 'ОДОБРЕНО').map((x) => ({ n: x.touchpoint_number, fix: String(x.fix_instructions || '').slice(0, 400) }));
   } catch (e) { errors.push(`codeChecks: ${e.message}`); }
+  process.env.KLOUZER_TODAY = baseToday; // проверки кода выше — от «сегодня» последнего шага
   let verdict = null;
   if (JUDGE && finalTouches.length) {
     const sets = sit.reply || sit.steps ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan }, stages: stages.slice(0, -1) } : { before: { touches: finalTouches, plan } };
