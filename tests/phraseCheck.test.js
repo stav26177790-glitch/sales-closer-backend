@@ -45,11 +45,13 @@ check('упрёк «вы говорили, что пришлёте» ловит�
   assert.ok(findBannedPhrases(bad)[0].fixes[0].includes('Помните, мы проговаривали'));
 });
 
-check('выдуманный кейс «пока ждал ответа — смонтировали…» ловится', () => {
-  const bad = [{ touchpoint_number: 4, body: 'Пока ждал ответа — смонтировали кофейню очень похожего формата: объёмные буквы на козырьке.' }];
-  const ok = [{ touchpoint_number: 4, body: 'В КП я приложил фото похожих работ — объёмные буквы на козырьке.' }];
-  assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [4]);
+check('свежий монтаж без названия — можно (владелец 15.11); с названием клиента — выдуманный кейс', () => {
+  const ok = [
+    { touchpoint_number: 4, body: 'Пока ждал ответа — смонтировали кофейню очень похожего формата: объёмные буквы на козырьке.' },
+    { touchpoint_number: 5, body: 'Вчера как раз смонтировали вывеску для пекарни, как у вас.' }];
+  const bad = [{ touchpoint_number: 4, body: 'Вчера смонтировали вывеску для кофейни «Бодрый день» на Тверской.' }];
   assert.equal(findBannedPhrases(ok).length, 0);
+  assert.deepEqual(findBannedPhrases(bad).map((h) => h.touchpoint_number), [4]);
 });
 
 check('живой «Зерно 4»: угроза «слот уйдёт» и «нужно решение сегодня» ловятся', () => {
