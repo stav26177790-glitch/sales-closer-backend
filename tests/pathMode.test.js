@@ -58,4 +58,19 @@ check('«клиент молчит»: план пересобирается ко
   const back = switchPathMode({ deal: { ...deal, last_diagnostic_output: { _path_mode: 'full' } }, baseInput: { timeline: tl, today: '2026-11-17', materials: {} } }, 'step');
   assert.equal(back.output.strategy_output.touch_plan.length, 1);
 });
+check('кружок — одному: «Андрей + Марина» → Марина (контакт); фраза «какой ориентир комфортен» и обращение к двоим — на правку', () => {
+  const tl = t.computeTimeline({ today: '2026-11-17', clientDeadline: '2026-12-15', productionDays: 10 });
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, kind: 'экспертное', channel: 'WhatsApp', day: 0, recipient: 'Марина (управляющая)' },
+    { number: 2, kind: 'эмпатичное', channel: 'Кружок', day: 3, recipient: 'Андрей (собственник, ЛПР) + Марина (управляющая)' },
+    { number: 3, kind: 'экспертное', channel: 'Звонок', day: 6, recipient: 'Марина (управляющая)' }
+  ] }, tl, '2026-11-17', null, {});
+  assert.equal(p.find((x) => x.channel === 'Кружок').recipient, 'Марина (управляющая)');
+  const { findBannedPhrases } = require('../engine/phraseCheck');
+  assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Какой ориентир для вас комфортен? Вся сумма показалась высокой или что-то в составе?' }]).length, 1);
+  const { findPlanIssues } = require('../engine/planChecks');
+  const krug = (b) => findPlanIssues([{ touchpoint_number: 5, channel: 'Кружок', body: b }], [{ touchpoint_number: 5, channel: 'Кружок' }]);
+  assert.ok(krug('Андрей, Марина, как вы? Появилась идея — можем коротко набраться?').some((x) => x.fixes.some((f) => /одному/.test(f))));
+  assert.ok(!krug('Марина, как вы? Появилась идея — можем коротко набраться?').some((x) => x.fixes.some((f) => /одному/.test(f))));
+});
 console.log(`pathMode: ${n} проверок пройдено`);

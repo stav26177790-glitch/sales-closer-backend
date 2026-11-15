@@ -311,7 +311,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
         const day = s.day > prev.day + 1 ? Math.floor((prev.day + s.day) / 2) : prev.day + 1;
         if (s.day <= day) s.day = day + 1;
         ordered.push({ orig: null, day, conditional: false, sameContact: false, condition: '', channel: 'Кружок', kind: 'эмпатичное',
-          recipient: prev.recipient, goal: 'Кружок с поводом: реальная деталь проекта клиента или новая идея по нему (кейс, вопрос по макету, звонок на производство) — тепло, 20–40 секунд, один шаг, без продажи в лоб', key_message: '', value: 'клиент видит, что о его проекте думают и работают', inserted: true });
+          recipient: prev.recipient, goal: 'Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать', key_message: '', value: 'клиент видит, что о его проекте думают и работают', inserted: true });
       } else {
         s.kind = 'экспертное';
         if (/кружок|видео|голосов/i.test(s.channel)) s.channel = 'WhatsApp';
@@ -362,6 +362,15 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     lastChance.criterion = 'ЗС';
     lastChance.also = [];
     lastChance.goal = LAST_CHANCE_GOAL;
+  }
+
+  // Кружок — одному человеку (владелец, живой «Зерно 10»): «Андрей + Марина» → тот, с кем уже
+  // есть контакт (получатель первого касания), иначе первый из списка.
+  const contact = String((steps.find((x) => !x.conditional) || {}).recipient || '').split(/\s*(?:\+|→| и )\s*/)[0].split(' (')[0].trim();
+  for (const x of steps) {
+    if (!/кружок|видео/i.test(String(x.channel || ''))) continue;
+    const parts = String(x.recipient || '').split(/\s*(?:\+|→| и )\s*/).filter(Boolean);
+    if (parts.length > 1) x.recipient = parts.find((p) => contact && p.startsWith(contact)) || parts[0];
   }
 
   // «Меняй время: утро → день → вечер» (документ владельца «Правило 7 касаний»):

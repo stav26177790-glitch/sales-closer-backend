@@ -11,6 +11,20 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const MEMORY_TTL_DAYS = 180;
 
+// Поля сделки с JSON. В рабочей базе (живой «Зерно 10», 15.11) last_diagnostic_output приходил
+// ТЕКСТОМ, а не объектом: код читал .scores / .client_triggers / ._path_mode — получал undefined
+// (writer видел 0 «что важно клиенту», режим «следующий шаг» не включался). Разбираем при чтении.
+const JSON_FIELDS = ['last_diagnostic_output', 'last_strategy_output', 'last_composer_output', 'last_reviewer_output', 'criteria'];
+function normalizeDeal(deal) {
+  if (!deal || typeof deal !== 'object') return deal;
+  for (const k of JSON_FIELDS) {
+    if (typeof deal[k] === 'string' && /^\s*[{[]/.test(deal[k])) {
+      try { deal[k] = JSON.parse(deal[k]); } catch { /* оставляем как есть */ }
+    }
+  }
+  return deal;
+}
+
 async function listDeals(managerId) {
   const { data, error } = await supabase
     .from('deals')
@@ -18,7 +32,7 @@ async function listDeals(managerId) {
     .eq('manager_id', managerId)
     .order('updated_at', { ascending: false });
   if (error) throw error;
-  return data;
+  return (data || []).map(normalizeDeal);
 }
 
 // Строка в managers нужна до первой сделки (deals.manager_id → managers.id).
@@ -69,7 +83,7 @@ async function createDeal(managerId, deal) {
 async function getDeal(dealId) {
   const { data, error } = await supabase.from('deals').select('*').eq('id', dealId).single();
   if (error) throw error;
-  return data;
+  return normalizeDeal(data);
 }
 
 async function updateDealState(dealId, patch) {
@@ -80,7 +94,7 @@ async function updateDealState(dealId, patch) {
     .select()
     .single();
   if (error) throw error;
-  return data;
+  return normalizeDeal(data);
 }
 
 async function getMessages(dealId) {
@@ -128,6 +142,7 @@ async function deleteDeal(dealId) {
 }
 module.exports = {
   supabase,
+  normalizeDeal,
   timelineFields,
   ensureManager,
   listDeals,
