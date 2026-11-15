@@ -1,0 +1,2302 @@
+{
+ "today": "2026-11-17",
+ "calls": [
+  {
+   "situation": 17,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 55,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4992,
+    "output_tokens": 417,
+    "service_tier": "standard"
+   },
+   "ms": 5420,
+   "cost": 0.0019435679999999997
+  },
+  {
+   "situation": 17,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 473,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 36608,
+    "output_tokens": 1874,
+    "service_tier": "standard"
+   },
+   "ms": 15126,
+   "cost": 0.009656152
+  },
+  {
+   "situation": 17,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5191,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 87808,
+    "output_tokens": 3141,
+    "service_tier": "standard"
+   },
+   "ms": 27403,
+   "cost": 0.023154031999999998
+  },
+  {
+   "situation": 17,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5368,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 3405,
+    "service_tier": "standard"
+   },
+   "ms": 26518,
+   "cost": 0.022202839999999998
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6327,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 1171,
+    "service_tier": "standard"
+   },
+   "ms": 8074,
+   "cost": 0.013563264
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 13806,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28672,
+    "output_tokens": 1111,
+    "service_tier": "standard"
+   },
+   "ms": 9891,
+   "cost": 0.023885048000000002
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6804,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 1932,
+    "service_tier": "standard"
+   },
+   "ms": 12749,
+   "cost": 0.017206464
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 9842,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 32768,
+    "output_tokens": 835,
+    "service_tier": "standard"
+   },
+   "ms": 8813,
+   "cost": 0.017739832
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6515,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13312,
+    "output_tokens": 1969,
+    "service_tier": "standard"
+   },
+   "ms": 12572,
+   "cost": 0.016982768
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5969,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 12928,
+    "output_tokens": 274,
+    "service_tier": "standard"
+   },
+   "ms": 3267,
+   "cost": 0.009532951999999999
+  },
+  {
+   "situation": 17,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1528,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4096,
+    "output_tokens": 467,
+    "service_tier": "standard"
+   },
+   "ms": 4095,
+   "cost": 0.004046504
+  },
+  {
+   "situation": 17,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1996,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 35712,
+    "output_tokens": 1831,
+    "service_tier": "standard"
+   },
+   "ms": 15026,
+   "cost": 0.011456807999999999
+  },
+  {
+   "situation": 17,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5259,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 87808,
+    "output_tokens": 2966,
+    "service_tier": "standard"
+   },
+   "ms": 25784,
+   "cost": 0.022550792
+  },
+  {
+   "situation": 17,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4660,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 3250,
+    "service_tier": "standard"
+   },
+   "ms": 25923,
+   "cost": 0.02065448
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6416,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 1880,
+    "service_tier": "standard"
+   },
+   "ms": 12575,
+   "cost": 0.016488384000000002
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6079,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 779,
+    "service_tier": "standard"
+   },
+   "ms": 6640,
+   "cost": 0.011683584
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 12165,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28672,
+    "output_tokens": 933,
+    "service_tier": "standard"
+   },
+   "ms": 9558,
+   "cost": 0.021014048
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5492,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13312,
+    "output_tokens": 1760,
+    "service_tier": "standard"
+   },
+   "ms": 11588,
+   "cost": 0.014804768
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 8191,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 32768,
+    "output_tokens": 669,
+    "service_tier": "standard"
+   },
+   "ms": 6499,
+   "cost": 0.014903152
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5614,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 1527,
+    "service_tier": "standard"
+   },
+   "ms": 10328,
+   "cost": 0.014031864000000002
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5666,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13184,
+    "output_tokens": 1801,
+    "service_tier": "standard"
+   },
+   "ms": 12051,
+   "cost": 0.015191176
+  },
+  {
+   "situation": 17,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1474,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4224,
+    "output_tokens": 431,
+    "service_tier": "standard"
+   },
+   "ms": 4442,
+   "cost": 0.003838296
+  },
+  {
+   "situation": 17,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1906,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 35840,
+    "output_tokens": 1794,
+    "service_tier": "standard"
+   },
+   "ms": 15785,
+   "cost": 0.01119712
+  },
+  {
+   "situation": 17,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5295,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 87808,
+    "output_tokens": 3187,
+    "service_tier": "standard"
+   },
+   "ms": 26859,
+   "cost": 0.023473472000000002
+  },
+  {
+   "situation": 17,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3244,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 595,
+    "service_tier": "standard"
+   },
+   "ms": 6421,
+   "cost": 0.008271559999999999
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3452,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 12928,
+    "output_tokens": 590,
+    "service_tier": "standard"
+   },
+   "ms": 4493,
+   "cost": 0.007461872000000001
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 8438,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28800,
+    "output_tokens": 407,
+    "service_tier": "standard"
+   },
+   "ms": 4763,
+   "cost": 0.014017079999999998
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3429,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 12928,
+    "output_tokens": 570,
+    "service_tier": "standard"
+   },
+   "ms": 5167,
+   "cost": 0.007352312000000001
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 109,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 499,
+    "service_tier": "standard"
+   },
+   "ms": 4997,
+   "cost": 0.0037532
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3115,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13312,
+    "output_tokens": 465,
+    "service_tier": "standard"
+   },
+   "ms": 4263,
+   "cost": 0.006538928000000001
+  },
+  {
+   "situation": 17,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1571,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4224,
+    "output_tokens": 456,
+    "service_tier": "standard"
+   },
+   "ms": 4184,
+   "cost": 0.004065336
+  },
+  {
+   "situation": 17,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1906,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 35968,
+    "output_tokens": 1973,
+    "service_tier": "standard"
+   },
+   "ms": 16671,
+   "cost": 0.011911592
+  },
+  {
+   "situation": 17,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5817,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 87808,
+    "output_tokens": 3610,
+    "service_tier": "standard"
+   },
+   "ms": 32091,
+   "cost": 0.025837592
+  },
+  {
+   "situation": 17,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3483,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 714,
+    "service_tier": "standard"
+   },
+   "ms": 7895,
+   "cost": 0.00905828
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3721,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 668,
+    "service_tier": "standard"
+   },
+   "ms": 5102,
+   "cost": 0.008131464
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3505,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 668,
+    "service_tier": "standard"
+   },
+   "ms": 5041,
+   "cost": 0.007846344000000002
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 49,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 16512,
+    "output_tokens": 664,
+    "service_tier": "standard"
+   },
+   "ms": 5289,
+   "cost": 0.0034206479999999997
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 9375,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28928,
+    "output_tokens": 588,
+    "service_tier": "standard"
+   },
+   "ms": 7124,
+   "cost": 0.015976312
+  },
+  {
+   "situation": 17,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1544,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4352,
+    "output_tokens": 507,
+    "service_tier": "standard"
+   },
+   "ms": 5166,
+   "cost": 0.0042372880000000005
+  },
+  {
+   "situation": 17,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2052,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 35968,
+    "output_tokens": 2002,
+    "service_tier": "standard"
+   },
+   "ms": 16171,
+   "cost": 0.012219152000000002
+  },
+  {
+   "situation": 17,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 6100,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 87808,
+    "output_tokens": 3018,
+    "service_tier": "standard"
+   },
+   "ms": 25071,
+   "cost": 0.023866831999999998
+  },
+  {
+   "situation": 17,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4178,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 37120,
+    "output_tokens": 1557,
+    "service_tier": "standard"
+   },
+   "ms": 13916,
+   "cost": 0.013313960000000001
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4858,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 12928,
+    "output_tokens": 1209,
+    "service_tier": "standard"
+   },
+   "ms": 8301,
+   "cost": 0.011769032
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4112,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13056,
+    "output_tokens": 536,
+    "service_tier": "standard"
+   },
+   "ms": 5255,
+   "cost": 0.008124863999999999
+  },
+  {
+   "situation": 17,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4007,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 13184,
+    "output_tokens": 536,
+    "service_tier": "standard"
+   },
+   "ms": 4461,
+   "cost": 0.007991896
+  },
+  {
+   "situation": 17,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 10478,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28928,
+    "output_tokens": 593,
+    "service_tier": "standard"
+   },
+   "ms": 6540,
+   "cost": 0.017452072
+  },
+  {
+   "situation": 17,
+   "agent": "judge",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 14322,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4608,
+    "output_tokens": 1713,
+    "service_tier": "standard"
+   },
+   "ms": 13286,
+   "cost": 0.025891272
+  }
+ ],
+ "results": [
+  {
+   "id": 17,
+   "name": "fresh_bowl_multi",
+   "title": "«Fresh Bowl» (многоуровневая): тишина → не берёт трубку → «дорого» и недоверие → торг 20% и баннер → тишина после Zoom",
+   "expect": [
+    "все 5 критериев формулы (ФВ, ОП, ЛПР, Д, ЗС) — в первом пути",
+    "повод по 902-ПП (Москва, фасад) и/или 168-ФЗ (латиница Fresh Bowl) — вопросом, без пугалок",
+    "фото фасада — по шаблону «Помните, мы проговаривали…»",
+    "выход на Сергея — только с согласия Ксении",
+    "глаголы менеджера — женский род",
+    "режимы пути по шагам: весь → весь → шаг → шаг → весь",
+    "деньги в переписке после «не берёт трубку»",
+    "торг 20% — сопротивление и обмен",
+    "баннер — только внутри",
+    "нет выдуманных фактов о компании",
+    "«последний шанс» — последним"
+   ],
+   "seconds": 529,
+   "state": "COMPOSING",
+   "errors": [],
+   "diagnostic": {
+    "scores": {
+     "financial": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Сергей (ЛПР) сказал: «сделаете на 20% дешевле — подпишем сразу» — это условие покупки, значит деньги есть",
+       "Ориентир бюджета ≈ 192 000 ₽ (240 000 ₽ минус 20%)",
+       "КП на 240 000 ₽ получено, возражение «дорого» — торг, а не отсутствие денег"
+      ],
+      "confidence": "high"
+     },
+     "need": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Ксения сама описала задачу: вывеска на фасад, объёмные буквы с подсветкой + световой логотип, фасад ~5 метров",
+       "Назван конкретный дедлайн: открытие 15 декабря",
+       "Клиент инициировал контакт сам (03.11)",
+       "Вторая точка сети — потребность реальная, привязана к открытию"
+      ],
+      "confidence": "high"
+     },
+     "trust": {
+      "status": "Вероятно",
+      "evidence": [
+       "Клиенту понравились наши работы / предложение",
+       "Ксения (04.11): «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный»",
+       "Сергей (19.11): «чем вы лучше тех, кто нас подвёл в прошлый раз» — прямое недоверие к категории подрядчиков",
+       "Торг на 20% со ссылкой на конкурентов дешевле на 15% — проверка, а не готовность",
+       "После Zoom 23.11 («понравились работы») — тишина 3 дня, решение не принято"
+      ],
+      "confidence": "high",
+      "next_step": "production"
+     },
+     "authority": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Сергей — собственник, решение по деньгам и подрядчику принимает он (со слов менеджера)",
+       "Сергей вышел на прямой контакт: согласился на Zoom 23.11, разговор состоялся",
+       "Сергей лично назвал условие покупки: «сделаете на 20% дешевле — подпишем сразу»"
+      ],
+      "confidence": "high"
+     },
+     "urgency": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Срок клиента горит: с запасом, запас 2 раб. дн.",
+       "Открытие второй точки 15 декабря — конкретная дата",
+       "Клиент сам спросил 03.11: «Открытие 15 декабря — успеете?»",
+       "Сергей торгуется и называет условие подписания — признак готовности к сделке",
+       "Но: после Zoom 23.11 — «подумаю» и 3 дня тишины, решения нет"
+      ],
+      "confidence": "medium"
+     }
+    },
+    "summary": "Сделка живая и по сути готова к закрытию: потребность подтверждена (открытие 15 декабря), ЛПР вышел на прямой контакт и назвал условие покупки, деньги есть (торг на 20% — это сигнал к покупке, а не отсутствие бюджета). Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и проверяет нас вопросом «чем вы лучше» и торгом. Скидка здесь не решит проблему — Сергей боится повторить прошлый опыт, а не переплатить. Закрывать нужно через доказательства надёжности: гарантия в договоре, проверка подсветки до отгрузки, выезд по гарантии за 3 рабочих дня, встреча на производстве. Сроки сжимаются: последний день старта 30 ноября, дальше вывеска не успеет к открытию.",
+    "soprano_recommendations": [
+     "Бюджет (СОПРАНО: Ограничения): клиент говорит о цене — уточнить ориентир по бюджету и с чем сравнивает. «Чтобы предложить подходящий вариант — какой бюджет заложили на вывеску и с чем сравниваете?» Без этого ответ на «дорого» — гадание; скидку не предлагать.",
+     "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+     "Уточнить у Сергея, с кем именно сравнивают (кто предложил на 15% дешевле) и что входит в их предложение — чтобы честно сравнить состав, а не только цену"
+    ]
+   },
+   "strategy": {},
+   "plan": [
+    {
+     "touchpoint_number": 1,
+     "send_date": "2026-11-27",
+     "timing": "27 ноября (пт), утром",
+     "channel": "WhatsApp",
+     "kind": "экспертное",
+     "recipient": "Сергей (собственник, ЛПР)",
+     "condition": "",
+     "goal": "Через выгоду ЛПР (владелец 15.11: «всё через выгоду для клиента»): пригласить на встречу на нашем производстве (акрил — Мытищи, сталь — Щёлково), чтобы он ПОЛУЧИЛ спокойствие за свой страх — своими глазами увидел, кто и как делает его вывеску и как её проверяют с подсветкой до отгрузки, и решил без риска повторить прошлый опыт. Начинать с того, что он получает («чтобы вы сами увидели, почему ваши буквы не погаснут через три месяца»), а не с «приглашаем на экскурсию». Конкретное время на выбор («во вторник в 11 или в среду в 15?»). Кейсы и «чем мы лучше» заново не повторять. Цифру «после встречи заключаются» клиенту не называть.",
+     "key_message": "Сергей, записала короткое видео: показываю, как мы проверяем каждую вывеску с подсветкой до отгрузки — чтобы на фасаде не было сюрпризов. Ваша будет проверена так же. Дата открытия 15 декабря в силе?",
+     "value": "Сергей видит реальный процесс проверки — страх «погаснет через три месяца» снимается конкретным доказательством, а не словами",
+     "criterion": "Д — доверие",
+     "also_criteria": [],
+     "must_include": [
+      "Касание 1 (звонок Сергею): попросить прислать фото фасада — Ксения обещала 04.11 («Фото пришлю на неделе»), без него нельзя сделать визуализацию, которую менеджер уже обещал («сделаем визуализацию на вашем фасаде бесплатно»)",
+      "Касание 1 (звонок Сергею): ответить на вопрос Сергея «чем вы лучше тех, кто нас подвёл» — через результат для него: «вы получаете вывеску, проверенную до отгрузки, с гарантией по договору и выездом за 3 рабочих дня», а не через перечисление «у нас есть»",
+      "Касание 2 (приглашение на производство): начинать с выгоды для Сергея — «своими глазами увидите, почему ваши буквы не погаснут», а не с процесса «приезжайте посмотреть цех»",
+      "Переписка: 03.11 менеджер писал клиенту «Успеваем, если согласуем макет до 25 ноября.» — эта дата прошла. Хотя бы в одном касании контактному лицу честно сослаться на это и сказать, что изменилось, — иначе клиент услышит «обещали и не делаете».",
+      "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+     ],
+     "facts": {
+      "status_on_send_day": "с запасом",
+      "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": false,
+     "last_chance": false,
+     "weekend": false,
+     "path_mode": "full"
+    },
+    {
+     "touchpoint_number": 2,
+     "send_date": "2026-11-30",
+     "timing": "30 ноября (пн), днём",
+     "channel": "Кружок",
+     "kind": "эмпатичное",
+     "recipient": "Сергей (собственник, ЛПР)",
+     "condition": "",
+     "goal": "Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать",
+     "key_message": "",
+     "value": "клиент видит, что о его проекте думают и работают",
+     "criterion": null,
+     "also_criteria": [],
+     "must_include": [],
+     "facts": {
+      "status_on_send_day": "впритык",
+      "permanent_ready_if_start_that_day": "11 декабря (пт) – 14 декабря (пн)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": true,
+     "last_chance": false,
+     "weekend": false,
+     "path_mode": "full"
+    },
+    {
+     "touchpoint_number": 3,
+     "send_date": "2026-12-01",
+     "timing": "1 декабря (вт), вечером",
+     "channel": "Звонок",
+     "kind": "экспертное",
+     "recipient": "Сергей (собственник, ЛПР)",
+     "condition": "",
+     "goal": "Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.",
+     "key_message": "Сергей, я не хочу тратить ваше время. Если решение не принято до 30 ноября — вывеска не успеет к открытию 15 декабря, и это будет честно. Скажите как есть: мы работаем или вы выбрали другой вариант? Если работаем — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство.",
+     "value": "Сергей получает честность: мы не давим, а прямо говорим о риске для его даты открытия — и он решает без неопределённости",
+     "criterion": "ЗС — здесь и сейчас",
+     "also_criteria": [],
+     "must_include": [],
+     "facts": {
+      "status_on_send_day": "впритык",
+      "permanent_ready_if_start_that_day": "14 декабря (пн) – 15 декабря (вт)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": false,
+     "last_chance": true,
+     "weekend": false,
+     "path_mode": "full"
+    }
+   ],
+   "touches": [
+    {
+     "touchpoint_number": 1,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Сергей (собственник, ЛПР)",
+       "value": "Своими глазами увидит, как проверяют его вывеску с подсветкой до отгрузки — страх «погаснет через три месяца» снимается доказательством, а не словами"
+      }
+     ],
+     "hook": {
+      "quote": "«В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку»",
+      "prep": "Перед касанием: позвонить на производство в Мытищи, уточнить у технолога, как проходит проверка подсветки букв из акрила перед отгрузкой, и согласовать два слота для визита Сергея — вторник 11:00 и среда 15:00.",
+      "opening": "Сергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть."
+     },
+     "body": "Сергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть.\n\nПомните, Ксения говорила, что в прошлый раз буквы погасли через три месяца? Чтобы вы сами увидели, почему с нами такого не будет, — приглашаю вас к нам на производство в Мытищи. Покажу, как проверяем каждую букву с подсветкой до отгрузки. Ваша будет проверена так же.\n\nКстати, Ксения обещала прислать фото фасада — без него не могу сделать визуализацию. Скинете сейчас? Я сразу запущу дизайнеру, и вы получите картинку вывески на вашем фасаде ещё до встречи.\n\nВо вторник в 11 или в среду в 15? Как вам удобнее?",
+     "channel": "WhatsApp",
+     "timing": "27 ноября (пт), утром",
+     "kind": "экспертное",
+     "criterion": "Д — доверие",
+     "last_chance": false
+    },
+    {
+     "touchpoint_number": 2,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Сергей (собственник, ЛПР)",
+       "value": "Видит, что о его проекте думают и работают — появляется интрига и желание созвониться"
+      }
+     ],
+     "hook": {
+      "quote": "«Фасад примерно 5 метров»",
+      "prep": "Перед касанием: открыть макет Fresh Bowl, посмотреть на ширину фасада 5 метров и прикинуть, как разместятся буквы и логотип, чтобы повод был конкретным.",
+      "opening": "Сергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует!"
+     },
+     "body": "Сергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?",
+     "channel": "Кружок",
+     "timing": "30 ноября (пн), днём",
+     "kind": "эмпатичное",
+     "criterion": null,
+     "last_chance": false
+    },
+    {
+     "touchpoint_number": 3,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Сергей (собственник, ЛПР)",
+       "value": "Получает честность: мы не давим, а прямо говорим о риске для его даты открытия — и он решает без неопределённости"
+      }
+     ],
+     "hook": {
+      "quote": "«Открытие 15 декабря — успеете?»",
+      "prep": "Перед касанием: открыть переписку, перечитать обещание от 03.11 «Успеваем, если согласуем макет до 25 ноября» и посчитать по фактам: если стартуем сегодня, готовность 14–15 декабря — впритык к открытию.",
+      "opening": "Сергей, добрый вечер! Решила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию."
+     },
+     "body": "Сергей, добрый вечер! Это [Имя], компания «Яркая Реклама».\n\n[Пауза]\n\nРешила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию.\n\n[Пауза]\n\nПомните, я писала Ксении 3 ноября, что успеваем, если согласуем макет до 25 ноября? Эта дата прошла. Если мы запускаемся сейчас, вывеска будет готова 14–15 декабря — впритык к вашему открытию. Я не хочу обещать то, чего не смогу сделать.\n\n[Пауза]\n\nПоэтому хочу спросить прямо: проект ещё актуален? Если да — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство. Если нет — так и скажите, я не буду больше отвлекать вас и тратить ваше время.\n\n[Пауза]\n\nКак есть?",
+     "channel": "Звонок",
+     "timing": "1 декабря (вт), вечером",
+     "kind": "экспертное",
+     "criterion": "ЗС — здесь и сейчас",
+     "last_chance": true
+    }
+   ],
+   "check": {
+    "approved": false,
+    "rounds": 4,
+    "reviews": 1,
+    "trace": [
+     "составил",
+     "код вернул 1,2,3",
+     "редактор",
+     "код вернул 1",
+     "редактор",
+     "код вернул 1",
+     "редактор",
+     "код вернул 1",
+     "проверка вернула 1,3"
+    ],
+    "needs_review": true
+   },
+   "first_round": {
+    "plan": [
+     {
+      "touchpoint_number": 1,
+      "send_date": "2026-11-17",
+      "timing": "Сегодня, 17 ноября (вт)",
+      "channel": "Звонок",
+      "kind": "экспертное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Возобновить контакт, сверить дату открытия, попросить Ксению организовать выход на Сергея и прислать фото фасада",
+      "key_message": "Ксения, добрый день! Сверяю по вашему проекту: дата открытия 15 декабря в силе? Чтобы вывеска была готова к открытию, макет нужно согласовать до 30 ноября — у нас для вас зарезервирован слот в производстве. И ещё: я подготовила для Сергея короткую страницу — что входит в цену, как устроена гарантия и почему буквы не погаснут. Можете передать ему мой контакт или организовать короткий созвон на 15 минут?",
+      "value": "Ксении не придётся пересказывать Сергею детали и отвечать на его вопросы за подрядчика — она получит готовую страницу и сможет выглядеть подготовленной",
+      "criterion": "ЛПР — определён",
+      "also_criteria": [],
+      "must_include": [
+       "Касание 1 (звонок Ксении): попросить прислать фото фасада — обещала «на неделе» 04.11 («Фото пришлю на неделе»), без него не сделать визуализацию",
+       "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+      ],
+      "facts": {
+       "status_on_send_day": "с запасом",
+       "permanent_ready_if_start_that_day": "30 ноября (пн) – 1 декабря (вт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 2,
+      "send_date": null,
+      "timing": "Только если Ксения согласится передать или даст контакт — после согласия, в тот же день",
+      "channel": "Email",
+      "kind": "экспертное",
+      "recipient": "Сергей (собственник, ЛПР)",
+      "condition": "Только если Ксения согласится передать или даст контакт",
+      "goal": "Дать Сергею одностраничный документ: результат для бизнеса, состав цены, гарантия, почему буквы не погаснут",
+      "key_message": "Сергей, добрый день! Для вашей точки на Мясницкой, 24: вывеска Fresh Bowl объёмными буквами с подсветкой и световой логотип. Вы получаете: готовую и проверенную вывеску к открытию 15 декабря, без доплат по ходу — цена 240 000 ₽ зафиксирована в договоре. Гарантия — правило договора: выезд по гарантийному случаю в течение 3 рабочих дней, ремонт бесплатно. Каждая вывеска проверяется с подсветкой до отгрузки — на фасаде не будет сюрпризов.",
+      "value": "Сергей получает результат для бизнеса: вывеска к открытию точно в срок, без риска повторения прошлого опыта, с гарантией по договору",
+      "criterion": "Д — доверие",
+      "also_criteria": [],
+      "must_include": [
+       "Касание 2 (Executive Summary для Сергея): начинается с результата для него — вывеска к открытию 15 декабря, без доплат, гарантия по договору, — а не с проблемы",
+       "Касание 2 (Executive Summary для Сергея): только если Ксения согласится передать или даст контакт — согласия в переписке нет, в timing пометка «только если Ксения даст контакт / согласится»"
+      ],
+      "facts": {
+       "status_on_send_day": "с запасом",
+       "permanent_ready_if_start_that_day": "30 ноября (пн) – 1 декабря (вт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 3,
+      "send_date": "2026-11-20",
+      "timing": "20 ноября (пт), утром",
+      "channel": "Кружок",
+      "kind": "эмпатичное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать",
+      "key_message": "",
+      "value": "клиент видит, что о его проекте думают и работают",
+      "criterion": null,
+      "also_criteria": [],
+      "must_include": [],
+      "facts": {
+       "status_on_send_day": "с запасом",
+       "permanent_ready_if_start_that_day": "3 декабря (чт) – 4 декабря (пт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": true,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 4,
+      "send_date": "2026-11-25",
+      "timing": "25 ноября (ср), днём",
+      "channel": "Мессенджер",
+      "kind": "экспертное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Показать похожий реализованный проект и напомнить о бесплатной визуализации на их фасаде",
+      "key_message": "Ксения, подобрала похожие работы: делали вывеску для кафе «Капи» в ТЦ — объёмные буквы с подсветкой, как у вас. Пришлю фото. И ещё: визуализация на вашем фасаде бесплатна — пришлите фото фасада, и вы увидите результат до оплаты.",
+      "value": "Ксения и Сергей увидят реальный результат похожего проекта и свою вывеску на своём фасаде до оплаты — страх «не попадём в стиль» снимается",
+      "criterion": "Д — доверие",
+      "also_criteria": [],
+      "must_include": [],
+      "facts": {
+       "status_on_send_day": "с запасом",
+       "permanent_ready_if_start_that_day": "8 декабря (вт) – 9 декабря (ср)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 5,
+      "send_date": "2026-11-30",
+      "timing": "30 ноября (пн), вечером",
+      "channel": "Кружок",
+      "kind": "эмпатичное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Человеческое касание: признать осторожность Сергея, предложить встречу на производстве",
+      "key_message": "Ксения, записала короткое видео. Понимаю, почему Сергей осторожен — после того как буквы погасли, доверие не вернуть словами. Поэтому предлагаю: приезжайте к нам на производство в Мытищах — увидите своими глазами, как собирают и проверяют подсветку до отгрузки. Это лучший способ убедиться.",
+      "value": "Сергей и Ксения получают живое доказательство: своими глазами видят, что вывеску делают здесь и проверяют до отгрузки — страх «погаснет и пропадут» снимается",
+      "criterion": "Д — доверие",
+      "also_criteria": [],
+      "must_include": [
+       "Касание 4 (кружок): предложить встречу на производстве в Мытищах — сильнейший инструмент доверия после негативного опыта, клиент увидит проверку подсветки своими глазами"
+      ],
+      "facts": {
+       "status_on_send_day": "впритык",
+       "permanent_ready_if_start_that_day": "11 декабря (пт) – 14 декабря (пн)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 6,
+      "send_date": "2026-12-03",
+      "timing": "3 декабря (чт), утром",
+      "channel": "Мессенджер",
+      "kind": "экспертное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Попросить сказать как есть, чтобы не тратить время клиента Заодно (ФВ — финансовая возможность): Снять вопрос денег персональным предложением: что стоит за ценой (бюджет, с чем сравнивают), что входит в цену КП; при «дорого» — варианты под бюджет с честным «это отход от ТЗ, вот риск». Скидку сами не предлагаем и сопротивляемся ей; если клиент ожил и торгуется («сделаете на N% — закажу») — голосом, через полномочия, небольшая уступка только в обмен на решение (файл 28).",
+      "key_message": "Ксения, если проект потерял актуальность или вы выбрали другого подрядчика — просто скажите, я не буду больше беспокоить. Если же вопрос в доверии — давайте я покажу, как мы проверяем подсветку до отгрузки, и вы решите сами.",
+      "value": "Ксения получает право честно закрыть вопрос без неловкости — мы не будем давить",
+      "criterion": "ЗС — здесь и сейчас",
+      "also_criteria": [
+       "ФВ — финансовая возможность"
+      ],
+      "must_include": [],
+      "facts": {
+       "status_on_send_day": "не успеваем",
+       "permanent_ready_if_start_that_day": "16 декабря (ср) – 17 декабря (чт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 7,
+      "send_date": "2026-12-08",
+      "timing": "8 декабря (вт), днём",
+      "channel": "Кружок",
+      "kind": "эмпатичное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать",
+      "key_message": "",
+      "value": "клиент видит, что о его проекте думают и работают",
+      "criterion": null,
+      "also_criteria": [],
+      "must_include": [],
+      "facts": {
+       "status_on_send_day": "не успеваем",
+       "permanent_ready_if_start_that_day": "21 декабря (пн) – 22 декабря (вт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": true,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "full"
+     },
+     {
+      "touchpoint_number": 8,
+      "send_date": "2026-12-11",
+      "timing": "11 декабря (пт), вечером",
+      "channel": "Звонок",
+      "kind": "экспертное",
+      "recipient": "Ксения (маркетолог)",
+      "condition": "",
+      "goal": "Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.",
+      "key_message": "",
+      "value": "",
+      "criterion": "ЗС — здесь и сейчас",
+      "also_criteria": [],
+      "must_include": [],
+      "facts": {
+       "status_on_send_day": "не успеваем",
+       "permanent_ready_if_start_that_day": "24 декабря (чт) – 25 декабря (пт)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": true,
+      "weekend": false,
+      "path_mode": "full"
+     }
+    ],
+    "touches": [
+     {
+      "touchpoint_number": 1,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "Ксении не придётся пересказывать Сергею детали и отвечать на его вопросы за подрядчика — она получит готовую страницу и сможет выглядеть подготовленной"
+       }
+      ],
+      "hook": {
+       "quote": "Фото пришлю на неделе",
+       "prep": "Перед касанием: перечитала переписку и КП, сверила расчёт сроков — поняла, что для открытия 15 декабря макет нужно согласовать до 30 ноября. Подготовила короткую страницу для Сергея: что входит в цену, как устроена гарантия, почему буквы не погаснут.",
+       "opening": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Сверяю по вашему проекту на Мясницкой — и у меня есть пара вопросов, которые помогут нам успеть к открытию."
+      },
+      "body": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Сверяю по вашему проекту на Мясницкой — и у меня есть пара вопросов, которые помогут нам успеть к открытию.\n\n[пауза]\n\nДата открытия 15 декабря в силе? [пауза, выслушать]\n\nСмотрю по срокам: чтобы вывеска была готова к открытию, макет нужно согласовать до 30 ноября — я держу для вас слот в производстве. Если заходим на этой неделе, всё успеваем спокойно.\n\nИ ещё два момента. Первый: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию, и вы увидите свою вывеску на Мясницкой до оплаты.\n\n[пауза]\n\nВторой: в названии Fresh Bowl латиница. С 1 марта действует закон о русском языке на вывесках — иностранный текст можно оставить, только если название зарегистрировано как товарный знак. Подскажите, регистрировали? Если нет — подберём вариант с русским текстом, чтобы с городом не было вопросов.\n\n[пауза]\n\nИ ещё: я подготовила для Сергея короткую страницу — что входит в цену, как устроена гарантия и почему буквы не погаснут через три месяца. Я сама отвечу на все вопросы Сергея — вам не придётся пересказывать детали и выглядеть неподготовленной. Можете передать ему мой контакт или организовать короткий созвон на 15 минут?\n\n[пауза]\n\nКак вам удобнее?",
+      "channel": "Звонок",
+      "timing": "Сегодня, 17 ноября (вт)",
+      "kind": "экспертное",
+      "criterion": "ЛПР — определён",
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 2,
+      "subject": "Вывеска Fresh Bowl на Мясницкой, 24 — что вы получаете",
+      "value_for_recipient": [
+       {
+        "recipient": "Сергей (собственник, ЛПР)",
+        "value": "Сергей получает результат для бизнеса: вывеска к открытию точно в срок, без риска повторения прошлого опыта, с гарантией по договору"
+       }
+      ],
+      "hook": {
+       "quote": "Сергей теперь очень осторожный",
+       "prep": "Перед касанием: собрала одностраничный документ для Сергея по итогам разговора с Ксенией — результат, состав цены, гарантия, проверка подсветки. Проверила, что все цифры из КП и факты компании.",
+       "opening": "Сергей, добрый день! Меня зовут [Имя], я веду проект вывески для Fresh Bowl на Мясницкой, 24. Ксения передала мой контакт — собрала для вас короткую страницу, чтобы вы сразу увидели результат."
+      },
+      "body": "Сергей, добрый день!\n\nМеня зовут [Имя], я веду проект вывески для Fresh Bowl на Мясницкой, 24. Ксения передала мой контакт — собрала для вас короткую страницу, чтобы вы сразу увидели результат.\n\n**Что вы получаете**\n\nВывеска будет готова к открытию 15 декабря — смонтирована, проверена, горит с первого дня. Объёмные буквы Fresh Bowl с подсветкой и световой логотип.\n\nЦена 240 000 ₽ зафиксирована в договоре — без доплат по ходу.\n\nГарантия — правило договора, а не обещание: если что-то случится, выезжаем в течение 3 рабочих дней, ремонт бесплатно. Вывеска не будет стоять тёмной.\n\nКаждая вывеска проверяется с подсветкой до отгрузки — на фасаде не будет сюрпризов. Буквы не погаснут через три месяца.\n\nПроизводство своё, в Мытищах — от поставщиков не зависим, поэтому дату держим.\n\n**Что нужно от вас**\n\nСогласовать макет до 30 ноября — тогда вывеска будет готова к открытию 15 декабря точно в срок, без переносов. Я подготовила визуализацию на вашем фасаде — пришлите фото, и вы увидите результат до оплаты.\n\nГотов ответить на вопросы по телефону или в Zoom — как удобнее. Мой контакт: [номер].\n\nС уважением,\n[Имя], «Яркая Реклама»",
+      "channel": "Email",
+      "timing": "Только если Ксения согласится передать или даст контакт — после согласия, в тот же день",
+      "kind": "экспертное",
+      "criterion": "Д — доверие",
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 3,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "клиент видит, что о его проекте думают и работают"
+       }
+      ],
+      "hook": {
+       "quote": "Фасад примерно 5 метров",
+       "prep": "Перед касанием: перечитала переписку, посмотрела макет и фото фасада (если прислали) или прикинула по описанию — появилась идея по размещению вывески на фасаде 5 метров.",
+       "opening": "Ксения, добрый день! Решила записать короткое видео — разбиралась с вашим фасадом на Мясницкой, и у меня появилась идея, уверена, она вас точно заинтересует!"
+      },
+      "body": "Ксения, добрый день! Решила записать короткое видео — разбиралась с вашим фасадом на Мясницкой, и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?",
+      "channel": "Кружок",
+      "timing": "20 ноября (пт), утром",
+      "kind": "эмпатичное",
+      "criterion": null,
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 4,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "Ксения и Сергей увидят реальный результат похожего проекта и свою вывеску на своём фасаде до оплаты — страх «не попадём в стиль» снимается"
+       }
+      ],
+      "hook": {
+       "quote": "Название Fresh Bowl объёмными буквами с подсветкой и круглый световой логотип",
+       "prep": "Перед касанием: подобрала в портфолио похожий проект — кафе «Капи» в ТЦ, объёмные буквы с подсветкой. Подготовила ссылку на фото.",
+       "opening": "Ксения, добрый день! Подбирала похожие работы под ваш проект — нашла то, что вам будет полезно посмотреть."
+      },
+      "body": "Ксения, добрый день! Подбирала похожие работы под ваш проект — нашла то, что вам будет полезно посмотреть.\n\nДелали вывеску для кафе «Капи» в ТЦ — объёмные буквы с подсветкой, как у вас. Вот фото: [фото работы «Капи» — из портфолио]\n\nИ ещё: визуализация на вашем фасаде бесплатна. Пришлите фото фасада — и вы увидите свою вывеску на Мясницкой до оплаты. Как вам?",
+      "channel": "Мессенджер",
+      "timing": "25 ноября (ср), днём",
+      "kind": "экспертное",
+      "criterion": "Д — доверие",
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 5,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "Сергей и Ксения получают живое доказательство: своими глазами видят, что вывеску делают здесь и проверяют до отгрузки — страх «погаснет и пропадут» снимается"
+       }
+      ],
+      "hook": {
+       "quote": "через три месяца половина букв погасла, а они перестали брать трубку",
+       "prep": "Перед касанием: позвонила на производство в Мытищи, уточнила, когда можно принять гостей на этой неделе — подготовила конкретные слоты для визита.",
+       "opening": "Ксения, добрый день! Позвонила на производство в Мытищах — появилась идея, уверена, она вас точно заинтересует."
+      },
+      "body": "Ксения, добрый день! Позвонила на производство в Мытищах — появилась идея, уверена, она вас точно заинтересует. Можем коротко набраться — всё объясню по телефону?",
+      "channel": "Кружок",
+      "timing": "30 ноября (пн), вечером",
+      "kind": "эмпатичное",
+      "criterion": "Д — доверие",
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 6,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "Ксения получает право честно закрыть вопрос без неловкости — мы не будем давить"
+       }
+      ],
+      "hook": {
+       "quote": "Дальше тишина",
+       "prep": "Перед касанием: перечитала всю переписку, сверила сроки — до открытия 15 декабря осталось 12 дней, производство уже не успевает к этой дате. Подготовила честный разговор.",
+       "opening": "Ксения, добрый день! Пишу, чтобы не тянуть и не занимать ваше время."
+      },
+      "body": "Ксения, добрый день! Пишу, чтобы не тянуть и не занимать ваше время.\n\nСкажу честно: к 15 декабря постоянную вывеску уже не успеть. Но можно открыться с временным решением внутри помещения, а постоянную поставить после — тогда точка откроется вовремя и с вывеской, покупатели вас найдут с первого дня. И вам не придётся объяснять Сергею, почему вывеска не готова к открытию — я сама предложу решение.\n\nЕсли вопрос в доверии — давайте я покажу, как мы проверяем подсветку до отгрузки, и вы решите сами. Это можно сделать на производстве в Мытищах или по видео.\n\nКак вам?",
+      "channel": "Мессенджер",
+      "timing": "3 декабря (чт), утром",
+      "kind": "экспертное",
+      "criterion": "ЗС — здесь и сейчас",
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 7,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "клиент видит, что о его проекте думают и работают"
+       }
+      ],
+      "hook": {
+       "quote": "Открытие 15 декабря",
+       "prep": "Перед касанием: пересмотрела проект, подумала над вариантом, как открыться вовремя и с вывеской, даже если постоянная не успевает к 15 декабря — появилась идея по временному решению.",
+       "opening": "Ксения, добрый день! Решила записать короткое видео — думала над вашим открытием 15 декабря, и у меня появилась идея, уверена, она вас точно заинтересует!"
+      },
+      "body": "Ксения, добрый день! Решила записать короткое видео — думала над вашим открытием 15 декабря, и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?",
+      "channel": "Кружок",
+      "timing": "8 декабря (вт), днём",
+      "kind": "эмпатичное",
+      "criterion": null,
+      "last_chance": false
+     },
+     {
+      "touchpoint_number": 8,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Ксения (маркетолог)",
+        "value": "Ксения получает право честно закрыть вопрос без неловкости — мы не будем давить"
+       }
+      ],
+      "hook": {
+       "quote": "Сергей теперь очень осторожный",
+       "prep": "Перед касанием: перечитала переписку, подготовила честный финальный разговор — без давления, с открытым вопросом.",
+       "opening": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню в последний раз по вашему проекту — и хочу спросить прямо."
+      },
+      "body": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню в последний раз по вашему проекту — и хочу спросить прямо.\n\n[пауза]\n\nСкажите как есть: проект ещё актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея. Если да — давайте договоримся о конкретном шаге, чтобы успеть хоть что-то сделать.\n\n[пауза, выслушать]\n\nЕсли актуально: до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением внутри помещения, а постоянную поставить после. Или сразу планировать на январь. Как вам?\n\n[пауза]\n\nЕсли нет — спасибо за честность, дверь открыта: если вернётесь к проекту, я на связи.",
+      "channel": "Звонок",
+      "timing": "11 декабря (пт), вечером",
+      "kind": "экспертное",
+      "criterion": "ЗС — здесь и сейчас",
+      "last_chance": true
+     }
+    ]
+   },
+   "stages": [
+    {
+     "label": "не берёт трубку",
+     "today": "2026-11-18",
+     "expect": [
+      "весь путь (не «следующий шаг»)",
+      "о деньгах — в переписке, касание на ФВ не переведено в звонок (голос недоступен)"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-18",
+       "timing": "Сегодня, 18 ноября (ср)",
+       "channel": "WhatsApp",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Возобновить контакт с Ксенией, честно сверить статус и попросить организовать контакт с Сергеем — через пользу для неё самой",
+       "key_message": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню по вывеске для Мясницкой. Помню, вы говорили, что Сергей осторожный после прошлого опыта — и я хочу снять с вас эту нагрузку. Давайте я сам покажу Сергею, как мы проверяем подсветку до отгрузки, и отвечу на его вопросы напрямую — вам не придётся ничего пересказывать и отвечать за подрядчика. Можете дать его контакт или организовать короткий созвон на 15 минут?",
+       "value": "Ксении не придётся пересказывать Сергею детали и отвечать за нас, если он поймёт что-то не так; она выглядит подготовленной, а вопрос с вывеской быстрее закрывается",
+       "criterion": "ЛПР — определён",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (звонок Ксении): попросить прислать фото фасада, которое Ксения обещала 04.11 («Фото пришлю на неделе») — по схеме «дайте фото — и вы получите визуализацию на вашем фасаде бесплатно»",
+        "Касания 1 и 3 (выход на Сергея): согласия Ксении на прямой контакт пока нет — в timing пометка «только если Ксения даст контакт или согласится организовать»",
+        "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 2,
+       "send_date": "2026-11-23",
+       "timing": "23 ноября (пн), утром",
+       "channel": "Кружок",
+       "kind": "эмпатичное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Дать Ксении визуальное доказательство, которое она может переслать Сергею, и снять страх «погаснет через три месяца»",
+       "key_message": "Ксения, добрый день! Записала короткое видео — показываю, как мы проверяем подсветку каждой вывески до отгрузки: включаем, смотрим, нет ли тёмных участков. Именно поэтому у наших клиентов буквы не гаснут через три месяца. Перешлите Сергею, если удобно — это займёт минуту.",
+       "value": "Ксения получает готовый материал для Сергея — не нужно ничего объяснять словами, достаточно переслать видео",
+       "criterion": "Д — доверие",
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "4 декабря (пт) – 7 декабря (пн)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 3,
+       "send_date": null,
+       "timing": "Только если контакта с Сергеем нет после касаний 1–2 — после согласия, в тот же день",
+       "channel": "Email",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "Только если контакта с Сергеем нет после касаний 1–2",
+       "goal": "Дать Ксении готовый пакет для Сергея: одна страница с результатом, гарантиями и ответом на его страх — и попросить переслать",
+       "key_message": "Ксения, подготовила для Сергея короткую страницу: что вы получаете — вывеску, проверенную до отгрузки, по договору с гарантией, с выездом по гарантийному случаю в течение 3 рабочих дней. И ответ на его главный вопрос: почему у нас буквы не гаснут. Просто перешлите ему — это займёт 10 секунд.",
+       "value": "Ксении не нужно ничего писать самой — готовый текст, который она просто пересылает; Сергей получает ответ на свой страх напрямую",
+       "criterion": "ЛПР — определён",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 3 (email с материалами для Сергея): текст для ЛПР начинается с того, что Сергей получает — вывеску, проверенную до отгрузки, по договору с гарантией, — а не с проблемы «мы знаем, что вас обожгли»"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 4,
+       "send_date": "2026-12-04",
+       "timing": "4 декабря (пт), днём",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Закрыть сделку честно: либо получить явный ответ, либо перевести в спящий режим с открытой дверью Заодно (ФВ — финансовая возможность): Снять вопрос денег персональным предложением: что стоит за ценой (бюджет, с чем сравнивают), что входит в цену КП; при «дорого» — варианты под бюджет с честным «это отход от ТЗ, вот риск». Скидку сами не предлагаем и сопротивляемся ей; если клиент ожил и торгуется («сделаете на N% — закажу») — голосом, через полномочия, небольшая уступка только в обмен на решение (файл 28).",
+       "key_message": "Ксения, это [Имя] из «Яркой Рекламы». Звоню в последний раз по проекту на Мясницкой. Скажите как есть: проект актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея, и дверь останется открытой. Если да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением внутри помещения, а постоянную поставить после. Как вам?",
+       "value": "Ксения получает ясность и право на отказ без неловкости; если проект жив — конкретный вариант, как открыться вовремя",
+       "criterion": "ЗС — здесь и сейчас",
+       "also_criteria": [
+        "ФВ — финансовая возможность"
+       ],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "не успеваем",
+        "permanent_ready_if_start_that_day": "17 декабря (чт) – 18 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 5,
+       "send_date": "2026-12-09",
+       "timing": "9 декабря (ср), вечером",
+       "channel": "Кружок",
+       "kind": "эмпатичное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать",
+       "key_message": "",
+       "value": "клиент видит, что о его проекте думают и работают",
+       "criterion": null,
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "не успеваем",
+        "permanent_ready_if_start_that_day": "22 декабря (вт) – 23 декабря (ср)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": true,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 6,
+       "send_date": "2026-12-14",
+       "timing": "14 декабря (пн), утром",
+       "channel": "WhatsApp",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.",
+       "key_message": "",
+       "value": "",
+       "criterion": "ЗС — здесь и сейчас",
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "не успеваем",
+        "permanent_ready_if_start_that_day": "25 декабря (пт) – 28 декабря (пн)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": true,
+       "weekend": false,
+       "path_mode": "full"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "Ксении не придётся пересказывать Сергею детали и отвечать за нас, если он поймёт что-то не так; она выглядит подготовленной, а вопрос с вывеской быстрее закрывается"
+        }
+       ],
+       "hook": {
+        "quote": "«В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный»",
+        "prep": "Перед касанием: перечитать переписку с Ксенией, поднять КП от 06.11 и проверить по 902-ПП, как разместить вывеску на фасаде Мясницкой, 24 — чтобы в разговоре честно сказать, что макет уже проверяю по требованиям города.",
+        "opening": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу по вывеске для Мясницкой. Помню, вы говорили, что Сергей осторожный после прошлого опыта — и я хочу снять с вас эту нагрузку."
+       },
+       "body": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу по вывеске для Мясницкой.\n\nПомню, вы говорили, что Сергей осторожный после прошлого опыта — хочу снять с вас эту нагрузку. Могу сама показать Сергею, как мы проверяем подсветку до отгрузки, и ответить на его вопросы напрямую — вам не придётся ничего пересказывать.\n\nМожете дать его контакт или организовать короткий созвон на 15 минут?\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде бесплатно, и Сергей увидит, как вывеска будет выглядеть на Мясницкой.",
+       "channel": "WhatsApp",
+       "timing": "Сегодня, 18 ноября (ср)",
+       "kind": "экспертное",
+       "criterion": "ЛПР — определён",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 2,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "Ксения получает готовый материал для Сергея — не нужно ничего объяснять словами, достаточно переслать видео"
+        }
+       ],
+       "hook": {
+        "quote": "«В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку»",
+        "prep": "Перед касанием: позвонить на производство и уточнить, как проходит проверка подсветки у вывесок, которые сейчас готовятся к отгрузке, — чтобы честно сказать «проверяем каждую вывеску до отгрузки».",
+        "opening": "Ксения, добрый день! Хочу показать, как мы проверяем подсветку до отгрузки — чтобы у Сергея не было страха, что буквы погаснут через три месяца."
+       },
+       "body": "Ксения, добрый день! Хочу показать, как мы проверяем подсветку до отгрузки — чтобы у Сергея не было страха, что буквы погаснут через три месяца. Сняла короткое видео с производства. Перешлёте ему — это займёт 10 секунд, и ему не придётся верить на слово.",
+       "channel": "Кружок",
+       "timing": "23 ноября (пн), утром",
+       "kind": "эмпатичное",
+       "criterion": "Д — доверие",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 3,
+       "subject": "Для Сергея: вывеска для Fresh Bowl на Мясницкой",
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "Ксении не нужно ничего писать самой — готовый текст, который она просто пересылает; Сергей получает ответ на свой страх напрямую"
+        }
+       ],
+       "hook": {
+        "quote": "«Сергей теперь очень осторожный»",
+        "prep": "Перед касанием: собрать в один файл условия гарантии по договору, порядок проверки подсветки до отгрузки и сроки производства из КП — чтобы письмо содержало только факты компании.",
+        "opening": "Ксения, подготовила для Сергея короткую страницу: что вы получаете — вывеску, проверенную до отгрузки, по договору с гарантией, с выездом по гарантийному случаю в течение 3 рабочих дней."
+       },
+       "body": "Ксения, добрый день!\n\nПодготовила для Сергея короткую страницу: что вы получаете — вывеску, проверенную до отгрузки, по договору с гарантией, с выездом по гарантийному случаю в течение 3 рабочих дней. И ответ на его главный вопрос: почему у нас буквы не гаснут. Просто перешлите ему — это займёт 10 секунд.\n\n---\n\nСергей, добрый день!\n\nПо вывеске для Fresh Bowl на Мясницкой вы получаете:\n\n1. Готовую и проверенную вывеску. Каждую конструкцию мы включаем и проверяем с подсветкой до отгрузки — тёмных участков и сюрпризов на фасаде не будет.\n\n2. Проект, проработанный экспертом. Макет проверяем по требованиям города до запуска производства — вывеску не придётся переделывать или снимать.\n\n3. Работу по договору. Срок, цена и гарантия зафиксированы на бумаге. Если что-то случится в гарантийный срок — выезжаем в течение 3 рабочих дней, ремонт бесплатно.\n\n4. Вывеску точно к дате. Производство своё, от поставщиков не зависим — дату держим.\n\nЕсли удобно, готов коротко созвониться и ответить на вопросы — 15 минут, и всё станет понятно.\n\n[Имя] из «Яркой Рекламы»",
+       "channel": "Email",
+       "timing": "Только если контакта с Сергеем нет после касаний 1–2 — после согласия, в тот же день",
+       "kind": "экспертное",
+       "criterion": "ЛПР — определён",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 4,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "Ксения получает ясность и право на отказ без неловкости; если проект жив — конкретный вариант, как открыться вовремя"
+        }
+       ],
+       "hook": {
+        "quote": "«Открытие 15 декабря — успеете?»",
+        "prep": "Перед касанием: проверить по производственному плану, какой слот свободен на этой неделе, и уточнить у производства, какой вариант временной вывески допустим для помещения на Мясницкой, — чтобы честно предложить вариант к открытию.",
+        "opening": "Ксения, это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой. Скажите, проект ещё актуален?"
+       },
+       "body": "Ксения, это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой.\n\n[пауза]\n\nСкажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть. Но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант временной вывески возможен, и вернусь с цифрами. Как вам?\n\n[Если Ксения говорит «дорого»]\nПонимаю, хочется не переплатить. Давайте разберём, что входит в цену: производство, монтаж, проверка до отгрузки, гарантия по договору. Если бюджет другой — подберу варианты, но честно скажу, чем каждый отходит от задания. По стоимости удобнее голосом — можем сейчас коротко обсудить?\n\n[Если Ксения торгуется]\nПоняла вас. N% — точно не смогу, у меня таких полномочий нет. Могу попробовать согласовать с руководителем небольшую уступку — если получится, готовы заключаться сегодня?\n\n[Если Ксения не берёт трубку]\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой. Скажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с цифрами. Как вам?",
+       "channel": "Звонок",
+       "timing": "4 декабря (пт), днём",
+       "kind": "экспертное",
+       "criterion": "ЗС — здесь и сейчас",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 5,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "клиент видит, что о его проекте думают и работают"
+        }
+       ],
+       "hook": {
+        "quote": "«Открытие 15 декабря — успеете?»",
+        "prep": "Перед касанием: перечитать переписку и поднять вопрос с датой открытия 15 декабря — чтобы повод кружка был привязан к конкретной детали проекта.",
+        "opening": "Ксения, как вы? Решила записать короткое видео в связи с датой открытия на Мясницкой — и у меня появилась идея, уверена, она вас точно заинтересует!"
+       },
+       "body": "Ксения, как вы? Решила записать короткое видео в связи с датой открытия на Мясницкой — и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?",
+       "channel": "Кружок",
+       "timing": "9 декабря (ср), вечером",
+       "kind": "эмпатичное",
+       "criterion": null,
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 6,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": ""
+        }
+       ],
+       "hook": {
+        "quote": "«Открытие 15 декабря — успеете?»",
+        "prep": "Перед касанием: перечитать всю переписку с Ксенией, чтобы последнее сообщение было тёплым и без претензий.",
+        "opening": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу в последний раз по вывеске для Мясницкой."
+       },
+       "body": "Ксения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу в последний раз по вывеске для Мясницкой.\n\nСкажите как есть: проект актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея, и вы не будете тратить время на мои сообщения. Дверь останется открытой — если вернётесь к вывеске, буду рада помочь.\n\nЕсли да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с вариантами. Как вам?",
+       "channel": "WhatsApp",
+       "timing": "14 декабря (пн), утром",
+       "kind": "экспертное",
+       "criterion": "ЗС — здесь и сейчас",
+       "last_chance": true
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Неизвестно",
+       "evidence": [
+        "Бюджет клиента не обсуждался — КП на 240 000 ₽ отправлено, реакции на цену не было",
+        "Решение по деньгам принимает собственник Сергей, его позиция неизвестна"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Ксения сама инициировала контакт 03.11 с конкретным запросом: вывеска на фасад, название объёмными буквами с подсветкой, круглый световой логотип, фасад ~5 метров",
+        "Назван конкретный дедлайн — открытие 15 декабря",
+        "Запрос детальный: тип вывески, состав, размер фасада"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Риск",
+       "evidence": [
+        "Ксения прямо сказала: «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный»",
+        "После отправки КП 06.11 — тишина 11 дней, два звонка без ответа",
+        "Фото фасада, обещанное «на неделе», так и не прислали — клиент не делает шагов навстречу"
+       ],
+       "confidence": "high"
+      },
+      "authority": {
+       "status": "Риск",
+       "evidence": [
+        "Менеджер общается только с маркетологом Ксенией",
+        "Решение по деньгам и подрядчику принимает собственник Сергей, его контакта у менеджера нет",
+        "Ксения сказала «перешлю Сергею» — и с тех пор тишина, ЛПР ни разу не появился",
+        "Ксения не может организовать даже передачу фото фасада"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Срок клиента горит: с запасом, запас 8 раб. дн.",
+        "Дедлайн открытия 15 декабря назван клиентом, но движения к согласованию макета нет",
+        "Менеджер 03.11 назвала условие: «успеваем, если согласуем макет до 25 ноября» — этот день уже прошёл (сегодня 18 ноября, до 25-го осталось 5 рабочих дней), а макет не согласован и фото фасада нет",
+        "Клиент молчит 11 дней после КП, два звонка без ответа"
+       ],
+       "confidence": "high"
+      }
+     },
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Неизвестно\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Ксения)\n\n**Вывод:** Сделка зависла на 11 дней после отправки КП. Потребность подтверждена — клиент сам пришёл с детальным запросом и конкретным дедлайном. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, которого нет в контакте и который ни разу не появился. Второй блокер — доверие: клиент прямо заявил о прошлом негативном опыте с подрядчиком, и этот барьер не снят. Срочность под угрозой: условие менеджера «согласуем макет до 25 ноября» уже на грани срыва, а фото фасада так и не прислали. Паттерн ложного продвижения: «перешлю Сергею» без дальнейших действий. Без выхода на ЛПР и снятия барьера доверия стандартные касания не сработают.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Решение (частично), Аналоги (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, смотрят ли они другие варианты и с кем сравнивают — это покажет, на каком этапе решение\n- Уточнить ориентир по бюджету: КП на 240 000 ₽ — вписывается ли в ожидания Сергея, с чем сравнивают\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 18 ноября (ср): производство 7 рабочих дней — до 27 ноября (пт), монтаж 2–3 раб. дн. — готово 1 декабря (вт) – 2 декабря (ср). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 8 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Выйти на собственника Сергея через Ксению, не обходя её, и снять барьер доверия, который он сформировал после прошлого негативного опыта\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею детали и отвечать за подрядчика, если он поймёт что-то не так; она получает готовые материалы для пересылки и выглядит подготовленной перед руководством\n- **ЛПР:** Сергей получает вывеску, проверенную с подсветкой до отгрузки, по договору с гарантией и выездом по гарантийному случаю в течение 3 рабочих дней — без повторения прошлого опыта с погасшими буквами и пропавшим подрядчиком\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Ксении): попросить прислать фото фасада, которое Ксения обещала 04.11 («Фото пришлю на неделе») — по схеме «дайте фото — и вы получите визуализацию на вашем фасаде бесплатно»\n2. Касание 3 (email с материалами для Сергея): текст для ЛПР начинается с того, что Сергей получает — вывеску, проверенную до отгрузки, по договору с гарантией, — а не с проблемы «мы знаем, что вас обожгли»\n3. Касания 1 и 3 (выход на Сергея): согласия Ксении на прямой контакт пока нет — в timing пометка «только если Ксения даст контакт или согласится организовать»\n\n### План касаний\n\n1. Сегодня, 18 ноября (ср) · WhatsApp · экспертное · ЛПР — Ксения (маркетолог): Возобновить контакт с Ксенией, честно сверить статус и попросить организовать контакт с Сергеем — через пользу для неё самой\n2. 23 ноября (пн), утром · Кружок · эмпатичное · Д — Ксения (маркетолог): Дать Ксении визуальное доказательство, которое она может переслать Сергею, и снять страх «погаснет через три месяца»\n3. только если: контакта с Сергеем нет после касаний 1–2 · Email · экспертное · ЛПР — Ксения (маркетолог): Дать Ксении готовый пакет для Сергея: одна страница с результатом, гарантиями и ответом на его страх — и попросить переслать\n4. 4 декабря (пт), днём · Звонок · экспертное · ЗС — Ксения (маркетолог): Закрыть сделку честно: либо получить явный ответ, либо перевести в спящий режим с открытой дверью Заодно (ФВ — финансовая возможность): Снять вопрос денег персональным предложением: что стоит за ценой (бюджет, с чем сравнивают), что входит в цену КП; при «дорого» — варианты под бюджет с честным «это отход от ТЗ, вот риск». Скидку сами не предлагаем и сопротивляемся ей; если клиент ожил и торгуется («сделаете на N% — закажу») — голосом, через полномочия, небольшая уступка только в обмен на решение (файл 28).\n5. 9 декабря (ср), вечером · Кружок · эмпатичное — Ксения (маркетолог): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n6. 14 декабря (пн), утром · WhatsApp · экспертное · ЗС — Ксения (маркетолог): Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.\n\n_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._\n\n**Обоснование:** Сделка зависла на 11 дней после КП. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, которого нет в контакте. Второй блокер — доверие: клиент прямо заявил о прошлом негативном опыте, и этот барьер не снят. Стратегия — выйти на Сергея через Ксению, не обходя её, и снять его страх через доказательства надёжности: проверка подсветки до отгрузки, договор с гарантией, выезд по гарантийному случаю за 3 рабочих дня. Срочность реальная — открытие 15 декабря, последний день старта 30 ноября. Если после 7 касаний без ответа движения нет — спящий режим на 30–40 рабочих дней, затем одно касание «как дела, какие результаты».\n\n## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · ЛПР\n_Когда: Сегодня, 18 ноября (ср)_\n\n**Перед касанием:** перечитать переписку с Ксенией, поднять КП от 06.11 и проверить по 902-ПП, как разместить вывеску на фасаде Мясницкой, 24 — чтобы в разговоре честно сказать, что макет уже проверяю по требованиям города.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу по вывеске для Мясницкой.\n\nПомню, вы говорили, что Сергей осторожный после прошлого опыта — хочу снять с вас эту нагрузку. Могу сама показать Сергею, как мы проверяем подсветку до отгрузки, и ответить на его вопросы напрямую — вам не придётся ничего пересказывать.\n\nМожете дать его контакт или организовать короткий созвон на 15 минут?\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде бесплатно, и Сергей увидит, как вывеска будет выглядеть на Мясницкой.\n\n---\n\n### Касание 2 · Кружок (видео) · эмпатичное · Д\n_Когда: 23 ноября (пн), утром_\n\n**Перед касанием:** позвонить на производство и уточнить, как проходит проверка подсветки у вывесок, которые сейчас готовятся к отгрузке, — чтобы честно сказать «проверяем каждую вывеску до отгрузки».\n\nКсения, добрый день! Хочу показать, как мы проверяем подсветку до отгрузки — чтобы у Сергея не было страха, что буквы погаснут через три месяца. Сняла короткое видео с производства. Перешлёте ему — это займёт 10 секунд, и ему не придётся верить на слово.\n\n---\n\n### Касание 3 · Email · экспертное · ЛПР\n_Когда: Только если контакта с Сергеем нет после касаний 1–2 — после согласия, в тот же день_\n\n**Перед касанием:** собрать в один файл условия гарантии по договору, порядок проверки подсветки до отгрузки и сроки производства из КП — чтобы письмо содержало только факты компании.\n\n**Тема:** Для Сергея: вывеска для Fresh Bowl на Мясницкой\n\nКсения, добрый день!\n\nПодготовила для Сергея короткую страницу: что вы получаете — вывеску, проверенную до отгрузки, по договору с гарантией, с выездом по гарантийному случаю в течение 3 рабочих дней. И ответ на его главный вопрос: почему у нас буквы не гаснут. Просто перешлите ему — это займёт 10 секунд.\n\n---\n\nСергей, добрый день!\n\nПо вывеске для Fresh Bowl на Мясницкой вы получаете:\n\n1. Готовую и проверенную вывеску. Каждую конструкцию мы включаем и проверяем с подсветкой до отгрузки — тёмных участков и сюрпризов на фасаде не будет.\n\n2. Проект, проработанный экспертом. Макет проверяем по требованиям города до запуска производства — вывеску не придётся переделывать или снимать.\n\n3. Работу по договору. Срок, цена и гарантия зафиксированы на бумаге. Если что-то случится в гарантийный срок — выезжаем в течение 3 рабочих дней, ремонт бесплатно.\n\n4. Вывеску точно к дате. Производство своё, от поставщиков не зависим — дату держим.\n\nЕсли удобно, готов коротко созвониться и ответить на вопросы — 15 минут, и всё станет понятно.\n\n[Имя] из «Яркой Рекламы»\n\n---\n\n### Касание 4 · Звонок · экспертное · ЗС\n_Когда: 4 декабря (пт), днём_\n\n**Перед касанием:** проверить по производственному плану, какой слот свободен на этой неделе, и уточнить у производства, какой вариант временной вывески допустим для помещения на Мясницкой, — чтобы честно предложить вариант к открытию.\n\nКсения, это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой.\n\n[пауза]\n\nСкажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть. Но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант временной вывески возможен, и вернусь с цифрами. Как вам?\n\n[Если Ксения говорит «дорого»]\nПонимаю, хочется не переплатить. Давайте разберём, что входит в цену: производство, монтаж, проверка до отгрузки, гарантия по договору. Если бюджет другой — подберу варианты, но честно скажу, чем каждый отходит от задания. По стоимости удобнее голосом — можем сейчас коротко обсудить?\n\n[Если Ксения торгуется]\nПоняла вас. N% — точно не смогу, у меня таких полномочий нет. Могу попробовать согласовать с руководителем небольшую уступку — если получится, готовы заключаться сегодня?\n\n[Если Ксения не берёт трубку]\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой. Скажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с цифрами. Как вам?\n\n---\n\n### Касание 5 · Кружок (видео)\n_Когда: 9 декабря (ср), вечером_\n\n**Перед касанием:** перечитать переписку и поднять вопрос с датой открытия 15 декабря — чтобы повод кружка был привязан к конкретной детали проекта.\n\nКсения, как вы? Решила записать короткое видео в связи с датой открытия на Мясницкой — и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 6 · WhatsApp · последний шанс\n_Когда: 14 декабря (пн), утром_\n\n**Перед касанием:** перечитать всю переписку с Ксенией, чтобы последнее сообщение было тёплым и без претензий.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу в последний раз по вывеске для Мясницкой.\n\nСкажите как есть: проект актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея, и вы не будете тратить время на мои сообщения. Дверь останется открытой — если вернётесь к вывеске, буду рада помочь.\n\nЕсли да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с вариантами. Как вам?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "дорого + недоверие",
+     "today": "2026-11-19",
+     "expect": [
+      "следующий шаг",
+      "на «дорого» — выяснение причины / локализация, без скидки",
+      "доверие — договор, гарантия по договору, выезд за 3 рабочих дня, реальные кейсы; без выдумок",
+      "в переписке, звонок не навязывать"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-19",
+       "timing": "Сегодня, 19 ноября (чт)",
+       "channel": "WhatsApp",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Дать Ксении готовый ответ для Сергея по доверию и попросить организовать прямой контакт с ним",
+       "key_message": "Ксения, спасибо, что передали вопрос Сергея. Отвечу так, чтобы вы могли просто переслать ему. Чем мы лучше тех, кто подвёл: у нас своё производство — буквы собираем и проверяем с подсветкой до отгрузки, поэтому «погаснет через три месяца» исключено. Гарантия закреплена в договоре, выезд по гарантийному случаю — 3 рабочих дня, ремонт бесплатно. Прошлый подрядчик пропал — у нас один менеджер ведёт проект от макета до монтажа, и вы всегда знаете, кому звонить. Чтобы Сергей получил ответы напрямую, а не через пересказ — можете дать его контакт? Я напишу коротко, без давления.",
+       "value": "Ксении не придётся пересказывать Сергею наши гарантии и отвечать за неточности — она просто перешлёт готовый ответ",
+       "criterion": "Д — доверие",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (ответ Ксении): ответ на вопрос Сергея «чем вы лучше» начинается с результата для него — «буквы не погаснут через три месяца, потому что проверяем с подсветкой до отгрузки», а не с перечисления наших характеристик",
+        "Касание 1 (ответ Ксении): просьба дать контакт Сергея построена на пользе для Ксении — «чтобы вам не пересказывать и не отвечать за неточности», без упрёка и без обхода",
+        "Касание 4 (звонок Сергею): только с пометкой «только если Ксения даст контакт или согласится организовать» — согласия в переписке пока нет",
+        "Касание 4 (звонок Сергею): разговор о цене — только голосом, без скидки; если Сергей упрётся в бюджет — предложить вариант под бюджет с честным риском отхода от ТЗ, а не снижать цену",
+        "Касание 2 (кейс): использовать кейс Smoke Dog из файла отрасли — сеть кальянных, логотип из нержавейки с контражурной подсветкой; не выдумывать другие кейсы",
+        "Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).",
+        "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "2 декабря (ср) – 3 декабря (чт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения",
+         "value": "Готовый ответ для Сергея, который можно просто переслать — не придётся пересказывать и отвечать за неточности"
+        }
+       ],
+       "hook": {
+        "quote": "Сергей спрашивает, чем вы лучше тех, кто нас подвёл в прошлый раз",
+        "prep": "Перед касанием: перечитать переписку, выписать вопрос Сергея и факты компании для ответа (своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня). Проверить, не прислала ли Ксения фото фасада.",
+        "opening": "Ксения, добрый день! Спасибо, что передали вопрос Сергея. Подготовила ответ — сможете просто переслать ему."
+       },
+       "body": "Ксения, добрый день! Спасибо, что передали вопрос Сергея. Подготовила ответ — сможете просто переслать ему.\n\nВот что написать Сергею:\n\n«Сергей, по поводу вашего вопроса — чем мы лучше тех, кто подвёл. Вы получаете как результат готовую и проверенную вывеску: буквы не погаснут через три месяца, потому что каждую вывеску мы собираем и проверяем с подсветкой до отгрузки. На фасад уезжает только то, что уже горит. И гарантия будет не пустой звук, а правило, закреплённое договором: если что-то случится — выезжаем в течение 3 рабочих дней, ремонт бесплатно. Прошлый подрядчик пропал — у нас такого не будет: один менеджер ведёт проект от макета до монтажа, и вы всегда знаете, кому звонить».",
+       "channel": "WhatsApp",
+       "timing": "Сегодня, 19 ноября (чт)",
+       "kind": "экспертное",
+       "criterion": "Д — доверие",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Сергей посмотрел КП и говорит «дорого, другие предлагают на 15% дешевле» — торг со ссылкой на конкурента, а не отказ по деньгам",
+        "Клиент называет условие покупки через цену — значит, бюджет на проект есть, ориентир ≈ 204 000 ₽ (240 000 минус 15%)"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Ксения сама инициировала контакт 03.11 с конкретной задачей: объёмные буквы с подсветкой и световой логотип на фасад ~5 метров",
+        "Названа конкретная дата открытия — 15 декабря",
+        "Это вторая точка сети — потребность повторяющаяся, не разовая"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Риск",
+       "evidence": [
+        "Ксения прямо сообщила о негативном опыте: «через три месяца половина букв погасла, а они перестали брать трубку»",
+        "Сергей задаёт прямой вопрос: «чем вы лучше тех, кто нас подвёл в прошлый раз»",
+        "Фото фасада, обещанное на неделе 04.11, так и не прислали — клиент не раскрывается",
+        "Ксения избегает голосового контакта: «говорить не могу — пишите сюда»"
+       ],
+       "confidence": "high"
+      },
+      "authority": {
+       "status": "Риск",
+       "evidence": [
+        "Ксения — маркетолог, прямо сказано: «решение по деньгам и подрядчику принимает собственник Сергей»",
+        "Контакта Сергея у менеджера нет",
+        "Всё общение идёт через Ксению, которая только пересылает КП и передаёт слова Сергея"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Срок клиента горит: с запасом, запас 7 раб. дн.",
+        "Открытие точки 15 декабря — конкретная дата, к которой нужна вывеска",
+        "Сергей уже посмотрел КП и отвечает по существу — решение обсуждается, а не отложено",
+        "Торг со ссылкой на конкурента — сигнал, что клиент в процессе выбора, а не «подумаем»"
+       ],
+       "confidence": "medium"
+      }
+     },
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «чем вы лучше тех, кто нас подвёл в прошлый раз» — боится повторения: буквы погасли, подрядчик пропал (Сергей)\n- **Прибыль:** «дорого, другие предлагают на 15% дешевле» — сравнивает цену и не хочет переплачивать (Сергей)\n\n**Вывод:** Сделка живая: клиент ответил после 11 дней тишины, Сергей посмотрел КП и торгуется — это сигнал к покупке, а не отказ. Бюджет есть (ориентир ≈ 204 000 ₽), потребность подтверждена, дата открытия 15 декабря держит срочность. Главный блокер — доверие: Сергей прямо спрашивает, чем мы лучше подрядчика, который подвёл в прошлый раз. Пока этот вопрос не закрыт, цена «дорого» не сдвинется никакой скидкой. Второй блокер — ЛПР: решение принимает Сергей, но менеджер общается только с Ксенией и не имеет его контакта. Ответ по доверию должен дойти до Сергея напрямую, а не через пересказ Ксении.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (нет), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, с кем именно сравнивают и что входит в предложение конкурента на 15% дешевле — попросить показать их КП для честного сравнения состава\n- Спросить Ксению, какой ориентир по бюджету у Сергея и что для него важнее при выборе — цена или гарантия, что буквы не погаснут\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 19 ноября (чт): производство 7 рабочих дней — до 30 ноября (пн), монтаж 2–3 раб. дн. — готово 2 декабря (ср) – 3 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 7 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть вопрос доверия Сергея: показать, чем мы отличаемся от подрядчика, который подвёл, и дать гарантии, которые можно проверить\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею наши гарантии и отвечать за неточности — она просто перешлёт готовый ответ или организует короткий звонок\n- **ЛПР:** Сергей получит вывеску, которая горит с первого дня и не погаснет через три месяца: своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня — и откроет точку 15 декабря с вывеской, которая работает\n\n### Обязательно в касаниях\n\n1. Касание 1 (ответ Ксении): ответ на вопрос Сергея «чем вы лучше» начинается с результата для него — «буквы не погаснут через три месяца, потому что проверяем с подсветкой до отгрузки», а не с перечисления наших характеристик\n2. Касание 1 (ответ Ксении): просьба дать контакт Сергея построена на пользе для Ксении — «чтобы вам не пересказывать и не отвечать за неточности», без упрёка и без обхода\n3. Касание 4 (звонок Сергею): только с пометкой «только если Ксения даст контакт или согласится организовать» — согласия в переписке пока нет\n4. Касание 4 (звонок Сергею): разговор о цене — только голосом, без скидки; если Сергей упрётся в бюджет — предложить вариант под бюджет с честным риском отхода от ТЗ, а не снижать цену\n5. Касание 2 (кейс): использовать кейс Smoke Dog из файла отрасли — сеть кальянных, логотип из нержавейки с контражурной подсветкой; не выдумывать другие кейсы\n6. Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).\n\n### Следующий шаг\n\n1. Сегодня, 19 ноября (чт) · WhatsApp · экспертное · Д — Ксения (маркетолог): Дать Ксении готовый ответ для Сергея по доверию и попросить организовать прямой контакт с ним\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка живая: Сергей посмотрел КП и торгуется — это сигнал к покупке, а не отказ. Главный блокер — доверие: Сергей прямо спрашивает, чем мы лучше подрядчика, который подвёл. Пока этот вопрос не закрыт, цена «дорого» не сдвинется никакой скидкой. Стратегия: ответить на вопрос доверия через результат для Сергея (своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня), дать Ксении готовый ответ для пересылки, и параллельно выходить на прямой контакт с Сергеем через Ксению. Если через 3 касания движения нет — честно зафиксировать статус сделки.\n\n## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: Сегодня, 19 ноября (чт)_\n\n**Перед касанием:** перечитать переписку, выписать вопрос Сергея и факты компании для ответа (своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня). Проверить, не прислала ли Ксения фото фасада.\n\nКсения, добрый день! Спасибо, что передали вопрос Сергея. Подготовила ответ — сможете просто переслать ему.\n\nВот что написать Сергею:\n\n«Сергей, по поводу вашего вопроса — чем мы лучше тех, кто подвёл. Вы получаете как результат готовую и проверенную вывеску: буквы не погаснут через три месяца, потому что каждую вывеску мы собираем и проверяем с подсветкой до отгрузки. На фасад уезжает только то, что уже горит. И гарантия будет не пустой звук, а правило, закреплённое договором: если что-то случится — выезжаем в течение 3 рабочих дней, ремонт бесплатно. Прошлый подрядчик пропал — у нас такого не будет: один менеджер ведёт проект от макета до монтажа, и вы всегда знаете, кому звонить».\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "торг 20% + табличка + баннер",
+     "today": "2026-11-20",
+     "expect": [
+      "следующий шаг: подготовка к Zoom с ЛПР",
+      "торг = сигнал к покупке; 20% — сопротивление, уступка только голосом и в обмен",
+      "табличка — допродажа или подарок вместо скидки",
+      "баннер на фасаде в Москве нельзя (902-ПП) — только внутри; цену баннера не выдумывать"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-20",
+       "timing": "Сегодня, 20 ноября (пт)",
+       "channel": "WhatsApp",
+       "kind": "экспертное",
+       "recipient": "Ксения (маркетолог)",
+       "condition": "",
+       "goal": "Ответить Ксении на вопросы Сергея (табличка, временный баннер) и зафиксировать Zoom на понедельник; скидку в переписке не обсуждать — перевести в голос",
+       "key_message": "Ксения, спасибо! По табличке с режимом работы — да, она нужна: по закону о защите прав потребителей её размещают у входа, и у нас она идёт в подарок при заказе от 50 000 ₽ — ваш заказ подходит. По временному баннеру: в Москве баннерную ткань на фасаде размещать нельзя, но можно повесить временную вывеску внутри помещения — к открытию покупатели вас найдут. По скидке 20% — у меня таких полномочий нет, но я подготовлю для Сергея расчёт и варианты, и в понедельник на Zoom всё честно разберём: что входит в цену и как сделать так, чтобы не переплатить. Zoom в понедельник в силе?",
+       "value": "Ксении не нужно самой разбираться в требованиях к табличке и баннеру — она получает готовые ответы для Сергея и выглядит подготовленной",
+       "criterion": "Д — доверие",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (Ксении): ответить на вопрос Сергея про табличку с режимом работы — она нужна по закону о защите прав потребителей и идёт в подарок при заказе от 50 000 ₽ (из переписки 20.11)",
+        "Касание 1 (Ксении): ответить на вопрос про временный баннер — в Москве баннерную ткань на фасаде размещать нельзя (902-ПП), но можно временную вывеску внутри помещения (из переписки 20.11)",
+        "Касание 2 (Zoom с Сергеем): ответить на его вопрос «чем вы лучше тех, кто подвёл» — через результат: проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня, один менеджер от макета до монтажа (из переписки 19.11)",
+        "Касание 2 (Zoom с Сергеем): скидку 20% не давать — у менеджера нет полномочий, предложить согласовать небольшую уступку только в обмен на подписание на этой неделе (из переписки 20.11)",
+        "Касание 2 (Zoom с Сергеем): пригласить на встречу на производстве (акрил — Мытищи) — сильнейший шаг доверия, Сергей прогрет (деньги есть, ЛПР на связи)",
+        "Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).",
+        "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "3 декабря (чт) – 4 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Ксения (маркетолог)",
+         "value": "Готовые ответы для Сергея по табличке и баннеру — не нужно самой разбираться в требованиях, выглядит подготовленной перед руководством"
+        }
+       ],
+       "hook": {
+        "quote": "Сергей готов созвониться в Zoom в понедельник. Но сказал так: сделаете на 20% дешевле — подпишем сразу. Ещё вопрос: нужна ли нам табличка с режимом работы? И можно до открытия повесить временный баннер на фасад?",
+        "prep": "Перед касанием: открыть переписку с Ксенией, перечитать вопросы Сергея от 20.11 (табличка, баннер, скидка 20%), проверить по 902-ПП правила для баннерной ткани на фасаде в Москве, подготовить ответ про табличку (закон о защите прав потребителей + подарок от 50 000 ₽), проверить, пришло ли фото фасада от Ксении (04.11 обещала «на неделе» — не пришло).",
+        "opening": "Ксения, добрый день! Спасибо, что написали — разобрала вопросы Сергея, сейчас всё по порядку."
+       },
+       "body": "Ксения, добрый день! Спасибо, что написали — разобрала вопросы Сергея, сейчас всё по порядку.\n\nПо табличке с режимом работы — да, она нужна: по закону о защите прав потребителей её размещают у входа. И у нас она идёт в подарок при заказе от 50 000 ₽ — ваш заказ подходит, так что табличку сделаем без доплаты.\n\nПо временному баннеру: в Москве баннерную ткань на фасаде размещать нельзя — такие правила города. Но можно повесить временную вывеску внутри помещения, чтобы к открытию покупатели вас нашли. По стоимости временной сориентирую — напишите, и я подберу варианты.\n\nПо скидке — у меня таких полномочий нет, это правда. Но в понедельник на Zoom всё честно разберём: что входит в цену и как сделать так, чтобы не переплатить. По стоимости удобнее голосом — там быстрее и понятнее.\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде, и Сергей увидит, как вывеска будет выглядеть на Мясницкой ещё до Zoom.\n\nZoom в понедельник в силе? Во сколько удобнее?",
+       "channel": "WhatsApp",
+       "timing": "Сегодня, 20 ноября (пт)",
+       "kind": "экспертное",
+       "criterion": "Д — доверие",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Сергей говорит: «сделаете на 20% дешевле — подпишем сразу» — торг с условием покупки, значит деньги есть",
+        "КП на 240 000 ₽ получено и рассмотрено ЛПР",
+        "Упоминание конкурентов «на 15% дешевле» — клиент сравнивает цены, то есть ориентируется в бюджете"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Ксения сама описала задачу: вывеска на фасад, объёмные буквы с подсветкой и световой логотип, фасад ~5 метров",
+        "Названа конкретная дата открытия — 15 декабря",
+        "Это вторая точка сети — потребность повторяющаяся, формат уже отработан",
+        "Клиент инициировал контакт сам (03.11)"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Риск",
+       "evidence": [
+        "Ксения (04.11): «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный»",
+        "Сергей прямо спрашивает: «чем вы лучше тех, кто нас подвёл в прошлый раз»",
+        "Сергей согласился на Zoom — это шаг навстречу, но вопрос доверия остаётся открытым"
+       ],
+       "confidence": "high",
+       "next_step": "production"
+      },
+      "authority": {
+       "status": "Подтверждено",
+       "evidence": [
+        "ЛПР (Сергей) вышел на прямой контакт с менеджером",
+        "Ксения прямо сказала: «Решение по деньгам и подрядчику принимает собственник Сергей»",
+        "Сергей посмотрел КП и лично торгуется — значит он вовлечён в решение",
+        "Сергей согласился на Zoom в понедельник — прямой контакт с ЛПР назначен",
+        "Но прямого контакта с Сергеем у менеджера пока нет, общение идёт через Ксению"
+       ],
+       "confidence": "medium"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Открытие точки — 15 декабря, конкретная дата",
+        "Ксения (03.11): «Открытие 15 декабря — успеете?» — клиент сам торопит",
+        "Сергей готов созвониться в Zoom в понедельник 23.11 — движение к решению идёт",
+        "По срокам успеваем с запасом 6 рабочих дней"
+       ],
+       "confidence": "high"
+      }
+     },
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Сергей)\n- **Прибыль:** «сделаете на 20% дешевле — подпишем сразу» — торгуется за цену, считает деньги (Сергей)\n\n**Вывод:** Сделка живая и движется: ЛПР (Сергей) посмотрел КП, торгуется и согласился на Zoom в понедельник 23.11. Потребность подтверждена — открытие 15 декабря, задача описана конкретно. Финансы подтверждены — торг с условием «подпишем сразу» означает, что деньги есть. Срочность подтверждена — дата открытия жёсткая, по срокам успеваем с запасом. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и прямо спрашивает, чем мы лучше. Пока этот вопрос не закрыт, скидка в 20% не решит проблему — это проверка, а не готовность купить. На Zoom в понедельник нужно отвечать на вопрос доверия через результат для Сергея, а не снижать цену. Вторичный блокер — ЛПР: прямого контакта с Сергеем пока нет, но Zoom назначен, и если он состоится, этот критерий перейдёт в Подтверждено.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, с кем именно сравнивает Сергей и что предлагают конкуренты — попросить показать их КП для честного сравнения состава\n- Уточнить у Сергея на Zoom, какой бюджет он закладывал на вывеску — чтобы понять, есть ли смысл предлагать вариант под бюджет с честным риском отхода от ТЗ\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 20 ноября (пт): производство 7 рабочих дней — до 1 декабря (вт), монтаж 2–3 раб. дн. — готово 3 декабря (чт) – 4 декабря (пт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 6 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть вопрос доверия Сергея через результат и личный контакт, не снижая цену\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не нужно пересказывать Сергею технические детали и отвечать за неточности — она получает готовые ответы и выглядит подготовленной перед руководством\n- **ЛПР:** Сергей получает вывеску, которая не погаснет через три месяца: проверка с подсветкой до отгрузки, гарантия как правило договора, выезд за 3 рабочих дня — и дата открытия 15 декабря не сдвинется\n\n### Обязательно в касаниях\n\n1. Касание 1 (Ксении): ответить на вопрос Сергея про табличку с режимом работы — она нужна по закону о защите прав потребителей и идёт в подарок при заказе от 50 000 ₽ (из переписки 20.11)\n2. Касание 1 (Ксении): ответить на вопрос про временный баннер — в Москве баннерную ткань на фасаде размещать нельзя (902-ПП), но можно временную вывеску внутри помещения (из переписки 20.11)\n3. Касание 2 (Zoom с Сергеем): ответить на его вопрос «чем вы лучше тех, кто подвёл» — через результат: проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня, один менеджер от макета до монтажа (из переписки 19.11)\n4. Касание 2 (Zoom с Сергеем): скидку 20% не давать — у менеджера нет полномочий, предложить согласовать небольшую уступку только в обмен на подписание на этой неделе (из переписки 20.11)\n5. Касание 2 (Zoom с Сергеем): пригласить на встречу на производстве (акрил — Мытищи) — сильнейший шаг доверия, Сергей прогрет (деньги есть, ЛПР на связи)\n6. Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).\n\n### Следующий шаг\n\n1. Сегодня, 20 ноября (пт) · WhatsApp · экспертное · Д — Ксения (маркетолог): Ответить Ксении на вопросы Сергея (табличка, временный баннер) и зафиксировать Zoom на понедельник; скидку в переписке не обсуждать — перевести в голос\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка живая: ЛПР на связи, деньги есть, сроки с запасом. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и торгуется на 20%, но это проверка, а не готовность купить. Стратегия: не снижать цену, а закрыть доверие через результат — Zoom с ответом «чем мы лучше» через проверку с подсветкой до отгрузки и гарантию в договоре, затем встреча на производстве (сильнейший шаг), и только после этого — небольшая уступка через полномочия в обмен на подписание. Скидку обсуждать только голосом. Сроки держим: последний день старта — 30 ноября, вывеска к открытию 15 декабря.\n\n## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: Сегодня, 20 ноября (пт)_\n\n**Перед касанием:** открыть переписку с Ксенией, перечитать вопросы Сергея от 20.11 (табличка, баннер, скидка 20%), проверить по 902-ПП правила для баннерной ткани на фасаде в Москве, подготовить ответ про табличку (закон о защите прав потребителей + подарок от 50 000 ₽), проверить, пришло ли фото фасада от Ксении (04.11 обещала «на неделе» — не пришло).\n\nКсения, добрый день! Спасибо, что написали — разобрала вопросы Сергея, сейчас всё по порядку.\n\nПо табличке с режимом работы — да, она нужна: по закону о защите прав потребителей её размещают у входа. И у нас она идёт в подарок при заказе от 50 000 ₽ — ваш заказ подходит, так что табличку сделаем без доплаты.\n\nПо временному баннеру: в Москве баннерную ткань на фасаде размещать нельзя — такие правила города. Но можно повесить временную вывеску внутри помещения, чтобы к открытию покупатели вас нашли. По стоимости временной сориентирую — напишите, и я подберу варианты.\n\nПо скидке — у меня таких полномочий нет, это правда. Но в понедельник на Zoom всё честно разберём: что входит в цену и как сделать так, чтобы не переплатить. По стоимости удобнее голосом — там быстрее и понятнее.\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде, и Сергей увидит, как вывеска будет выглядеть на Мясницкой ещё до Zoom.\n\nZoom в понедельник в силе? Во сколько удобнее?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "тишина после Zoom",
+     "today": "2026-11-26",
+     "expect": [
+      "весь путь до «последнего шанса»",
+      "условие «согласуем до 25 ноября» прошло — честно, сроки от сегодня",
+      "скидка цифрой письменно — только в финальных касаниях и в обмен на шаг",
+      "не повторять уже отработанное («чем лучше прошлых»)"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-27",
+       "timing": "27 ноября (пт), утром",
+       "channel": "WhatsApp",
+       "kind": "экспертное",
+       "recipient": "Сергей (собственник, ЛПР)",
+       "condition": "",
+       "goal": "Через выгоду ЛПР (владелец 15.11: «всё через выгоду для клиента»): пригласить на встречу на нашем производстве (акрил — Мытищи, сталь — Щёлково), чтобы он ПОЛУЧИЛ спокойствие за свой страх — своими глазами увидел, кто и как делает его вывеску и как её проверяют с подсветкой до отгрузки, и решил без риска повторить прошлый опыт. Начинать с того, что он получает («чтобы вы сами увидели, почему ваши буквы не погаснут через три месяца»), а не с «приглашаем на экскурсию». Конкретное время на выбор («во вторник в 11 или в среду в 15?»). Кейсы и «чем мы лучше» заново не повторять. Цифру «после встречи заключаются» клиенту не называть.",
+       "key_message": "Сергей, записала короткое видео: показываю, как мы проверяем каждую вывеску с подсветкой до отгрузки — чтобы на фасаде не было сюрпризов. Ваша будет проверена так же. Дата открытия 15 декабря в силе?",
+       "value": "Сергей видит реальный процесс проверки — страх «погаснет через три месяца» снимается конкретным доказательством, а не словами",
+       "criterion": "Д — доверие",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (звонок Сергею): попросить прислать фото фасада — Ксения обещала 04.11 («Фото пришлю на неделе»), без него нельзя сделать визуализацию, которую менеджер уже обещал («сделаем визуализацию на вашем фасаде бесплатно»)",
+        "Касание 1 (звонок Сергею): ответить на вопрос Сергея «чем вы лучше тех, кто нас подвёл» — через результат для него: «вы получаете вывеску, проверенную до отгрузки, с гарантией по договору и выездом за 3 рабочих дня», а не через перечисление «у нас есть»",
+        "Касание 2 (приглашение на производство): начинать с выгоды для Сергея — «своими глазами увидите, почему ваши буквы не погаснут», а не с процесса «приезжайте посмотреть цех»",
+        "Переписка: 03.11 менеджер писал клиенту «Успеваем, если согласуем макет до 25 ноября.» — эта дата прошла. Хотя бы в одном касании контактному лицу честно сослаться на это и сказать, что изменилось, — иначе клиент услышит «обещали и не делаете».",
+        "Экспертный повод (закон о русском языке, 168-ФЗ, с 1.03.2026): в названии латиница — спросить, зарегистрировано ли название как товарный знак (тогда можно как есть; иначе нужен русский текст). Как вопрос, без пугалок и штрафов."
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 2,
+       "send_date": "2026-11-30",
+       "timing": "30 ноября (пн), днём",
+       "channel": "Кружок",
+       "kind": "эмпатичное",
+       "recipient": "Сергей (собственник, ЛПР)",
+       "condition": "",
+       "goal": "Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать",
+       "key_message": "",
+       "value": "клиент видит, что о его проекте думают и работают",
+       "criterion": null,
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "впритык",
+        "permanent_ready_if_start_that_day": "11 декабря (пт) – 14 декабря (пн)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": true,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "full"
+      },
+      {
+       "touchpoint_number": 3,
+       "send_date": "2026-12-01",
+       "timing": "1 декабря (вт), вечером",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Сергей (собственник, ЛПР)",
+       "condition": "",
+       "goal": "Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.",
+       "key_message": "Сергей, я не хочу тратить ваше время. Если решение не принято до 30 ноября — вывеска не успеет к открытию 15 декабря, и это будет честно. Скажите как есть: мы работаем или вы выбрали другой вариант? Если работаем — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство.",
+       "value": "Сергей получает честность: мы не давим, а прямо говорим о риске для его даты открытия — и он решает без неопределённости",
+       "criterion": "ЗС — здесь и сейчас",
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "впритык",
+        "permanent_ready_if_start_that_day": "14 декабря (пн) – 15 декабря (вт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": true,
+       "weekend": false,
+       "path_mode": "full"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Сергей (собственник, ЛПР)",
+         "value": "Своими глазами увидит, как проверяют его вывеску с подсветкой до отгрузки — страх «погаснет через три месяца» снимается доказательством, а не словами"
+        }
+       ],
+       "hook": {
+        "quote": "«В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку»",
+        "prep": "Перед касанием: позвонить на производство в Мытищи, уточнить у технолога, как проходит проверка подсветки букв из акрила перед отгрузкой, и согласовать два слота для визита Сергея — вторник 11:00 и среда 15:00.",
+        "opening": "Сергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть."
+       },
+       "body": "Сергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть.\n\nПомните, Ксения говорила, что в прошлый раз буквы погасли через три месяца? Чтобы вы сами увидели, почему с нами такого не будет, — приглашаю вас к нам на производство в Мытищи. Покажу, как проверяем каждую букву с подсветкой до отгрузки. Ваша будет проверена так же.\n\nКстати, Ксения обещала прислать фото фасада — без него не могу сделать визуализацию. Скинете сейчас? Я сразу запущу дизайнеру, и вы получите картинку вывески на вашем фасаде ещё до встречи.\n\nВо вторник в 11 или в среду в 15? Как вам удобнее?",
+       "channel": "WhatsApp",
+       "timing": "27 ноября (пт), утром",
+       "kind": "экспертное",
+       "criterion": "Д — доверие",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 2,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Сергей (собственник, ЛПР)",
+         "value": "Видит, что о его проекте думают и работают — появляется интрига и желание созвониться"
+        }
+       ],
+       "hook": {
+        "quote": "«Фасад примерно 5 метров»",
+        "prep": "Перед касанием: открыть макет Fresh Bowl, посмотреть на ширину фасада 5 метров и прикинуть, как разместятся буквы и логотип, чтобы повод был конкретным.",
+        "opening": "Сергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует!"
+       },
+       "body": "Сергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?",
+       "channel": "Кружок",
+       "timing": "30 ноября (пн), днём",
+       "kind": "эмпатичное",
+       "criterion": null,
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 3,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Сергей (собственник, ЛПР)",
+         "value": "Получает честность: мы не давим, а прямо говорим о риске для его даты открытия — и он решает без неопределённости"
+        }
+       ],
+       "hook": {
+        "quote": "«Открытие 15 декабря — успеете?»",
+        "prep": "Перед касанием: открыть переписку, перечитать обещание от 03.11 «Успеваем, если согласуем макет до 25 ноября» и посчитать по фактам: если стартуем сегодня, готовность 14–15 декабря — впритык к открытию.",
+        "opening": "Сергей, добрый вечер! Решила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию."
+       },
+       "body": "Сергей, добрый вечер! Это [Имя], компания «Яркая Реклама».\n\n[Пауза]\n\nРешила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию.\n\n[Пауза]\n\nПомните, я писала Ксении 3 ноября, что успеваем, если согласуем макет до 25 ноября? Эта дата прошла. Если мы запускаемся сейчас, вывеска будет готова 14–15 декабря — впритык к вашему открытию. Я не хочу обещать то, чего не смогу сделать.\n\n[Пауза]\n\nПоэтому хочу спросить прямо: проект ещё актуален? Если да — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство. Если нет — так и скажите, я не буду больше отвлекать вас и тратить ваше время.\n\n[Пауза]\n\nКак есть?",
+       "channel": "Звонок",
+       "timing": "1 декабря (вт), вечером",
+       "kind": "экспертное",
+       "criterion": "ЗС — здесь и сейчас",
+       "last_chance": true
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Сергей (ЛПР) сказал: «сделаете на 20% дешевле — подпишем сразу» — это условие покупки, значит деньги есть",
+        "Ориентир бюджета ≈ 192 000 ₽ (240 000 ₽ минус 20%)",
+        "КП на 240 000 ₽ получено, возражение «дорого» — торг, а не отсутствие денег"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Ксения сама описала задачу: вывеска на фасад, объёмные буквы с подсветкой + световой логотип, фасад ~5 метров",
+        "Назван конкретный дедлайн: открытие 15 декабря",
+        "Клиент инициировал контакт сам (03.11)",
+        "Вторая точка сети — потребность реальная, привязана к открытию"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Вероятно",
+       "evidence": [
+        "Клиенту понравились наши работы / предложение",
+        "Ксения (04.11): «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный»",
+        "Сергей (19.11): «чем вы лучше тех, кто нас подвёл в прошлый раз» — прямое недоверие к категории подрядчиков",
+        "Торг на 20% со ссылкой на конкурентов дешевле на 15% — проверка, а не готовность",
+        "После Zoom 23.11 («понравились работы») — тишина 3 дня, решение не принято"
+       ],
+       "confidence": "high",
+       "next_step": "production"
+      },
+      "authority": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Сергей — собственник, решение по деньгам и подрядчику принимает он (со слов менеджера)",
+        "Сергей вышел на прямой контакт: согласился на Zoom 23.11, разговор состоялся",
+        "Сергей лично назвал условие покупки: «сделаете на 20% дешевле — подпишем сразу»"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Срок клиента горит: с запасом, запас 2 раб. дн.",
+        "Открытие второй точки 15 декабря — конкретная дата",
+        "Клиент сам спросил 03.11: «Открытие 15 декабря — успеете?»",
+        "Сергей торгуется и называет условие подписания — признак готовности к сделке",
+        "Но: после Zoom 23.11 — «подумаю» и 3 дня тишины, решения нет"
+       ],
+       "confidence": "medium"
+      }
+     },
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Сергей)\n- **Прибыль:** «Дорого, другие предлагают на 15% дешевле» и «сделаете на 20% дешевле — подпишем сразу» — считает деньги, сравнивает цены (Сергей)\n\n**Вывод:** Сделка живая и по сути готова к закрытию: потребность подтверждена (открытие 15 декабря), ЛПР вышел на прямой контакт и назвал условие покупки, деньги есть (торг на 20% — это сигнал к покупке, а не отсутствие бюджета). Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и проверяет нас вопросом «чем вы лучше» и торгом. Скидка здесь не решит проблему — Сергей боится повторить прошлый опыт, а не переплатить. Закрывать нужно через доказательства надёжности: гарантия в договоре, проверка подсветки до отгрузки, выезд по гарантии за 3 рабочих дня, встреча на производстве. Сроки сжимаются: последний день старта 30 ноября, дальше вывеска не успеет к открытию.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Бюджет (СОПРАНО: Ограничения): клиент говорит о цене — уточнить ориентир по бюджету и с чем сравнивает. «Чтобы предложить подходящий вариант — какой бюджет заложили на вывеску и с чем сравниваете?» Без этого ответ на «дорого» — гадание; скидку не предлагать.\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Сергея, с кем именно сравнивают (кто предложил на 15% дешевле) и что входит в их предложение — чтобы честно сравнить состав, а не только цену\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 26 ноября (чт): производство 7 рабочих дней — до 7 декабря (пн), монтаж 2–3 раб. дн. — готово 9 декабря (ср) – 10 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 2 рабочих дня. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть доверие Сергея через доказательства надёжности и личную встречу на производстве, не через скидку\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею детали и отвечать за подрядчика: мы сами покажем производство и проверку, и она снимет с себя вопрос «чем вы лучше»\n- **ЛПР:** Сергей получает вывеску, которая не погаснет через три месяца: своё производство с проверкой подсветки до отгрузки, гарантия по договору с выездом за 3 рабочих дня, и он видит это своими глазами на производстве — без риска повторить прошлый опыт\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Сергею): попросить прислать фото фасада — Ксения обещала 04.11 («Фото пришлю на неделе»), без него нельзя сделать визуализацию, которую менеджер уже обещал («сделаем визуализацию на вашем фасаде бесплатно»)\n2. Касание 1 (звонок Сергею): ответить на вопрос Сергея «чем вы лучше тех, кто нас подвёл» — через результат для него: «вы получаете вывеску, проверенную до отгрузки, с гарантией по договору и выездом за 3 рабочих дня», а не через перечисление «у нас есть»\n3. Касание 2 (приглашение на производство): начинать с выгоды для Сергея — «своими глазами увидите, почему ваши буквы не погаснут», а не с процесса «приезжайте посмотреть цех»\n4. Переписка: 03.11 менеджер писал клиенту «Успеваем, если согласуем макет до 25 ноября.» — эта дата прошла. Хотя бы в одном касании контактному лицу честно сослаться на это и сказать, что изменилось, — иначе клиент услышит «обещали и не делаете».\n\n### План касаний\n\n1. 27 ноября (пт), утром · WhatsApp · экспертное · Д — Сергей (собственник, ЛПР): Через выгоду ЛПР (владелец 15.11: «всё через выгоду для клиента»): пригласить на встречу на нашем производстве (акрил — Мытищи, сталь — Щёлково), чтобы он ПОЛУЧИЛ спокойствие за свой страх — своими глазами увидел, кто и как делает его вывеску и как её проверяют с подсветкой до отгрузки, и решил без риска повторить прошлый опыт. Начинать с того, что он получает («чтобы вы сами увидели, почему ваши буквы не погаснут через три месяца»), а не с «приглашаем на экскурсию». Конкретное время на выбор («во вторник в 11 или в среду в 15?»). Кейсы и «чем мы лучше» заново не повторять. Цифру «после встречи заключаются» клиенту не называть.\n2. 30 ноября (пн), днём · Кружок · эмпатичное — Сергей (собственник, ЛПР): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n3. 1 декабря (вт), вечером · Звонок · экспертное · ЗС — Сергей (собственник, ЛПР): Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.\n\n_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._\n\n**Обоснование:** Сделка готова к закрытию: потребность, ЛПР, деньги и срочность подтверждены. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и проверяет нас торгом на 20%. Скидка не решит проблему — Сергей боится повторить прошлый опыт, а не переплатить. Закрываем через доказательства надёжности: гарантия в договоре, проверка подсветки до отгрузки, выезд по гарантии за 3 рабочих дня, и сильнейший шаг — приглашение на производство, где Сергей своими глазами увидит, кто и как делает его вывеску. Торг отрабатываем через полномочия: небольшая уступка только в обмен на подписание сегодня. Сроки сжимаются: последний день старта 30 ноября, дальше вывеска не успеет к открытию 15 декабря.\n\n## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: 27 ноября (пт), утром_\n\n**Перед касанием:** позвонить на производство в Мытищи, уточнить у технолога, как проходит проверка подсветки букв из акрила перед отгрузкой, и согласовать два слота для визита Сергея — вторник 11:00 и среда 15:00.\n\nСергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть.\n\nПомните, Ксения говорила, что в прошлый раз буквы погасли через три месяца? Чтобы вы сами увидели, почему с нами такого не будет, — приглашаю вас к нам на производство в Мытищи. Покажу, как проверяем каждую букву с подсветкой до отгрузки. Ваша будет проверена так же.\n\nКстати, Ксения обещала прислать фото фасада — без него не могу сделать визуализацию. Скинете сейчас? Я сразу запущу дизайнеру, и вы получите картинку вывески на вашем фасаде ещё до встречи.\n\nВо вторник в 11 или в среду в 15? Как вам удобнее?\n\n---\n\n### Касание 2 · Кружок (видео)\n_Когда: 30 ноября (пн), днём_\n\n**Перед касанием:** открыть макет Fresh Bowl, посмотреть на ширину фасада 5 метров и прикинуть, как разместятся буквы и логотип, чтобы повод был конкретным.\n\nСергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 3 · Звонок · последний шанс\n_Когда: 1 декабря (вт), вечером_\n\n**Перед касанием:** открыть переписку, перечитать обещание от 03.11 «Успеваем, если согласуем макет до 25 ноября» и посчитать по фактам: если стартуем сегодня, готовность 14–15 декабря — впритык к открытию.\n\nСергей, добрый вечер! Это [Имя], компания «Яркая Реклама».\n\n[Пауза]\n\nРешила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию.\n\n[Пауза]\n\nПомните, я писала Ксении 3 ноября, что успеваем, если согласуем макет до 25 ноября? Эта дата прошла. Если мы запускаемся сейчас, вывеска будет готова 14–15 декабря — впритык к вашему открытию. Я не хочу обещать то, чего не смогу сделать.\n\n[Пауза]\n\nПоэтому хочу спросить прямо: проект ещё актуален? Если да — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство. Если нет — так и скажите, я не буду больше отвлекать вас и тратить ваше время.\n\n[Пауза]\n\nКак есть?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    }
+   ],
+   "residual": [
+    {
+     "n": 1,
+     "fix": "Сократить: 735 из 600 символов для этого канала. Обязательные пункты не выбрасывать — перенести в другое касание."
+    }
+   ],
+   "verdict": {
+    "summary": "Касания в целом сильные: живой язык, реальные факты компании, корректная работа с 902-ПП и 168-ФЗ, правильный выход на ЛПР через согласие Ксении. Главные проблемы — в before_reply касание 6 нарушает правило «деньги только голосом» (обсуждает бюджет и варианты под бюджет письменно), а в after_reply касание 1 содержит фразу «вчера разговаривала с технологом», которая не подтверждена фактами и выглядит как выдумка.",
+    "touches": [
+     {
+      "set": "before_reply",
+      "n": 1,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 2,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 3,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 4,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 5,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 6,
+      "send": "нет",
+      "issues": [
+       {
+        "rule": "Деньги — только голосом",
+        "comment": "В мессенджере обсуждается бюджет: «что стоит за ценой (бюджет, с чем сравнивают)», «при „дорого“ — варианты под бюджет». Это нарушение правила — деньги только звонок или Zoom."
+       },
+       {
+        "rule": "Последний шанс — только последним",
+        "comment": "Касание 6 содержит «Попросить сказать как есть» — это формула последнего шанса, но касание не последнее (есть ещё 7 и 8)."
+       }
+      ]
+     },
+     {
+      "set": "before_reply",
+      "n": 7,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "before_reply",
+      "n": 8,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "after_reply",
+      "n": 1,
+      "send": "с мелкой правкой",
+      "issues": [
+       {
+        "rule": "Факты — только реальные",
+        "comment": "«вчера разговаривала с нашим технологом на производстве» — в prep указано «позвонить на производство», но в тексте касания это подано как уже свершившийся факт. Если звонок не был сделан — это выдумка."
+       }
+      ]
+     },
+     {
+      "set": "after_reply",
+      "n": 2,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "after_reply",
+      "n": 3,
+      "send": "как есть",
+      "issues": []
+     }
+    ],
+    "expectations": [
+     {
+      "expectation": "все 5 критериев формулы (ФВ, ОП, ЛПР, Д, ЗС) — в первом пути",
+      "met": "частично",
+      "comment": "ФВ, ОП, ЛПР, Д, ЗС покрыты, но ФВ в касании 6 нарушает правило «деньги только голосом»."
+     },
+     {
+      "expectation": "повод по 902-ПП (Москва, фасад) и/или 168-ФЗ (латиница Fresh Bowl) — вопросом, без пугалок",
+      "met": "да",
+      "comment": "В касании 1 корректно задан вопрос про товарный знак по 168-ФЗ, без пугалок."
+     },
+     {
+      "expectation": "фото фасада — по шаблону «Помните, мы проговаривали…»",
+      "met": "да",
+      "comment": "Шаблон использован в касаниях 1, 4, 6 и в after_reply 1."
+     },
+     {
+      "expectation": "выход на Сергея — только с согласия Ксении",
+      "met": "да",
+      "comment": "Везде запрашивается согласие Ксении или передача контакта."
+     },
+     {
+      "expectation": "глаголы менеджера — женский род",
+      "met": "да",
+      "comment": "Все глаголы в женском роде: «разбиралась», «подготовила», «позвонила»."
+     },
+     {
+      "expectation": "режимы пути по шагам: весь → весь → шаг → шаг → весь",
+      "met": "да",
+      "comment": "Режимы соответствуют: before_reply full, after_reply full, промежуточные step."
+     },
+     {
+      "expectation": "деньги в переписке после «не берёт трубку»",
+      "met": "частично",
+      "comment": "В промежуточном этапе «не берёт трубку» касание 4 (звонок) корректно обсуждает деньги голосом. Но в before_reply касание 6 нарушает правило."
+     },
+     {
+      "expectation": "торг 20% — сопротивление и обмен",
+      "met": "да",
+      "comment": "В промежуточном этапе «торг 20%» касание 1 корректно сопротивляется скидке и переводит в голос."
+     },
+     {
+      "expectation": "баннер — только внутри",
+      "met": "да",
+      "comment": "В промежуточном этапе «торг 20%» касание 1 корректно указывает, что баннер на фасаде нельзя, только внутри."
+     },
+     {
+      "expectation": "нет выдуманных фактов о компании",
+      "met": "частично",
+      "comment": "В after_reply касание 1 фраза «вчера разговаривала с технологом» может быть выдумкой, если звонок не был сделан."
+     },
+     {
+      "expectation": "«последний шанс» — последним",
+      "met": "частично",
+      "comment": "В before_reply касание 6 содержит формулу последнего шанса, но не является последним касанием."
+     }
+    ],
+    "plan_issues": [
+     "В before_reply касание 6 нарушает правило «деньги только голосом» — обсуждает бюджет и варианты под бюджет письменно в мессенджере.",
+     "В before_reply касание 6 содержит формулу «последнего шанса» («попросить сказать как есть»), но не является последним касанием — это размывает смысл финального касания.",
+     "В after_reply касание 1 фраза «вчера разговаривала с технологом» не подтверждена фактами — если звонок не был сделан, это выдумка."
+    ]
+   },
+   "chat": [
+    {
+     "label": "переписка",
+     "text": "## Формула закрытия\n\n- **ФВ — финансовая возможность:** Неизвестно\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку» (Ксения)\n- **Надёжность:** «Сергей теперь очень осторожный» — после негативного опыта с прошлым подрядчиком (Сергей)\n\n**Вывод:** Сделка зависла на 11 дней после отправки КП. Потребность подтверждена: клиент сам инициировал контакт с конкретным запросом и датой открытия 15 декабря. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, контакта которого нет и с которым не было ни одного прямого общения. Второй блокер — доверие: клиент прямо заявил о негативном опыте с прошлым подрядчиком (погасшие буквы, пропавший подрядчик), Сергей «очень осторожный», и этот барьер не отработан — после КП тишина, фото фасада не прислали. Финансы неизвестны: бюджет не обсуждался. Срочность вероятна: дата открытия названа, запас по производству есть, но согласование макета не начато. Паттерн ложного продвижения: контакт есть, но ЛПР недоступен и движения нет. Без выхода на Сергея и отработки доверия стандартные касания через Ксению результата не дадут.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (нет), Решение (частично), Аналоги (нет), Нюансы (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, смотрят ли они другие варианты/подрядчиков и по каким критериям выбирают\n- Уточнить ориентир по бюджету и с чем сравнивают цену из КП\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 17 ноября (вт): производство 7 рабочих дней — до 26 ноября (чт), монтаж 2–3 раб. дн. — готово 30 ноября (пн) – 1 декабря (вт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 9 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "переписка",
+     "text": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Выйти на собственника Сергея через Ксению и параллельно закрыть доверие фактами\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею детали и отвечать на его вопросы за подрядчика — она получит готовую страницу для передачи и сможет выглядеть подготовленной перед руководством\n- **ЛПР:** Сергей получает вывеску к открытию 15 декабря точно в срок, по цене из КП без доплат, с гарантией по договору и проверкой подсветки до отгрузки — страх повторения прошлого опыта снят\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Ксении): попросить прислать фото фасада — обещала «на неделе» 04.11 («Фото пришлю на неделе»), без него не сделать визуализацию\n2. Касание 2 (Executive Summary для Сергея): начинается с результата для него — вывеска к открытию 15 декабря, без доплат, гарантия по договору, — а не с проблемы\n3. Касание 2 (Executive Summary для Сергея): только если Ксения согласится передать или даст контакт — согласия в переписке нет, в timing пометка «только если Ксения даст контакт / согласится»\n4. Касание 4 (кружок): предложить встречу на производстве в Мытищах — сильнейший инструмент доверия после негативного опыта, клиент увидит проверку подсветки своими глазами\n\n### План касаний\n\n1. Сегодня, 17 ноября (вт) · Звонок · экспертное · ЛПР — Ксения (маркетолог): Возобновить контакт, сверить дату открытия, попросить Ксению организовать выход на Сергея и прислать фото фасада\n2. только если: Ксения согласится передать или даст контакт · Email · экспертное · Д — Сергей (собственник, ЛПР): Дать Сергею одностраничный документ: результат для бизнеса, состав цены, гарантия, почему буквы не погаснут\n3. 20 ноября (пт), утром · Кружок · эмпатичное — Ксения (маркетолог): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n4. 25 ноября (ср), днём · Мессенджер · экспертное · Д — Ксения (маркетолог): Показать похожий реализованный проект и напомнить о бесплатной визуализации на их фасаде\n5. 30 ноября (пн), вечером · Кружок · эмпатичное · Д — Ксения (маркетолог): Человеческое касание: признать осторожность Сергея, предложить встречу на производстве\n6. 3 декабря (чт), утром · Мессенджер · экспертное · ЗС — Ксения (маркетолог): Попросить сказать как есть, чтобы не тратить время клиента Заодно (ФВ — финансовая возможность): Снять вопрос денег персональным предложением: что стоит за ценой (бюджет, с чем сравнивают), что входит в цену КП; при «дорого» — варианты под бюджет с честным «это отход от ТЗ, вот риск». Скидку сами не предлагаем и сопротивляемся ей; если клиент ожил и торгуется («сделаете на N% — закажу») — голосом, через полномочия, небольшая уступка только в обмен на решение (файл 28).\n7. 8 декабря (вт), днём · Кружок · эмпатичное — Ксения (маркетолог): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n8. 11 декабря (пт), вечером · Звонок · экспертное · ЗС — Ксения (маркетолог): Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.\n\n_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._\n\n**Обоснование:** Сделка зависла на 11 дней после КП. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, контакта которого нет. Второй блокер — доверие: клиент прямо заявил о негативном опыте с прошлым подрядчиком, Сергей «очень осторожный». Стратегия: через Ксению выйти на Сергея (Executive Summary, просьба о передаче контакта), параллельно закрывать доверие фактами (проверка подсветки до отгрузки, гарантия по договору, кейс похожего проекта, встреча на производстве). Срочность реальная — дата открытия 15 декабря, запас 9 рабочих дней, последний день старта 30 ноября. Если после 7 касаний без ответа движения нет — спящий режим на 30–40 рабочих дней, затем одно касание «как дела, какие результаты».",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "переписка",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ЛПР\n_Когда: Сегодня, 17 ноября (вт)_\n\n**Перед касанием:** перечитала переписку и КП, сверила расчёт сроков — поняла, что для открытия 15 декабря макет нужно согласовать до 30 ноября. Подготовила короткую страницу для Сергея: что входит в цену, как устроена гарантия, почему буквы не погаснут.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Сверяю по вашему проекту на Мясницкой — и у меня есть пара вопросов, которые помогут нам успеть к открытию.\n\n[пауза]\n\nДата открытия 15 декабря в силе? [пауза, выслушать]\n\nСмотрю по срокам: чтобы вывеска была готова к открытию, макет нужно согласовать до 30 ноября — я держу для вас слот в производстве. Если заходим на этой неделе, всё успеваем спокойно.\n\nИ ещё два момента. Первый: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию, и вы увидите свою вывеску на Мясницкой до оплаты.\n\n[пауза]\n\nВторой: в названии Fresh Bowl латиница. С 1 марта действует закон о русском языке на вывесках — иностранный текст можно оставить, только если название зарегистрировано как товарный знак. Подскажите, регистрировали? Если нет — подберём вариант с русским текстом, чтобы с городом не было вопросов.\n\n[пауза]\n\nИ ещё: я подготовила для Сергея короткую страницу — что входит в цену, как устроена гарантия и почему буквы не погаснут через три месяца. Я сама отвечу на все вопросы Сергея — вам не придётся пересказывать детали и выглядеть неподготовленной. Можете передать ему мой контакт или организовать короткий созвон на 15 минут?\n\n[пауза]\n\nКак вам удобнее?\n\n---\n\n### Касание 2 · Email · экспертное · Д\n_Когда: Только если Ксения согласится передать или даст контакт — после согласия, в тот же день_\n\n**Перед касанием:** собрала одностраничный документ для Сергея по итогам разговора с Ксенией — результат, состав цены, гарантия, проверка подсветки. Проверила, что все цифры из КП и факты компании.\n\n**Тема:** Вывеска Fresh Bowl на Мясницкой, 24 — что вы получаете\n\nСергей, добрый день!\n\nМеня зовут [Имя], я веду проект вывески для Fresh Bowl на Мясницкой, 24. Ксения передала мой контакт — собрала для вас короткую страницу, чтобы вы сразу увидели результат.\n\n**Что вы получаете**\n\nВывеска будет готова к открытию 15 декабря — смонтирована, проверена, горит с первого дня. Объёмные буквы Fresh Bowl с подсветкой и световой логотип.\n\nЦена 240 000 ₽ зафиксирована в договоре — без доплат по ходу.\n\nГарантия — правило договора, а не обещание: если что-то случится, выезжаем в течение 3 рабочих дней, ремонт бесплатно. Вывеска не будет стоять тёмной.\n\nКаждая вывеска проверяется с подсветкой до отгрузки — на фасаде не будет сюрпризов. Буквы не погаснут через три месяца.\n\nПроизводство своё, в Мытищах — от поставщиков не зависим, поэтому дату держим.\n\n**Что нужно от вас**\n\nСогласовать макет до 30 ноября — тогда вывеска будет готова к открытию 15 декабря точно в срок, без переносов. Я подготовила визуализацию на вашем фасаде — пришлите фото, и вы увидите результат до оплаты.\n\nГотов ответить на вопросы по телефону или в Zoom — как удобнее. Мой контакт: [номер].\n\nС уважением,\n[Имя], «Яркая Реклама»\n\n---\n\n### Касание 3 · Кружок (видео)\n_Когда: 20 ноября (пт), утром_\n\n**Перед касанием:** перечитала переписку, посмотрела макет и фото фасада (если прислали) или прикинула по описанию — появилась идея по размещению вывески на фасаде 5 метров.\n\nКсения, добрый день! Решила записать короткое видео — разбиралась с вашим фасадом на Мясницкой, и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 4 · Мессенджер · экспертное · Д\n_Когда: 25 ноября (ср), днём_\n\n**Перед касанием:** подобрала в портфолио похожий проект — кафе «Капи» в ТЦ, объёмные буквы с подсветкой. Подготовила ссылку на фото.\n\nКсения, добрый день! Подбирала похожие работы под ваш проект — нашла то, что вам будет полезно посмотреть.\n\nДелали вывеску для кафе «Капи» в ТЦ — объёмные буквы с подсветкой, как у вас. Вот фото: [фото работы «Капи» — из портфолио]\n\nИ ещё: визуализация на вашем фасаде бесплатна. Пришлите фото фасада — и вы увидите свою вывеску на Мясницкой до оплаты. Как вам?\n\n---\n\n### Касание 5 · Кружок (видео) · эмпатичное · Д\n_Когда: 30 ноября (пн), вечером_\n\n**Перед касанием:** позвонила на производство в Мытищи, уточнила, когда можно принять гостей на этой неделе — подготовила конкретные слоты для визита.\n\nКсения, добрый день! Позвонила на производство в Мытищах — появилась идея, уверена, она вас точно заинтересует. Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 6 · Мессенджер · экспертное · ЗС\n_Когда: 3 декабря (чт), утром_\n\n**Перед касанием:** перечитала всю переписку, сверила сроки — до открытия 15 декабря осталось 12 дней, производство уже не успевает к этой дате. Подготовила честный разговор.\n\nКсения, добрый день! Пишу, чтобы не тянуть и не занимать ваше время.\n\nСкажу честно: к 15 декабря постоянную вывеску уже не успеть. Но можно открыться с временным решением внутри помещения, а постоянную поставить после — тогда точка откроется вовремя и с вывеской, покупатели вас найдут с первого дня. И вам не придётся объяснять Сергею, почему вывеска не готова к открытию — я сама предложу решение.\n\nЕсли вопрос в доверии — давайте я покажу, как мы проверяем подсветку до отгрузки, и вы решите сами. Это можно сделать на производстве в Мытищах или по видео.\n\nКак вам?\n\n---\n\n### Касание 7 · Кружок (видео)\n_Когда: 8 декабря (вт), днём_\n\n**Перед касанием:** пересмотрела проект, подумала над вариантом, как открыться вовремя и с вывеской, даже если постоянная не успевает к 15 декабря — появилась идея по временному решению.\n\nКсения, добрый день! Решила записать короткое видео — думала над вашим открытием 15 декабря, и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 8 · Звонок · последний шанс\n_Когда: 11 декабря (пт), вечером_\n\n**Перед касанием:** перечитала переписку, подготовила честный финальный разговор — без давления, с открытым вопросом.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню в последний раз по вашему проекту — и хочу спросить прямо.\n\n[пауза]\n\nСкажите как есть: проект ещё актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея. Если да — давайте договоримся о конкретном шаге, чтобы успеть хоть что-то сделать.\n\n[пауза, выслушать]\n\nЕсли актуально: до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением внутри помещения, а постоянную поставить после. Или сразу планировать на январь. Как вам?\n\n[пауза]\n\nЕсли нет — спасибо за честность, дверь открыта: если вернётесь к проекту, я на связи.\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "не берёт трубку",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Неизвестно\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Ксения)\n\n**Вывод:** Сделка зависла на 11 дней после отправки КП. Потребность подтверждена — клиент сам пришёл с детальным запросом и конкретным дедлайном. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, которого нет в контакте и который ни разу не появился. Второй блокер — доверие: клиент прямо заявил о прошлом негативном опыте с подрядчиком, и этот барьер не снят. Срочность под угрозой: условие менеджера «согласуем макет до 25 ноября» уже на грани срыва, а фото фасада так и не прислали. Паттерн ложного продвижения: «перешлю Сергею» без дальнейших действий. Без выхода на ЛПР и снятия барьера доверия стандартные касания не сработают.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Решение (частично), Аналоги (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, смотрят ли они другие варианты и с кем сравнивают — это покажет, на каком этапе решение\n- Уточнить ориентир по бюджету: КП на 240 000 ₽ — вписывается ли в ожидания Сергея, с чем сравнивают\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 18 ноября (ср): производство 7 рабочих дней — до 27 ноября (пт), монтаж 2–3 раб. дн. — готово 1 декабря (вт) – 2 декабря (ср). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 8 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "не берёт трубку",
+     "text": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Выйти на собственника Сергея через Ксению, не обходя её, и снять барьер доверия, который он сформировал после прошлого негативного опыта\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею детали и отвечать за подрядчика, если он поймёт что-то не так; она получает готовые материалы для пересылки и выглядит подготовленной перед руководством\n- **ЛПР:** Сергей получает вывеску, проверенную с подсветкой до отгрузки, по договору с гарантией и выездом по гарантийному случаю в течение 3 рабочих дней — без повторения прошлого опыта с погасшими буквами и пропавшим подрядчиком\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Ксении): попросить прислать фото фасада, которое Ксения обещала 04.11 («Фото пришлю на неделе») — по схеме «дайте фото — и вы получите визуализацию на вашем фасаде бесплатно»\n2. Касание 3 (email с материалами для Сергея): текст для ЛПР начинается с того, что Сергей получает — вывеску, проверенную до отгрузки, по договору с гарантией, — а не с проблемы «мы знаем, что вас обожгли»\n3. Касания 1 и 3 (выход на Сергея): согласия Ксении на прямой контакт пока нет — в timing пометка «только если Ксения даст контакт или согласится организовать»\n\n### План касаний\n\n1. Сегодня, 18 ноября (ср) · WhatsApp · экспертное · ЛПР — Ксения (маркетолог): Возобновить контакт с Ксенией, честно сверить статус и попросить организовать контакт с Сергеем — через пользу для неё самой\n2. 23 ноября (пн), утром · Кружок · эмпатичное · Д — Ксения (маркетолог): Дать Ксении визуальное доказательство, которое она может переслать Сергею, и снять страх «погаснет через три месяца»\n3. только если: контакта с Сергеем нет после касаний 1–2 · Email · экспертное · ЛПР — Ксения (маркетолог): Дать Ксении готовый пакет для Сергея: одна страница с результатом, гарантиями и ответом на его страх — и попросить переслать\n4. 4 декабря (пт), днём · Звонок · экспертное · ЗС — Ксения (маркетолог): Закрыть сделку честно: либо получить явный ответ, либо перевести в спящий режим с открытой дверью Заодно (ФВ — финансовая возможность): Снять вопрос денег персональным предложением: что стоит за ценой (бюджет, с чем сравнивают), что входит в цену КП; при «дорого» — варианты под бюджет с честным «это отход от ТЗ, вот риск». Скидку сами не предлагаем и сопротивляемся ей; если клиент ожил и торгуется («сделаете на N% — закажу») — голосом, через полномочия, небольшая уступка только в обмен на решение (файл 28).\n5. 9 декабря (ср), вечером · Кружок · эмпатичное — Ксения (маркетолог): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n6. 14 декабря (пн), утром · WhatsApp · экспертное · ЗС — Ксения (маркетолог): Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.\n\n_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._\n\n**Обоснование:** Сделка зависла на 11 дней после КП. Главный блокер — ЛПР: менеджер работает с маркетологом Ксенией, а решение принимает собственник Сергей, которого нет в контакте. Второй блокер — доверие: клиент прямо заявил о прошлом негативном опыте, и этот барьер не снят. Стратегия — выйти на Сергея через Ксению, не обходя её, и снять его страх через доказательства надёжности: проверка подсветки до отгрузки, договор с гарантией, выезд по гарантийному случаю за 3 рабочих дня. Срочность реальная — открытие 15 декабря, последний день старта 30 ноября. Если после 7 касаний без ответа движения нет — спящий режим на 30–40 рабочих дней, затем одно касание «как дела, какие результаты».",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "не берёт трубку",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · ЛПР\n_Когда: Сегодня, 18 ноября (ср)_\n\n**Перед касанием:** перечитать переписку с Ксенией, поднять КП от 06.11 и проверить по 902-ПП, как разместить вывеску на фасаде Мясницкой, 24 — чтобы в разговоре честно сказать, что макет уже проверяю по требованиям города.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу по вывеске для Мясницкой.\n\nПомню, вы говорили, что Сергей осторожный после прошлого опыта — хочу снять с вас эту нагрузку. Могу сама показать Сергею, как мы проверяем подсветку до отгрузки, и ответить на его вопросы напрямую — вам не придётся ничего пересказывать.\n\nМожете дать его контакт или организовать короткий созвон на 15 минут?\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде бесплатно, и Сергей увидит, как вывеска будет выглядеть на Мясницкой.\n\n---\n\n### Касание 2 · Кружок (видео) · эмпатичное · Д\n_Когда: 23 ноября (пн), утром_\n\n**Перед касанием:** позвонить на производство и уточнить, как проходит проверка подсветки у вывесок, которые сейчас готовятся к отгрузке, — чтобы честно сказать «проверяем каждую вывеску до отгрузки».\n\nКсения, добрый день! Хочу показать, как мы проверяем подсветку до отгрузки — чтобы у Сергея не было страха, что буквы погаснут через три месяца. Сняла короткое видео с производства. Перешлёте ему — это займёт 10 секунд, и ему не придётся верить на слово.\n\n---\n\n### Касание 3 · Email · экспертное · ЛПР\n_Когда: Только если контакта с Сергеем нет после касаний 1–2 — после согласия, в тот же день_\n\n**Перед касанием:** собрать в один файл условия гарантии по договору, порядок проверки подсветки до отгрузки и сроки производства из КП — чтобы письмо содержало только факты компании.\n\n**Тема:** Для Сергея: вывеска для Fresh Bowl на Мясницкой\n\nКсения, добрый день!\n\nПодготовила для Сергея короткую страницу: что вы получаете — вывеску, проверенную до отгрузки, по договору с гарантией, с выездом по гарантийному случаю в течение 3 рабочих дней. И ответ на его главный вопрос: почему у нас буквы не гаснут. Просто перешлите ему — это займёт 10 секунд.\n\n---\n\nСергей, добрый день!\n\nПо вывеске для Fresh Bowl на Мясницкой вы получаете:\n\n1. Готовую и проверенную вывеску. Каждую конструкцию мы включаем и проверяем с подсветкой до отгрузки — тёмных участков и сюрпризов на фасаде не будет.\n\n2. Проект, проработанный экспертом. Макет проверяем по требованиям города до запуска производства — вывеску не придётся переделывать или снимать.\n\n3. Работу по договору. Срок, цена и гарантия зафиксированы на бумаге. Если что-то случится в гарантийный срок — выезжаем в течение 3 рабочих дней, ремонт бесплатно.\n\n4. Вывеску точно к дате. Производство своё, от поставщиков не зависим — дату держим.\n\nЕсли удобно, готов коротко созвониться и ответить на вопросы — 15 минут, и всё станет понятно.\n\n[Имя] из «Яркой Рекламы»\n\n---\n\n### Касание 4 · Звонок · экспертное · ЗС\n_Когда: 4 декабря (пт), днём_\n\n**Перед касанием:** проверить по производственному плану, какой слот свободен на этой неделе, и уточнить у производства, какой вариант временной вывески допустим для помещения на Мясницкой, — чтобы честно предложить вариант к открытию.\n\nКсения, это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой.\n\n[пауза]\n\nСкажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть. Но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант временной вывески возможен, и вернусь с цифрами. Как вам?\n\n[Если Ксения говорит «дорого»]\nПонимаю, хочется не переплатить. Давайте разберём, что входит в цену: производство, монтаж, проверка до отгрузки, гарантия по договору. Если бюджет другой — подберу варианты, но честно скажу, чем каждый отходит от задания. По стоимости удобнее голосом — можем сейчас коротко обсудить?\n\n[Если Ксения торгуется]\nПоняла вас. N% — точно не смогу, у меня таких полномочий нет. Могу попробовать согласовать с руководителем небольшую уступку — если получится, готовы заключаться сегодня?\n\n[Если Ксения не берёт трубку]\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Звоню по проекту на Мясницкой. Скажите, проект ещё актуален? Если да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с цифрами. Как вам?\n\n---\n\n### Касание 5 · Кружок (видео)\n_Когда: 9 декабря (ср), вечером_\n\n**Перед касанием:** перечитать переписку и поднять вопрос с датой открытия 15 декабря — чтобы повод кружка был привязан к конкретной детали проекта.\n\nКсения, как вы? Решила записать короткое видео в связи с датой открытия на Мясницкой — и у меня появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 6 · WhatsApp · последний шанс\n_Когда: 14 декабря (пн), утром_\n\n**Перед касанием:** перечитать всю переписку с Ксенией, чтобы последнее сообщение было тёплым и без претензий.\n\nКсения, добрый день! Это [Имя] из «Яркой Рекламы». Пишу в последний раз по вывеске для Мясницкой.\n\nСкажите как есть: проект актуален? Если нет — я не буду больше отвлекать ни вас, ни Сергея, и вы не будете тратить время на мои сообщения. Дверь останется открытой — если вернётесь к вывеске, буду рада помочь.\n\nЕсли да — до открытия 15 декабря постоянную вывеску уже не успеть, но можно открыться с временным решением, а постоянную поставить после. Я уточню у производства, какой вариант возможен, и вернусь с вариантами. Как вам?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "дорого + недоверие",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «чем вы лучше тех, кто нас подвёл в прошлый раз» — боится повторения: буквы погасли, подрядчик пропал (Сергей)\n- **Прибыль:** «дорого, другие предлагают на 15% дешевле» — сравнивает цену и не хочет переплачивать (Сергей)\n\n**Вывод:** Сделка живая: клиент ответил после 11 дней тишины, Сергей посмотрел КП и торгуется — это сигнал к покупке, а не отказ. Бюджет есть (ориентир ≈ 204 000 ₽), потребность подтверждена, дата открытия 15 декабря держит срочность. Главный блокер — доверие: Сергей прямо спрашивает, чем мы лучше подрядчика, который подвёл в прошлый раз. Пока этот вопрос не закрыт, цена «дорого» не сдвинется никакой скидкой. Второй блокер — ЛПР: решение принимает Сергей, но менеджер общается только с Ксенией и не имеет его контакта. Ответ по доверию должен дойти до Сергея напрямую, а не через пересказ Ксении.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (нет), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, с кем именно сравнивают и что входит в предложение конкурента на 15% дешевле — попросить показать их КП для честного сравнения состава\n- Спросить Ксению, какой ориентир по бюджету у Сергея и что для него важнее при выборе — цена или гарантия, что буквы не погаснут\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 19 ноября (чт): производство 7 рабочих дней — до 30 ноября (пн), монтаж 2–3 раб. дн. — готово 2 декабря (ср) – 3 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 7 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "дорого + недоверие",
+     "text": "## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть вопрос доверия Сергея: показать, чем мы отличаемся от подрядчика, который подвёл, и дать гарантии, которые можно проверить\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею наши гарантии и отвечать за неточности — она просто перешлёт готовый ответ или организует короткий звонок\n- **ЛПР:** Сергей получит вывеску, которая горит с первого дня и не погаснет через три месяца: своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня — и откроет точку 15 декабря с вывеской, которая работает\n\n### Обязательно в касаниях\n\n1. Касание 1 (ответ Ксении): ответ на вопрос Сергея «чем вы лучше» начинается с результата для него — «буквы не погаснут через три месяца, потому что проверяем с подсветкой до отгрузки», а не с перечисления наших характеристик\n2. Касание 1 (ответ Ксении): просьба дать контакт Сергея построена на пользе для Ксении — «чтобы вам не пересказывать и не отвечать за неточности», без упрёка и без обхода\n3. Касание 4 (звонок Сергею): только с пометкой «только если Ксения даст контакт или согласится организовать» — согласия в переписке пока нет\n4. Касание 4 (звонок Сергею): разговор о цене — только голосом, без скидки; если Сергей упрётся в бюджет — предложить вариант под бюджет с честным риском отхода от ТЗ, а не снижать цену\n5. Касание 2 (кейс): использовать кейс Smoke Dog из файла отрасли — сеть кальянных, логотип из нержавейки с контражурной подсветкой; не выдумывать другие кейсы\n6. Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).\n\n### Следующий шаг\n\n1. Сегодня, 19 ноября (чт) · WhatsApp · экспертное · Д — Ксения (маркетолог): Дать Ксении готовый ответ для Сергея по доверию и попросить организовать прямой контакт с ним\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка живая: Сергей посмотрел КП и торгуется — это сигнал к покупке, а не отказ. Главный блокер — доверие: Сергей прямо спрашивает, чем мы лучше подрядчика, который подвёл. Пока этот вопрос не закрыт, цена «дорого» не сдвинется никакой скидкой. Стратегия: ответить на вопрос доверия через результат для Сергея (своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня), дать Ксении готовый ответ для пересылки, и параллельно выходить на прямой контакт с Сергеем через Ксению. Если через 3 касания движения нет — честно зафиксировать статус сделки.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "дорого + недоверие",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: Сегодня, 19 ноября (чт)_\n\n**Перед касанием:** перечитать переписку, выписать вопрос Сергея и факты компании для ответа (своё производство, проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня). Проверить, не прислала ли Ксения фото фасада.\n\nКсения, добрый день! Спасибо, что передали вопрос Сергея. Подготовила ответ — сможете просто переслать ему.\n\nВот что написать Сергею:\n\n«Сергей, по поводу вашего вопроса — чем мы лучше тех, кто подвёл. Вы получаете как результат готовую и проверенную вывеску: буквы не погаснут через три месяца, потому что каждую вывеску мы собираем и проверяем с подсветкой до отгрузки. На фасад уезжает только то, что уже горит. И гарантия будет не пустой звук, а правило, закреплённое договором: если что-то случится — выезжаем в течение 3 рабочих дней, ремонт бесплатно. Прошлый подрядчик пропал — у нас такого не будет: один менеджер ведёт проект от макета до монтажа, и вы всегда знаете, кому звонить».\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "торг 20% + табличка + баннер",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Сергей)\n- **Прибыль:** «сделаете на 20% дешевле — подпишем сразу» — торгуется за цену, считает деньги (Сергей)\n\n**Вывод:** Сделка живая и движется: ЛПР (Сергей) посмотрел КП, торгуется и согласился на Zoom в понедельник 23.11. Потребность подтверждена — открытие 15 декабря, задача описана конкретно. Финансы подтверждены — торг с условием «подпишем сразу» означает, что деньги есть. Срочность подтверждена — дата открытия жёсткая, по срокам успеваем с запасом. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и прямо спрашивает, чем мы лучше. Пока этот вопрос не закрыт, скидка в 20% не решит проблему — это проверка, а не готовность купить. На Zoom в понедельник нужно отвечать на вопрос доверия через результат для Сергея, а не снижать цену. Вторичный блокер — ЛПР: прямого контакта с Сергеем пока нет, но Zoom назначен, и если он состоится, этот критерий перейдёт в Подтверждено.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Ксении, с кем именно сравнивает Сергей и что предлагают конкуренты — попросить показать их КП для честного сравнения состава\n- Уточнить у Сергея на Zoom, какой бюджет он закладывал на вывеску — чтобы понять, есть ли смысл предлагать вариант под бюджет с честным риском отхода от ТЗ\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 20 ноября (пт): производство 7 рабочих дней — до 1 декабря (вт), монтаж 2–3 раб. дн. — готово 3 декабря (чт) – 4 декабря (пт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 6 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "торг 20% + табличка + баннер",
+     "text": "## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть вопрос доверия Сергея через результат и личный контакт, не снижая цену\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не нужно пересказывать Сергею технические детали и отвечать за неточности — она получает готовые ответы и выглядит подготовленной перед руководством\n- **ЛПР:** Сергей получает вывеску, которая не погаснет через три месяца: проверка с подсветкой до отгрузки, гарантия как правило договора, выезд за 3 рабочих дня — и дата открытия 15 декабря не сдвинется\n\n### Обязательно в касаниях\n\n1. Касание 1 (Ксении): ответить на вопрос Сергея про табличку с режимом работы — она нужна по закону о защите прав потребителей и идёт в подарок при заказе от 50 000 ₽ (из переписки 20.11)\n2. Касание 1 (Ксении): ответить на вопрос про временный баннер — в Москве баннерную ткань на фасаде размещать нельзя (902-ПП), но можно временную вывеску внутри помещения (из переписки 20.11)\n3. Касание 2 (Zoom с Сергеем): ответить на его вопрос «чем вы лучше тех, кто подвёл» — через результат: проверка с подсветкой до отгрузки, гарантия в договоре, выезд за 3 рабочих дня, один менеджер от макета до монтажа (из переписки 19.11)\n4. Касание 2 (Zoom с Сергеем): скидку 20% не давать — у менеджера нет полномочий, предложить согласовать небольшую уступку только в обмен на подписание на этой неделе (из переписки 20.11)\n5. Касание 2 (Zoom с Сергеем): пригласить на встречу на производстве (акрил — Мытищи) — сильнейший шаг доверия, Сергей прогрет (деньги есть, ЛПР на связи)\n6. Переписка: Ксения (04.11): «Фото пришлю на неделе.» — если ещё не прислано, в первом касании Ксения попросить по шаблону владельца: «Помните, мы проговаривали, что пришлёте …? Скинете сейчас — …, и вы получите …» (без упрёка «вы обещали»).\n\n### Следующий шаг\n\n1. Сегодня, 20 ноября (пт) · WhatsApp · экспертное · Д — Ксения (маркетолог): Ответить Ксении на вопросы Сергея (табличка, временный баннер) и зафиксировать Zoom на понедельник; скидку в переписке не обсуждать — перевести в голос\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка живая: ЛПР на связи, деньги есть, сроки с запасом. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и торгуется на 20%, но это проверка, а не готовность купить. Стратегия: не снижать цену, а закрыть доверие через результат — Zoom с ответом «чем мы лучше» через проверку с подсветкой до отгрузки и гарантию в договоре, затем встреча на производстве (сильнейший шаг), и только после этого — небольшая уступка через полномочия в обмен на подписание. Скидку обсуждать только голосом. Сроки держим: последний день старта — 30 ноября, вывеска к открытию 15 декабря.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "торг 20% + табличка + баннер",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: Сегодня, 20 ноября (пт)_\n\n**Перед касанием:** открыть переписку с Ксенией, перечитать вопросы Сергея от 20.11 (табличка, баннер, скидка 20%), проверить по 902-ПП правила для баннерной ткани на фасаде в Москве, подготовить ответ про табличку (закон о защите прав потребителей + подарок от 50 000 ₽), проверить, пришло ли фото фасада от Ксении (04.11 обещала «на неделе» — не пришло).\n\nКсения, добрый день! Спасибо, что написали — разобрала вопросы Сергея, сейчас всё по порядку.\n\nПо табличке с режимом работы — да, она нужна: по закону о защите прав потребителей её размещают у входа. И у нас она идёт в подарок при заказе от 50 000 ₽ — ваш заказ подходит, так что табличку сделаем без доплаты.\n\nПо временному баннеру: в Москве баннерную ткань на фасаде размещать нельзя — такие правила города. Но можно повесить временную вывеску внутри помещения, чтобы к открытию покупатели вас нашли. По стоимости временной сориентирую — напишите, и я подберу варианты.\n\nПо скидке — у меня таких полномочий нет, это правда. Но в понедельник на Zoom всё честно разберём: что входит в цену и как сделать так, чтобы не переплатить. По стоимости удобнее голосом — там быстрее и понятнее.\n\nИ ещё: помните, мы проговаривали, что вы пришлёте фото фасада? Скинете сейчас — я сразу сделаю визуализацию на вашем фасаде, и Сергей увидит, как вывеска будет выглядеть на Мясницкой ещё до Zoom.\n\nZoom в понедельник в силе? Во сколько удобнее?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "тишина после Zoom",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Надёжность:** «В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла, а они перестали брать трубку. Сергей теперь очень осторожный» (Сергей)\n- **Прибыль:** «Дорого, другие предлагают на 15% дешевле» и «сделаете на 20% дешевле — подпишем сразу» — считает деньги, сравнивает цены (Сергей)\n\n**Вывод:** Сделка живая и по сути готова к закрытию: потребность подтверждена (открытие 15 декабря), ЛПР вышел на прямой контакт и назвал условие покупки, деньги есть (торг на 20% — это сигнал к покупке, а не отсутствие бюджета). Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и проверяет нас вопросом «чем вы лучше» и торгом. Скидка здесь не решит проблему — Сергей боится повторить прошлый опыт, а не переплатить. Закрывать нужно через доказательства надёжности: гарантия в договоре, проверка подсветки до отгрузки, выезд по гарантии за 3 рабочих дня, встреча на производстве. Сроки сжимаются: последний день старта 30 ноября, дальше вывеска не успеет к открытию.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Проблемы (частично), Аналоги (частично), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Бюджет (СОПРАНО: Ограничения): клиент говорит о цене — уточнить ориентир по бюджету и с чем сравнивает. «Чтобы предложить подходящий вариант — какой бюджет заложили на вывеску и с чем сравниваете?» Без этого ответ на «дорого» — гадание; скидку не предлагать.\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Сергея, с кем именно сравнивают (кто предложил на 15% дешевле) и что входит в их предложение — чтобы честно сравнить состав, а не только цену\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 26 ноября (чт): производство 7 рабочих дней — до 7 декабря (пн), монтаж 2–3 раб. дн. — готово 9 декабря (ср) – 10 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 2 рабочих дня. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "тишина после Zoom",
+     "text": "## Стратегия\n\n- **Название:** Снижение риска\n- **Цель:** Закрыть доверие Сергея через доказательства надёжности и личную встречу на производстве, не через скидку\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Надёжность\n- **Контактному лицу:** Ксении не придётся пересказывать Сергею детали и отвечать за подрядчика: мы сами покажем производство и проверку, и она снимет с себя вопрос «чем вы лучше»\n- **ЛПР:** Сергей получает вывеску, которая не погаснет через три месяца: своё производство с проверкой подсветки до отгрузки, гарантия по договору с выездом за 3 рабочих дня, и он видит это своими глазами на производстве — без риска повторить прошлый опыт\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Сергею): попросить прислать фото фасада — Ксения обещала 04.11 («Фото пришлю на неделе»), без него нельзя сделать визуализацию, которую менеджер уже обещал («сделаем визуализацию на вашем фасаде бесплатно»)\n2. Касание 1 (звонок Сергею): ответить на вопрос Сергея «чем вы лучше тех, кто нас подвёл» — через результат для него: «вы получаете вывеску, проверенную до отгрузки, с гарантией по договору и выездом за 3 рабочих дня», а не через перечисление «у нас есть»\n3. Касание 2 (приглашение на производство): начинать с выгоды для Сергея — «своими глазами увидите, почему ваши буквы не погаснут», а не с процесса «приезжайте посмотреть цех»\n4. Переписка: 03.11 менеджер писал клиенту «Успеваем, если согласуем макет до 25 ноября.» — эта дата прошла. Хотя бы в одном касании контактному лицу честно сослаться на это и сказать, что изменилось, — иначе клиент услышит «обещали и не делаете».\n\n### План касаний\n\n1. 27 ноября (пт), утром · WhatsApp · экспертное · Д — Сергей (собственник, ЛПР): Через выгоду ЛПР (владелец 15.11: «всё через выгоду для клиента»): пригласить на встречу на нашем производстве (акрил — Мытищи, сталь — Щёлково), чтобы он ПОЛУЧИЛ спокойствие за свой страх — своими глазами увидел, кто и как делает его вывеску и как её проверяют с подсветкой до отгрузки, и решил без риска повторить прошлый опыт. Начинать с того, что он получает («чтобы вы сами увидели, почему ваши буквы не погаснут через три месяца»), а не с «приглашаем на экскурсию». Конкретное время на выбор («во вторник в 11 или в среду в 15?»). Кейсы и «чем мы лучше» заново не повторять. Цифру «после встречи заключаются» клиенту не называть.\n2. 30 ноября (пн), днём · Кружок · эмпатичное — Сергей (собственник, ЛПР): Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать\n3. 1 декабря (вт), вечером · Звонок · экспертное · ЗС — Сергей (собственник, ЛПР): Последний шанс: попросить клиента сказать как есть — актуален ли проект, и если нет, не отвлекать его больше, чтобы не тратить его время. Тепло, без давления и без обиды; дверь открыта.\n\n_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._\n\n**Обоснование:** Сделка готова к закрытию: потребность, ЛПР, деньги и срочность подтверждены. Главный блокер — доверие: Сергей обжёгся с прошлым подрядчиком и проверяет нас торгом на 20%. Скидка не решит проблему — Сергей боится повторить прошлый опыт, а не переплатить. Закрываем через доказательства надёжности: гарантия в договоре, проверка подсветки до отгрузки, выезд по гарантии за 3 рабочих дня, и сильнейший шаг — приглашение на производство, где Сергей своими глазами увидит, кто и как делает его вывеску. Торг отрабатываем через полномочия: небольшая уступка только в обмен на подписание сегодня. Сроки сжимаются: последний день старта 30 ноября, дальше вывеска не успеет к открытию 15 декабря.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "тишина после Zoom",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · WhatsApp · экспертное · Д\n_Когда: 27 ноября (пт), утром_\n\n**Перед касанием:** позвонить на производство в Мытищи, уточнить у технолога, как проходит проверка подсветки букв из акрила перед отгрузкой, и согласовать два слота для визита Сергея — вторник 11:00 и среда 15:00.\n\nСергей, добрый день! Решила набрать, потому что вчера разговаривала с нашим технологом на производстве — обсуждали, как проверяем подсветку на буквах из акрила перед отгрузкой. И подумала: вам это точно будет важно увидеть.\n\nПомните, Ксения говорила, что в прошлый раз буквы погасли через три месяца? Чтобы вы сами увидели, почему с нами такого не будет, — приглашаю вас к нам на производство в Мытищи. Покажу, как проверяем каждую букву с подсветкой до отгрузки. Ваша будет проверена так же.\n\nКстати, Ксения обещала прислать фото фасада — без него не могу сделать визуализацию. Скинете сейчас? Я сразу запущу дизайнеру, и вы получите картинку вывески на вашем фасаде ещё до встречи.\n\nВо вторник в 11 или в среду в 15? Как вам удобнее?\n\n---\n\n### Касание 2 · Кружок (видео)\n_Когда: 30 ноября (пн), днём_\n\n**Перед касанием:** открыть макет Fresh Bowl, посмотреть на ширину фасада 5 метров и прикинуть, как разместятся буквы и логотип, чтобы повод был конкретным.\n\nСергей, как вы? Решила записать короткое видео: смотрела ваш фасад на Мясницкой — и появилась идея, уверена, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?\n\n---\n\n### Касание 3 · Звонок · последний шанс\n_Когда: 1 декабря (вт), вечером_\n\n**Перед касанием:** открыть переписку, перечитать обещание от 03.11 «Успеваем, если согласуем макет до 25 ноября» и посчитать по фактам: если стартуем сегодня, готовность 14–15 декабря — впритык к открытию.\n\nСергей, добрый вечер! Это [Имя], компания «Яркая Реклама».\n\n[Пауза]\n\nРешила набрать, потому что хочу быть с вами честной по срокам — и не хочу, чтобы вы попали в неприятную ситуацию.\n\n[Пауза]\n\nПомните, я писала Ксении 3 ноября, что успеваем, если согласуем макет до 25 ноября? Эта дата прошла. Если мы запускаемся сейчас, вывеска будет готова 14–15 декабря — впритык к вашему открытию. Я не хочу обещать то, чего не смогу сделать.\n\n[Пауза]\n\nПоэтому хочу спросить прямо: проект ещё актуален? Если да — макет нужно согласовать сегодня-завтра, и я сразу запускаю производство. Если нет — так и скажите, я не буду больше отвлекать вас и тратить ваше время.\n\n[Пауза]\n\nКак есть?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    }
+   ]
+  }
+ ]
+}
