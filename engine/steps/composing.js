@@ -12,6 +12,7 @@
 const { callAgentSafe, runMemoryUpdate } = require('../pipeline');
 const { CONFIG } = require('../config');
 const { composeUntilReady, channelKey } = require('../autoCompose');
+const { modeCommand, switchPathMode } = require('../pathMode');
 const {
   isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
 } = require('../intent');
@@ -122,7 +123,7 @@ function isNewFacts(text) {
 
 async function rebuildPath({ baseInput, managerInput }) {
   const { runIntakeStep } = require('../pipeline');
-  const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true, path: true });
+  const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true, path: true, pathMode: 'step' });
   delete output._intakeRoundLimitNote; // перестройка — не «не удалось уточнить», а обычный путь
   output._intake_rounds = 1;
   output._awaitingCorrectionConfirmation = false;
@@ -138,6 +139,8 @@ async function rebuildPath({ baseInput, managerInput }) {
 async function composing(ctx) {
   const { deal, managerInput } = ctx;
   if (deal.awaiting_correction_confirmation) return awaitingCorrection(ctx);
+  const modeCmd = modeCommand(managerInput);
+  if (ctx.opts?.path && modeCmd && deal.last_strategy_output) return switchPathMode(ctx, modeCmd);
   if (ctx.opts?.path && !isPureApproval(managerInput) && isNewFacts(managerInput)) return rebuildPath(ctx);
   // Теневой режим: сравниваем решение списков фраз с LLM-классификатором.
   logIntentClassificationShadow(managerInput, isPureApproval(managerInput), isManagerQuestion(managerInput), deal.id);

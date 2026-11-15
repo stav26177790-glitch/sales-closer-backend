@@ -268,8 +268,18 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   const lastRegular = regularIdx[regularIdx.length - 1];
   steps = steps.filter((x, i) => x.conditional || x.sameContact || i === lastRegular || !LC_GOAL_RE.test(`${x.goal || ''} ${x.key_message || ''}`));
 
-  // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании.
-  steps = coverCriteria(steps, scores);
+  // Режим «следующий шаг» (владелец 15.11, engine/pathMode.js): идёт разговор — только ближайший
+  // шаг: первое обычное касание (+ «сразу после» тому же контакту и условные касания до
+  // следующего обычного). Без добавочных касаний на критерии и без «последнего шанса».
+  const stepMode = context.mode === 'step';
+  if (stepMode) {
+    const firstRegular = steps.findIndex((x) => !x.conditional && !x.sameContact);
+    const nextRegular = steps.findIndex((x, i) => i > firstRegular && !x.conditional && !x.sameContact);
+    if (firstRegular >= 0 && nextRegular > 0) steps = steps.slice(0, nextRegular);
+  }
+
+  // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании (весь путь).
+  if (!stepMode) steps = coverCriteria(steps, scores);
 
   // Подсказки из переписки (прогон 14.11: повод про козырёк по 902-ПП не появился ни разу) —
   // в первое экспертное касание как обязательный пункт.
@@ -336,7 +346,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // как есть, чтобы не тратить время клиента. Только последним и только в цепочке
   // от трёх касаний (одно-два касания после ответа клиента — ещё не «последний шанс»).
   const own = steps.filter((s) => !s.conditional && !s.sameContact);
-  const lastChance = own.length >= 3 ? own[own.length - 1] : null;
+  const lastChance = !stepMode && own.length >= 3 ? own[own.length - 1] : null;
   if (lastChance) {
     // Его критерий (если был) переносим на предыдущее касание — покрытие формулы не теряем.
     const lost = [lastChance.criterion, ...(lastChance.also || [])].filter((c) => c && c !== 'ЗС');
@@ -388,7 +398,8 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
       facts: factsFor(send || today, timeline),
       inserted: !!s.inserted,
       last_chance: !!s.lastChance,
-      weekend
+      weekend,
+      path_mode: stepMode ? 'step' : 'full'
     };
   });
 }
@@ -397,7 +408,10 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 function formatTouchPlan(plan) {
   if (!Array.isArray(plan) || !plan.length) return '';
   const lines = plan.map((p) => `${p.touchpoint_number}. ${p.condition ? `только если: ${p.condition.replace(/^только если\s*/i, '')}` : p.timing} · ${p.channel} · ${p.kind}${p.criterion ? ` · ${p.criterion.split(' —')[0]}` : ''}${p.recipient ? ` — ${p.recipient}` : ''}${p.goal ? `: ${p.goal}` : ''}`);
-  return `### План касаний\n\n${lines.join('\n')}`;
+  const note = plan[0]?.path_mode === 'step'
+    ? '_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._'
+    : '_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._';
+  return `### ${plan[0]?.path_mode === 'step' ? 'Следующий шаг' : 'План касаний'}\n\n${lines.join('\n')}\n\n${note}`;
 }
 
 // После writer: канал, дата и тип — из плана (модель их не меняет).

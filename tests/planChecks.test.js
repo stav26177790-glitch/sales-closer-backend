@@ -90,4 +90,13 @@ check('«не отвлекаю в выходной?» в рабочий день
   assert.ok(!findPlanIssues([{ touchpoint_number: 8, channel: 'Звонок', body }], sat).some((x) => x.fixes.some((f) => /рабочий день/.test(f))));
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Email', body: 'Андрей, из чего складывается цена 185 000 ₽: акрил, LED, монтаж.' }], [{ touchpoint_number: 2, channel: 'Email' }]).length, 1);
 });
+check('два кружка-копии в цепочке — второй на правку; разные поводы — нет', () => {
+  const plan = [{ touchpoint_number: 2, channel: 'Кружок' }, { touchpoint_number: 4, channel: 'Кружок' }];
+  const a = 'Алина, как вы? Подбирал похожие работы — появилась идея, уверен, она вас точно заинтересует! Можем коротко набраться — всё объясню по телефону?';
+  const b = 'Алина, добрый день! Подбирал похожие работы — появилась идея, уверен, она вас точно заинтересует. Можем коротко набраться — всё объясню по телефону?';
+  const c = 'Алина, как вы? Решил записать видео в связи с вашим вопросом про буквы 70 см — есть мысль, думаю, понравится. Наберёмся на пару минут — расскажу?';
+  const issues = (x, y) => findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: x }, { touchpoint_number: 4, channel: 'Кружок', body: y }], plan);
+  assert.deepEqual(issues(a, b).map((x) => x.touchpoint_number), [4]);
+  assert.equal(issues(a, c).length, 0);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

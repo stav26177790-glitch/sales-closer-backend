@@ -91,19 +91,20 @@ function loadEngine(dbApi) {
 
 // ---------- судья: независимая оценка касаний ----------
 const RUBRIC = fs.readFileSync(path.join(__dirname, 'rubric.md'), 'utf8');
-async function judge(sit, finalTouches, plan, diagnosticSummary) {
+async function judge(sit, sets, diagnosticSummary) {
   const client = provider.createClient();
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
   const model = getAgentConfig('reviewer').model;
+  const planOf = (plan) => (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, facts: p.facts }));
+  const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: x.touches } : null);
   const user = JSON.stringify({
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,
     conversation: [sit.first, sit.reply].filter(Boolean).join('\n\n--- ответ клиента после касаний ---\n\n'),
     what_this_situation_checks: sit.expect, diagnostic_summary: diagnosticSummary,
-    touch_plan: (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, facts: p.facts })),
-    touches: finalTouches
+    before_reply: setOf(sets.before), after_reply: setOf(sets.after)
   }, null, 1);
   const startedAt = Date.now();
-  const r = await client.messages.create({ model, max_tokens: 6000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
+  const r = await client.messages.create({ model, max_tokens: 9000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
   const text = r.content.filter((c) => c.type === 'text').map((c) => c.text || '').join('');
   calls.push({ situation: sit.id, agent: 'judge', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
   const m = text.match(/\{[\s\S]*\}/);
@@ -152,7 +153,8 @@ async function runSituation(sit) {
   } catch (e) { errors.push(`codeChecks: ${e.message}`); }
   let verdict = null;
   if (JUDGE && finalTouches.length) {
-    try { verdict = await judge(sit, finalTouches, plan, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
+    const sets = sit.reply ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan } } : { before: { touches: finalTouches, plan } };
+    try { verdict = await judge(sit, sets, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
   }
   return {
     id: sit.id, name: sit.name, title: sit.title, expect: sit.expect,
@@ -179,6 +181,10 @@ function md(results) {
   L.push(`«Сегодня» в прогоне: ${process.env.KLOUZER_TODAY}. Ситуаций: ${results.length}. Провайдер: ${PROVIDER.name} (${PROVIDER.models.main} / ${PROVIDER.models.small}). Цена: **$${total.toFixed(2)}**.`);
   L.push('');
   L.push(`**Касаний оценено: ${send.length}. Отправил бы как есть: ${asIs} (${send.length ? Math.round(asIs / send.length * 100) : 0}%), с мелкой правкой: ${minor}, нет: ${no}.** Планка владельца — 8 из 10 «как есть».`);
+  for (const [key, title] of [['before_reply', 'До ответа клиента'], ['after_reply', 'После ответа клиента (следующий шаг)']]) {
+    const x = send.filter((t) => (t.set || 'before_reply') === key);
+    if (x.length) L.push(`- ${title}: ${x.length} касаний, как есть ${x.filter((t) => t.send === 'как есть').length} (${Math.round(x.filter((t) => t.send === 'как есть').length / x.length * 100)}%), с правкой ${x.filter((t) => t.send === 'с мелкой правкой').length}, нет ${x.filter((t) => t.send === 'нет').length}`);
+  }
   L.push('');
   L.push('| # | Ситуация | Касаний | Как есть | Правка | Нет | Ожидания | Остаток проверок кода | Время | Ошибки |');
   L.push('|---|---|---|---|---|---|---|---|---|---|');
@@ -186,7 +192,7 @@ function md(results) {
     const t = r.verdict?.touches || [];
     const exp = r.verdict?.expectations || [];
     const met = exp.filter((e) => e.met === 'да').length;
-    L.push(`| ${r.id} | ${r.title} | ${r.touches.length} | ${t.filter((x) => x.send === 'как есть').length} | ${t.filter((x) => x.send === 'с мелкой правкой').length} | ${t.filter((x) => x.send === 'нет').length} | ${exp.length ? `${met}/${exp.length}` : '—'} | ${r.residual.length} | ${r.seconds} с | ${r.errors.length ? r.errors.length : ''} |`);
+    L.push(`| ${r.id} | ${r.title} | ${t.length} | ${t.filter((x) => x.send === 'как есть').length} | ${t.filter((x) => x.send === 'с мелкой правкой').length} | ${t.filter((x) => x.send === 'нет').length} | ${exp.length ? `${met}/${exp.length}` : '—'} | ${r.residual.length} | ${r.seconds} с | ${r.errors.length ? r.errors.length : ''} |`);
   }
   L.push('');
   L.push('## Цена по агентам');
@@ -204,18 +210,28 @@ function md(results) {
     if (r.verdict?.summary) L.push(`\n**Судья:** ${r.verdict.summary}`);
     for (const e of r.verdict?.expectations || []) L.push(`- ${e.met === 'да' ? '✅' : e.met === 'частично' ? '🟡' : '❌'} ${e.expectation}${e.comment ? ` — ${e.comment}` : ''}`);
     if (r.residual.length) { L.push('\n**Остались замечания проверок кода:**'); for (const x of r.residual) L.push(`- касание ${x.n}: ${x.fix}`); }
-    L.push('\n**План:**');
-    for (const p of r.plan) L.push(`${p.touchpoint_number}. ${p.timing} · ${p.channel} · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion ? ` · ${String(p.criterion).split(' —')[0]}` : ''} — ${p.goal || ''}`);
-    L.push('\n**Касания:**');
-    r.touches.forEach((m, i) => {
-      const v = (r.verdict?.touches || []).find((x) => Number(x.n) === Number(m.touchpoint_number ?? i + 1));
-      L.push(`\n### Касание ${m.touchpoint_number ?? i + 1} · ${m.channel || ''} — ${v ? `**${v.send}**` : ''}`);
-      if (m.timing) L.push(`_Когда: ${m.timing}_`);
-      if (m.hook?.prep) L.push(`_Перед касанием: ${String(m.hook.prep).replace(/^перед касанием:?\s*/i, '')}_`);
-      L.push('');
-      L.push(String(m.body || '').split('\n').map((x) => `> ${x}`).join('\n'));
-      for (const i2 of v?.issues || []) L.push(`- ⚠️ ${i2.rule || ''}: ${i2.comment || ''}`);
-    });
+    // Два набора (владелец 15.11 — режимы пути): до ответа клиента и после (следующий шаг).
+    const sets = r.first_round
+      ? [{ key: 'before_reply', title: 'До ответа клиента', plan: r.first_round.plan, touches: r.first_round.touches },
+        { key: 'after_reply', title: 'После ответа клиента', plan: r.plan, touches: r.touches }]
+      : [{ key: 'before_reply', title: 'Касания', plan: r.plan, touches: r.touches }];
+    for (const set of sets) {
+      const mode = set.plan?.[0]?.path_mode === 'step' ? 'следующий шаг' : 'весь путь';
+      L.push(`\n#### ${set.title} — ${mode}`);
+      L.push('\n**План:**');
+      for (const p of set.plan || []) L.push(`${p.touchpoint_number}. ${p.timing} · ${p.channel} · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion ? ` · ${String(p.criterion).split(' —')[0]}` : ''} — ${p.goal || ''}`);
+      (set.touches || []).forEach((m, i) => {
+        const n = Number(m.touchpoint_number ?? i + 1);
+        const v = (r.verdict?.touches || []).find((x) => Number(x.n) === n && (x.set || 'before_reply') === set.key)
+          || (sets.length === 1 ? (r.verdict?.touches || []).find((x) => Number(x.n) === n) : null);
+        L.push(`\n### Касание ${n} · ${m.channel || ''} — ${v ? `**${v.send}**` : ''}`);
+        if (m.timing) L.push(`_Когда: ${m.timing}_`);
+        if (m.hook?.prep) L.push(`_Перед касанием: ${String(m.hook.prep).replace(/^перед касанием:?\s*/i, '')}_`);
+        L.push('');
+        L.push(String(m.body || '').split('\n').map((x) => `> ${x}`).join('\n'));
+        for (const i2 of v?.issues || []) L.push(`- ⚠️ ${i2.rule || ''}: ${i2.comment || ''}`);
+      });
+    }
   }
   return L.join('\n');
 }

@@ -152,6 +152,7 @@ async function runMemoryUpdate(dealId, baseInput, deal, extra = {}) {
 // вызвать не только из INIT/COLLECTING/SOPRANO_INTERVIEW, но и сразу же
 // при старте новой сессии из FINAL_OUTPUT — без лишнего "пустого" хода.
 const { dropNeedlessClarification } = require('./clarification');
+const { autoMode } = require('./pathMode');
 
 // opts.path — режим пути (сайт): ненужные вопросы planner/diagnostic снимаются (dropNeedlessClarification).
 // opts.noClarification — перестройка пути по новым фактам (ответ клиента): путь строится без
@@ -175,6 +176,11 @@ async function runIntakeStep(baseInput, intakeRounds = 1, opts = {}) {
   const diagnosticResult = await callAgentSafe('diagnostic', { ...baseInput, planner_output: output.planner_output }, 6000); // + СОПРАНО — 4000 мало
   output.diagnostic_output = diagnosticResult?.diagnostic_output || diagnosticResult;
   if (opts.path) dropNeedlessClarification(output.diagnostic_output, baseInput);
+  // Режим пути (engine/pathMode.js): задан явно (перестройка по ответу клиента — «следующий шаг»)
+  // или по переписке — последняя реплика клиента, молчание не названо → «следующий шаг».
+  if (opts.path && output.diagnostic_output && typeof output.diagnostic_output === 'object') {
+    output.diagnostic_output._path_mode = opts.pathMode || autoMode(baseInput?.materials?.source_materials?.text);
+  }
   if (output.diagnostic_output?.clarification_needed?.required && !roundLimitReached) {
     return { output, nextState: 'SOPRANO_INTERVIEW' };
   }

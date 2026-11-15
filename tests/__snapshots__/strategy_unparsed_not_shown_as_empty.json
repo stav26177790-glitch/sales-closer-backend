@@ -111,7 +111,8 @@
                 "questions": []
               },
               "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
-            }
+            },
+            "path_mode": "full"
           }
         }
       ],
@@ -229,7 +230,8 @@
                 "questions": []
               },
               "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
-            }
+            },
+            "path_mode": "full"
           }
         }
       ],
@@ -359,6 +361,7 @@
               },
               "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
             },
+            "path_mode": "full",
             "manager_correction": "пересобери стратегию",
             "previous_strategy_output": {
               "deal_health": "под риском",

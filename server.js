@@ -27,6 +27,8 @@ function withFlags(deal) {
     ...deal,
     is_experience_candidate: isPastComposing && !deal.experience_decision,
     is_stale_candidate: !isPastComposing && !deal.stale_dismissed && daysSinceUpdate >= STALE_DAYS,
+    // Режим пути (engine/pathMode.js) — для кнопки «весь путь / следующий шаг» на сайте.
+    path_mode: deal.last_diagnostic_output?._path_mode || null,
   };
 }
 
@@ -106,7 +108,7 @@ app.get('/api/deals/:id/history', requireManager, async (req, res) => {
     const deal = await db.getDeal(req.params.id);
     if (deal.manager_id !== req.managerId) return res.status(403).json({ error: 'Нет доступа' });
     const messages = await db.getMessages(req.params.id);
-    res.json({ deal, messages });
+    res.json({ deal: withFlags(deal), messages });
   } catch (e) {
     console.error('[API ERROR]', req.method, req.path, e);
     res.status(500).json({ error: friendlyError(e) });
@@ -134,7 +136,7 @@ app.post('/api/deals/:id/continue', requireManager, async (req, res) => {
           await db.addMessage(dealId, 'agent', r.chatText, r.nextState);
         });
         const updatedDeal = await db.getDeal(dealId);
-        return { deal: updatedDeal, reply: result.chatText, state: result.nextState, parts };
+        return { deal: withFlags(updatedDeal), reply: result.chatText, state: result.nextState, parts };
       });
       return res.status(202).json({ job: { status: job.status, stage: job.stage, started_at: job.startedAt } });
     }

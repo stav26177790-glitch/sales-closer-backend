@@ -48,7 +48,7 @@ const MONEY_FIX = 'Всё, что касается денег (бюджет, «�
 // кейсы, сроки, условия — по телефону. Прогоны DeepSeek «Зерно» 15.11: кружки со списком
 // идей, дедлайном «не позже 19 ноября» и правилами города.
 const KRUG_DETAIL_RE = /не позже|не позднее|стартовать до|запустить до|успеть до|902-ПП|по правилам города|нельзя на фасаде|на фасаде нельзя|баннер на фасаде|делали (вывеск|букв)|для (кафе|бара|кофейни) «/i;
-const KRUG_CALL_RE = /набрать?ся|созвон|по телефону|позвон|наберу|набрать вас/i;
+const KRUG_CALL_RE = /набер[её]мся|набрать?ся|созвон|по телефону|позвон|наберу|набрать вас/i;
 const KRUG_MAX = 300;
 const KRUG_FIX = 'Кружок — интрига и призыв к созвону, коротко (до 300 символов): повод → «появилась идея, уверен, она вас точно заинтересует» → «можем коротко набраться — всё объясню по телефону?». Саму идею, кейсы, сроки, условия и правила города — убрать, это по телефону.';
 
@@ -56,8 +56,17 @@ const KRUG_FIX = 'Кружок — интрига и призыв к созво�
 const SHIFT_RE = /кажд[а-яё]* (рабоч[а-яё]* )?(день|дня)[^.!?]{0,40}сдвига/i;
 
 // [{ touchpoint_number, fixes }]
+const wordSet = (t) => new Set(String(t || '').toLowerCase().replace(/[^а-яёa-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 3));
+function overlap(a, b) {
+  if (!a.size || !b.size) return 0;
+  let k = 0;
+  for (const w of a) if (b.has(w)) k++;
+  return k / Math.min(a.size, b.size);
+}
+
 function findPlanIssues(messages, plan, sourceText = '') {
   let shiftSaidIn = null;
+  const krugSeen = [];
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
@@ -89,6 +98,14 @@ function findPlanIssues(messages, plan, sourceText = '') {
     // «Не отвлекаю в выходной?» — только если касание правда уходит в выходной (прогон 15.11: в среду).
     if (/в выходной|выходной день/i.test(t) && p?.send_date && isWorkingDay(p.send_date)) {
       fixes.push('Касание уходит в рабочий день — убрать «не отвлекаю в выходной?» и подобное про выходной.');
+    }
+    // Кружки в одной цепочке не повторяют друг друга (прогон 16 ситуаций, 15.11: «Арка» —
+    // три кружка одним шаблоном «подбирал похожие работы — появилась идея»).
+    if (/кружок|видео/i.test(channel)) {
+      const words = wordSet(t);
+      const twin = krugSeen.find((k) => overlap(k.words, words) >= 0.9);
+      if (twin) fixes.push(`Кружок почти дословно повторяет касание ${twin.n}. Другой повод — другая конкретная деталь проекта (дата открытия, козырёк, логотип, вопрос клиента) и другие слова; приглашение созвониться оставить.`);
+      krugSeen.push({ n, words });
     }
     // Кружок — интрига + призыв к созвону (правило 73).
     if (/кружок|видео/i.test(channel) && (KRUG_DETAIL_RE.test(t) || !KRUG_CALL_RE.test(t) || t.length > KRUG_MAX)) fixes.push(KRUG_FIX);

@@ -111,7 +111,8 @@
                 "questions": []
               },
               "diagnostic_summary": "бюджет есть, ЛПР не выявлен"
-            }
+            },
+            "path_mode": "full"
           }
         },
         {

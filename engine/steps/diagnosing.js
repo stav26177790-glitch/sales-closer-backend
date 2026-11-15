@@ -11,11 +11,12 @@ const { attachMustInclude } = require('../mustInclude');
 const { buildTouchPlan } = require('../touchPlan');
 const { cleanStrategy } = require('../strategyCleanup');
 const { isGoAhead } = require('../intent');
+const { modeOf } = require('../pathMode');
 
 // Стратегия по текущей оценке (+ правка менеджера к прошлой стратегии, если есть).
 async function runStrategy({ dealId, deal, baseInput }, correction) {
   const output = {};
-  const input = { ...baseInput, diagnostic_output: deal.last_diagnostic_output };
+  const input = { ...baseInput, diagnostic_output: deal.last_diagnostic_output, path_mode: modeOf(deal) };
   if (correction) {
     input.manager_correction = correction;
     input.previous_strategy_output = deal.last_strategy_output;
@@ -38,7 +39,7 @@ async function runStrategy({ dealId, deal, baseInput }, correction) {
   attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
   // План касаний: даты, факты на день отправки, чередование, пункты по касаниям — кодом.
   if (output.strategy_output && typeof output.strategy_output === 'object') {
-    const plan = buildTouchPlan(output.strategy_output, baseInput.timeline, baseInput.today, deal.last_diagnostic_output?.scores, { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent });
+    const plan = buildTouchPlan(output.strategy_output, baseInput.timeline, baseInput.today, deal.last_diagnostic_output?.scores, { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent, mode: modeOf(deal) });
     if (plan) output.strategy_output.touch_plan = plan;
   }
 
@@ -72,6 +73,9 @@ async function diagnosing(ctx) {
     });
     output.diagnostic_output = result?.diagnostic_output || result;
     cleanManagerConflicts(output.diagnostic_output, baseInput);
+    if (output.diagnostic_output && typeof output.diagnostic_output === 'object' && deal.last_diagnostic_output?._path_mode) {
+      output.diagnostic_output._path_mode = deal.last_diagnostic_output._path_mode;
+    }
     return { nextState: 'DIAGNOSING', output };
   }
   return runStrategy(ctx);
