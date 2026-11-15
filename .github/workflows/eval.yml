@@ -25,6 +25,9 @@ on:
         required: false
         default: 'deepseek'
 
+permissions:
+  contents: write
+
 jobs:
   eval:
     runs-on: ubuntu-latest
@@ -46,6 +49,21 @@ jobs:
           if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only ${{ inputs.only }}"; fi
           if [ "${{ inputs.judge }}" = "false" ]; then ARGS="$ARGS --no-judge"; fi
           node tests/eval/run.js $ARGS
+      # Отчёт — ещё и в ветку eval-reports (её читает Claude: файлы-артефакты из его окружения недоступны).
+      # Render выкладывает только main — на работу Клоузера это не влияет.
+      - name: Отчёт в ветку eval-reports
+        if: always()
+        run: |
+          [ -d eval-report ] || exit 0
+          DIR="runs/$(date -u +%Y-%m-%d_%H%M)_${{ inputs.provider }}_${{ github.run_id }}"
+          git config user.name "eval-bot"; git config user.email "eval-bot@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin eval-reports >/dev/null; then
+            git fetch --depth 1 origin eval-reports && git worktree add -B eval-reports /tmp/rep FETCH_HEAD
+          else
+            git worktree add --orphan -b eval-reports /tmp/rep
+          fi
+          mkdir -p "/tmp/rep/$DIR" && cp -r eval-report/. "/tmp/rep/$DIR/"
+          cd /tmp/rep && git add -A && git commit -qm "eval $DIR" && git push -q origin eval-reports
       - name: Отчёт
         if: always()
         uses: actions/upload-artifact@v4

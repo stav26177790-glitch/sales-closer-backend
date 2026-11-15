@@ -4,7 +4,7 @@
  */
 const assert = require('assert');
 const t = require('../engine/timeline');
-const { buildTouchPlan, pinToPlan } = require('../engine/touchPlan');
+const { buildTouchPlan, pinToPlan, contextHints } = require('../engine/touchPlan');
 
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
@@ -192,6 +192,15 @@ check('прогон 14.11: условные касания закрывают Л
   assert.ok(!p.some((x) => /честный ответ: есть ли шанс/.test(x.goal || '')), 'шанс в середине остался');
   assert.ok(!p.some((x) => x.added_for_criterion), 'добавлено лишнее касание');
   assert.equal(p.filter((x) => !x.condition && /ЛПР/.test(x.criterion || '')).length, 0);
+});
+check('латиница: «акрил + LED» в КП — не повод (прогон DeepSeek 15.11); латиница в названии клиента — повод', () => {
+  const hint = (c) => contextHints(c).map((h) => (typeof h === 'string' ? h : h.text)).join(' ');
+  assert.ok(!/168-ФЗ/.test(hint({ source: 'КП: 185 000 ₽, акрил + LED, CRM', client: 'Кофейня «Зерно» 9' })));
+  assert.ok(/168-ФЗ/.test(hint({ source: 'вывеска', client: 'Bar Nord' })));
+});
+check('кружок-реанимация: подсказка требует назвать саму идею', () => {
+  const h = contextHints({ source: 'x', client: 'y', daysSilent: 15 }).find((x) => typeof x === 'object');
+  assert.ok(/ИДЕЮ НАЗВАТЬ/.test(h.text));
 });
 check('подсказки из переписки: козырёк в Москве → 902-ПП; латиница → 168-ФЗ; не Москва — без 902-ПП', () => {
   const { contextHints } = require('../engine/touchPlan');

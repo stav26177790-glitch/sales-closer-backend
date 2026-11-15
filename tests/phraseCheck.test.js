@@ -112,4 +112,10 @@ check('«Правило 7 касаний»: пустые напоминания 
   assert.equal(findBannedPhrases([{ touchpoint_number: 1, body: 'Марина, к какому варианту склоняетесь — баннер сейчас или сразу постоянная?' }]).length, 0);
 });
 
+check('временная вывеска + «без доплат» в одном касании — на правку; «без доплат» без баннера — можно', () => {
+  assert.equal(findBannedPhrases([{ touchpoint_number: 2, body: 'Временная вывеска к 1 декабря. Цена 185 000 ₽ — по КП, без доплат по ходу.' }]).length, 1);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 2, body: 'Цена 185 000 ₽ — по КП, без доплат по ходу.' }]).length, 0);
+  assert.equal(findBannedPhrases([{ touchpoint_number: 2, body: 'Временная к открытию, постоянная — по КП, без доплат; по временной сориентирую отдельно.' }]).length, 0);
+});
+
 console.log(`phraseCheck: ${passed} проверок пройдено`);

@@ -17,7 +17,8 @@ const zerno = t.computeTimeline({ today: '2026-11-13', clientDeadline: '2026-12-
 
 check('«не успеваем»: сдвиг основной даты и дата баннера — только для баннера', () => {
   const list = buildMustInclude({ must_include: [] }, zerno);
-  assert.equal(list.length, 2);
+  assert.equal(list.length, 3);
+  assert.ok(list[2].includes('цена — отдельно от КП') && list[2].includes('без доплат'));
   assert.ok(list[0].includes('3 декабря (чт) – 4 декабря (пт)'));
   assert.ok(list[0].includes('каждый рабочий день ожидания'));
   assert.ok(list[1].includes('19 ноября (чт)') && list[1].includes('только для временной вывески'));
@@ -32,7 +33,7 @@ check('«с запасом» или нет сроков — пунктов по 
 check('пункты стратегии идут первыми, повторы убираются', () => {
   const list = buildMustInclude({ must_include: ['Попросить логотип', 'Попросить логотип', { text: 'Сослаться на 28.10' }] }, zerno);
   assert.deepEqual(list.slice(0, 2), ['Попросить логотип', 'Сослаться на 28.10']);
-  assert.equal(list.length, 4);
+  assert.equal(list.length, 5);
 });
 
 check('невыполненный пункт снимает одобрение касания и общего вердикта', () => {
@@ -85,7 +86,7 @@ check('пункт стратегии с датами готовности уби
   const list = buildMustInclude({ must_include: live }, zerno);
   assert.ok(list.includes(live[0]) && list.includes(live[1]));
   assert.ok(!list.includes(live[2]));
-  assert.equal(list.length, 4);
+  assert.equal(list.length, 5);
 });
 
 check('прошедшее условие менеджера из переписки добавляется кодом (живой «Зерно 4»)', () => {
