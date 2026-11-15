@@ -17,6 +17,13 @@ check('кавычки с запятой после: «точку "Зерна", �
   const t = '{"x":"похожий на первую точку "Зерна", объёмные буквы","y":2}';
   assert.deepEqual(parseModelJson(t), { x: 'похожий на первую точку "Зерна", объёмные буквы', y: 2 });
 });
+check('DeepSeek 15.11: лишняя «}» после каждого касания в messages — чинится, касания целы', () => {
+  const raw = '{"composer_output":{"messages":[{"touchpoint_number":1,"hook":{"quote":"q"},"body":"текст {не трогать}"}},{"touchpoint_number":2,"body":"б"}}]}}';
+  const r = parseModelJson(raw);
+  assert.equal(r.composer_output.messages.length, 2);
+  assert.equal(r.composer_output.messages[0].body, 'текст {не трогать}');
+  assert.equal(r.composer_output.messages[1].touchpoint_number, 2);
+});
 check('совсем не JSON — null', () => {
   assert.equal(parseModelJson('Извините, не могу'), null);
 });

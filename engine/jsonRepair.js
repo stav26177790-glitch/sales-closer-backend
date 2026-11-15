@@ -46,12 +46,46 @@ function escapeInnerQuotes(s) {
   return out;
 }
 
+// Лишняя закрывающая скобка (живой «Зерно» на DeepSeek, 15.11): после каждого касания модель ставила
+// лишнюю «}» — внутри массива messages. Скобка, которая не соответствует открытой (} при открытом [,
+// ] при открытом {, или закрывающая без открытой), выбрасывается. Строки не трогаем.
+function dropStrayClosers(s) {
+  let out = '';
+  const stack = [];
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inStr) {
+      out += ch;
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === '{' || ch === '[') { stack.push(ch); out += ch; continue; }
+    if (ch === '}' || ch === ']') {
+      const want = ch === '}' ? '{' : '[';
+      if (stack[stack.length - 1] !== want) continue; // лишняя — выбрасываем
+      stack.pop();
+      out += ch;
+      continue;
+    }
+    out += ch;
+  }
+  // запятая перед закрывающей скобкой, оставшаяся после выброса, — убираем
+  return out.replace(/,(\s*[}\]])/g, '$1');
+}
+
 function parseModelJson(text) {
   const body = stripFence(text);
   if (!body) return null;
   const attempts = [
     () => JSON.parse(body),
-    () => JSON.parse(escapeInnerQuotes(body))
+    () => JSON.parse(escapeInnerQuotes(body)),
+    () => JSON.parse(dropStrayClosers(body)),
+    () => JSON.parse(dropStrayClosers(escapeInnerQuotes(body)))
   ];
   for (const a of attempts) {
     try {
@@ -62,4 +96,4 @@ function parseModelJson(text) {
   return null;
 }
 
-module.exports = { parseModelJson, escapeInnerQuotes, stripFence };
+module.exports = { parseModelJson, escapeInnerQuotes, dropStrayClosers, stripFence };
