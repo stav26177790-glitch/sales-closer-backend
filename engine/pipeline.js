@@ -10,7 +10,7 @@ const db = require('../db');
 const { CONFIG } = require('./config');
 const { formatFinalSummary } = require('./chat');
 const { pinToPlan } = require('./touchPlan');
-const { cleanDiagnostic, ensureBudgetRecommendation, ensureAlternativesRecommendation } = require('./diagnosticCleanup');
+const { cleanDiagnostic, ensureBudgetRecommendation, ensureAlternativesRecommendation, ensureEvidenceScores } = require('./diagnosticCleanup');
 
 // Если agentRunner не смог распарсить ответ модели (например, потому что модель
 // обернула JSON в markdown-разметку ```json ... ```), он возвращает
@@ -237,6 +237,7 @@ function cleanManagerConflicts(diag, baseInput) {
   cleanDiagnostic(diag);
   ensureBudgetRecommendation(diag, baseInput?.materials?.source_materials?.text);
   ensureAlternativesRecommendation(diag);
+  ensureEvidenceScores(diag, baseInput?.materials?.source_materials?.text);
   if (!Array.isArray(diag?.conflicts_with_manager) || !diag.conflicts_with_manager.length) return;
   const real = realManagerConflicts(diag.conflicts_with_manager, baseInput?.materials?.user_assessment);
   if (real.length !== diag.conflicts_with_manager.length) {

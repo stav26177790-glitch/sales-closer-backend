@@ -71,4 +71,64 @@ function ensureAlternativesRecommendation(diag) {
   return true;
 }
 
-module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation };
+// Оценки по явным фактам (владелец 15.11, живой прогон «Fresh Bowl»): модель держала Риск там,
+// где клиент прямо показал обратное.
+// — ФВ: «сделаете на 20% дешевле — подпишем сразу» = деньги есть (± цена − N%) → Подтверждено.
+// — ЛПР: ЛПР назван и вышел на прямой контакт («Сергей готов созвониться», «созвонились в Zoom:
+//   Сергею…») → Подтверждено.
+// — Д: «понравились наши работы», «устраивает» → минимум Вероятно.
+// Не поднимаем, если после факта — отказ («выбрали других», «передумали», «денег нет»).
+const RANK = { 'Риск': 0, 'Неизвестно': 1, 'Вероятно': 2, 'Подтверждено': 3 };
+const BARGAIN_BUY_RE = /(сделаете|сделайте|скинете|скиньте|уступите|дадите|снизите|будет)[^.!?\n]{0,40}(на \d+|\d+\s*%|процент|дешевле|скидк)[^.!?\n]{0,50}(закаж|подпиш|бер[её]м|возьм|оплат|заключ|договорились)|(закаж|подпиш|бер[её]м|возьм|заключ)[^.!?\n]{0,30}если[^.!?\n]{0,40}(скидк|дешевле|\d+\s*%)/i;
+const TRUST_RE = /(понравил\w*|устраива\w*|впечатлил\w*)[^.!?\n]{0,30}(наш|ваш|работ|кейс|предложени|визуализац|макет)/i;
+const NEG_RE = /(выбрали других|выбрали друг|ушли к|отказал\w*|передумал\w*|денег нет|бюджет(а)? нет|бюджет урезал|не будем заказ|не актуальн)/i;
+const LPR_NAME_RE = /(?:[Рр]ешени[ея][^.!?\n]{0,60}?принима[а-яё]+|ЛПР[^.!?\n]{0,10}?|[Рр]ешает)\s+(?:собственник|директор|владел[а-яё]*|руководител[а-яё]*|сам[аи]?)?\s*([А-ЯЁ][а-яё]{2,})/;
+const CONTACT_RE = /(созвон\w*|zoom|зум|встрет\w*|встреч\w*|поговорил\w*|переговорил\w*|на связь|позвонил\w*|звонок)/i;
+function raise(diag, key, to, why) {
+  const sc = diag?.scores?.[key];
+  if (!sc || typeof sc !== 'object') return false;
+  if ((RANK[sc.status] ?? 1) >= RANK[to]) return false;
+  sc.status = to;
+  sc.evidence = [why, ...(Array.isArray(sc.evidence) ? sc.evidence : [])].slice(0, 5);
+  return true;
+}
+function afterIs(text, idx, re) { return idx >= 0 && re.test(text.slice(idx)); }
+// Принцип (владелец 15.11: «бери в работу не шлифовку, а сам принцип»): путь = разрыв между тем,
+// что УЖЕ случилось, и закрытием. Факты клиента двигают оценку, а стратег получает список
+// «уже случилось» (deal_events) — не планирует это заново, строит следующий шаг от итога.
+const MEETING_RE = /(созвонились|встретились|провели (zoom|зум|встречу|созвон)|был[аи]? на встрече|поговорили (с|в)|переговорили)/i;
+const sentenceAt = (t, idx) => {
+  const start = Math.max(t.lastIndexOf('\n', idx), t.lastIndexOf('. ', idx)) + 1;
+  const endRel = t.slice(idx).search(/[.!?\n]/);
+  return t.slice(start, endRel < 0 ? undefined : idx + endRel + 1).trim().slice(0, 180);
+};
+function ensureEvidenceScores(diag, sourceText) {
+  const t = String(sourceText || '');
+  if (!diag || typeof diag !== 'object' || !diag.scores || !t) return [];
+  const changed = [];
+  const events = [];
+  const b0 = t.search(BARGAIN_BUY_RE);
+  if (b0 >= 0 && !afterIs(t, b0, NEG_RE)) events.push(`Клиент торгуется с условием покупки: «${sentenceAt(t, b0)}» — деньги есть (ориентир ≈ цена КП минус процент). Дальше — не доказывать заново, а голосом через полномочия: небольшая уступка только в обмен на подписание / оплату.`);
+  const mt = t.search(MEETING_RE);
+  if (mt >= 0) events.push(`Встреча / созвон уже состоялись: «${sentenceAt(t, mt)}» — не предлагать эту встречу заново как первую; следующее касание — от её итога (что сказали, что мешает решить).`);
+  const tr0 = t.search(TRUST_RE);
+  if (tr0 >= 0 && !afterIs(t, tr0, NEG_RE)) events.push(`Клиенту понравилось: «${sentenceAt(t, tr0)}» — не повторять тот же набор доказательств (кейс + гарантии + «чем мы лучше»).`);
+  const b = t.search(BARGAIN_BUY_RE);
+  if (b >= 0 && !afterIs(t, b, NEG_RE) && raise(diag, 'financial', 'Подтверждено',
+    'Клиент назвал условие покупки через скидку — деньги есть, ориентир ≈ цена КП минус названный процент (торг — сигнал к покупке)')) changed.push('financial');
+  const nm = t.match(LPR_NAME_RE)?.[1];
+  if (nm) {
+    const stem = nm.slice(0, Math.max(4, nm.length - 2));
+    const sent = t.split(/(?<=[.!?\n])/).map((x, i) => ({ x, i })).filter(({ x }) => x.includes(stem) && CONTACT_RE.test(x) && !LPR_NAME_RE.test(x));
+    if (sent.length && !NEG_RE.test(t.slice(t.indexOf(sent[sent.length - 1].x)))) {
+      events.push(`ЛПР (${nm}) уже на прямом контакте: «${sent[sent.length - 1].x.trim().slice(0, 180)}» — не планировать выход на него через посредника; касания — к его решению.`);
+      if (raise(diag, 'authority', 'Подтверждено', `ЛПР (${nm}) вышел на прямой контакт с менеджером`)) changed.push('authority');
+    }
+  }
+  const tr = t.search(TRUST_RE);
+  if (tr >= 0 && !afterIs(t, tr, NEG_RE) && raise(diag, 'trust', 'Вероятно', 'Клиенту понравились наши работы / предложение')) changed.push('trust');
+  if (events.length) diag.deal_events = events; else delete diag.deal_events;
+  return changed;
+}
+
+module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation, ensureEvidenceScores };

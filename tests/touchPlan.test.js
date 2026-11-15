@@ -166,9 +166,35 @@ check('прогон 15.11 «Fresh Bowl»: «если после касания 4
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Кружок', kind: 'эмпатичное', day: 0 },
     { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'только если Сергей не вышел на связь после касания 1', day: 3 },
-    { number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'только если после касания 2 нет движения', day: 6 }
+    { number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'только если после касания 2 нет движения', day: 6 },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', condition: 'только если после всех касаний нет решения', day: 9 }
   ] }, tl, '2026-11-13');
   assert.ok(p.every((x) => !x.condition), JSON.stringify(p.map((x) => x.condition)));
+  assert.ok(p[p.length - 1].last_chance);
+});
+check('живой прогон 15.11 «Fresh Bowl»: голос недоступен — первое касание не звонок (мессенджер), звонки дальше остаются', () => {
+  const seq = () => ({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 3 },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', day: 6 }
+  ] });
+  const p = buildTouchPlan(seq(), tl, '2026-11-13', null, { source: 'Звонила Ксении два раза — не берёт трубку.' });
+  assert.equal(p[0].channel, 'WhatsApp'); assert.equal(p[2].channel, 'Звонок');
+  assert.equal(buildTouchPlan(seq(), tl, '2026-11-13', null, { source: 'Покровка' })[0].channel, 'Звонок');
+});
+check('принцип 15.11: касание на уже подтверждённый критерий не тратим (заодно-открытый → главный, иначе убираем); последнее — остаётся', () => {
+  const seq = () => ({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'Д' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', day: 2, criterion: 'ЛПР' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 4, criterion: 'ФВ' },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', day: 6, criterion: 'ЗС' }
+  ] });
+  const open = { financial: { status: 'Риск' }, need: { status: 'Подтверждено' }, authority: { status: 'Риск' }, trust: { status: 'Риск' }, urgency: { status: 'Вероятно' } };
+  const n0 = buildTouchPlan(seq(), tl, '2026-11-13', open, { source: 'x' }).length;
+  const closed = { ...open, financial: { status: 'Подтверждено' }, authority: { status: 'Подтверждено' } };
+  const p = buildTouchPlan(seq(), tl, '2026-11-13', closed, { source: 'x' });
+  assert.ok(p.length < n0, `${p.length} < ${n0}`);
+  assert.ok(!p.some((x) => /^ЛПР/.test(x.criterion || '')), JSON.stringify(p.map((x) => x.criterion)));
   assert.ok(p[p.length - 1].last_chance);
 });
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {

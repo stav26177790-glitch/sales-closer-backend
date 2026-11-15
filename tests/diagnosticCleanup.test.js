@@ -39,4 +39,30 @@ check('СОПРАНО «Аналоги» не собраны — рекомен�
   assert.equal(ensureAlternativesRecommendation(d), false);
   assert.equal(ensureAlternativesRecommendation({ soprano: { 'А': { status: 'собрано' } }, soprano_recommendations: [] }), false);
 });
+check('владелец 15.11 (живой «Fresh Bowl»): торг с условием покупки → ФВ Подтверждено; ЛПР вышел на контакт → ЛПР Подтверждено; «понравились работы» → Д Вероятно', () => {
+  const { ensureEvidenceScores } = require('../engine/diagnosticCleanup');
+  const mk = () => ({ scores: { financial: { status: 'Риск' }, authority: { status: 'Риск' }, trust: { status: 'Риск' } } });
+  const base = 'Общаюсь с маркетологом Ксенией. Решение по деньгам и подрядчику принимает собственник Сергей, его контакта у меня нет.';
+  let d = mk(); assert.deepEqual(ensureEvidenceScores(d, base + '\nКсения: Сергей посмотрел КП: говорит, дорого, другие предлагают на 15% дешевле.'), []);
+  d = mk(); const step3 = base + '\nКсения: Сергей готов созвониться в Zoom в понедельник. Но сказал так: сделаете на 20% дешевле — подпишем сразу.';
+  assert.deepEqual(ensureEvidenceScores(d, step3), ['financial', 'authority']);
+  assert.equal(d.scores.financial.status, 'Подтверждено'); assert.match(d.scores.financial.evidence[0], /деньги есть/);
+  d = mk(); assert.deepEqual(ensureEvidenceScores(d, step3 + '\nСозвонились в Zoom: Сергею понравились наши работы, про скидку сказал «подумаю». С тех пор три дня тишина.'), ['financial', 'authority', 'trust']);
+  // Котик: «на 20 процентов дешевле, сделаете на 30 — закажу у вас»
+  d = mk(); assert.deepEqual(ensureEvidenceScores(d, 'он сказал, что уже написал — на 20 процентов дешевле, сделаете на 30 — закажу у вас'), ['financial']);
+  // После факта — отказ: не поднимаем.
+  d = mk(); assert.deepEqual(ensureEvidenceScores(d, 'сделаете на 10% дешевле — подпишем. Потом написал: выбрали других.'), []);
+  // Не понижаем.
+  d = { scores: { financial: { status: 'Подтверждено' }, authority: { status: 'Риск' }, trust: { status: 'Вероятно' } } };
+  assert.deepEqual(ensureEvidenceScores(d, 'сделаете на 10% дешевле — подпишем'), []);
+});
+check('принцип 15.11: стратег получает «уже случилось» (deal_events) — встреча была, ЛПР на связи, торг, понравилось', () => {
+  const { ensureEvidenceScores } = require('../engine/diagnosticCleanup');
+  const d = { scores: { financial: { status: 'Риск' }, authority: { status: 'Риск' }, trust: { status: 'Риск' } } };
+  ensureEvidenceScores(d, 'Решение принимает собственник Сергей.\nКсения: Сергей готов созвониться в Zoom. Сделаете на 20% дешевле — подпишем сразу.\nСозвонились в Zoom: Сергею понравились наши работы, про скидку сказал «подумаю».');
+  const e = d.deal_events.join(' | ');
+  assert.match(e, /торгуется с условием покупки/); assert.match(e, /уже состоялись/); assert.match(e, /уже на прямом контакте/); assert.match(e, /понравилось/);
+  const d2 = { scores: { financial: { status: 'Риск' } } }; ensureEvidenceScores(d2, 'КП отправила, тишина.');
+  assert.equal(d2.deal_events, undefined);
+});
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

@@ -100,6 +100,30 @@ function criteriaToMove(scores) {
   });
 }
 
+// Закрытое не трогаем (владелец 15.11, принцип): касание, чей критерий уже «Подтверждено», —
+// лишнее. Если у него есть открытый критерий «заодно» — он становится главным; иначе касание
+// убираем (последнее обычное касание пути — не трогаем, на нём «последний шанс»).
+function dropClosed(steps, scores) {
+  if (!scores || typeof scores !== 'object') return steps;
+  const closed = new Set(CRITERIA_ORDER.filter((c) => /подтвержд/i.test(String(scores[CRITERIA[c].key]?.status || ''))));
+  if (!closed.size) return steps;
+  const regular = steps.filter((s) => !s.conditional && !s.sameContact);
+  const lastRegular = regular[regular.length - 1];
+  const out = [];
+  let prevDropped = false;
+  for (const s of steps) {
+    // касание «сразу после» убранного — тоже уходит
+    if (s.sameContact && prevDropped) continue;
+    prevDropped = false;
+    if (!s.criterion || !closed.has(s.criterion) || s === lastRegular) { out.push(s); continue; }
+    const open = (s.also || []).find((c) => !closed.has(c));
+    if (open) { s.criterion = open; s.also = (s.also || []).filter((c) => c !== open); out.push(s); continue; }
+    if (!s.conditional && out.filter((x) => !x.conditional && !x.sameContact).length + regular.slice(regular.indexOf(s) + 1).length < 2) { out.push(s); continue; }
+    prevDropped = true;
+  }
+  return out;
+}
+
 // Сколько касаний будет после чередования: два экспертных подряд → +кружок.
 function projectedSize(regularSteps) {
   let size = 0; let prev = null;
@@ -149,7 +173,7 @@ function coverCriteria(steps, scores) {
 // (прогон 14.11: такие шаги считались условными — ломались порядок дат и «последний шанс»).
 // Условные — только шаги, которые случатся при согласии (даст контакт, согласится).
 // + прогон 15.11 «Fresh Bowl»: «если после касания 4 нет движения», «Сергей не вышел на связь».
-const SILENCE_RE = /нет ответа|не ответ|без ответа|не организ|не дал|не даст|молч|не получ|не согласовал|не вернул|нет движения|не вышел на связь|не вышла на связь|тишина|не отреагир|не перезвон/i;
+const SILENCE_RE = /нет ответа|не ответ|без ответа|не организ|не дал|не даст|молч|не получ|не согласовал|не вернул|нет движения|не вышел на связь|не вышла на связь|тишина|не отреагир|не перезвон|нет решения|не решил|не принял решени|всё ещё упира|все еще упира/i;
 const isConditional = (s) => {
   const t = String(s?.condition || '') + ' ' + String(s?.timing || '');
   return /только если|если (марина|он|она|контакт)|после согласия/i.test(t) && !SILENCE_RE.test(t);
@@ -280,7 +304,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   }
 
   // Все неподтверждённые критерии формулы закрытия — хотя бы в одном касании (весь путь).
-  if (!stepMode) steps = coverCriteria(steps, scores);
+  if (!stepMode) steps = coverCriteria(dropClosed(steps, scores), scores);
 
   // Подсказки из переписки (прогон 14.11: повод про козырёк по 902-ПП не появился ни разу) —
   // в первое экспертное касание как обязательный пункт.
@@ -331,6 +355,12 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   for (const x of noVoice ? [] : steps) {
     const money = x.criterion === 'ФВ' || (x.also || []).includes('ФВ');
     if (money && !/звонок|zoom|зум|видеозвон|встреч/i.test(String(x.channel || ''))) { x.channel = 'Звонок'; x.kind = 'экспертное'; }
+  }
+  // Живой прогон 15.11 «Fresh Bowl»: «не берёт трубку» — а первое касание снова звонок. Голос
+  // недоступен — первое касание пишем (мессенджер), звонок — позже (владелец 15.11).
+  if (noVoice) {
+    const first = steps.find((x) => !isConditional(x));
+    if (first && /^\s*звонок/i.test(String(first.channel || ''))) first.channel = 'WhatsApp';
   }
 
   // Интервал между касаниями — по ситуации (владелец 14.11: «от триггера, если есть
