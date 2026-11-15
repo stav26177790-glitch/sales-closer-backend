@@ -145,6 +145,18 @@ async function test(name, fn) {
     assert.ok(warnings.some((w) => w.includes('max_tokens=8000')), 'нет предупреждения об обрезке ответа');
   });
 
+  await test('Сломанный (не обрезанный) JSON → один повтор; обрезанный лимитом — без повтора', async () => {
+    requests.length = 0;
+    nextResponse = reply('{"composer_output": ]]] сломано', { stop_reason: 'end_turn' });
+    const out = await callAgent('composer', INPUT, 8000);
+    assert.strictEqual(out.parse_error, true);
+    assert.strictEqual(requests.length, 2, `ожидалось 2 запроса, было ${requests.length}`);
+    requests.length = 0;
+    nextResponse = reply('{"composer_output": {"messages": [', { stop_reason: 'max_tokens' });
+    await callAgent('composer', INPUT, 8000);
+    assert.strictEqual(requests.length, 1, `ожидался 1 запрос, было ${requests.length}`);
+  });
+
   await test('Ошибка API пробрасывается сразу, без собственных повторов', async () => {
     nextResponse = Object.assign(new Error('400 invalid_request_error'), { status: 400 });
     await assert.rejects(() => callAgent('planner', INPUT), /400/);

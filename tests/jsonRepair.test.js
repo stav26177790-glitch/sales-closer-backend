@@ -24,6 +24,12 @@ check('DeepSeek 15.11: лишняя «}» после каждого касани
   assert.equal(r.composer_output.messages[0].body, 'текст {не трогать}');
   assert.equal(r.composer_output.messages[1].touchpoint_number, 2);
 });
+check('DeepSeek 15.11: каждое касание в своём массиве [ {…} ], [ {…} ] ] — склеивается', () => {
+  const raw = '{\n "composer_output": {\n "messages": [\n {"touchpoint_number": 1, "body": "а ], [ {не трогать}"}\n ],\n [\n {"touchpoint_number": 2, "hook": {"q": "x"}, "body": "б"}\n ],\n [\n {"touchpoint_number": 3, "body": "в"}\n ]\n ]\n }\n}';
+  const r = parseModelJson(raw);
+  assert.deepEqual(r.composer_output.messages.map((m) => m.touchpoint_number), [1, 2, 3]);
+  assert.equal(r.composer_output.messages[0].body, 'а ], [ {не трогать}');
+});
 check('совсем не JSON — null', () => {
   assert.equal(parseModelJson('Извините, не могу'), null);
 });

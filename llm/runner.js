@@ -51,32 +51,41 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
   const systemPrompt = buildSystemPrompt(agentName, inputData?.deal?.industry);
   const startedAt = Date.now();
 
-  const response = await client.messages.create({
-    model: config.model,
-    max_tokens: maxTokens,
-    temperature: config.temperature,
-    system: toApiSystem(agentName, systemPrompt),
-    messages: [{ role: 'user', content: JSON.stringify(compressInput(inputData, agentName), null, 2) }],
-    ...EXTRA_PARAMS
-  });
+  // Ответ не разобрался как JSON — один раз переспрашиваем (DeepSeek 15.11 дважды ломал структуру
+  // касаний по-разному; починка в engine/jsonRepair.js ловит известные поломки, повтор — остальные).
+  const MAX_ATTEMPTS = 2;
+  let parsed = null;
+  let rawOutput = '';
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const attemptStart = Date.now();
+    const response = await client.messages.create({
+      model: config.model,
+      max_tokens: maxTokens,
+      temperature: config.temperature,
+      system: toApiSystem(agentName, systemPrompt),
+      messages: [{ role: 'user', content: JSON.stringify(compressInput(inputData, agentName), null, 2) }],
+      ...EXTRA_PARAMS
+    });
 
-  console.log(
-    `[agentRunner] ← ${agentName} (сделка: ${dealLabel}) ${((Date.now() - startedAt) / 1000).toFixed(1)} с, ` +
-    `${formatUsage(response.usage)}, stop: ${response.stop_reason}`
-  );
+    console.log(
+      `[agentRunner] ← ${agentName} (сделка: ${dealLabel}) ${((Date.now() - attemptStart) / 1000).toFixed(1)} с, ` +
+      `${formatUsage(response.usage)}, stop: ${response.stop_reason}${attempt > 1 ? `, попытка ${attempt}` : ''}`
+    );
 
-  const rawOutput = response.content.find((b) => b.type === 'text')?.text || '';
-  const parsed = parseAgentText(rawOutput);
-  // Сохраняем вход и ответ агента для проверки правок на реальных ответах (engine/agentLog.js).
-  recordAgentCall({ agent: agentName, input: inputData, output: parsed, rawOutput, durationMs: Date.now() - startedAt, usage: response.usage });
-  if (parsed === null) {
+    rawOutput = response.content.find((b) => b.type === 'text')?.text || '';
+    parsed = parseAgentText(rawOutput);
+    // Сохраняем вход и ответ агента для проверки правок на реальных ответах (engine/agentLog.js).
+    recordAgentCall({ agent: agentName, input: inputData, output: parsed, rawOutput, durationMs: Date.now() - attemptStart, usage: response.usage });
+    if (parsed !== null) break;
     console.warn(
       `[agentRunner] Ответ ${agentName} (сделка: ${dealLabel}) не разобран как JSON` +
       (response.stop_reason === 'max_tokens' ? ` — ответ обрезан лимитом max_tokens=${maxTokens}` : '') +
-      '. Дальше по цепочке — восстановление из raw_output.'
+      (attempt < MAX_ATTEMPTS ? '. Переспрашиваю.' : '. Дальше по цепочке — восстановление из raw_output.')
     );
-    return { raw_output: rawOutput, parse_error: true };
+    // Обрезанный лимитом ответ повтор не спасёт — тот же лимит.
+    if (response.stop_reason === 'max_tokens') break;
   }
+  if (parsed === null) return { raw_output: rawOutput, parse_error: true };
   logSchemaDrift(agentName, inputData, parsed);
   return parsed;
 }

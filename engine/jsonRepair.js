@@ -78,6 +78,32 @@ function dropStrayClosers(s) {
   return out.replace(/,(\s*[}\]])/g, '$1');
 }
 
+// Каждое касание в своём массиве (живой «Зерно 9» на DeepSeek, 15.11):
+// "messages": [ {…} ], [ {…} ], [ {…} ] ] — склеиваем «} ], [ {» в «}, {»; лишнюю «]» в конце
+// потом выбрасывает dropStrayClosers. Строки не трогаем.
+function mergeSplitArrays(s) {
+  let out = '';
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inStr) {
+      out += ch;
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === ']' && /\}\s*$/.test(out)) {
+      const m = s.slice(i).match(/^\]\s*,\s*\[\s*(?=\{)/);
+      if (m) { out += ','; i += m[0].length - 1; continue; }
+    }
+    out += ch;
+  }
+  return out;
+}
+
 function parseModelJson(text) {
   const body = stripFence(text);
   if (!body) return null;
@@ -85,7 +111,9 @@ function parseModelJson(text) {
     () => JSON.parse(body),
     () => JSON.parse(escapeInnerQuotes(body)),
     () => JSON.parse(dropStrayClosers(body)),
-    () => JSON.parse(dropStrayClosers(escapeInnerQuotes(body)))
+    () => JSON.parse(dropStrayClosers(escapeInnerQuotes(body))),
+    () => JSON.parse(dropStrayClosers(mergeSplitArrays(body))),
+    () => JSON.parse(dropStrayClosers(mergeSplitArrays(escapeInnerQuotes(body))))
   ];
   for (const a of attempts) {
     try {
@@ -96,4 +124,4 @@ function parseModelJson(text) {
   return null;
 }
 
-module.exports = { parseModelJson, escapeInnerQuotes, dropStrayClosers, stripFence };
+module.exports = { parseModelJson, escapeInnerQuotes, dropStrayClosers, mergeSplitArrays, stripFence };

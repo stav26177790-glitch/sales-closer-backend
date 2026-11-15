@@ -196,6 +196,9 @@ app.patch('/api/deals/:id/timeline', requireManager, async (req, res) => {
     }
     const fields = db.timelineFields(req.body);
     if (!Object.keys(fields).length) return res.status(400).json({ error: 'Нет корректных полей сроков' });
+    if (!fields.production_days && !deal.production_days) {
+      return res.status(400).json({ error: 'Укажите производство — сколько рабочих дней, например 12' });
+    }
     const updated = await db.updateDealState(req.params.id, fields);
     // Сразу показываем менеджеру расчёт: раньше блок «Сроки» появлялся только
     // после свежей диагностики, и сроки, заданные позже, менеджер не видел
