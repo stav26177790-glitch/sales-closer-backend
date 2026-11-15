@@ -281,6 +281,22 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     criterion: criterionOf(s?.criterion) || (s?.same_contact_as != null ? null : guessCriterion(s))
   }));
 
+  // Ритм пути (симулятор 15.11 «Fresh Bowl»: стратег связал все 4 касания цепочкой «сразу после» —
+  // путь схлопнулся в один день, «последнего шанса» нет). К основному касанию — не больше одного
+  // «сразу после»; следующие в цепочке — обычные касания со своим днём.
+  // Длинная цепочка: два и больше «сразу после» подряд. Пару «звонок + сразу текст» не трогаем.
+  const chained = steps.map((x, i) => !!x.sameContact && !x.conditional && (!!steps[i - 1]?.sameContact || !!steps[i + 1]?.sameContact));
+  for (let i = 1; i < steps.length; i++) {
+    const x = steps[i]; const prev = steps[i - 1];
+    if (x.sameContact && !x.conditional && (prev.sameContact || prev.conditional)) x.sameContact = false;
+  }
+  // Весь путь — до «последнего шанса»: нужно хотя бы 3 обычных касания. Не хватает — «сразу после»
+  // из длинной цепочки (с конца) становятся обычными касаниями.
+  if (context.mode !== 'step') {
+    const regularCount = () => steps.filter((x) => !x.conditional && !x.sameContact).length;
+    for (let i = steps.length - 1; i > 0 && regularCount() < 3; i--) if (chained[i] && steps[i].sameContact) steps[i].sameContact = false;
+  }
+
   // По датам: обычные касания (вместе с текстом «сразу после» к ним) — по дню отправки;
   // условные остаются на своих местах. Иначе номера шли не по хронологии (прогон 14.11).
   {
@@ -303,9 +319,13 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 
   // «Сразу после / в тот же день после звонка» — тот же день, что предыдущий шаг.
   let lastDay = 0;
+  let seenRegular = false;
   for (const s of steps) {
     if (s.conditional) continue;
-    if (s.sameContact) s.day = lastDay; else lastDay = s.day;
+    if (s.sameContact) { s.day = lastDay; continue; }
+    // обычные касания — каждое в свой день (не раньше следующего дня после предыдущего)
+    if (seenRegular && s.day <= lastDay) s.day = lastDay + 1;
+    lastDay = s.day; seenRegular = true;
   }
 
   // «Есть ли шанс / честный ответ» в середине цепочки — убираем: это вопрос только

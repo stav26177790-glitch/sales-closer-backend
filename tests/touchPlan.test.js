@@ -210,6 +210,18 @@ check('владелец 15.11: Д открыт и клиент прогрет (�
   const p2 = buildTouchPlan(seq(), tl, '2026-11-13', sc(false), { source: 'x' });
   assert.ok(!p2.some((x) => /производстве/.test(x.goal || '')));
 });
+check('симулятор 15.11: цепочка «сразу после» из 4 касаний — к основному не больше одного, остальные в свои дни; «последний шанс» есть', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'ФВ' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', timing: 'сразу после предыдущего касания', same_contact_as: 1, criterion: 'Д' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', timing: 'сразу после предыдущего касания', same_contact_as: 2 },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', timing: 'сразу после предыдущего касания', same_contact_as: 3, criterion: 'Д' }
+  ] }, tl, '2026-11-13', null, { source: 'x' });
+  const days = new Set(p.map((x) => x.send_date));
+  assert.ok(days.size >= 3, JSON.stringify(p.map((x) => [x.touchpoint_number, x.send_date, x.timing])));
+  assert.ok(p[p.length - 1].last_chance, JSON.stringify(p.map((x) => x.timing)));
+  assert.equal(p.filter((x) => /сразу после/.test(x.timing)).length, 1);
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
