@@ -39,7 +39,7 @@ async function runStrategy({ dealId, deal, baseInput, opts = {} }, correction) {
   attachMustInclude(output.strategy_output, baseInput.timeline, baseInput.materials?.source_materials?.text);
   // План касаний: даты, факты на день отправки, чередование, пункты по касаниям — кодом.
   if (output.strategy_output && typeof output.strategy_output === 'object') {
-    const plan = buildTouchPlan(output.strategy_output, baseInput.timeline, baseInput.today, deal.last_diagnostic_output?.scores, { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent, mode: modeOf(deal) });
+    const plan = buildTouchPlan(output.strategy_output, baseInput.timeline, baseInput.today, deal.last_diagnostic_output?.scores, { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent, mode: modeOf(deal), dealSize: deal.deal_size });
     if (plan) output.strategy_output.touch_plan = plan;
   }
 

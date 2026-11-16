@@ -209,6 +209,10 @@ check('владелец 15.11: Д открыт и клиент прогрет (�
   assert.match(t.goal, /производстве/); assert.match(t.goal, /выгоду/); assert.equal(t.channel, 'WhatsApp');
   const p2 = buildTouchPlan(seq(), tl, '2026-11-13', sc(false), { source: 'x' });
   assert.ok(!p2.some((x) => /производстве/.test(x.goal || '')));
+  // владелец 16.11: встречу проводит заведующий производством, менеджер — по Zoom; от 500 тыс. — может приехать сам
+  assert.match(t.goal, /заведующий производством/); assert.doesNotMatch(t.goal, /от 500 тыс/);
+  const big = buildTouchPlan(seq(), tl, '2026-11-13', sc(true), { source: 'x', dealSize: 650000 }).find((x) => /^Д/.test(x.criterion || ''));
+  assert.match(big.goal, /от 500 тыс/);
 });
 check('симулятор 15.11: цепочка «сразу после» из 4 касаний — к основному не больше одного, остальные в свои дни; «последний шанс» есть', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
