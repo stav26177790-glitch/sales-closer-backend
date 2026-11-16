@@ -237,4 +237,14 @@ check('живой «Дента Плюс» 16.11: «Я (07.11): Отправил 
   const r = findPlanIssues([{ touchpoint_number: 1, channel: 'Кружок', body: 'Ольга, добрый день! Записала вам короткое видео — появилась идея. Можем коротко набраться?' }], [{ touchpoint_number: 1 }], 'Я (07.11): Отправил КП');
   assert.ok(/мужчина/.test(JSON.stringify(r)), JSON.stringify(r));
 });
+check('владелец 16.11: «в результате вы получаете» — смысл, не мантра: дословно дважды одному человеку — на правку', () => {
+  const { repeatedArguments } = require('../engine/planChecks');
+  const msgs = [
+    { touchpoint_number: 1, recipient: 'Ольга', body: 'Ольга, в результате вы получаете вывеску к открытию.' },
+    { touchpoint_number: 2, recipient: 'Ольга', body: 'Ольга, договоримся сегодня — в результате вы получаете спокойствие.' }
+  ];
+  assert.ok(JSON.stringify(repeatedArguments(msgs, [], [])).includes('в результате вы получаете'));
+  const varied = [msgs[0], { touchpoint_number: 2, recipient: 'Ольга', body: 'Ольга, договоримся сегодня — и вы спокойны за результат.' }];
+  assert.ok(!JSON.stringify(repeatedArguments(varied, [], [])).includes('в результате вы получаете'));
+});
 console.log(`planChecks: ${n} проверок пройдено`);
