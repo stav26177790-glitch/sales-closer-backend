@@ -112,6 +112,12 @@ check('владелец 16.11: шаг после «дороговато» — з
   const wa = findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Ольга, по цене удобнее голосом — созвонимся сегодня на 5 минут?' }], [{ touchpoint_number: 1, channel: 'WhatsApp', path_mode: 'step' }], src).flatMap((h) => h.fixes).join(' ');
   assert.doesNotMatch(wa, /прояснить/);
 });
+check('симулятор 16.11: «дата открытия 15 декабря уже прошла» в касании 7 декабря — ошибка; про прошедшую дату — можно', () => {
+  const p7 = [{ touchpoint_number: 1, channel: 'Звонок', send_date: '2026-12-07' }];
+  const f = (body) => findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body }], p7, 'Я (06.11): Отправила КП.').flatMap((h) => h.fixes).join(' ');
+  assert.match(f('Ксения, дата открытия 15 декабря уже прошла — давайте пересчитаем.'), /ещё впереди/);
+  assert.doesNotMatch(f('Ксения, срок 25 ноября уже прошёл — честно пересчитала.'), /ещё впереди/);
+});
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));

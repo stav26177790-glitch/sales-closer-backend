@@ -42,6 +42,9 @@ const PRICE_OBJECTION_RE = /(дорог|дороговат|дешевле|не �
 function ensureBudgetRecommendation(diag, sourceText) {
   if (!diag || typeof diag !== 'object') return false;
   if (!PRICE_OBJECTION_RE.test(String(sourceText || ''))) return false;
+  // Клиент уже назвал цифру («у других 480», «давайте 550») — ориентир есть, рекомендация «уточнить бюджет» лишняя
+  // (симулятор 16.11 «Дента Плюс»).
+  if (/(давайте|хотя бы|за|предлагают|нашли|бюджет|рассчитыва[а-яё]*)[^.!?\n]{0,25}\d{2,3}\s*(тыс|000|к\b)|\d{2,3}\s*тысяч/i.test(String(sourceText || ''))) return false;
   const recs = Array.isArray(diag.soprano_recommendations) ? diag.soprano_recommendations : [];
   if (recs.some((r) => /бюджет|сколько заложил|ориентир по (цене|стоимости)/i.test(String(r)))) return false;
   const rec = 'Бюджет (СОПРАНО: Ограничения): клиент говорит о цене — уточнить ориентир по бюджету и с чем сравнивает. ' +

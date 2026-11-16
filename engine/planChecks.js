@@ -148,6 +148,9 @@ function repeatedArguments(messages) {
   }
   return out;
 }
+const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+// «уже прошла» или «прошла.» в конце фразы; «чтобы открытие 3 декабря прошло по плану» — не про прошедшую дату.
+const PASSED_DATE_RE = new RegExp(`(\\d{1,2})\\s+(${MONTHS_GEN.join('|')})[^.!?\\n]{0,40}(уже\\s+прош[а-яё]*|прош(ла|ло|ёл|ел|ли)(?=\\s*[.,;!—–]|\\s*$))`, 'i');
 const STEP_EXPENSIVE_RE = /дорог|дороговат|дешевле|предлагают за \d/i;
 
 function findPlanIssues(messages, plan, sourceText = '') {
@@ -232,6 +235,12 @@ function findPlanIssues(messages, plan, sourceText = '') {
     // 902-ПП — только Москва; «есть пара моментов» — только реальные, из данных.
     if (PP902_RE.test(t) && !isMoscow) fixes.push('902-ПП — правила Москвы, а город объекта в данных не указан. Убрать 902-ПП: «посмотрю ваш макет по требованиям города, чтобы не пришлось переделывать» (или уточнить город).');
     if (INVENTED_ISSUES_RE.test(t) && !INVENTED_ISSUES_RE.test(String(sourceText || ''))) fixes.push('«Есть пара моментов» — обещание найденных проблем, которых в данных нет. Иначе: «посмотрю ваш макет по требованиям города — чтобы вывеску не пришлось переделывать».');
+    // «Дата … уже прошла», а она ещё впереди (симулятор 16.11: 7 декабря — «открытие 15 декабря уже прошло»).
+    { const sd = byN.get(n)?.send_date; const mm = sd ? t.match(PASSED_DATE_RE) : null;
+      if (mm) { const mon = MONTHS_GEN.indexOf(mm[2].toLowerCase()); const y = Number(String(sd).slice(0, 4));
+        let d = new Date(Date.UTC(y, mon, Number(mm[1]))); const s0 = new Date(sd + 'T00:00:00Z');
+        if (d - s0 < -183 * 864e5) d = new Date(Date.UTC(y + 1, mon, Number(mm[1])));
+        if (mon >= 0 && d >= s0) fixes.push(`«${mm[0].slice(0, 60)}» — ошибка: ${mm[1]} ${mm[2]} ещё впереди (касание отправляется ${sd}). Даты — только из фактов плана.`); } }
     // Шаг после ответа клиента с «дорого»: первое касание — прояснить, какое это «дорого» (тренинг 28).
     // Письмо с предложением созвониться — нормально: прояснять будут голосом (деньги — голосом, правило 7).
     if (i === 0 && (plan || [])[0]?.path_mode === 'step' && STEP_EXPENSIVE_RE.test(String(sourceText || '').slice(-700)) && !CLARIFY_RE.test(t)
