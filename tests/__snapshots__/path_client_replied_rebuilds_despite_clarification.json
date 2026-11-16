@@ -619,6 +619,12 @@
                   "criterion": "ЛПР — определён",
                   "last_chance": false
                 }
+              ],
+              "_sent_history": [
+                {
+                  "channel": "WhatsApp",
+                  "body": "Иван, добрый день!"
+                }
               ]
             }
           }
@@ -673,6 +679,26 @@
             ],
             "deal_events": [
               "ЗС закрыт — срок близко (дата клиента, запас ≤ 10 рабочих дней): отдельных касаний на срочность не тратить — одним вопросом сверить «дата открытия в силе?» и держать слот как заботу о дате."
+            ]
+          },
+          "last_composer_output": {
+            "messages": [
+              {
+                "touchpoint_number": 1,
+                "channel": "WhatsApp",
+                "body": "Иван, добрый день!"
+              }
+            ],
+            "_check": {
+              "approved": true,
+              "rounds": 1,
+              "reviews": 1
+            },
+            "_sent_history": [
+              {
+                "channel": "WhatsApp",
+                "body": "Иван, добрый день!"
+              }
             ]
           },
           "intake_rounds": 1,
@@ -754,6 +780,12 @@
                 "kind": "экспертное",
                 "criterion": "ЛПР — определён",
                 "last_chance": false
+              }
+            ],
+            "_sent_history": [
+              {
+                "channel": "WhatsApp",
+                "body": "Иван, добрый день!"
               }
             ],
             "_check": {

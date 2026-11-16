@@ -133,8 +133,9 @@ const ARGUMENTS = [
   { key: 'своё производство — от поставщиков не зависим', re: /от поставщиков не завис/i }
 ];
 const KRUG_CH_RE = /кружок|видео/i;
-function repeatedArguments(messages) {
+function repeatedArguments(messages, sentHistory = []) {
   const first = new Map();
+  for (const sent of sentHistory || []) for (const a of ARGUMENTS) if (a.re.test(String(sent?.body || '')) && !first.has(a.key)) first.set(a.key, 'прошлого хода (уже ушло клиенту)');
   const out = [];
   for (const m of messages || []) {
     if (KRUG_CH_RE.test(String(m?.channel || ''))) continue;
@@ -153,7 +154,7 @@ const MONTHS_GEN = ['января', 'февраля', 'марта', 'апрел�
 const PASSED_DATE_RE = new RegExp(`(\\d{1,2})\\s+(${MONTHS_GEN.join('|')})[^.!?\\n]{0,40}(уже\\s+прош[а-яё]*|прош(ла|ло|ёл|ел|ли)(?=\\s*[.,;!—–]|\\s*$))`, 'i');
 const STEP_EXPENSIVE_RE = /дорог|дороговат|дешевле|предлагают за \d/i;
 
-function findPlanIssues(messages, plan, sourceText = '') {
+function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
   // Финальные касания пути: «последний шанс» и обычное касание перед ним.
@@ -167,7 +168,7 @@ function findPlanIssues(messages, plan, sourceText = '') {
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
   const out = [];
-  const repeats = repeatedArguments(messages);
+  const repeats = repeatedArguments(messages, sentHistory);
   (messages || []).forEach((m, i) => {
     const n = Number(m?.touchpoint_number ?? i + 1);
     const t = textOf(m);
@@ -251,8 +252,8 @@ function findPlanIssues(messages, plan, sourceText = '') {
   return out;
 }
 
-function applyPlanChecks(verdict, messages, plan, sourceText = '') {
-  const hits = findPlanIssues(messages, plan, sourceText);
+function applyPlanChecks(verdict, messages, plan, sourceText = '', sentHistory = []) {
+  const hits = findPlanIssues(messages, plan, sourceText, sentHistory);
   if (!hits.length || !verdict || typeof verdict !== 'object') return { verdict, hits };
   const reviewed = Array.isArray(verdict.messages_reviewed) ? verdict.messages_reviewed : (verdict.messages_reviewed = []);
   for (const h of hits) {

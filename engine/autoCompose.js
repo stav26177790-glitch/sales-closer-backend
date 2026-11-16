@@ -52,7 +52,7 @@ function isForwardMaterial(step, m) {
   return /пересыл|переслать|для передачи/i.test(t);
 }
 
-function codeChecks(composerOutput, timeline, plan, sourceText) {
+function codeChecks(composerOutput, timeline, plan, sourceText, sentHistory = []) {
   const msgs = messagesOf(composerOutput);
   const r = {
     verdict: 'ОДОБРЕНО',
@@ -135,7 +135,7 @@ function codeChecks(composerOutput, timeline, plan, sourceText) {
   // старые сделки без плана пишет composer, у него повода нет.
   if (hasPlan) applyHookCheck(r, msgs, sourceText);
   // «Последний шанс» — только последним; альтернатива подешевле — с риском / отходом от ТЗ.
-  applyPlanChecks(r, msgs, hasPlan ? plan : null, sourceText);
+  applyPlanChecks(r, msgs, hasPlan ? plan : null, sourceText, sentHistory);
   return r;
 }
 
@@ -259,6 +259,8 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
   let cur = { ...deal };
   let fb = feedback;
   let composerOutput = deal.last_composer_output;
+  // Что ушло клиенту в прошлых ходах (касание 1 каждого хода) — не повторять (владелец 16.11).
+  const sentHistory = Array.isArray(deal.last_composer_output?._sent_history) ? deal.last_composer_output._sent_history : [];
   let reviewerOutput = null;
   let rounds = 0;
   let reviews = 0;
@@ -308,6 +310,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
         : fresh;
     }
     skipCompose = false;
+    if (sentHistory.length && composerOutput && typeof composerOutput === 'object') composerOutput._sent_history = sentHistory;
     cur = { ...cur, last_composer_output: composerOutput };
 
     if (!messagesOf(composerOutput).length) {
@@ -315,7 +318,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
       return { composer_output: composerOutput, reviewer_output: null, approved: false, rounds, reviews };
     }
 
-    const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput));
+    const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput), sentHistory);
     if (code.verdict !== 'ОДОБРЕНО') trace.push(`код вернул ${bad(code)}`);
     if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);

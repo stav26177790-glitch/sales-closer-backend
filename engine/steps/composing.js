@@ -121,9 +121,13 @@ function isNewFacts(text) {
   return !isManagerQuestion(t);
 }
 
-async function rebuildPath({ baseInput, managerInput }) {
+const { sentHistoryAfter } = require('../sentHistory');
+async function rebuildPath({ deal, baseInput, managerInput }) {
   const { runIntakeStep } = require('../pipeline');
   const { output, nextState } = await runIntakeStep(baseInput, 1, { noClarification: true, path: true, pathMode: rebuildMode(managerInput) });
+  if (deal?.last_composer_output && typeof deal.last_composer_output === 'object') {
+    output.composer_output = { ...deal.last_composer_output, _sent_history: sentHistoryAfter(deal.last_composer_output) };
+  }
   delete output._intakeRoundLimitNote; // перестройка — не «не удалось уточнить», а обычный путь
   output._intake_rounds = 1;
   output._awaitingCorrectionConfirmation = false;

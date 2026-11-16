@@ -118,6 +118,18 @@ check('симулятор 16.11: «дата открытия 15 декабря �
   assert.match(f('Ксения, дата открытия 15 декабря уже прошла — давайте пересчитаем.'), /ещё впереди/);
   assert.doesNotMatch(f('Ксения, срок 25 ноября уже прошёл — честно пересчитала.'), /ещё впереди/);
 });
+check('владелец 16.11 (вариант 1): касание 1 прошлого хода считаем отправленным — его доводы в новом ходе не повторяем', () => {
+  const sent = [{ channel: 'Звонок', body: 'Ольга, давайте я подготовлю визуализацию на фото вашего фасада.' }];
+  const msgs = [{ touchpoint_number: 1, channel: 'Звонок', body: 'Игорь Петрович, давайте я сделаю визуализацию на вашем фасаде.' },
+    { touchpoint_number: 2, channel: 'Email', body: 'Оплату можно разбить 70/30: остаток — перед отгрузкой.' }];
+  const f1 = findPlanIssues(msgs, plan, 'x', sent).flatMap((h) => h.fixes).join(' ');
+  assert.match(f1, /Повтор довода: «визуализация на фасаде» уже был в касании прошлого хода/);
+  assert.ok(!findPlanIssues(msgs, plan, 'x', sent).some((h) => h.touchpoint_number === 2));
+  assert.equal(findPlanIssues(msgs, plan, 'x', []).length, 0);
+  const { sentHistoryAfter } = require('../engine/sentHistory');
+  const h = sentHistoryAfter({ messages: [{ touchpoint_number: 2, channel: 'Email', body: 'Б' }, { touchpoint_number: 1, channel: 'Звонок', body: 'А' }], _sent_history: [{ channel: 'WhatsApp', body: 'раньше' }] });
+  assert.deepEqual(h.map((x) => x.body), ['раньше', 'А']);
+});
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));
