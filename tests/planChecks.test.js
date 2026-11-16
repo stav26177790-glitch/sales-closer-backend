@@ -86,6 +86,32 @@ check('владелец 16.11 (методика «дорого», тренинг
   assert.doesNotMatch(f('Сергей, а в целом решение вам подходит? [пауза] Для одних «дорого» — не нужно сейчас, для других — не рассчитывали, третьи хотят поторговаться. У вас какой вариант ближе? [пауза] Если поторговаться — подберу варианты под ваш бюджет. Но скажу честно: это отход от ТЗ — если уменьшить буквы, вывеску хуже видно.'), /прояснить, какое это «дорого»/);
   assert.doesNotMatch(findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Подберу варианты под ваш бюджет. Скажу честно: это отход от ТЗ — вывеску хуже видно.' }], plan, 'КП отправила').flatMap((h) => h.fixes).join(' '), /прояснить/);
 });
+check('симулятор 16.11 «Дента Плюс»: повтор довода (визуализация, ОТК, образец «вы получаете…») в двух касаниях — на правку; кружок не считаем', () => {
+  const src = 'Я (07.11): Отправил КП.';
+  const msgs = [
+    { touchpoint_number: 1, channel: 'Звонок', body: 'Ольга, давайте я подготовлю визуализацию на фото вашего фасада. Каждая вывеска проходит ОТК до отгрузки.' },
+    { touchpoint_number: 2, channel: 'Email', body: 'Ольга, если удобно — подготовлю визуализацию на фото фасада. Своё производство в Щёлково.' },
+    { touchpoint_number: 3, channel: 'Кружок', body: 'Ольга, появилась идея по визуализации — можем коротко набраться?' },
+    { touchpoint_number: 4, channel: 'WhatsApp', body: 'Ольга, оплату можно разбить 70/30: остаток — перед отгрузкой.' }
+  ];
+  const hits = findPlanIssues(msgs, plan, src);
+  const f2 = (hits.find((h) => h.touchpoint_number === 2) || { fixes: [] }).fixes.join(' ');
+  assert.match(f2, /Повтор довода: «визуализация на фасаде» уже был в касании 1/);
+  assert.ok(!hits.some((h) => h.touchpoint_number === 3 && /Повтор довода/.test(h.fixes.join(' '))));
+  assert.ok(!hits.some((h) => h.touchpoint_number === 4 && /Повтор довода/.test(h.fixes.join(' '))));
+  const { repeatedArguments } = require('../engine/planChecks');
+  assert.deepEqual(repeatedArguments(msgs).map((r) => [r.touchpoint_number, r.key]), [[2, 'визуализация на фасаде']]);
+});
+check('владелец 16.11: шаг после «дороговато» — звонок без прояснения, какое «дорого» — на правку; письмо с приглашением созвониться — нет', () => {
+  const stepPlan = [{ touchpoint_number: 1, channel: 'Звонок', path_mode: 'step' }];
+  const src = 'Ольга (19.11): Игорь Петрович посмотрел КП: говорит, дороговато — нам предлагают за 480 тысяч.';
+  const call = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Ольга, по цене: пришлите КП за 480 тысяч, сравню состав.' }], stepPlan, src).flatMap((h) => h.fixes).join(' ');
+  assert.match(call, /прояснить, какое это «дорого»/);
+  const ok = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Ольга, а в целом решение Игорю Петровичу подходит? [пауза] Для одних «дорого» — не нужно сейчас, для других — не рассчитывали, третьи хотят поторговаться. Какой вариант ближе?' }], stepPlan, src).flatMap((h) => h.fixes).join(' ');
+  assert.doesNotMatch(ok, /прояснить/);
+  const wa = findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Ольга, по цене удобнее голосом — созвонимся сегодня на 5 минут?' }], [{ touchpoint_number: 1, channel: 'WhatsApp', path_mode: 'step' }], src).flatMap((h) => h.fixes).join(' ');
+  assert.doesNotMatch(wa, /прояснить/);
+});
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));

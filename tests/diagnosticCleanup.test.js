@@ -74,5 +74,7 @@ check('владелец 16.11: СОПРАНО по фактам — негати
   assert.deepEqual(ensureSopranoFromFacts(d, 'Сергей говорит, дорого, другие предлагают на 15% дешевле.'), ['А']);
   assert.deepEqual(d.soprano_recommendations, ['Уточнить бюджет']);
   assert.deepEqual(ensureSopranoFromFacts({ soprano: { 'П': { status: 'нет' } } }, 'КП отправила, тишина.'), []);
+  // симулятор 16.11 «Дента Плюс»: «нам предлагают за 480 тысяч» — тоже аналог
+  assert.deepEqual(ensureSopranoFromFacts({ soprano: { 'А': { status: 'частично' } } }, 'Игорь Петрович говорит, дороговато — нам предлагают за 480 тысяч.'), ['А']);
 });
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

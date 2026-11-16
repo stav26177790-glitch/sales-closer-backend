@@ -27,27 +27,11 @@ const ROOT = path.join(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'eval-report');
 const args = process.argv.slice(2);
 const argVal = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
-// Повторы доводов (владелец 16.11: «Клоузер не должен долбить одно и то же»): фразы из 5 слов,
-// которые встречаются в 2+ разных касаниях одного набора. Кружки — шаблон по правилу, не считаем.
+// Повторы доводов (владелец 16.11: «Клоузер не должен долбить одно и то же») — по доводам, как проверка кода.
 function repeatedPhrases(touches) {
-  const KRUG = /кружок|видео/i;
-  const map = new Map();
-  (touches || []).forEach((m, i) => {
-    if (KRUG.test(String(m.channel || ''))) return;
-    const w = String(m.body || '').toLowerCase().replace(/\[[^\]]*\]/g, ' ').replace(/[^а-яёa-z0-9 ]+/g, ' ').split(/\s+/).filter((x) => x.length > 2);
-    const seen = new Set();
-    for (let k = 0; k + 5 <= w.length; k++) {
-      const sh = w.slice(k, k + 5).join(' ');
-      if (seen.has(sh)) continue; seen.add(sh);
-      if (!map.has(sh)) map.set(sh, new Set());
-      map.get(sh).add(i);
-    }
-  });
-  const hits = [...map.entries()].filter(([, v]) => v.size >= 2).map(([k, v]) => ({ phrase: k, touches: [...v].map((i) => (touches[i].touchpoint_number ?? i + 1)) }));
-  // склеить перекрывающиеся: оставить по одному примеру на пару касаний
-  const out = []; const used = new Set();
-  for (const h of hits) { const key = h.touches.join(','); if (used.has(key)) continue; used.add(key); out.push(h); }
-  return { count: hits.length, examples: out.slice(0, 6) };
+  const { repeatedArguments } = require('../../engine/planChecks');
+  const r = repeatedArguments(touches || []);
+  return { count: r.length, examples: r.map((x) => ({ phrase: x.key, touches: [x.firstIn, x.touchpoint_number] })) };
 }
 const ONLY = argVal('--only') ? new Set(argVal('--only').split(',').map(Number)) : null;
 const CONCURRENCY = Number(argVal('--concurrency') || 2);
@@ -138,7 +122,18 @@ async function judge(sit, sets, diagnosticSummary) {
 }
 
 // ---------- одна ситуация ----------
+// Многоуровневые сделки меняют «сегодня» через process.env (одно на процесс) — параллельно две такие
+// сделки путали даты (симулятор 16.11: шаг 20.11 посчитался от 19.11). Идут по очереди.
+let stepLock = Promise.resolve();
 async function runSituation(sit) {
+  if (sit.steps) {
+    let release; const prev = stepLock; stepLock = new Promise((r) => { release = r; });
+    await prev;
+    try { return await runSituationInner(sit); } finally { release(); }
+  }
+  return runSituationInner(sit);
+}
+async function runSituationInner(sit) {
   const db = createDb({ id: `eval-${sit.name}`, current_state: 'INIT', criteria: { financial: '', need: '', trust: '', authority: '', urgency: '' }, ...sit.deal });
   const { runPath, codeChecks, timelineForDeal } = loadEngine(db.api);
   const parts = [];

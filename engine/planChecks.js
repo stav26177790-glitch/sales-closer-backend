@@ -118,6 +118,38 @@ function firstPerson(text, re) {
   return out;
 }
 
+// Вариативность (владелец 16.11: «не хватает гибкости и вариативности; странно, если клиент не покупает, а
+// менеджер повторяет одно и то же»). Каждый довод / инструмент доверия — не больше одного раза в наборе
+// касаний; образец владельца «вы получаете…» — смысл, своими словами, один раз (симулятор 16.11: модель
+// вставляла его дословно в 3 касания — судья назвал канцеляритом).
+const ARGUMENTS = [
+  { key: 'визуализация на фасаде', re: /визуализац/i },
+  { key: 'ОТК', re: /(^|[^а-яё])ОТК([^а-яё]|$)|технического контроля/ },
+  { key: 'гарантия по договору / выезд за 3 рабочих дня', re: /выезд[а-яё]*[^.!?\n]{0,40}3 рабоч|в течение 3 рабочих дней/i },
+  { key: 'оплата частями 70/30', re: /70\s*\/\s*30|70\s*%[^.!?\n]{0,50}30\s*%|остат[а-яё]*[^.!?\n]{0,30}перед отгрузк/i },
+  { key: 'встреча на производстве', re: /(приглаш[а-яё]*|приезжайте|приехать|заехать|покажу)[^.!?\n]{0,60}производств/i },
+  { key: 'образец «вы получаете…»', re: /полностью проработанный|без переплат,? точно по ТЗ/i },
+  { key: 'кейс / портфолио', re: /портфолио|\/portfolio|(^|[^а-яё])кейс/i },
+  { key: 'своё производство — от поставщиков не зависим', re: /от поставщиков не завис/i }
+];
+const KRUG_CH_RE = /кружок|видео/i;
+function repeatedArguments(messages) {
+  const first = new Map();
+  const out = [];
+  for (const m of messages || []) {
+    if (KRUG_CH_RE.test(String(m?.channel || ''))) continue;
+    const n = m?.touchpoint_number;
+    const t = String(m?.body || '');
+    for (const a of ARGUMENTS) {
+      if (!a.re.test(t)) continue;
+      if (first.has(a.key)) out.push({ touchpoint_number: n, key: a.key, firstIn: first.get(a.key) });
+      else first.set(a.key, n);
+    }
+  }
+  return out;
+}
+const STEP_EXPENSIVE_RE = /дорог|дороговат|дешевле|предлагают за \d/i;
+
 function findPlanIssues(messages, plan, sourceText = '') {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
@@ -132,6 +164,7 @@ function findPlanIssues(messages, plan, sourceText = '') {
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
   const out = [];
+  const repeats = repeatedArguments(messages);
   (messages || []).forEach((m, i) => {
     const n = Number(m?.touchpoint_number ?? i + 1);
     const t = textOf(m);
@@ -199,6 +232,11 @@ function findPlanIssues(messages, plan, sourceText = '') {
     // 902-ПП — только Москва; «есть пара моментов» — только реальные, из данных.
     if (PP902_RE.test(t) && !isMoscow) fixes.push('902-ПП — правила Москвы, а город объекта в данных не указан. Убрать 902-ПП: «посмотрю ваш макет по требованиям города, чтобы не пришлось переделывать» (или уточнить город).');
     if (INVENTED_ISSUES_RE.test(t) && !INVENTED_ISSUES_RE.test(String(sourceText || ''))) fixes.push('«Есть пара моментов» — обещание найденных проблем, которых в данных нет. Иначе: «посмотрю ваш макет по требованиям города — чтобы вывеску не пришлось переделывать».');
+    // Шаг после ответа клиента с «дорого»: первое касание — прояснить, какое это «дорого» (тренинг 28).
+    // Письмо с предложением созвониться — нормально: прояснять будут голосом (деньги — голосом, правило 7).
+    if (i === 0 && (plan || [])[0]?.path_mode === 'step' && STEP_EXPENSIVE_RE.test(String(sourceText || '').slice(-700)) && !CLARIFY_RE.test(t)
+      && (VOICE_CHANNEL_RE.test(channel) || noVoice)) fixes.push(CLARIFY_FIX);
+    for (const r of repeats.filter((x) => x.touchpoint_number === n)) fixes.push(`Повтор довода: «${r.key}» уже был в касании ${r.firstIn}. Здесь — другой инструмент (визуализация, ОТК и договор, оплата 70/30, слот под дату, кейс, встреча на производстве) или другой ход; одно и то же не повторять (владелец 16.11).`);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
   return out;
@@ -220,4 +258,4 @@ function applyPlanChecks(verdict, messages, plan, sourceText = '') {
   return { verdict, hits };
 }
 
-module.exports = { managerGender, findPlanIssues, applyPlanChecks, LAST_CHANCE_RE, ALT_RE, RISK_RE };
+module.exports = { managerGender, findPlanIssues, applyPlanChecks, repeatedArguments, LAST_CHANCE_RE, ALT_RE, RISK_RE };
