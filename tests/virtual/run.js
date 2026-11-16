@@ -55,7 +55,7 @@ function withPlanAndHooks(resp) {
     const { LAST_CHANCE_RE } = require('../../engine/planChecks');
     for (const p of input?.touch_plan || []) {
       const m = msgs.find((x) => Number(x.touchpoint_number) === p.touchpoint_number);
-      if (p.last_chance && m && !LAST_CHANCE_RE.test(m.body || '')) m.body = `${m.body || ''} Скажите как есть: проект ещё актуален? Если нет — не буду больше отвлекать.`.trim();
+      if (p.last_chance && m && !/что я сделал[а]? не так/i.test(m.body || '')) m.body = `${m.body || ''} Скажите как есть: проект ещё актуален? Если нет — можете сказать в открытую, что я сделал не так? И не буду больше отвлекать.`.trim();
     }
     for (const m of msgs) {
       if (m.hook) continue;

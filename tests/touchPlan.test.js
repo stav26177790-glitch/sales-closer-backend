@@ -347,4 +347,23 @@ check('без оценки — план как раньше (старые сде
   const p = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13');
   assert.equal(p.length, 1);
 });
+// Живой «Дента Плюс» 16.11: весь путь, а стратег поставил условия «если доверие остаётся блокером / если движения
+// нет» — вышло два обычных касания и без «последнего шанса». Весь путь — всегда до «последнего шанса».
+check('весь путь из двух обычных касаний — код добавляет «последний шанс»; «движения нет / остаётся блокером» — не условие', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, criterion: 'Д', recipient: 'Игорь Петрович' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'Только если Игорь Петрович даст контакт Ольги' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 3, recipient: 'Игорь Петрович' }
+  ] }, tl, '2026-11-13', null, { mode: 'full' });
+  const regular = p.filter((x) => !x.condition);
+  assert.ok(regular.length >= 3 && regular.at(-1).last_chance && /в открытую/.test(regular.at(-1).goal), JSON.stringify(p.map((x) => [x.timing, x.last_chance])));
+  const q = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'Только если доверие остаётся блокером после касаний 1–4', day: 6 },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', condition: 'Только если после касаний 1–5 движения нет', day: 9 }
+  ] }, tl, '2026-11-13', null, { mode: 'full' });
+  assert.ok(q.every((x) => !x.condition) && q.at(-1).last_chance, JSON.stringify(q.map((x) => [x.timing, x.condition])));
+  const step = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13', null, { mode: 'step' });
+  assert.ok(step.every((x) => !x.last_chance) && step.length === 1);
+});
 console.log(`touchPlan: ${n} проверок пройдено`);
