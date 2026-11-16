@@ -27,6 +27,28 @@ const ROOT = path.join(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'eval-report');
 const args = process.argv.slice(2);
 const argVal = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
+// Повторы доводов (владелец 16.11: «Клоузер не должен долбить одно и то же»): фразы из 5 слов,
+// которые встречаются в 2+ разных касаниях одного набора. Кружки — шаблон по правилу, не считаем.
+function repeatedPhrases(touches) {
+  const KRUG = /кружок|видео/i;
+  const map = new Map();
+  (touches || []).forEach((m, i) => {
+    if (KRUG.test(String(m.channel || ''))) return;
+    const w = String(m.body || '').toLowerCase().replace(/\[[^\]]*\]/g, ' ').replace(/[^а-яёa-z0-9 ]+/g, ' ').split(/\s+/).filter((x) => x.length > 2);
+    const seen = new Set();
+    for (let k = 0; k + 5 <= w.length; k++) {
+      const sh = w.slice(k, k + 5).join(' ');
+      if (seen.has(sh)) continue; seen.add(sh);
+      if (!map.has(sh)) map.set(sh, new Set());
+      map.get(sh).add(i);
+    }
+  });
+  const hits = [...map.entries()].filter(([, v]) => v.size >= 2).map(([k, v]) => ({ phrase: k, touches: [...v].map((i) => (touches[i].touchpoint_number ?? i + 1)) }));
+  // склеить перекрывающиеся: оставить по одному примеру на пару касаний
+  const out = []; const used = new Set();
+  for (const h of hits) { const key = h.touches.join(','); if (used.has(key)) continue; used.add(key); out.push(h); }
+  return { count: hits.length, examples: out.slice(0, 6) };
+}
 const ONLY = argVal('--only') ? new Set(argVal('--only').split(',').map(Number)) : null;
 const CONCURRENCY = Number(argVal('--concurrency') || 2);
 const JUDGE = !args.includes('--no-judge');
@@ -153,7 +175,8 @@ async function runSituation(sit) {
     const d = db.deal;
     stages.push({ label: st.label, today: process.env.KLOUZER_TODAY, expect: st.expect || [],
       plan: d.last_strategy_output?.touch_plan || [], touches: d.last_composer_output !== before ? (d.last_composer_output?.messages || []) : [],
-      scores: d.last_diagnostic_output?.scores, chat: parts.filter((x) => x.label === st.label).map((x) => x.text).join('\n\n') });
+      scores: d.last_diagnostic_output?.scores, soprano: d.last_diagnostic_output?.soprano, soprano_recs: d.last_diagnostic_output?.soprano_recommendations,
+      chat: parts.filter((x) => x.label === st.label).map((x) => x.text).join('\n\n') });
   }
   const deal = db.deal;
   const finalTouches = deal.last_composer_output?.messages || [];
@@ -234,6 +257,9 @@ function md(results) {
       L.push(`\n#### Шаг «${st.label}» (сегодня ${st.today}) — ${mode}`);
       if (st.expect?.length) L.push(`_Ожидается: ${st.expect.join('; ')}_`);
       if (st.scores) L.push(`Оценка: ${Object.entries(st.scores).map(([k, v]) => `${k} ${v?.status || v}`).join(', ')}`);
+      if (st.soprano) L.push(`СОПРАНО: ${Object.entries(st.soprano).map(([k, v]) => `${k} ${v?.status || v}`).join(', ')}`);
+      if (st.soprano_recs?.length) L.push(`Рекомендации СОПРАНО: ${st.soprano_recs.map((x) => `«${String(x).slice(0, 140)}»`).join('; ')}`);
+      { const rp = repeatedPhrases(st.touches); if (rp.count) L.push(`Повторы между касаниями: ${rp.count} — ${rp.examples.map((e) => `«${e.phrase}» (${e.touches.join(', ')})`).join('; ')}`); }
       L.push('\n**План:**');
       for (const p of st.plan || []) L.push(`${p.touchpoint_number}. ${p.timing} · ${p.channel} · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion ? ` · ${String(p.criterion).split(' —')[0]}` : ''} — ${p.goal || ''}`);
       st.touches.forEach((m, i) => { L.push(`\n**${m.touchpoint_number ?? i + 1} · ${m.channel || ''}** _${m.timing || ''}_`); L.push(String(m.body || '').split('\n').map((x) => `> ${x}`).join('\n')); });
@@ -247,6 +273,7 @@ function md(results) {
     for (const set of sets) {
       const mode = set.plan?.[0]?.path_mode === 'step' ? 'следующий шаг' : 'весь путь';
       L.push(`\n#### ${set.title} — ${mode}`);
+      { const rp = repeatedPhrases(set.touches); L.push(`Повторы между касаниями: ${rp.count ? `${rp.count} — ${rp.examples.map((e) => `«${e.phrase}» (${e.touches.join(', ')})`).join('; ')}` : 'нет'}`); }
       L.push('\n**План:**');
       for (const p of set.plan || []) L.push(`${p.touchpoint_number}. ${p.timing} · ${p.channel} · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion ? ` · ${String(p.criterion).split(' —')[0]}` : ''} — ${p.goal || ''}`);
       (set.touches || []).forEach((m, i) => {
