@@ -366,4 +366,15 @@ check('весь путь из двух обычных касаний — код 
   const step = buildTouchPlan({ touchpoint_sequence: [{ number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 }] }, tl, '2026-11-13', null, { mode: 'step' });
   assert.ok(step.every((x) => !x.last_chance) && step.length === 1);
 });
+check('живой «Дента Плюс» 16.11: приглашение на производство от стратега — кто проводит; от 500 тыс. — выезд менеджера', () => {
+  const seq = { touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, criterion: 'ЛПР' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'Только если Ольга даст контакт', goal: 'Усилить доверие через встречу на производстве' }
+  ] };
+  const big = buildTouchPlan(seq, tl, '2026-11-13', null, { mode: 'step', dealSize: 620000 });
+  const small = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { mode: 'step', dealSize: 185000 });
+  const g = (p) => p.find((x) => /производств/.test(x.goal)).goal;
+  assert.ok(/заведующ/.test(g(big)) && /от 500 тыс/.test(g(big)), g(big));
+  assert.ok(/заведующ/.test(g(small)) && !/от 500 тыс/.test(g(small)), g(small));
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

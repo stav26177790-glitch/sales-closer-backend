@@ -43,6 +43,22 @@ const PRODUCTION_GOAL = 'Через выгоду ЛПР (владелец 15.11:
 // (владелец 16.11: «сильный шаг, но затратный»).
 const BIG_DEAL = 500000;
 const PRODUCTION_BIG_NOTE = ' Проект крупный (от 500 тыс.): можно предложить и личную встречу с менеджером — на производстве или на объекте клиента (сильный, но затратный шаг; решает менеджер).';
+// Любое приглашение на производство в плане (не только от aimTrustAtProduction — стратег ставит его и сам):
+// кто проводит и, от 500 тыс., личная встреча с менеджером. Живой «Дента Плюс» 16.11: 620 тыс., стратег сам
+// позвал на производство — про выезд менеджера не сказано (владелец: «абсолютно верно»).
+const PRODUCTION_RE = /производств|цех/i;
+const INVITE_RE = /пригла|встреч|приех|показа|экскурс|увидеть/i;
+const PRODUCTION_WHO_NOTE = ' Встречу на производстве проводит заведующий производством, менеджер — на связи по Zoom.';
+function noteProductionMeetings(steps, dealSize) {
+  const big = Number(dealSize) >= BIG_DEAL;
+  for (const x of steps) {
+    const t = `${x.goal || ''} ${x.key_message || ''}`;
+    if (x.lastChance || !PRODUCTION_RE.test(t) || !INVITE_RE.test(t)) continue;
+    if (!/заведующ/i.test(x.goal || '')) x.goal = `${x.goal || ''}${PRODUCTION_WHO_NOTE}`;
+    if (big && !(x.goal || '').includes(PRODUCTION_BIG_NOTE)) x.goal = `${x.goal}${PRODUCTION_BIG_NOTE}`;
+  }
+  return steps;
+}
 // Признак ставит diagnosticCleanup по событиям сделки (scores.trust.next_step = 'production').
 function warmForProduction(scores) {
   return scores?.trust?.next_step === 'production' && !/подтвержд/i.test(String(scores?.trust?.status || ''));
@@ -483,7 +499,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     lastChance.goal = LAST_CHANCE_GOAL;
   }
 
-  steps = diversifyTrust(steps);
+  steps = noteProductionMeetings(diversifyTrust(steps), context.dealSize);
 
   // Кружок — одному человеку (владелец, живой «Зерно 10»): «Андрей + Марина» → тот, с кем уже
   // есть контакт (получатель первого касания), иначе первый из списка.
