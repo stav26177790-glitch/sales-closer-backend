@@ -133,18 +133,32 @@ const ARGUMENTS = [
   { key: 'своё производство — от поставщиков не зависим', re: /от поставщиков не завис/i }
 ];
 const KRUG_CH_RE = /кружок|видео/i;
-function repeatedArguments(messages, sentHistory = []) {
+// Повтор считается для одного и того же человека: звонок Ольге и письмо для пересылки Игорю Петровичу с тем
+// же 70/30 — не повтор, а передача ЛПР (симулятор 16.11). Получатель — по обращению в начале касания
+// («Ольга, добрый день» / «Игорь Петрович, …»), иначе — по плану.
+const whoOf = (m, planRecipient) => {
+  const g = String(m?.body || '').match(/^\s*([А-ЯЁ][а-яё]+)(?=[\s,!])/);
+  const name = g && !/^(Добрый|Здравствуйте|Привет|Это|Тема|Если|По|Как|Коллеги)$/.test(g[1]) ? g[1] : String(m?.recipient || planRecipient || '').split(/[\s(,→]/)[0];
+  return String(name || '').toLowerCase();
+};
+function repeatedArguments(messages, sentHistory = [], plan = null) {
+  const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const first = new Map();
-  for (const sent of sentHistory || []) for (const a of ARGUMENTS) if (a.re.test(String(sent?.body || '')) && !first.has(a.key)) first.set(a.key, 'прошлого хода (уже ушло клиенту)');
+  for (const sent of sentHistory || []) for (const a of ARGUMENTS) {
+    const k = `${a.key}|${whoOf(sent)}`;
+    if (a.re.test(String(sent?.body || '')) && !first.has(k)) first.set(k, 'прошлого хода (уже ушло клиенту)');
+  }
   const out = [];
   for (const m of messages || []) {
     if (KRUG_CH_RE.test(String(m?.channel || ''))) continue;
     const n = m?.touchpoint_number;
     const t = String(m?.body || '');
+    const who = whoOf(m, byN.get(n)?.recipient);
     for (const a of ARGUMENTS) {
       if (!a.re.test(t)) continue;
-      if (first.has(a.key)) out.push({ touchpoint_number: n, key: a.key, firstIn: first.get(a.key) });
-      else first.set(a.key, n);
+      const k = `${a.key}|${who}`;
+      if (first.has(k)) out.push({ touchpoint_number: n, key: a.key, firstIn: first.get(k) });
+      else first.set(k, n);
     }
   }
   return out;
@@ -168,7 +182,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
   const out = [];
-  const repeats = repeatedArguments(messages, sentHistory);
+  const repeats = repeatedArguments(messages, sentHistory, plan);
   (messages || []).forEach((m, i) => {
     const n = Number(m?.touchpoint_number ?? i + 1);
     const t = textOf(m);

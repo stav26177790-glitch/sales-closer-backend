@@ -120,7 +120,7 @@ check('симулятор 16.11: «дата открытия 15 декабря �
 });
 check('владелец 16.11 (вариант 1): касание 1 прошлого хода считаем отправленным — его доводы в новом ходе не повторяем', () => {
   const sent = [{ channel: 'Звонок', body: 'Ольга, давайте я подготовлю визуализацию на фото вашего фасада.' }];
-  const msgs = [{ touchpoint_number: 1, channel: 'Звонок', body: 'Игорь Петрович, давайте я сделаю визуализацию на вашем фасаде.' },
+  const msgs = [{ touchpoint_number: 1, channel: 'Звонок', body: 'Ольга, давайте я всё-таки сделаю визуализацию на вашем фасаде.' },
     { touchpoint_number: 2, channel: 'Email', body: 'Оплату можно разбить 70/30: остаток — перед отгрузкой.' }];
   const f1 = findPlanIssues(msgs, plan, 'x', sent).flatMap((h) => h.fixes).join(' ');
   assert.match(f1, /Повтор довода: «визуализация на фасаде» уже был в касании прошлого хода/);
@@ -129,6 +129,13 @@ check('владелец 16.11 (вариант 1): касание 1 прошло�
   const { sentHistoryAfter } = require('../engine/sentHistory');
   const h = sentHistoryAfter({ messages: [{ touchpoint_number: 2, channel: 'Email', body: 'Б' }, { touchpoint_number: 1, channel: 'Звонок', body: 'А' }], _sent_history: [{ channel: 'WhatsApp', body: 'раньше' }] });
   assert.deepEqual(h.map((x) => x.body), ['раньше', 'А']);
+});
+check('симулятор 16.11: один довод разным людям (звонок Ольге, письмо для пересылки Игорю Петровичу) — не повтор; тому же человеку — повтор', () => {
+  const msgs = [{ touchpoint_number: 1, channel: 'Звонок', body: 'Ольга, добрый день! По оплате: 70% при старте, остаток 30% — после проверки.' },
+    { touchpoint_number: 2, channel: 'Email', body: 'Игорь Петрович, добрый день! Оплата частями: 70% при старте, 30% — после проверки готовой вывески.' },
+    { touchpoint_number: 3, channel: 'WhatsApp', body: 'Ольга, напомню: 70% при старте, остаток 30% — перед отгрузкой.' }];
+  const { repeatedArguments } = require('../engine/planChecks');
+  assert.deepEqual(repeatedArguments(msgs).map((r) => [r.touchpoint_number, r.firstIn]), [[3, 1]]);
 });
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
