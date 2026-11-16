@@ -234,6 +234,20 @@ check('симулятор 15.11: «попросить сказать как ес
   assert.equal(mid.length, 0, JSON.stringify(p.map((x) => x.goal)));
   assert.ok(p[p.length - 1].last_chance);
 });
+check('владелец 16.11: инструменты доверия — разные в разных касаниях на Д (визуализация, ОТК и договор, 70/30…), не одно и то же', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, criterion: 'Д', goal: 'Снять недоверие' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', day: 3 },
+    { number: 3, channel: 'Email', kind: 'экспертное', day: 6, criterion: 'Д', goal: 'Снять недоверие' },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', day: 9, criterion: 'Д', goal: 'Снять недоверие' },
+    { number: 5, channel: 'WhatsApp', kind: 'экспертное', day: 12 }
+  ] }, tl, '2026-11-13', null, { source: 'x' });
+  const tools = p.filter((x) => /Инструмент доверия/.test(x.goal || '')).map((x) => x.goal.split('Инструмент доверия этого касания: ')[1]);
+  assert.ok(tools.length >= 2, JSON.stringify(p.map((x) => x.goal)));
+  assert.equal(new Set(tools).size, tools.length);
+  assert.ok(tools.some((t) => /70\/30/.test(t)) || tools.some((t) => /ОТК/.test(t)));
+  assert.ok(!/Инструмент доверия/.test(p[p.length - 1].goal || ''));
+});
 check('время суток меняется: со 2-го дня утром → днём → вечером; «сегодня» и вдогонку — без времени', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
     { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0 },

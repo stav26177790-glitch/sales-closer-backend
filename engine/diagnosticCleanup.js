@@ -102,6 +102,32 @@ const sentenceAt = (t, idx) => {
   const endRel = t.slice(idx).search(/[.!?\n]/);
   return t.slice(start, endRel < 0 ? undefined : idx + endRel + 1).trim().slice(0, 180);
 };
+// СОПРАНО по фактам переписки (владелец 16.11): негативный опыт с прошлым подрядчиком — это Опыт и
+// Проблемы (собрано); появилась альтернатива (другой подрядчик, «у других дешевле») — Аналоги (собрано).
+const NEG_EXPERIENCE_RE = /(обожгл[а-яё]*|подв[её]л[а-яё]*|подвели|погасл[а-яё]*|перестал[а-яё]* брать трубку|пропал[а-яё]*|негативн[а-яё]* опыт|плох[а-яё]* опыт|кинул[а-яё]*|сорвал[а-яё]* срок)/i;
+const ALTERNATIVE_RE = /(други[ея] (предлага|компани|подрядчик)|у других|конкурент[а-яё]*|ещё (одн[а-яё]* )?(компани|подрядчик|вариант)|дешевле у|предлагают на \d+\s*% дешевле|сравнива[а-яё]* с)/i;
+function markSoprano(diag, key, note) {
+  if (!diag.soprano || typeof diag.soprano !== 'object') return false;
+  const cur = diag.soprano[key];
+  if (cur && /^собран/i.test(String(cur.status || ''))) return false;
+  diag.soprano[key] = { ...(cur && typeof cur === 'object' ? cur : {}), status: 'собрано', note };
+  return true;
+}
+function ensureSopranoFromFacts(diag, sourceText) {
+  const t = String(sourceText || '');
+  if (!diag || typeof diag !== 'object' || !t) return [];
+  const out = [];
+  if (NEG_EXPERIENCE_RE.test(t)) {
+    if (markSoprano(diag, 'О1', 'негативный опыт с прошлым подрядчиком')) out.push('О1');
+    if (markSoprano(diag, 'П', 'проблема — страх повторения прошлого негативного опыта')) out.push('П');
+  }
+  if (ALTERNATIVE_RE.test(t) && markSoprano(diag, 'А', 'клиент сравнивает с другим подрядчиком / вариантом')) out.push('А');
+  // Рекомендация «Аналоги: уточнить» больше не нужна, если Аналоги собраны.
+  if (out.includes('А') && Array.isArray(diag.soprano_recommendations))
+    diag.soprano_recommendations = diag.soprano_recommendations.filter((r) => !/СОПРАНО: Аналоги/.test(String(r)));
+  return out;
+}
+
 function ensureEvidenceScores(diag, sourceText, timeline) {
   const t = String(sourceText || '');
   if (!diag || typeof diag !== 'object' || !diag.scores || !t) return [];
@@ -135,7 +161,7 @@ function ensureEvidenceScores(diag, sourceText, timeline) {
   if (diag.scores.trust && typeof diag.scores.trust === 'object') delete diag.scores.trust.next_step;
   if (warm && !/подтвержд/i.test(stOf('trust')) && diag.scores.trust && typeof diag.scores.trust === 'object') diag.scores.trust.next_step = 'production';
   if (warm && !/подтвержд/i.test(stOf('trust')))
-    events.push('Открыт главный критерий — Д. Клиент прогрет (деньги есть / ЛПР на связи) — сильнейший шаг доверия: пригласить ЛПР на встречу на нашем производстве — через его выгоду: своими глазами увидит, кто и как делает его вывеску и как проверяем подсветку до отгрузки, и решит без риска повторить прошлый опыт. Кейсы и «чем мы лучше» заново не повторять.');
+    events.push('Открыт главный критерий — Д. Клиент прогрет (деньги есть / ЛПР на связи) — сильнейший шаг доверия: пригласить ЛПР на встречу на нашем производстве — через его выгоду: своими глазами увидит, кто и как делает его вывеску и как ОТК проверяет её до отгрузки на неисправности и соответствие ТЗ, и решит без риска повторить прошлый опыт. Кейсы и «чем мы лучше» заново не повторять.');
   // ЗС: клиент назвал дату, а запас 10 рабочих дней и меньше — сроки горят (владелец 15.11: «ЗС тоже
   // есть, сроки же горят — хотя это можно проверить вопросом к клиенту»).
   const tl = timeline && typeof timeline === 'object' ? timeline : null;
@@ -148,4 +174,4 @@ function ensureEvidenceScores(diag, sourceText, timeline) {
   return changed;
 }
 
-module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation, ensureEvidenceScores };
+module.exports = { cleanDiagnostic, cleanSummary, ensureBudgetRecommendation, ensureAlternativesRecommendation, ensureEvidenceScores, ensureSopranoFromFacts };

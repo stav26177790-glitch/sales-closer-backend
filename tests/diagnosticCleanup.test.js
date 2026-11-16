@@ -65,4 +65,14 @@ check('принцип 15.11: стратег получает «уже случи
   const d2 = { scores: { financial: { status: 'Риск' } } }; ensureEvidenceScores(d2, 'КП отправила, тишина.');
   assert.equal(d2.deal_events, undefined);
 });
+check('владелец 16.11: СОПРАНО по фактам — негативный опыт → Опыт и Проблемы собраны; альтернатива → Аналоги собраны, рекомендация про Аналоги уходит', () => {
+  const { ensureSopranoFromFacts } = require('../engine/diagnosticCleanup');
+  const d = { soprano: { 'О1': { status: 'частично' }, 'П': { status: 'нет' }, 'А': { status: 'нет' } },
+    soprano_recommendations: ['Альтернативы (СОПРАНО: Аналоги): уточнить…', 'Уточнить бюджет'] };
+  assert.deepEqual(ensureSopranoFromFacts(d, 'В прошлый раз мы сильно обожглись с подрядчиком: через три месяца половина букв погасла.'), ['О1', 'П']);
+  assert.equal(d.soprano['П'].status, 'собрано');
+  assert.deepEqual(ensureSopranoFromFacts(d, 'Сергей говорит, дорого, другие предлагают на 15% дешевле.'), ['А']);
+  assert.deepEqual(d.soprano_recommendations, ['Уточнить бюджет']);
+  assert.deepEqual(ensureSopranoFromFacts({ soprano: { 'П': { status: 'нет' } } }, 'КП отправила, тишина.'), []);
+});
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);
