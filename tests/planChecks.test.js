@@ -70,6 +70,15 @@ check('прогон 15.11 «Fresh Bowl»: «Как обещал в разгов�
     .some((h) => /женщина/.test(h.fixes.join(' '))));
   assert.equal(findPlanIssues([{ touchpoint_number: 1, channel: 'Email', body: 'Сергей, добрый день! Как обещала — отправляю кейс. Ксения написала, что вы смотрели КП.' }], plan, src).length, 0);
 });
+check('живой «Fresh Bowl 2», 16.11: WhatsApp написан как звонок — на правку; «рад видеть» у менеджера-женщины — на правку', () => {
+  const src = 'Я (06.11): Отправила КП: 240 000 ₽.';
+  const wa = (body) => findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body }], plan, src).flatMap((h) => h.fixes).join(' ');
+  assert.match(wa('Сергей, добрый день! Ксения передала ваши вопросы — решила сразу вам набрать, чтобы обсудить голосом.\n[пауза]\nПо поводу 20% — таких полномочий у меня нет.'), /написан как звонок/);
+  assert.doesNotMatch(wa('Сергей, добрый день! По поводу 20% — таких полномочий у меня нет, но могу попробовать согласовать. Удобно созвониться сегодня в 15?'), /написан как звонок/);
+  const call = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Сергей, добрый день! Не отвлекаю?\n[пауза]' }], plan, src).flatMap((h) => h.fixes).join(' ');
+  assert.doesNotMatch(call, /написан как звонок/);
+  assert.match(findPlanIssues([{ touchpoint_number: 1, channel: 'Личная встреча', body: 'Сергей, рад видеть! Пойдёмте, покажу цех.' }], plan, src).flatMap((h) => h.fixes).join(' '), /женщина/);
+});
 check('владелец 15.11: голос недоступен (не берёт трубку / просит писать) — о деньгах можно в переписке; скидка цифрой — только в финальных касаниях и в обмен', () => {
   const { voiceBlocked } = require('../engine/voice');
   assert.ok(voiceBlocked('клиент не отвечает на звонки'));
