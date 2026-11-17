@@ -107,7 +107,12 @@ async function judge(sit, sets, diagnosticSummary) {
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
   const model = getAgentConfig('reviewer').model;
   const planOf = (plan) => (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, how: p.how, facts: p.facts }));
-  const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: x.touches } : null);
+  // Судья 17.11 путал статус срока касаний (брал «не успеваем» чужого касания) — каждому касанию свой статус рядом.
+  const withFacts = (touches, plan) => (touches || []).map((t) => {
+    const p = (plan || []).find((q) => q.touchpoint_number === Number(t.touchpoint_number));
+    return p?.facts?.status_on_send_day ? { ...t, srok_na_den_otpravki: `${p.facts.status_on_send_day}; готово при старте в день отправки: ${p.facts.permanent_ready_if_start_that_day}` } : t;
+  });
+  const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: withFacts(x.touches, x.plan) } : null);
   const user = JSON.stringify({
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,
     conversation: sit.steps
@@ -303,7 +308,8 @@ async function rejudge(file) {
   for (const r of prev.results) {
     const sit = SITUATIONS.find((x) => x.id === r.id);
     if (!sit || (!r.touches?.length && !r.first_round?.touches?.length)) { results.push(r); continue; }
-    const sets = r.first_round ? { before: r.first_round, after: { touches: r.touches, plan: r.plan } } : { before: { touches: r.touches, plan: r.plan } };
+    // Судья 17.11: при пересуде промежуточные ходы не передавались — «650 договорились» (ход 2 экзамена) судья не видел.
+    const sets = r.first_round ? { before: r.first_round, after: { touches: r.touches, plan: r.plan }, stages: r.stages || [] } : { before: { touches: r.touches, plan: r.plan } };
     let verdict = null;
     try { verdict = await als.run(sit.id, () => judge(sit, sets, r.diagnostic?.summary)); } catch (e) { r.errors = [...(r.errors || []), `judge: ${e.message}`]; }
     results.push({ ...r, verdict });
