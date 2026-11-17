@@ -551,7 +551,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   steps = noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
-  require('./scenarios').attachScenarios(steps, context.source, addHow);
+  require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });
   // Экзамен 17.11 (прогоны 4–5): стратег ставит цель «согласовать 650 через полномочия» (650 — цена клиента) →
   // writer пишет «650 — точно не смогу», а через фразу «по цене 650». Цель на цену клиента код переписывает.
   const ask = String(context.source || '').match(/сделаете (?:на |за )?(\d{2,3})(?:[ \u00a0]?(?:000|тыс))?/i);

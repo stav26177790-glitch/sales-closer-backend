@@ -456,39 +456,59 @@ async function criticalGate(result, baseInput, deal) {
   const plan = deal.last_strategy_output?.touch_plan;
   const src = sourceTextOf(baseInput);
   const mark = (out, extra) => ({ ...result, composer_output: { ...out, _check: { ...(out._check || result.composer_output._check || {}), ...extra } } });
+  // Шероховатость 2 (17.11): касания, оставшиеся с замечаниями проверок кода после всех кругов, тоже идут через
+  // «редактор → переписать заново», а не уходят к менеджеру как есть. Структурные (пропущено касание, чередование)
+  // — нет: их решает план, не текст.
+  const codeLeft = (o) => (codeChecks(o, timeline, plan, src).messages_reviewed || [])
+    .filter((m) => m.verdict !== 'ОДОБРЕНО' && !(m.failed_criteria || []).some((c) => c === 'missing_touch' || c === 'alternation'));
+  const verdictOf2 = (o, crit, code) => {
+    const v = criticVerdict(o, crit);
+    for (const c of code) {
+      const m = v.messages_reviewed.find((x) => Number(x.touchpoint_number) === Number(c.touchpoint_number));
+      if (!m) continue;
+      m.verdict = 'НА ДОРАБОТКУ'; m.code_checked = true;
+      m.failed_criteria = [...new Set([...(m.failed_criteria || []), ...(c.failed_criteria || ['code'])])];
+      m.fix_instructions = [m.fix_instructions, c.fix_instructions].filter(Boolean).join(' ');
+      v.verdict = 'НА ДОРАБОТКУ';
+    }
+    return v;
+  };
+  const numsOf = (crit, code) => [...new Set([...crit.map((c) => Number(c.n)), ...code.map((c) => Number(c.touchpoint_number))])];
   stage('Финальная проверка грубых ошибок…');
-  const first = await runCritic(baseInput, deal, result.composer_output);
-  if (!first.length) return mark(result.composer_output, { critic: 'чисто' });
-  const v1 = criticVerdict(result.composer_output, first);
-  const badNums = [...new Set(first.map((c) => Number(c.n)))];
-  console.log(`[critic] грубые ошибки в касаниях ${badNums.join(', ')}: ${first.map((c) => c.error).join('; ')}`);
+  let crit = await runCritic(baseInput, deal, result.composer_output);
+  let code = codeLeft(result.composer_output);
+  if (!crit.length && !code.length) return mark(result.composer_output, { critic: 'чисто' });
+  let best = result.composer_output;
+  const score = (c1, c2) => c1.length * 3 + c2.length; // грубая ошибка весит больше замечания кода
+  let bestScore = score(crit, code);
+  const nums0 = numsOf(crit, code);
+  console.log(`[critic] касания ${nums0.join(', ')}: грубых ошибок ${crit.length}, замечаний кода ${code.length}`);
+  const tryCandidate = async (cand, nums, label) => {
+    if (!cand || !messagesOf(cand).length) return null;
+    const c1 = await runCritic(baseInput, deal, cand, nums);
+    const c2 = codeLeft(cand).filter((m) => nums.includes(Number(m.touchpoint_number)));
+    const sc = score(c1, c2);
+    if (sc < bestScore) { best = cand; bestScore = sc; crit = c1; code = c2; }
+    return sc === 0 ? label : null;
+  };
   // 1) точечно — редактор
-  stage(`Исправляю грубые ошибки в касаниях ${badNums.join(', ')}…`);
-  const dealNow = { ...deal, last_composer_output: result.composer_output };
-  // Правка принимается, если проверки кода не стали хуже (часть замечаний кода могла остаться и до неё).
-  const codeBad = (o) => (codeChecks(o, timeline, plan, src).messages_reviewed || []).filter((m) => m.verdict !== 'ОДОБРЕНО').length;
-  const baseBad = codeBad(result.composer_output);
-  let best = result.composer_output; let left = first;
-  const edited = await runEditor(baseInput, dealNow, result.composer_output, v1);
-  if (edited && codeBad(edited) <= baseBad) {
-    const again = await runCritic(baseInput, deal, edited, badNums);
-    if (!again.length) return mark(edited, { critic: `исправлено редактором: ${badNums.join(', ')}` });
-    best = edited; left = again;
-  }
+  stage(`Исправляю касания ${nums0.join(', ')}…`);
+  const edited = await runEditor(baseInput, { ...deal, last_composer_output: best }, best, verdictOf2(best, crit, code));
+  const ok1 = await tryCandidate(edited, nums0, `исправлено редактором: ${nums0.join(', ')}`);
+  if (ok1) return mark(best, { critic: ok1 });
   // 2) не помогло — переписать эти касания заново (не латать по кругу)
-  stage(`Переписываю касания ${[...new Set(left.map((c) => Number(c.n)))].join(', ')} заново…`);
-  const v2 = criticVerdict(best, left);
+  const nums1 = numsOf(crit, code);
+  stage(`Переписываю касания ${nums1.join(', ')} заново…`);
+  const v2 = verdictOf2(best, crit, code);
   try {
     const fresh = await runComposer(baseInput, { ...deal, last_composer_output: best, last_reviewer_output: v2 }, { feedback: v2, iteration: 9 });
     const merged = keepApprovedTouches(fresh, best, v2).output;
-    if (messagesOf(merged).length && codeBad(merged) <= baseBad) {
-      const third = await runCritic(baseInput, deal, merged, [...new Set(left.map((c) => Number(c.n)))]);
-      if (!third.length) return mark(merged, { critic: 'переписано заново' });
-      best = merged; left = third;
-    }
+    const ok2 = await tryCandidate(merged, nums1, 'переписано заново');
+    if (ok2) return mark(best, { critic: ok2 });
   } catch (e) { console.warn(`[critic] переписать не удалось: ${e.message}`); }
-  console.warn(`[critic] needs_review: ${deal?.client || deal?.id || ''} — осталось: ${left.map((c) => `${c.n}: ${c.error}`).join('; ')}`);
-  return mark(best, { critic: 'осталось', critic_left: left, needs_review: true });
+  if (!crit.length && !code.length) return mark(best, { critic: 'исправлено' });
+  console.warn(`[critic] needs_review: ${deal?.client || deal?.id || ''} — осталось: ${[...crit.map((c) => `${c.n}: ${c.error}`), ...code.map((c) => `${c.touchpoint_number}: код`)].join('; ')}`);
+  return mark(best, { critic: 'осталось', critic_left: crit, code_left: code.map((c) => ({ n: c.touchpoint_number, fix: c.fix_instructions })), needs_review: true });
 }
 
 // Касания помечаются как прошедшие цикл проверки: «ок» менеджера на них —

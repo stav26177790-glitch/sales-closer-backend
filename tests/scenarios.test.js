@@ -38,4 +38,11 @@ check('прогон 6: сценарии — только по последнем
   attachScenarios(steps, src, addHow);
   assert.deepEqual(steps[0].scenarios, ['torg']); assert.deepEqual(steps[2].scenarios, ['want_see']);
 });
+check('шероховатости 1, 3, 4: следующий шаг — ответ на событие в касании 1 (торг — звонок); «договор у меня с собой»; «так и не подписан»', () => {
+  const steps = [{ channel: 'WhatsApp', kind: 'эмпатичное' }, { channel: 'Звонок', kind: 'экспертное' }];
+  attachScenarios(steps, 'Арсен: «Сделаете 650 — подписываем до пятницы». Хочет потрогать латунь.', addHow, { step: true, voiceOk: true });
+  assert.deepEqual(steps[0].scenarios, ['torg']); assert.deepEqual(steps[1].scenarios, ['want_see']);
+  assert.equal(checkScenario('Договор у меня с собой — подписываем?', ['want_see'], { channel: 'Личная встреча' }).length, 1);
+  assert.equal(checkScenario('Мы обсуждаем с 6 ноября, а договор так и не подписан.', ['think_silence']).length, 1);
+});
 console.log(`scenarios: ${n} проверок пройдено`);

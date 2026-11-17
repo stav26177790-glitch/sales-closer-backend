@@ -262,6 +262,12 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     const fx = p?.facts || {};
+    // Шероховатость 5 (17.11): «отправляю, как договаривались» без договорённости в переписке — выдумка. Условное
+    // касание («только если согласится») — после договорённости, там можно.
+    if (!p?.condition && /как (мы )?(и )?(с вами )?договаривались|как (и )?договорились/i.test(t)
+      && !/созвонил|созвон|поговорил|по телефону|провел[аи]? (zoom|зум|встреч)|договорились|договаривались|обещал[аи]? (прислать|скинуть)|пришл[юё]|скину/i.test(String(sourceText || ''))) {
+      fixes.push('«Как договаривались» — а договорённости в переписке нет (выдумка). Повод — от себя: «подобрала для вас…», «разбиралась с вашим проектом — подготовила…».');
+    }
     for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);

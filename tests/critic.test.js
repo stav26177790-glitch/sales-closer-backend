@@ -20,8 +20,8 @@ async function check(name, fn) { await fn(); n++; console.log(`  ✓ ${name}`); 
 const SRC = 'Я (09.11): Отправила КП: 720 000 ₽ с монтажом.\nАрсен: «Сделаете 650 — подписываем до пятницы». Вика: говорить не могу — пишите сюда.';
 const base = { today: '2026-11-20', deal: { client: 'Brot' }, materials: { source_materials: { text: SRC } }, timeline: null };
 const plan = [{ touchpoint_number: 1, channel: 'Звонок', path_mode: 'step' }];
-const good = { messages: [{ touchpoint_number: 1, channel: 'Звонок', body: 'Арсен, 650 — точно не смогу, у меня таких полномочий нет. Попробую согласовать небольшую уступку, если подписываем до пятницы. Как вам в целом?' }] };
-const bad = { messages: [{ touchpoint_number: 1, channel: 'Звонок', body: 'Арсен, по цене мы договорились: 650 000 ₽. Как вам в целом?' }] };
+const good = { messages: [{ touchpoint_number: 1, channel: 'Звонок', hook: { quote: 'Сделаете 650 — подписываем до пятницы', prep: 'Перед звонком: уточнить у руководителя возможную уступку за наличные.', opening: 'Арсен, поговорила с руководителем по вашему условию' }, body: 'Арсен, поговорила с руководителем по вашему условию. 650 — точно не смогу, у меня таких полномочий нет. Попробую согласовать небольшую уступку, если подписываем до пятницы. Как вам в целом?' }] };
+const bad = { messages: [{ touchpoint_number: 1, channel: 'Звонок', hook: { quote: 'Сделаете 650 — подписываем до пятницы', prep: 'Перед звонком: уточнить у руководителя возможную уступку за наличные.', opening: 'Арсен, поговорила с руководителем по вашему условию' }, body: 'Арсен, поговорила с руководителем по вашему условию. По цене мы договорились: 650 000 ₽. Как вам в целом?' }] };
 
 (async () => {
   CONFIG.AUTO_COMPOSER_ROUNDS = 1; CONFIG.AUTO_REVIEWS = 0;
@@ -59,6 +59,13 @@ const bad = { messages: [{ touchpoint_number: 1, channel: 'Звонок', body: 
     assert.equal(r.composer_output._check.critic, 'чисто');
     const afterCritic = calls.slice(calls.findIndex((c) => c.name === 'critic') + 1);
     assert.ok(!afterCritic.some((c) => c.name === 'editor' || c.name === 'writer'));
+  });
+  await check('шероховатость 2: касание с оставшимся замечанием кода (без грубых ошибок) — тоже переписывается', async () => {
+    calls.length = 0;
+    const noHook = { messages: [{ touchpoint_number: 1, channel: 'Звонок', body: good.messages[0].body }] };
+    script = { critic: { critical: [] }, editor: { editor_output: { messages: noHook.messages } }, writer: good };
+    const r = await composeUntilReady(base, { id: 't', last_composer_output: noHook, last_strategy_output: { touch_plan: plan } }, { startWith: noHook });
+    assert.equal(r.composer_output._check.critic, 'переписано заново', JSON.stringify(r.composer_output._check));
   });
   console.log(`critic: ${n} проверок пройдено`);
 })().catch((e) => { console.error(e); process.exit(1); });
