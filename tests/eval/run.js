@@ -106,7 +106,7 @@ async function judge(sit, sets, diagnosticSummary) {
   const client = provider.createClient();
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
   const model = getAgentConfig('reviewer').model;
-  const planOf = (plan) => (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, facts: p.facts }));
+  const planOf = (plan) => (plan || []).map((p) => ({ n: p.touchpoint_number, timing: p.timing, channel: p.channel, kind: p.kind, criterion: p.criterion, last_chance: p.last_chance, goal: p.goal, how: p.how, facts: p.facts }));
   const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: x.touches } : null);
   const user = JSON.stringify({
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,

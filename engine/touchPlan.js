@@ -45,6 +45,13 @@ const BIG_DEAL = 500000;
 const PRODUCTION_BIG_NOTE = ' Личная встреча с менеджером (проект от 500 тыс.) — только если по-другому не получается (клиент не может приехать на производство и Zoom не подходит; владелец 17.11) — тогда на производстве или на объекте, через то, что это даёт клиенту.';
 // Zoom (владелец 17.11, knowledge/29_zoom.md): касание «Zoom» — сценарий встречи с подготовкой, касание с
 // приглашением в Zoom — по скелету приглашения. В «Сулико» Zoom выскочил, а процесс был невнятным.
+// Владелец 17.11 (скрин плана «Сулико»): «текст тяжело читается, прям стена текста». Методичка для writer
+// (как делать касание) — в поле `how`, менеджеру в плане — короткая цель `goal`.
+const KRUG_RE = /кружок|видео/i;
+const LDPR_NOTE = 'ЛДПР (владелец 17.11, файл 28): если адресат — не ЛПР, а контактное лицо и его влияние на решение ещё не выяснено, — одним вопросом выяснить, как бы между делом: «А если бы выбирали вы, [имя]?» / «А вам-то как в целом?» / «А как вы влияете на решение [ЛПР]?». Влияет — можно аккуратно заходить и через него (редко: не обходить ЛПР и не перекладывать на контакт всё, чтобы не слить сделку).';
+// Один и тот же человек: «Тамара (управляющая)» = «Тамара».
+function sameWho(a, b) { const f = (x) => String(x || '').toLowerCase().match(/[а-яёa-z]+/)?.[0] || ''; return f(a) === f(b); }
+function addHow(x, t) { const v = String(t || '').trim(); if (v && !(x.how || []).includes(v)) x.how = [...(x.how || []), v]; }
 const ZOOM_CH_RE = /zoom|зум/i;
 const ZOOM_INVITE_RE = /(пригла|договор|организ|назнач|предлож|позвать|созвон)[^.]{0,40}(zoom|зум)|(zoom|зум)[^.]{0,30}(встреч|созвон)/i;
 const ZOOM_MEETING_NOTE = ' СЦЕНАРИЙ ZOOM (файл 29): рамка «пройдёмся → покажу варианты → предложу оптимальный, ок?» → показ (экран, макет, фото работ по свечению и материалу, образцы — включить подсветку, фотопривязка) → предварительный расчёт → ТЕМПЕРАТУРА «что вам больше откликнулось?» [выслушать] → итог «я правильно понял(а), что…? верно?» → ОДНА ветка по ситуации: замер (5 000 ₽, как экспертиза; не «бесплатно» — при торге в счёт заказа: предоплата, потом вычитаем) / выезд специалиста с образцами (только если лид целевой, СОПРАНО собрано, объект и бюджет известны, Москва или ближнее Подмосковье) / сразу в производство (слот и цена на 2 месяца — как забота о сроке) → фиксация даты и времени. В «Перед касанием» — подготовка: расчёт, технические моменты макета в Кореле (ножки, плёнки, борта), фото работ под материал сделки, образцы, фотопривязка или «Презентация проекта». После встречи — запись Zoom в сделку.';
@@ -57,9 +64,9 @@ function noteZoom(steps, source) {
     if (x.lastChance) continue;
     const g = x.goal || '';
     if (ZOOM_CH_RE.test(x.channel || '')) {
-      if (!g.includes('СЦЕНАРИЙ ZOOM')) x.goal = `${g}${ZOOM_MEETING_NOTE}${msk ? ZOOM_MOSCOW_NOTE : ''}`;
-    } else if (ZOOM_INVITE_RE.test(`${g} ${x.key_message || ''}`) && !g.includes('ПРИГЛАШЕНИЕ В ZOOM')) {
-      x.goal = `${g}${ZOOM_INVITE_NOTE}`;
+      addHow(x, ZOOM_MEETING_NOTE); if (msk) addHow(x, ZOOM_MOSCOW_NOTE);
+    } else if (ZOOM_INVITE_RE.test(`${g} ${x.key_message || ''}`)) {
+      addHow(x, ZOOM_INVITE_NOTE);
     }
   }
   return steps;
@@ -68,7 +75,7 @@ function noteZoom(steps, source) {
 // кто проводит и, от 500 тыс., личная встреча с менеджером. Живой «Дента Плюс» 16.11: 620 тыс., стратег сам
 // позвал на производство — про выезд менеджера не сказано (владелец: «абсолютно верно»).
 const PRODUCTION_RE = /производств|цех/i;
-const INVITE_RE = /пригла|встреч|приех|показа|экскурс|увидеть/i;
+const INVITE_RE = /пригла|встреч|приех|показа|экскурс|увидеть|визит/i;
 const PRODUCTION_WHO_NOTE = ' Встречу на производстве проводит заведующий производством — ориентировать на него, он почти всегда на месте; менеджер всегда может подключиться по Zoom (владелец 17.11). Звать через то, что это даёт клиенту (смысл, своими словами): своими глазами видит, кто и как делает его вывеску и как её проверяют, — и решает без риска.';
 function noteProductionMeetings(steps, dealSize) {
   const big = Number(dealSize) >= BIG_DEAL;
@@ -76,8 +83,8 @@ function noteProductionMeetings(steps, dealSize) {
     const t = `${x.goal || ''} ${x.key_message || ''}`;
     // Живой «Сулико» 17.11: в «последнем шансе» звали на производство, а кто проводит — не сказано → и там тоже.
     if (!PRODUCTION_RE.test(t) || !INVITE_RE.test(t)) continue;
-    if (!/заведующ/i.test(x.goal || '')) x.goal = `${x.goal || ''}${PRODUCTION_WHO_NOTE}`;
-    if (big && !(x.goal || '').includes(PRODUCTION_BIG_NOTE)) x.goal = `${x.goal}${PRODUCTION_BIG_NOTE}`;
+    if (!/заведующ/i.test(x.goal || '')) addHow(x, PRODUCTION_WHO_NOTE);
+    if (big) addHow(x, PRODUCTION_BIG_NOTE);
   }
   return steps;
 }
@@ -91,7 +98,8 @@ function aimTrustAtProduction(steps, scores, dealSize) {
     || steps.find((x) => !x.conditional && !x.sameContact && (x.also || []).includes('Д'));
   if (!target) return steps;
   if (target.criterion !== 'Д') { target.also = target.also.filter((c) => c !== 'Д'); target.also.push(target.criterion); target.criterion = 'Д'; }
-  target.goal = PRODUCTION_GOAL + (Number(dealSize) >= BIG_DEAL ? PRODUCTION_BIG_NOTE : '');
+  target.goal = 'Пригласить на встречу на производстве — через выгоду ЛПР';
+  addHow(target, PRODUCTION_GOAL); if (Number(dealSize) >= BIG_DEAL) addHow(target, PRODUCTION_BIG_NOTE);
   target.production_meeting = true;
   if (/кружок/i.test(String(target.channel || ''))) target.channel = 'WhatsApp';
   target.kind = 'экспертное';
@@ -102,6 +110,7 @@ function aimTrustAtProduction(steps, scores, dealSize) {
 // на производстве; есть и другие инструменты — разбивка платежа 70/30 и т. д.; странно, если клиент не
 // покупает, а менеджер повторяет одно и то же»). Каждое касание на Д — свой инструмент, без повтора.
 // Все — факты из `industry/signage.md`, через выгоду клиента.
+const TRUST_SHORT = ['визуализация на фасаде', 'ОТК и договор', 'оплата частями 70/30', 'слот под дату открытия', 'кейс похожего бизнеса'];
 const TRUST_TOOLS = [
   'визуализация на фото фасада клиента бесплатно — он видит результат до оплаты',
   'ОТК и договор — комплексный результат: ОТК полностью проверяет вывеску на неисправности и соответствие ТЗ в договоре; вы получаете результат в срок и без переделок; гарантия — правило в договоре, выезд за 3 рабочих дня',
@@ -115,8 +124,9 @@ function diversifyTrust(steps) {
     if (x.conditional || x.production_meeting || x.lastChance) continue;
     if (x.criterion !== 'Д' && !(x.also || []).includes('Д')) continue;
     if (/кружок/i.test(String(x.channel || ''))) continue; // кружок — интрига, не довод
-    const tool = TRUST_TOOLS[k++ % TRUST_TOOLS.length];
-    x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`;
+    const i = k++ % TRUST_TOOLS.length; const tool = TRUST_TOOLS[i];
+    x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия: ${TRUST_SHORT[i]}`;
+    addHow(x, `Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`);
     x.trust_tool = tool;
   }
   return steps;
@@ -132,6 +142,7 @@ const isUrgent = (tl) => !!tl && (tl.status !== 'с запасом' || Number(tl
 // Владелец 16.11 (живой «Дента Плюс»): в «последнем шансе» не хватает открытости и напора (в хорошем
 // смысле) и сбора обратной связи — почему не купили. «Что я сделал не так? В открытую» оставляет дверь
 // открытой, снова вовлекает в диалог и полезно компании. «В последний раз» → «финально».
+const LAST_CHANCE_SHORT = 'Последний шанс: «решил(а) финально набрать — скажите как есть: проект актуален?» Да — шаг с датой; нет — «что я сделал(а) не так? в открытую»';
 const LAST_CHANCE_GOAL = 'Последний шанс (финальное касание): открыто и с напором в хорошем смысле — «решил финально набрать / написать, скажите как есть: проект актуален?». Если да — сразу конкретный шаг с датой и что это даёт клиенту (своими словами, напр. «договоримся сегодня — и вывеска у вас к открытию [дата]»). Если нет — собрать обратную связь: «Можете сказать в открытую, что я сделал не так? Мне правда важно — может, мы что-то упустили». Тепло, без обиды и давления; не отвлекать больше, чтобы не тратить время клиента; дверь открыта.';
 
 function criterionOf(v) {
@@ -445,11 +456,15 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     // кружок превращался в WhatsApp и вставлялся лишний кружок).
     if (s.sameContact) { ordered.push(s); prev = s; continue; }
     if (prev && prev.kind === s.kind) {
+      // Живой «Сулико» 17.11 (владелец: «сколько кружков по одному и тому же поводу — это плохо»): кружок одному
+      // человеку — не больше одного за путь; уже есть — не вставляем, два экспертных подряд допустимы.
+      const hasKrug = [...ordered, ...steps].some((o) => KRUG_RE.test(o.channel || '') && sameWho(o.recipient, prev.recipient));
+      if (s.kind === 'экспертное' && hasKrug) { ordered.push(s); prev = s; continue; }
       if (s.kind === 'экспертное') {
         const day = s.day > prev.day + 1 ? Math.floor((prev.day + s.day) / 2) : prev.day + 1;
         if (s.day <= day) s.day = day + 1;
         ordered.push({ orig: null, day, conditional: false, sameContact: false, condition: '', channel: 'Кружок', kind: 'эмпатичное',
-          recipient: prev.recipient, goal: 'Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать', key_message: '', value: 'клиент видит, что о его проекте думают и работают', inserted: true });
+          recipient: prev.recipient, goal: 'Кружок-интрига: деталь проекта → «появилась идея» → созвон', how: ['Кружок-интрига (правило 73): повод — конкретная деталь проекта клиента → «появилась идея, уверен, вас заинтересует» → «можем коротко набраться — всё объясню по телефону?»; саму идею не раскрывать'], key_message: '', value: 'клиент видит, что о его проекте думают и работают', inserted: true });
       } else {
         s.kind = 'экспертное';
         if (/кружок|видео|голосов/i.test(s.channel)) s.channel = 'WhatsApp';
@@ -459,6 +474,15 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     prev = ordered[ordered.length - 1];
   }
   steps = ordered;
+  // Кружок одному человеку — один за путь (условный тоже считается): остальные убираем.
+  {
+    const seen = [];
+    steps = steps.filter((x) => {
+      if (!KRUG_RE.test(x.channel || '')) return true;
+      if (seen.some((r) => sameWho(r, x.recipient))) return false;
+      seen.push(x.recipient); return true;
+    });
+  }
 
   // Деньги — только звонок или Zoom (владелец 14.11, правило): касание, которое двигает ФВ
   // (бюджет, «дорого», варианты под бюджет), — звонок, если стратегия не поставила Zoom.
@@ -518,10 +542,17 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     if (/кружок|видео/i.test(String(lastChance.channel || ''))) { lastChance.channel = 'WhatsApp'; lastChance.kind = 'экспертное'; }
     lastChance.criterion = 'ЗС';
     lastChance.also = [];
-    lastChance.goal = LAST_CHANCE_GOAL;
+    lastChance.goal = LAST_CHANCE_SHORT;
+    addHow(lastChance, LAST_CHANCE_GOAL);
   }
 
   steps = noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source);
+  // Владелец 17.11 (живой «Сулико»): «Клоузер не предложил выяснить влияние Тамары на сделку». ЛПР не подтверждён —
+  // в первом касании контактному лицу выяснить его влияние (ЛДПР, файл 28).
+  if (scores && criteriaToMove(scores).includes('ЛПР')) {
+    const first = steps.find((x) => !x.conditional && !x.lastChance && !KRUG_RE.test(x.channel || ''));
+    if (first) addHow(first, LDPR_NOTE);
+  }
 
   // Кружок — одному человеку (владелец, живой «Зерно 10»): «Андрей + Марина» → тот, с кем уже
   // есть контакт (получатель первого касания), иначе первый из списка.
@@ -561,6 +592,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
       recipient: s.recipient,
       condition: s.conditional ? (s.condition || 'только при условии') : '',
       goal: s.goal,
+      how: (s.how || []).join(' '),
       key_message: s.key_message,
       value: s.value,
       criterion: s.criterion ? CRITERIA[s.criterion].label : null,
@@ -578,7 +610,17 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
 // Для менеджера под стратегией: «1. 13 ноября (пт) · Звонок · экспертное — Марине: цель».
 function formatTouchPlan(plan) {
   if (!Array.isArray(plan) || !plan.length) return '';
-  const lines = plan.map((p) => `${p.touchpoint_number}. ${p.condition ? `только если: ${p.condition.replace(/^только если\s*/i, '')}` : p.timing} · ${p.channel} · ${p.kind}${p.criterion ? ` · ${p.criterion.split(' —')[0]}` : ''}${p.recipient ? ` — ${p.recipient}` : ''}${p.goal ? `: ${p.goal}` : ''}`);
+  // Владелец 17.11: «стена текста» → карточкой: когда · канал · тип · критерий; кому; цель; «заодно» — своей строкой.
+  const lines = plan.map((p) => {
+    const when = p.condition ? `Только если ${p.condition.replace(/^только если:?\s*/i, '')}` : p.timing;
+    const head = `${p.touchpoint_number}. **${when} · ${p.channel}** · ${p.last_chance ? 'последний шанс' : p.kind}${p.criterion && !p.last_chance ? ` · ${p.criterion.split(' —')[0]}` : ''}`;
+    const out = [head];
+    if (p.recipient) out.push(`  Кому: ${p.recipient}`);
+    const [main, ...also] = String(p.goal || '').split(/\s*Заодно \(/);
+    if (main.trim()) out.push(`  ${main.trim()}`);
+    for (const a of also) out.push(`  Заодно (${a.trim()}`);
+    return out.join('\n');
+  });
   const note = plan[0]?.path_mode === 'step'
     ? '_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._'
     : '_Показан весь путь. Если клиент ответил и нужен только следующий шаг — напишите «следующий шаг»._';

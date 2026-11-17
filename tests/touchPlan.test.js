@@ -24,10 +24,10 @@ check('даты отправки по рабочему календарю; «с�
   assert.equal(plan[2].send_date, null);
   assert.ok(plan[2].condition.includes('Марина даст контакт'));
 });
-check('два экспертных подряд (1 → 4) — код вставил кружок между ними', () => {
+check('два экспертных подряд (1 → 4) — код вставил кружок между ними; кружок одному человеку — один за путь (17.11)', () => {
   const kinds = plan.filter((p) => !p.condition && !/сразу после/.test(p.timing)).map((p) => p.kind);
-  for (let i = 1; i < kinds.length; i++) assert.notEqual(kinds[i], kinds[i - 1]);
-  assert.ok(plan.some((p) => p.inserted && p.channel === 'Кружок'));
+  assert.equal(kinds[1], 'эмпатичное');
+  assert.equal(plan.filter((p) => p.channel === 'Кружок').length, 1);
 });
 check('факты на день отправки: 13.11 — готово 3–4 декабря, баннер ещё можно; 25.11 — 15–16 декабря, баннер не упоминать', () => {
   assert.equal(plan[0].facts.permanent_ready_if_start_that_day, '3 декабря (чт) – 4 декабря (пт)');
@@ -107,8 +107,8 @@ check('Зерно 7: стратегия вся про ЛПР → код доба
   const covered = new Set(regular.flatMap((x) => [x.criterion, ...x.also_criteria]).filter(Boolean).map((c) => c.split(' —')[0]));
   for (const c of ['ЛПР', 'ЗС', 'ФВ', 'Д']) assert.ok(covered.has(c), `не покрыт ${c}`);
   assert.ok(regular.length <= 7);
-  const kinds = regular.map((x) => x.kind);
-  for (let i = 1; i < kinds.length; i++) assert.notEqual(kinds[i], kinds[i - 1], kinds.join(','));
+  // 17.11: кружок одному человеку — один за путь, поэтому экспертные подряд после него допустимы.
+  assert.ok(regular.filter((x) => /кружок/i.test(x.channel)).length <= 1);
   // Деньги, доверие, сроки — экспертные касания, не кружок.
   for (const x of regular) if (/^(ФВ|Д|ЗС)/.test(x.criterion || '')) assert.equal(x.kind, 'экспертное', x.criterion);
 });
@@ -123,7 +123,7 @@ check('шаг без критерия получает непокрытый кр
   assert.equal(p[2].criterion, 'ЗС — здесь и сейчас');
 });
 check('план уже из 7 касаний — непокрытый критерий добавляется целью к последнему, касаний не больше 7', () => {
-  const seq7 = [0, 1, 2, 3, 4, 5, 6].map((i) => ({ number: i + 1, channel: i % 2 ? 'Кружок' : 'WhatsApp', kind: i % 2 ? 'эмпатичное' : 'экспертное', day: i * 2, criterion: 'ЛПР' }));
+  const seq7 = [0, 1, 2, 3, 4, 5, 6].map((i) => ({ number: i + 1, channel: i % 2 ? 'Голосовое' : 'WhatsApp', kind: i % 2 ? 'эмпатичное' : 'экспертное', day: i * 2, criterion: 'ЛПР' }));
   const p = buildTouchPlan({ touchpoint_sequence: seq7 }, tl, '2026-11-13', { authority: { status: 'Риск' }, financial: { status: 'Неизвестно' } });
   assert.equal(p.length, 7);
   assert.ok(p.some((x) => x.also_criteria.includes('ФВ — финансовая возможность')));
@@ -210,9 +210,9 @@ check('владелец 15.11: Д открыт и клиент прогрет (�
   const p2 = buildTouchPlan(seq(), tl, '2026-11-13', sc(false), { source: 'x' });
   assert.ok(!p2.some((x) => /производстве/.test(x.goal || '')));
   // владелец 16.11: встречу проводит заведующий производством, менеджер — по Zoom; от 500 тыс. — может приехать сам
-  assert.match(t.goal, /заведующий производством/); assert.doesNotMatch(t.goal, /от 500 тыс/);
+  assert.match(t.how, /заведующий производством/); assert.doesNotMatch(t.how, /от 500 тыс/);
   const big = buildTouchPlan(seq(), tl, '2026-11-13', sc(true), { source: 'x', dealSize: 650000 }).find((x) => /^Д/.test(x.criterion || ''));
-  assert.match(big.goal, /от 500 тыс/);
+  assert.match(big.how, /от 500 тыс/);
 });
 check('симулятор 15.11: цепочка «сразу после» из 4 касаний — к основному не больше одного, остальные в свои дни; «последний шанс» есть', () => {
   const p = buildTouchPlan({ touchpoint_sequence: [
@@ -246,7 +246,7 @@ check('владелец 16.11: инструменты доверия — раз�
     { number: 4, channel: 'Звонок', kind: 'экспертное', day: 9, criterion: 'Д', goal: 'Снять недоверие' },
     { number: 5, channel: 'WhatsApp', kind: 'экспертное', day: 12 }
   ] }, tl, '2026-11-13', null, { source: 'x' });
-  const tools = p.filter((x) => /Инструмент доверия/.test(x.goal || '')).map((x) => x.goal.split('Инструмент доверия этого касания: ')[1]);
+  const tools = p.filter((x) => /Инструмент доверия/.test(x.how || '')).map((x) => x.how.split('Инструмент доверия этого касания: ')[1]);
   assert.ok(tools.length >= 2, JSON.stringify(p.map((x) => x.goal)));
   assert.equal(new Set(tools).size, tools.length);
   assert.ok(tools.some((t) => /70\/30/.test(t)) || tools.some((t) => /ОТК/.test(t)));
@@ -258,7 +258,7 @@ check('время суток меняется: со 2-го дня утром →
     { number: 2, channel: 'WhatsApp', kind: 'экспертное', day: 0, same_contact_as: 1 },
     { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 2 },
     { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 4 },
-    { number: 5, channel: 'Кружок', kind: 'эмпатичное', day: 6 },
+    { number: 5, channel: 'Голосовое', kind: 'эмпатичное', day: 6 },
     { number: 6, channel: 'Звонок', kind: 'экспертное', day: 8 }
   ] }, tl, '2026-11-13');
   assert.ok(!/утром|днём|вечером/.test(p[0].timing) && !/утром|днём|вечером/.test(p[1].timing));
@@ -373,7 +373,7 @@ check('живой «Дента Плюс» 16.11: приглашение на п�
   ] };
   const big = buildTouchPlan(seq, tl, '2026-11-13', null, { mode: 'step', dealSize: 620000 });
   const small = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { mode: 'step', dealSize: 185000 });
-  const g = (p) => p.find((x) => /производств/.test(x.goal)).goal;
+  const g = (p) => p.find((x) => /производств/.test(x.goal)).how;
   assert.ok(/заведующ/.test(g(big)) && /от 500 тыс/.test(g(big)), g(big));
   assert.ok(/заведующ/.test(g(small)) && !/от 500 тыс/.test(g(small)), g(small));
 });
@@ -384,10 +384,29 @@ check('владелец 17.11: Zoom — сценарий и подготовка
     { number: 3, channel: 'Звонок', kind: 'экспертное', day: 5, goal: 'Договориться о замере' }
   ] };
   const p = buildTouchPlan(seq, tl, '2026-11-13', null, { mode: 'full', source: 'хинкальная в Москве, ул. Большая Дорогомиловская' });
-  assert.ok(/ПРИГЛАШЕНИЕ В ZOOM/.test(p[0].goal) && /камеру/.test(p[0].goal), p[0].goal);
+  assert.ok(/ПРИГЛАШЕНИЕ В ZOOM/.test(p[0].how) && /камеру/.test(p[0].how), p[0].how);
   const z = p.find((x) => /zoom/i.test(x.channel) && !x.last_chance);
-  assert.ok(/СЦЕНАРИЙ ZOOM/.test(z.goal) && /откликнулось/.test(z.goal) && /902-ПП по дому/.test(z.goal), z.goal);
+  assert.ok(/СЦЕНАРИЙ ZOOM/.test(z.how) && /откликнулось/.test(z.how) && /902-ПП по дому/.test(z.how), z.how);
   const q = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { mode: 'full', source: 'стоматология в Химках, Московская область' });
-  assert.ok(!/902-ПП по дому/.test(q.find((x) => /zoom/i.test(x.channel)).goal));
+  assert.ok(!/902-ПП по дому/.test(q.find((x) => /zoom/i.test(x.channel)).how));
+});
+check('живой «Сулико» 17.11: кружок одному человеку — один за путь; ЛПР не подтверждён — выяснить влияние (ЛДПР); план читается карточками', () => {
+  const { formatTouchPlan } = require('../engine/touchPlan');
+  const seq = { touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, criterion: 'Д', recipient: 'Тамара (управляющая)', goal: 'Предложить дату визита на производство' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', condition: 'Только если Тамара не взяла трубку', recipient: 'Тамара' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 1, recipient: 'Тамара (управляющая)' },
+    { number: 4, channel: 'WhatsApp', kind: 'экспертное', day: 2, criterion: 'Д', recipient: 'Тамара' },
+    { number: 5, channel: 'Звонок', kind: 'экспертное', day: 4, criterion: 'Д', recipient: 'Тамара' },
+    { number: 6, channel: 'Звонок', kind: 'экспертное', day: 6, recipient: 'Тамара' }
+  ] };
+  const p = buildTouchPlan(seq, tl, '2026-11-17', { authority: { status: 'Вероятно' }, trust: { status: 'Риск' } }, { mode: 'full', dealSize: 540000, source: 'Москва' });
+  assert.equal(p.filter((x) => /кружок/i.test(x.channel)).length, 1, JSON.stringify(p.map((x) => x.channel)));
+  assert.ok(/А если бы выбирали вы/.test(p[0].how) && /заведующ/.test(p[0].how), p[0].how);
+  assert.ok(p.every((x) => x.goal.length < 260), JSON.stringify(p.map((x) => x.goal.length)));
+  const f = formatTouchPlan(p);
+  assert.ok(/\n  Кому: Тамара/.test(f) && !/СЦЕНАРИЙ|правило 73/.test(f), f);
+  const q = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-17', { authority: { status: 'Подтверждено' }, trust: { status: 'Риск' } }, { mode: 'full' });
+  assert.ok(!q.some((x) => /А если бы выбирали вы/.test(x.how)));
 });
 console.log(`touchPlan: ${n} проверок пройдено`);
