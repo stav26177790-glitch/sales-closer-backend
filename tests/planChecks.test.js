@@ -270,4 +270,8 @@ check('экзамен 17.11: «к открытию» при «не успева�
   assert.equal(voiceBlocked('Вика: говорить не могу — пишите сюда.'), true);
   assert.equal(voiceBlocked('Вика: говорить не могу — пишите сюда.\nПровела Zoom с Викой и Арсеном.'), false);
 });
+check('экзамен 17.11: «временный баннер внутри — успеем к открытию» при «не успеваем» — не нарушение', () => {
+  const r = findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Постоянная будет готова 3–4 декабря. Но есть решение: временный баннер внутри, в витрине: при старте до 19 ноября успеем к открытию.' }], [{ touchpoint_number: 1, facts: { status_on_send_day: 'не успеваем', permanent_ready_if_start_that_day: '3–4 декабря' } }], 'Я (31.10): Отправил КП');
+  assert.ok(!/НЕ успевает/.test(JSON.stringify(r)), JSON.stringify(r));
+});
 console.log(`planChecks: ${n} проверок пройдено`);

@@ -215,7 +215,8 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     const fx = p?.facts || {};
-    if (/не успеваем|дата прошла/i.test(String(fx.status_on_send_day || '')) && OPENING_PROMISE_RE.test(t)) fixes.push(OPENING_PROMISE_FIX(fx));
+    // Про временную вывеску «успеем к открытию» — правда (её срок свой): такие фразы не считаем.
+    if (/не успеваем|дата прошла/i.test(String(fx.status_on_send_day || '')) && t.split(/(?<=[.!?\n])/).some((x) => OPENING_PROMISE_RE.test(x) && !/временн|баннер/i.test(x))) fixes.push(OPENING_PROMISE_FIX(fx));
     if ((zoomNs.has(n) || /zoom|зум/i.test(String(m?.channel || ''))) && (!ZOOM_TEMP_RE.test(t) || !ZOOM_FIX_RE.test(t))) fixes.push(ZOOM_FIX);
     // Голос в приоритете; голос недоступен (не берёт трубку, просит писать) — о деньгах можно
     // в переписке (владелец 15.11). Скидка цифрой письменно — нет (правило 77).
