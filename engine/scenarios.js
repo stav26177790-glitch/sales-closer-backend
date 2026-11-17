@@ -9,7 +9,15 @@
  * `checkScenario` следит, что ключевые ходы сценария в тексте есть.
  */
 
-const tail = (src, n = 1500) => String(src || '').slice(-n);
+// Последнее СОБЫТИЕ — последнее содержательное сообщение менеджера (engine/advance.js склеивает их как
+// «[Сообщение менеджера N]»; «ок», «следующий шаг» — не событие). Экзамен прогон 6: по хвосту в 1500 знаков
+// старые события («просто цену» из прошлого хода) цепляли сценарии в следующих ходах.
+function lastEvent(src) {
+  const parts = String(src || '').split(/\[Сообщение менеджера \d+\]\s*/).map((x) => x.trim()).filter(Boolean);
+  const real = parts.filter((x) => x.length > 25 && !/^(ок|окей|да|следующий шаг|клиент молчит|весь путь)\.?$/i.test(x));
+  return real.length ? real[real.length - 1] : String(src || '').slice(-700);
+}
+const tail = (src, n = 1500) => lastEvent(src).slice(-n);
 const VOICE_CH_RE = /звонок|zoom|зум|встреч|видеозвон/i;
 
 const SCENARIOS = [
@@ -62,15 +70,23 @@ const SCENARIOS = [
 ];
 
 function detectScenarios(source) {
-  return SCENARIOS.filter((s) => s.detect(source));
+  const found = SCENARIOS.filter((s) => s.detect(source));
+  // Тишина — самое свежее событие: прошлые торг / «дорого» уже отвечены, первым касанием — «подумает → тишина».
+  return found.some((x) => x.id === 'think_silence') ? found.filter((x) => x.id === 'think_silence') : found;
 }
 
 // Карточки — в how касания-ответа: голосовые сценарии — первое голосовое обычное касание, иначе первое обычное.
 function attachScenarios(steps, source, addHow) {
   const found = detectScenarios(source);
+  const used = new Set();
   for (const sc of found) {
     const regular = steps.filter((x) => !x.lastChance && !/кружок|видео/i.test(x.channel || ''));
-    const target = (sc.voice && regular.find((x) => VOICE_CH_RE.test(x.channel || ''))) || regular.find((x) => !x.conditional) || regular[0];
+    // Несколько сценариев — по разным касаниям, если касаний хватает (прогон 6: торг + «посмотреть» в одном звонке —
+    // торг уехал в условное касание). Торг — первым (самое свежее условие клиента).
+    const pick = (list) => list.find((x) => !used.has(x)) || list[0];
+    const voiceList = regular.filter((x) => VOICE_CH_RE.test(x.channel || ''));
+    const target = (sc.voice && voiceList.length && pick(voiceList)) || pick(regular.filter((x) => !x.conditional)) || regular[0];
+    if (target) used.add(target);
     if (!target) continue;
     addHow(target, sc.card(source));
     target.scenarios = [...new Set([...(target.scenarios || []), sc.id])];

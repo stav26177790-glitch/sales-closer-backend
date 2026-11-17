@@ -30,4 +30,12 @@ check('проверка ходов: торг без полномочий и ус
   assert.equal(checkScenario('Мы с вами договаривались созвониться после понедельника — как ваше решение?', ['think_silence']).length, 0);
   assert.equal(checkScenario('Я привезу образец прямо к вам.', ['want_see'], { channel: 'Звонок' }).length, 1);
 });
+check('прогон 6: сценарии — только по последнему сообщению менеджера; тишина вытесняет старые; торг и «посмотреть» — в разные звонки', () => {
+  const src = '[Сообщение менеджера 1]\nВика: зачем нам Zoom, просто скиньте цену.\n\n[Сообщение менеджера 2]\nок\n\n[Сообщение менеджера 3]\nПровела Zoom. Арсен: «Сделаете 650 — подписываем до пятницы». Хочет потрогать латунь вживую.';
+  assert.deepEqual(ids(src), ['torg', 'want_see']);
+  assert.deepEqual(ids(src + '\n\n[Сообщение менеджера 4]\nАрсен обещал подумать до понедельника. Понедельник прошёл, не перезвонил. Сделаете 650 — помним.'), ['think_silence']);
+  const steps = [{ channel: 'Звонок' }, { channel: 'WhatsApp' }, { channel: 'Звонок', conditional: true }];
+  attachScenarios(steps, src, addHow);
+  assert.deepEqual(steps[0].scenarios, ['torg']); assert.deepEqual(steps[2].scenarios, ['want_see']);
+});
 console.log(`scenarios: ${n} проверок пройдено`);
