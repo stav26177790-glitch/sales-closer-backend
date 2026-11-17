@@ -256,7 +256,10 @@ function verdictOf(r) {
  * @param opts.channelHistory  для первой попытки новой сессии
  * @returns { composer_output, reviewer_output, approved, rounds, reviews }
  */
-async function composeUntilReady(baseInput, deal, { feedback, channelHistory, startWith } = {}) {
+async function composeUntilReady(baseInput, deal, opts = {}) {
+  return criticalGate(await composeCore(baseInput, deal, opts), baseInput, deal);
+}
+async function composeCore(baseInput, deal, { feedback, channelHistory, startWith } = {}) {
   const stage = (text) => setStage(deal.id, text);
   let cur = { ...deal };
   let fb = feedback;
@@ -274,10 +277,15 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
   // startWith — уже готовые касания (сделки, начатые до этой версии): сначала проверить, не переписывая.
   let skipCompose = !!startWith;
   let reviewOnly = null;
+  // Владелец 17.11 (п. 3 «как сделать 10»): касание, которое редактор не исправил дважды, — переписать заново.
+  const failCount = {};
   if (startWith) composerOutput = startWith;
   while (rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
     // Доработка по замечаниям проверки — сначала точечно редактором.
-    const byVerdict = !skipCompose && fb && cur.last_reviewer_output && fb === cur.last_reviewer_output;
+    const badNow = (reviewedOf(fb)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => Number(m.touchpoint_number));
+    const stuck = badNow.length && badNow.every((x) => (failCount[x] || 0) >= 2);
+    if (stuck) trace.push(`переписываю заново ${badNow.join(',')}`);
+    const byVerdict = !skipCompose && !stuck && fb && cur.last_reviewer_output && fb === cur.last_reviewer_output;
     if (byVerdict) {
       stage(`Редактор правит касания ${bad(fb) || ''}…`);
       const edited = await runEditor(baseInput, deal, cur.last_composer_output, fb);
@@ -321,7 +329,7 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
     }
 
     const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput), sentHistory);
-    if (code.verdict !== 'ОДОБРЕНО') trace.push(`код вернул ${bad(code)}`);
+    if (code.verdict !== 'ОДОБРЕНО') { trace.push(`код вернул ${bad(code)}`); for (const m of code.messages_reviewed) if (m.verdict !== 'ОДОБРЕНО') failCount[m.touchpoint_number] = (failCount[m.touchpoint_number] || 0) + 1; }
     if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);
       reviewerOutput = code;
@@ -393,6 +401,100 @@ async function composeUntilReady(baseInput, deal, { feedback, channelHistory, st
   return done(composerOutput, reviewerOutput, ok, rounds, reviews, { trace, ...(ok ? {} : { needs_review: true }) });
 }
 
+
+// ---------- Финальная проверка грубых ошибок (владелец 17.11: «как сделать, чтобы оценки были 10») ----------
+// Та же проверка, что у судьи симулятора (agents/critic_agent.md, 9 грубых ошибок): после всех кругов — ещё один
+// короткий вызов. Нашёл — редактор правит эти касания; не помогло — касания ПЕРЕПИСЫВАЮТСЯ writer'ом заново
+// (не латаем по кругу). Голос и род менеджера считает код и даёт готовыми; ложные «обещание к открытию» на честной
+// дате и «деньги письменно» при недоступном голосе код отсеивает.
+const { voiceBlocked } = require('./voice');
+const { managerGender } = require('./planChecks');
+function sourceTextForCritic(baseInput) { return sourceTextOf(baseInput); }
+async function runCritic(baseInput, deal, composerOutput, onlyNums) {
+  const plan = deal.last_strategy_output?.touch_plan || [];
+  const src = sourceTextForCritic(baseInput);
+  const kp = src.match(/КП[^.\n]{0,15}?:?\s*(\d{2,3}(?:[  ]\d{3}))\s*₽/i);
+  const ask = src.match(/сделаете (?:на |за )?(\d{2,3})(?:[  ]?(?:000|тыс))?/i);
+  const g = managerGender(src);
+  const touches = messagesOf(composerOutput)
+    .map((m, i) => ({ m, n: Number(m?.touchpoint_number ?? i + 1) }))
+    .filter(({ n }) => !onlyNums || onlyNums.includes(n))
+    .map(({ m, n }) => {
+      const p = plan.find((q) => q.touchpoint_number === n);
+      return { n, channel: m.channel, body: m.body, ...(p?.facts?.status_on_send_day ? { srok_na_den_otpravki: `${p.facts.status_on_send_day}; готово при старте в день отправки: ${p.facts.permanent_ready_if_start_that_day}` } : {}) };
+    });
+  if (!touches.length) return [];
+  let out;
+  try {
+    out = await callAgentSafe('critic', {
+      today: baseInput.today, deal: baseInput.deal, conversation: src, kp_price: kp ? kp[1] : null, client_price_ask: ask ? ask[1] : null,
+      voice_available_now: !voiceBlocked(src), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно', touches
+    }, 3000);
+  } catch (e) { console.warn(`[critic] ошибка: ${e.message}`); return []; }
+  const list = Array.isArray(out?.critical) ? out.critical : [];
+  const errNo = (c) => String(c.error || '').match(/^\s*(\d)/)?.[1];
+  return list.filter((c) => {
+    if (errNo(c) === '2') return /к открыт|успева|успеем|к \d{1,2} (ноябр|декабр|январ)/i.test(String(c.quote || '')) && !/не успева|уже не|позже|временн/i.test(String(c.quote || ''));
+    if (errNo(c) === '6') return !voiceBlocked(src);
+    return true;
+  });
+}
+function criticVerdict(composerOutput, list) {
+  const msgs = messagesOf(composerOutput);
+  const by = new Map();
+  for (const c of list) { const n = Number(c.n); by.set(n, [...(by.get(n) || []), c]); }
+  return {
+    verdict: by.size ? 'НА ДОРАБОТКУ' : 'ОДОБРЕНО', source: 'critic',
+    messages_reviewed: msgs.map((m, i) => {
+      const n = Number(m?.touchpoint_number ?? i + 1);
+      const cs = by.get(n);
+      return cs ? { touchpoint_number: n, verdict: 'НА ДОРАБОТКУ', code_checked: true, failed_criteria: ['critical'],
+        fix_instructions: cs.map((c) => `Грубая ошибка — ${c.error}: «${c.quote || ''}». ${c.fix || ''}`).join(' ') } : { touchpoint_number: n, verdict: 'ОДОБРЕНО' };
+    })
+  };
+}
+async function criticalGate(result, baseInput, deal) {
+  if (!CONFIG.CRITIC || !result?.composer_output || !messagesOf(result.composer_output).length) return result;
+  const stage = (text) => setStage(deal.id, text);
+  const timeline = baseInput.timeline;
+  const plan = deal.last_strategy_output?.touch_plan;
+  const src = sourceTextOf(baseInput);
+  const mark = (out, extra) => ({ ...result, composer_output: { ...out, _check: { ...(out._check || result.composer_output._check || {}), ...extra } } });
+  stage('Финальная проверка грубых ошибок…');
+  const first = await runCritic(baseInput, deal, result.composer_output);
+  if (!first.length) return mark(result.composer_output, { critic: 'чисто' });
+  const v1 = criticVerdict(result.composer_output, first);
+  const badNums = [...new Set(first.map((c) => Number(c.n)))];
+  console.log(`[critic] грубые ошибки в касаниях ${badNums.join(', ')}: ${first.map((c) => c.error).join('; ')}`);
+  // 1) точечно — редактор
+  stage(`Исправляю грубые ошибки в касаниях ${badNums.join(', ')}…`);
+  const dealNow = { ...deal, last_composer_output: result.composer_output };
+  // Правка принимается, если проверки кода не стали хуже (часть замечаний кода могла остаться и до неё).
+  const codeBad = (o) => (codeChecks(o, timeline, plan, src).messages_reviewed || []).filter((m) => m.verdict !== 'ОДОБРЕНО').length;
+  const baseBad = codeBad(result.composer_output);
+  let best = result.composer_output; let left = first;
+  const edited = await runEditor(baseInput, dealNow, result.composer_output, v1);
+  if (edited && codeBad(edited) <= baseBad) {
+    const again = await runCritic(baseInput, deal, edited, badNums);
+    if (!again.length) return mark(edited, { critic: `исправлено редактором: ${badNums.join(', ')}` });
+    best = edited; left = again;
+  }
+  // 2) не помогло — переписать эти касания заново (не латать по кругу)
+  stage(`Переписываю касания ${[...new Set(left.map((c) => Number(c.n)))].join(', ')} заново…`);
+  const v2 = criticVerdict(best, left);
+  try {
+    const fresh = await runComposer(baseInput, { ...deal, last_composer_output: best, last_reviewer_output: v2 }, { feedback: v2, iteration: 9 });
+    const merged = keepApprovedTouches(fresh, best, v2).output;
+    if (messagesOf(merged).length && codeBad(merged) <= baseBad) {
+      const third = await runCritic(baseInput, deal, merged, [...new Set(left.map((c) => Number(c.n)))]);
+      if (!third.length) return mark(merged, { critic: 'переписано заново' });
+      best = merged; left = third;
+    }
+  } catch (e) { console.warn(`[critic] переписать не удалось: ${e.message}`); }
+  console.warn(`[critic] needs_review: ${deal?.client || deal?.id || ''} — осталось: ${left.map((c) => `${c.n}: ${c.error}`).join('; ')}`);
+  return mark(best, { critic: 'осталось', critic_left: left, needs_review: true });
+}
+
 // Касания помечаются как прошедшие цикл проверки: «ок» менеджера на них —
 // это принятие итога, а не запуск проверки.
 function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra = {}) {
@@ -402,4 +504,4 @@ function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra =
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }
 
-module.exports = { composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, applyCodeOwnership, isForwardMaterial };
+module.exports = { runCritic, criticVerdict, composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, applyCodeOwnership, isForwardMaterial };

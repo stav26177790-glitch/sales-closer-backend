@@ -7,6 +7,7 @@
  *   node tests/virtual/run.js          — сводка находок (код выхода 1, если есть)
  *   node tests/virtual/run.js --full   — плюс весь текст для менеджера
  */
+process.env.CRITIC = process.env.CRITIC || 'off'; // финальная проверка грубых ошибок — в сценарных тестах выключена
 process.env.KLOUZER_TODAY = '2026-11-13';
 const path = require('path');
 const ROOT = path.join(__dirname, '..', '..');

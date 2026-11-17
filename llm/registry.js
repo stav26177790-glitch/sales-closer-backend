@@ -72,6 +72,13 @@ const AGENTS = {
     knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '15b_objection_library.md',
       '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md', '29_zoom.md']
   },
+  // Финальная проверка грубых ошибок (владелец 17.11, «как сделать 10»): те же 9 пунктов, что у судьи
+  // симулятора. Факты отрасли нужны (ошибка 4 — выдумка). Дешёвая модель, короткий ответ.
+  critic: {
+    // Основная модель: грубые ошибки (торг, выдумки) — тонкое место, дешёвая пропускала у судьи.
+    model: SONNET, temperature: 0, industryCases: false, industryKnowledge: true, cache: true,
+    knowledge: []
+  },
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
   editor: {

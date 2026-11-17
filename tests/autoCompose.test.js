@@ -2,6 +2,7 @@
  * Проверки кода в автоцикле касаний (engine/autoCompose.js → codeChecks):
  * длина канала и чередование экспертное / эмпатичное (воронка владельца).
  */
+process.env.CRITIC = process.env.CRITIC || 'off'; // финальная проверка грубых ошибок — в сценарных тестах выключена
 const assert = require('assert');
 const dbPath = require.resolve('../db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {}, children: [], paths: [] };

@@ -113,9 +113,9 @@ async function test(name, fn) {
     assert.ok(AGENTS.composer.knowledge.includes('23_lpr_tactics.md'), 'composer без тактики выхода на ЛПР');
   });
 
-  await test('Кэш включён у composer, reviewer, advisor, writer и (14.11) diagnostic, strategy, editor', async () => {
+  await test('Кэш включён у composer, reviewer, advisor, writer, (14.11) diagnostic, strategy, editor, (17.11) critic', async () => {
     const cached = Object.entries(AGENTS).filter(([, c]) => c.cache).map(([n]) => n).sort();
-    assert.deepStrictEqual(cached, ['advisor', 'composer', 'diagnostic', 'editor', 'reviewer', 'strategy', 'writer']);
+    assert.deepStrictEqual(cached, ['advisor', 'composer', 'critic', 'diagnostic', 'editor', 'reviewer', 'strategy', 'writer']);
   });
 
   await test('Вход агента — JSON с отступом 2, как раньше', async () => {

@@ -18,6 +18,7 @@
  */
 // «Сегодня» фиксировано: в агентов уходит календарь рабочих дней вперёд —
 // без фиксации снимки менялись бы каждый день.
+process.env.CRITIC = process.env.CRITIC || 'off'; // финальная проверка грубых ошибок — в сценарных тестах выключена
 process.env.KLOUZER_TODAY = process.env.KLOUZER_TODAY || '2026-11-13';
 
 const fs = require('fs');
