@@ -114,7 +114,8 @@ function managerGender(sourceText) {
   if (MANAGER_MASC_RE.test(s)) return 'm';
   return null;
 }
-const MOSCOW_RE = /москв|мск([^а-яё]|$)|метро|м\.\s?[А-ЯЁ]|902-?пп/i;
+// «метро», не «метров» (экзамен 5 17.11: «Фасад 7 метров» в Твери считался Москвой).
+const MOSCOW_RE = /москв|мск([^а-яё]|$)|метро(?![а-яё])|м\.\s?[А-ЯЁ]|902-?пп/i;
 const PP902_RE = /902/;
 const INVENTED_ISSUES_RE = /(есть|нашл?[аи]?|нашёл|вижу|увидел[а]?) (пар[ау]|несколько|пару-тройку) (момент|нюанс|замечани)/i;
 
@@ -275,7 +276,8 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const regular = (plan || []).filter((p) => !p.condition);
   const lcIdx = regular.findIndex((p) => p.last_chance);
   const finalNs = new Set(lcIdx >= 0 ? regular.slice(Math.max(0, lcIdx - 1), lcIdx + 1).map((p) => p.touchpoint_number) : []);
-  const isMoscow = MOSCOW_RE.test(String(sourceText || ''));
+  // Объект в другом городе, а «Москва» — офис сети / согласующий (экзамен 17.11, «Зерно», Тверь): не Москва.
+  const isMoscow = MOSCOW_RE.test(String(sourceText || '')) && !NOT_MOSCOW_RE.test(String(sourceText || ''));
   let shiftSaidIn = null;
   const krugSeen = [];
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
