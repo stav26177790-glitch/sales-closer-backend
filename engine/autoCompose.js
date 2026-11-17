@@ -432,12 +432,8 @@ async function runCritic(baseInput, deal, composerOutput, onlyNums) {
     }, 3000);
   } catch (e) { console.warn(`[critic] ошибка: ${e.message}`); return []; }
   const list = Array.isArray(out?.critical) ? out.critical : [];
-  const errNo = (c) => String(c.error || '').match(/^\s*(\d)/)?.[1];
-  return list.filter((c) => {
-    if (errNo(c) === '2') return /к открыт|успева|успеем|к \d{1,2} (ноябр|декабр|январ)/i.test(String(c.quote || '')) && !/не успева|уже не|позже|временн/i.test(String(c.quote || ''));
-    if (errNo(c) === '6') return !voiceBlocked(src);
-    return true;
-  });
+  const { keepCritical } = require('./criticFilters');
+  return list.filter((c) => keepCritical(c, { source: src, status: plan.find((q) => q.touchpoint_number === Number(c.n))?.facts?.status_on_send_day }));
 }
 function criticVerdict(composerOutput, list) {
   const msgs = messagesOf(composerOutput);
