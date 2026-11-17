@@ -377,4 +377,17 @@ check('живой «Дента Плюс» 16.11: приглашение на п�
   assert.ok(/заведующ/.test(g(big)) && /от 500 тыс/.test(g(big)), g(big));
   assert.ok(/заведующ/.test(g(small)) && !/от 500 тыс/.test(g(small)), g(small));
 });
+check('владелец 17.11: Zoom — сценарий и подготовка в цели; Москва — 902-ПП и соседи; приглашение — по скелету', () => {
+  const seq = { touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, goal: 'Пригласить Георгия Давидовича на Zoom-встречу' },
+    { number: 2, channel: 'Zoom', kind: 'экспертное', day: 2, goal: 'Показать образцы и расчёт' },
+    { number: 3, channel: 'Звонок', kind: 'экспертное', day: 5, goal: 'Договориться о замере' }
+  ] };
+  const p = buildTouchPlan(seq, tl, '2026-11-13', null, { mode: 'full', source: 'хинкальная в Москве, ул. Большая Дорогомиловская' });
+  assert.ok(/ПРИГЛАШЕНИЕ В ZOOM/.test(p[0].goal) && /камеру/.test(p[0].goal), p[0].goal);
+  const z = p.find((x) => /zoom/i.test(x.channel) && !x.last_chance);
+  assert.ok(/СЦЕНАРИЙ ZOOM/.test(z.goal) && /откликнулось/.test(z.goal) && /902-ПП по дому/.test(z.goal), z.goal);
+  const q = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-13', null, { mode: 'full', source: 'стоматология в Химках, Московская область' });
+  assert.ok(!/902-ПП по дому/.test(q.find((x) => /zoom/i.test(x.channel)).goal));
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

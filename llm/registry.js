@@ -44,7 +44,8 @@ const AGENTS = {
       '02_sales_formula.md', '06_trust.md', '07_decision_authority.md', '08_urgency.md',
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
       '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md',
-      '25_after_kp_playbook.md', '26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '28_vozrazheniya_trening.md'
+      '25_after_kp_playbook.md', '26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '28_vozrazheniya_trening.md',
+      '29_zoom.md' // владелец 17.11: Zoom — приглашение, подготовка, сценарий, развилка
     ]
   },
   composer: {
@@ -69,7 +70,7 @@ const AGENTS = {
     // 15.11 (проверка по просьбе владельца): writer пишет ВСЕ касания, но не видел библиотеку возражений,
     // стиль и тактики ЛПР — они были только у старого composer.
     knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '15b_objection_library.md',
-      '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md']
+      '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md', '29_zoom.md']
   },
   // Точечная правка касаний по замечаниям проверки (engine/autoCompose.js).
   // Короткий промпт вместо 300 КБ composer'а — правки не теряются (2026-11-13).
@@ -87,7 +88,7 @@ const AGENTS = {
     knowledge: [
       '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
       '07_decision_authority.md', '23_lpr_tactics.md', '24_client_triggers.md',
-      '26_perepiska_metodika.md', '28_vozrazheniya_trening.md'
+      '26_perepiska_metodika.md', '28_vozrazheniya_trening.md', '29_zoom.md'
     ]
   },
   intent_classifier: {

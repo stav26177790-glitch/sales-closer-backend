@@ -61,7 +61,8 @@ check('«каждый день ожидания сдвигает дату» — 
 check('деньги в мессенджере — на доработку; звонок / Zoom — ок; предложение созвониться — ок; цена КП как факт — ок', () => {
   const t = 'Марина, по бюджету: подберу варианты, чтобы вы не переплачивали.';
   assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /звонком или в Zoom/.test(h.fixes.join(' '))));
-  assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: t + ' Это отход от ТЗ, есть риск.' }], plan, '').length);
+  // Zoom 17.11: сценарий встречи требует ещё температуру и фиксацию (файл 29) — здесь проверяем только «деньги».
+  assert.ok(!/звонком или в Zoom/.test(JSON.stringify(findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: t + ' Это отход от ТЗ, есть риск.' }], plan, ''))));
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
@@ -246,5 +247,12 @@ check('владелец 16.11: «в результате вы получаете
   assert.ok(JSON.stringify(repeatedArguments(msgs, [], [])).includes('в результате вы получаете'));
   const varied = [msgs[0], { touchpoint_number: 2, recipient: 'Ольга', body: 'Ольга, договоримся сегодня — и вы спокойны за результат.' }];
   assert.ok(!JSON.stringify(repeatedArguments(varied, [], [])).includes('в результате вы получаете'));
+});
+check('владелец 17.11: касание «Zoom» — сценарий с температурой и фиксацией; без них — на правку', () => {
+  const plan = [{ touchpoint_number: 1, channel: 'Zoom' }];
+  const bad = findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: 'Георгий Давидович, покажу образцы и расчёт, обсудим детали.' }], plan, 'Я (06.11): Отправила КП');
+  assert.ok(/файл 29/.test(JSON.stringify(bad)), JSON.stringify(bad));
+  const ok = findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: 'Давайте так: пройдёмся по проекту, покажу варианты и предложу оптимальный — ок? [показ образцов и расчёта] Что вам больше откликнулось? [выслушать] Я правильно поняла, что… Верно? Тогда фиксируем замер на четверг, 11:00.' }], plan, 'Я (06.11): Отправила КП');
+  assert.ok(!/файл 29/.test(JSON.stringify(ok)), JSON.stringify(ok));
 });
 console.log(`planChecks: ${n} проверок пройдено`);

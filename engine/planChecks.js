@@ -177,6 +177,10 @@ const MONTHS_GEN = ['января', 'февраля', 'марта', 'апрел�
 const PASSED_DATE_RE = new RegExp(`(\\d{1,2})\\s+(${MONTHS_GEN.join('|')})[^.!?\\n]{0,40}(уже\\s+прош[а-яё]*|прош(ла|ло|ёл|ел|ли)(?=\\s*[.,;!—–]|\\s*$))`, 'i');
 const STEP_EXPENSIVE_RE = /дорог|дороговат|дешевле|предлагают за \d/i;
 
+// Zoom (владелец 17.11, файл 29): сценарий встречи — температура «что откликнулось?» и фиксация даты / времени.
+const ZOOM_TEMP_RE = /откликнул|понравил|как вам (в целом|решени|вариант)|что скажете|что думаете/i;
+const ZOOM_FIX_RE = /дат[аеуы]|врем[яени]|зафиксир|фиксир|договорились|запишу|записываю|в календар|(понедельник|вторник|сред[ау]|четверг|пятниц[ау]|суббот[ау]|воскресень[ея])|\d{1,2}[.:]\d{2}|\d{1,2}\s+(ноябр|декабр|январ|феврал)/i;
+const ZOOM_FIX = 'Касание «Zoom» — сценарий встречи (владелец 17.11, файл 29): рамка → показ → расчёт → температура «Что вам больше откликнулось? Какие решения понравились?» [выслушать] → «Я правильно понял(а), что…? Верно?» → одна ветка (замер / выезд с образцами / сразу в производство) → фиксация даты и времени.';
 function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
@@ -190,6 +194,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
+  const zoomNs = new Set((plan || []).filter((p) => /zoom|зум/i.test(p.channel || '')).map((p) => p.touchpoint_number));
   const out = [];
   const repeats = repeatedArguments(messages, sentHistory, plan);
   (messages || []).forEach((m, i) => {
@@ -203,6 +208,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
       fixes.push(`Вопрос «скажите как есть / есть ли шанс / не буду отвлекать» — только в последнем касании (${lastN}, «последний шанс»). Здесь — шаг этого касания.`);
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
+    if ((zoomNs.has(n) || /zoom|зум/i.test(String(m?.channel || ''))) && (!ZOOM_TEMP_RE.test(t) || !ZOOM_FIX_RE.test(t))) fixes.push(ZOOM_FIX);
     // Голос в приоритете; голос недоступен (не берёт трубку, просит писать) — о деньгах можно
     // в переписке (владелец 15.11). Скидка цифрой письменно — нет (правило 77).
     // Скидка цифрой письменно — только когда голос недоступен, в финальных касаниях (другие
