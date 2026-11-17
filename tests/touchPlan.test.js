@@ -18,6 +18,11 @@ const seq = [
 ];
 const plan = buildTouchPlan({ touchpoint_sequence: seq, must_include: ['Касание 2: начинается с выгоды', 'Переписка: 28.10 … эта дата прошла'] }, tl, '2026-11-13');
 
+check('владелец 17.11 (файл 26, п. 8): письменное «сразу после звонка» — подсказка follow-up резюме; обычное касание — нет', () => {
+  const hows = (k) => [].concat(plan.find((p) => p.touchpoint_number === k)?.how || []).join(' ');
+  assert.ok(/FOLLOW-UP/.test(hows(2)), hows(2));
+  assert.ok(!/FOLLOW-UP/.test(hows(4)));
+});
 check('даты отправки по рабочему календарю; «сразу после» — тот же день; условное — без даты', () => {
   assert.equal(plan[0].send_date, '2026-11-13');
   assert.equal(plan[1].send_date, '2026-11-13');

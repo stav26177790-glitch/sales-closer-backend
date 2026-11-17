@@ -45,7 +45,8 @@ const AGENTS = {
       '09_touchpoint_engine.md', '13_examples.md', '20_buying_psychology.md',
       '21_industry_specifics.md', '23_lpr_tactics.md', '24_client_triggers.md',
       '25_after_kp_playbook.md', '26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '28_vozrazheniya_trening.md',
-      '29_zoom.md' // владелец 17.11: Zoom — приглашение, подготовка, сценарий, развилка
+      '29_zoom.md', // владелец 17.11: Zoom — приглашение, подготовка, сценарий, развилка
+      '30_offer.md', '31_negative_phase.md' // владелец 17.11: сильный оффер, негативная фаза
     ]
   },
   composer: {
@@ -70,7 +71,8 @@ const AGENTS = {
     // 15.11 (проверка по просьбе владельца): writer пишет ВСЕ касания, но не видел библиотеку возражений,
     // стиль и тактики ЛПР — они были только у старого composer.
     knowledge: ['26_perepiska_metodika.md', '27_pravilo_7_kasaniy.md', '15_objection_expensive.md', '15b_objection_library.md',
-      '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md', '29_zoom.md']
+      '28_vozrazheniya_trening.md', '14_style_guide.md', '23_lpr_tactics.md', '29_zoom.md',
+      '30_offer.md', '31_negative_phase.md', '22_presentation.md'] // владелец 17.11: оффер, негатив, презентация (ФХВЭ, ДЧЕТ)
   },
   // Финальная проверка грубых ошибок (владелец 17.11, «как сделать 10»): те же 9 пунктов, что у судьи
   // симулятора. Факты отрасли нужны (ошибка 4 — выдумка). Дешёвая модель, короткий ответ.
@@ -95,7 +97,7 @@ const AGENTS = {
     knowledge: [
       '15_objection_expensive.md', '15b_objection_library.md', '17_trust_building.md',
       '07_decision_authority.md', '23_lpr_tactics.md', '24_client_triggers.md',
-      '26_perepiska_metodika.md', '28_vozrazheniya_trening.md', '29_zoom.md'
+      '26_perepiska_metodika.md', '28_vozrazheniya_trening.md', '29_zoom.md', '30_offer.md', '31_negative_phase.md'
     ]
   },
   intent_classifier: {

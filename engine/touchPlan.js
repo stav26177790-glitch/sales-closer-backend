@@ -59,6 +59,21 @@ const ZOOM_MEETING_NOTE = ' СЦЕНАРИЙ ZOOM (файл 29): рамка «п
 const ZOOM_MOSCOW_NOTE = ' Москва: в подготовке и показе — 902-ПП по дому клиента (где можно ставить вывеску, допродажа по концепции) и вывески соседей на Яндекс Картах.';
 const ZOOM_INVITE_NOTE = ' ПРИГЛАШЕНИЕ В ZOOM (файл 29): зацеп «не всё так просто, вслепую не считаем» → что даёт клиенту (15 минут вместо переписки, наглядно, разберём неточности макета, точный расчёт; связь сейчас нестабильна — Zoom надёжнее) → оффер с днём и временем → «камеру включать не обязательно» → усиление смыслом: клиент получает упакованное экспертное решение под свою ситуацию.';
 const ZOOM_MSK_RE = /москв|мск([^а-яё]|$)|метро|м\.\s?[А-ЯЁ]|902-?пп/i;
+// Follow-up (владелец, файл 26 п. 8: «90% менеджеров этого не делают»): письменное касание сразу после звонка /
+// Zoom тому же человеку — короткое резюме договорённостей в конце. Только подсказка писателю, без проверки кодом:
+// итог разговора заранее неизвестен.
+const FOLLOWUP_NOTE = ' FOLLOW-UP (файл 26, п. 8): в конце — короткое резюме разговора: что обсудили, к чему пришли, о чём договорились, и «ок?» — например: «[Имя], тогда резюмирую: договорились [шаг] [день, время]; на нём определимся [что]. Ок?». Итог разговора заранее неизвестен — договорённости шаблоном в квадратных скобках, не выдумывать.';
+function noteFollowUp(steps) {
+  steps.forEach((x, i) => {
+    const prev = steps[i - 1];
+    if (!x.sameContact || x.conditional || x.lastChance || !prev) return;
+    if (VOICE_STEP_RE.test(x.channel || '') || !VOICE_STEP_RE.test(prev.channel || '')) return;
+    if (/кружок|видео/i.test(x.channel || '')) return;
+    addHow(x, FOLLOWUP_NOTE);
+  });
+  return steps;
+}
+const VOICE_STEP_RE = /звонок|zoom|зум|встреч|видеозвон/i;
 function noteZoom(steps, source) {
   const msk = ZOOM_MSK_RE.test(String(source || '')) && !NOT_MOSCOW_RE.test(String(source || ''));
   for (const x of steps) {
@@ -548,7 +563,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     addHow(lastChance, LAST_CHANCE_GOAL);
   }
 
-  steps = noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source);
+  steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source));
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });
