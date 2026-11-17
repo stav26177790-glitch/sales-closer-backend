@@ -75,7 +75,9 @@ function codeChecks(composerOutput, timeline, plan, sourceText, sentHistory = []
     // текст-«одна страница» — лимит как у письма, иначе проверка режет суть стратегии.
     const max = isForwardMaterial(planStep(m, i), m) ? CONFIG.MAX_MESSAGE_LENGTH.email : CONFIG.MAX_MESSAGE_LENGTH[channelKey(m?.channel)];
     const len = String(m?.body || '').length;
-    if (max && len > max) {
+    // Владелец 17.11 («превышение небольшое — сам посмотри и прими решение»): до 10% сверх лимита не гоняем
+    // круг правок — сценарий звонка с развилками важнее нескольких лишних знаков.
+    if (max && len > Math.round(max * 1.1)) {
       const x = r.messages_reviewed[i];
       x.verdict = 'НА ДОРАБОТКУ';
       x.code_checked = true;

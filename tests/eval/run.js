@@ -249,6 +249,7 @@ function md(results) {
     if (r.errors.length) L.push(`**Ошибки:** ${r.errors.join('; ')}`);
     L.push(`Состояние: ${r.state}. Время: ${r.seconds} с. Стратегия: ${r.strategy.name || '—'} — ${r.strategy.goal || ''}`);
     if (r.verdict?.summary) L.push(`\n**Судья:** ${r.verdict.summary}`);
+    for (const c of r.verdict?.critical || []) L.push(`- ⛔ Грубая ошибка (${c.set}, касание ${c.n}): ${c.error} — «${c.quote || ''}»`);
     for (const x of r.verdict?.missing || []) L.push(`- 🔎 Не хватает: ${x}`);
     for (const e of r.verdict?.expectations || []) L.push(`- ${e.met === 'да' ? '✅' : e.met === 'частично' ? '🟡' : '❌'} ${e.expectation}${e.comment ? ` — ${e.comment}` : ''}`);
     if (r.residual.length) { L.push('\n**Остались замечания проверок кода:**'); for (const x of r.residual) L.push(`- касание ${x.n}: ${x.fix}`); }
