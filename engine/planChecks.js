@@ -181,6 +181,40 @@ function repeatedArguments(messages, sentHistory = [], plan = null) {
   }
   return out;
 }
+// Четыре экзамена 17.11: в 3 из 4 — одна и та же выгода дословно в нескольких касаниях одному человеку («гости с
+// первого дня видят барбершоп» ×3, «покупатели вас найдут с первого дня» ×3) — мантра (владелец 16.11: «смысл +
+// вариативность»). Общая проверка: одинаковая цепочка из 5 слов в двух касаниях одному адресату. Шаблоны владельца,
+// которые повторять можно, и цифры / даты — не считаем.
+const REPEAT_OK_RE = /как вам в целом|таких полномочий нет|скажите как есть|помните мы проговаривали|в открытую|добрый день|доброе утро|добрый вечер|по правилам москвы|камеру включать|что я сделал|что я сделала|можем коротко набраться|появилась идея|идея уверен|уверен[а]?( она)? вас|она вас точно|не буду больше отвлекать|пауза выслушать/i;
+// Только формулировки выгоды (мантра) — не общие слова «по вашей вывеске на фасад».
+const BENEFIT_WORD_RE = /получ|увид|видят|видно|найдут|гост|клиент|покупател|прохож|спокойн|без (переделок|штраф|риск|сюрприз)|первого дня|замет|узна|выгляд|успеете|к открытию|надежн|уверен/;
+function shingles(text, k = 5) {
+  const w = String(text || '').toLowerCase().replace(/ё/g, 'е').replace(/\[[^\]]*\]/g, ' ').replace(/[^а-яa-z0-9\s-]/g, ' ').split(/\s+/).filter(Boolean);
+  const out = new Set();
+  for (let i = 0; i + k <= w.length; i++) {
+    const s = w.slice(i, i + k).join(' ');
+    if (/\d/.test(s) || REPEAT_OK_RE.test(s) || !BENEFIT_WORD_RE.test(s)) continue;
+    out.add(s);
+  }
+  return out;
+}
+function repeatedPhrases(messages, plan = null) {
+  const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
+  const seen = new Map();
+  const out = [];
+  for (const [i, m] of (messages || []).entries()) {
+    const n = Number(m?.touchpoint_number ?? i + 1);
+    // Адресат из плана / касания — надёжнее первого слова текста («Сделаем быстро…» — не имя).
+    const known = String(m?.recipient || byN.get(n)?.recipient || '').split(/[\s(,→]/)[0].toLowerCase();
+    const who = known || whoOf(m);
+    const sh = shingles(m?.body);
+    let hit = null;
+    for (const s of sh) { const k = `${who}|${s}`; if (seen.has(k) && !hit) hit = { phrase: s, firstIn: seen.get(k) }; }
+    for (const s of sh) { const k = `${who}|${s}`; if (!seen.has(k)) seen.set(k, n); }
+    if (hit) out.push({ touchpoint_number: n, ...hit });
+  }
+  return out;
+}
 const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 // «уже прошла» или «прошла.» в конце фразы; «чтобы открытие 3 декабря прошло по плану» — не про прошедшую дату.
 const PASSED_DATE_RE = new RegExp(`(\\d{1,2})\\s+(${MONTHS_GEN.join('|')})[^.!?\\n]{0,40}(уже\\s+прош[а-яё]*|прош(ла|ло|ёл|ел|ли)(?=\\s*[.,;!—–]|\\s*$))`, 'i');
@@ -250,6 +284,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const zoomNs = new Set((plan || []).filter((p) => /zoom|зум/i.test(p.channel || '')).map((p) => p.touchpoint_number));
   const out = [];
   const repeats = repeatedArguments(messages, sentHistory, plan);
+  const phraseRepeats = repeatedPhrases(messages, plan);
   (messages || []).forEach((m, i) => {
     const n = Number(m?.touchpoint_number ?? i + 1);
     const t = textOf(m);
@@ -344,6 +379,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     // Письмо с предложением созвониться — нормально: прояснять будут голосом (деньги — голосом, правило 7).
     if (i === 0 && (plan || [])[0]?.path_mode === 'step' && STEP_EXPENSIVE_RE.test(String(sourceText || '').slice(-700)) && !CLARIFY_RE.test(t)
       && (VOICE_CHANNEL_RE.test(channel) || noVoice)) fixes.push(CLARIFY_FIX);
+    for (const r of phraseRepeats.filter((x) => x.touchpoint_number === n)) fixes.push(`Повтор формулировки «…${r.phrase}…» — уже было в касании ${r.firstIn} тому же человеку. Тот же смысл — другими словами или другая выгода (владелец: «смысл + вариативность, не мантра»).`);
     for (const r of repeats.filter((x) => x.touchpoint_number === n)) fixes.push(`Повтор довода: «${r.key}» уже был в касании ${r.firstIn}. Здесь — другой инструмент (визуализация, ОТК и договор, оплата 70/30, слот под дату, кейс, встреча на производстве) или другой ход; одно и то же не повторять (владелец 16.11).`);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });
@@ -366,4 +402,5 @@ function applyPlanChecks(verdict, messages, plan, sourceText = '', sentHistory =
   return { verdict, hits };
 }
 
-module.exports = { managerGender, findPlanIssues, applyPlanChecks, repeatedArguments, LAST_CHANCE_RE, ALT_RE, RISK_RE };
+module.exports = {
+  repeatedPhrases, managerGender, findPlanIssues, applyPlanChecks, repeatedArguments, LAST_CHANCE_RE, ALT_RE, RISK_RE };

@@ -8,7 +8,7 @@ const { voiceBlocked } = require('./voice');
 
 const errNo = (c) => String(c?.error || '').match(/^\s*(\d)/)?.[1] || (/обещани[ея] срока/i.test(String(c?.error || '')) ? '2' : /деньги письменно/i.test(String(c?.error || '')) ? '6' : null);
 
-function keepCritical(c, { source = '', status = '' } = {}) {
+function keepCritical(c, { source = '', status = '', channel = '' } = {}) {
   const q = String(c?.quote || '');
   switch (errNo(c)) {
     case '1': // честный торг по сценарию владельца: «N не смогу / нет полномочий / небольшая уступка за шаг», цена КП.
@@ -23,7 +23,8 @@ function keepCritical(c, { source = '', status = '' } = {}) {
       return /обещал|так и не|тишина|не (ответили|перезвонили|прислали|набрали)|пропал|сами (назвали|сказали)/i.test(q);
     case '7': // «приедет наш специалист», «заведующий покажет» — верно; ошибка — менеджер сам едет / везёт
       return /я (сама?|тоже)? ?(приеду|привезу|подъеду)|у меня с собой|привезу|сама? покажу цех/i.test(q);
-    case '6': // голос недоступен на момент хода — деньги в переписке можно
+    case '6': // голос недоступен — деньги в переписке можно; звонок / Zoom / встреча — это голос (4 экзамена: ⛔ на звонке)
+      if (/звонок|zoom|зум|встреч|видеозвон/i.test(String(channel || ''))) return false;
       return !voiceBlocked(source);
     default:
       return true;

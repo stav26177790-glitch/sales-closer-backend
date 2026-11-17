@@ -18,4 +18,8 @@ check('прогон 8: ложные упрёк / выезд / уступка б�
   assert.equal(keepCritical({ error: '7. Менеджер сам едет', quote: 'Я привезу образец прямо к вам' }), true);
   assert.equal(keepCritical({ error: '1. Цена клиента', quote: 'Вы называли 650 000 ₽, я пошла согласовывать с руководителем. Если получится — подписываем' }), true);
 });
+check('4 экзамена: «деньги письменно» в звонке — ложно', () => {
+  assert.equal(keepCritical({ error: '6. Деньги письменно', quote: 'Какой ориентир по бюджету у вас был?' }, { channel: 'Звонок' }), false);
+  assert.equal(keepCritical({ error: '6. Деньги письменно', quote: 'Скидка 5%' }, { channel: 'WhatsApp' }), true);
+});
 console.log(`criticFilters: ${n} проверок пройдено`);
