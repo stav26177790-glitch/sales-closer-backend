@@ -262,6 +262,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     const fx = p?.facts || {};
+    for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
     if (require('./touchPlan').JUST_PRICE_RE.test(String(sourceText || '').slice(-1500)) && NO_ZOOM_RE.test(t)) fixes.push(NO_ZOOM_FIX);
