@@ -96,7 +96,12 @@ function loadEngine(dbApi) {
 }
 
 // ---------- судья: независимая оценка касаний ----------
-const RUBRIC = fs.readFileSync(path.join(__dirname, 'rubric.md'), 'utf8');
+// Судья 17.11: ему не давали факты компании → ложные «не подтверждено» (Щёлково, ОТК). Даём файл отрасли и 902-ПП.
+const RUBRIC = [
+  fs.readFileSync(path.join(__dirname, 'rubric.md'), 'utf8'),
+  '# Факты компании (файл отрасли — всё здесь НЕ выдумка)\n\n' + fs.readFileSync(path.join(ROOT, 'knowledge', 'industry', 'signage.md'), 'utf8'),
+  '# 902-ПП (только если объект в Москве)\n\n' + fs.readFileSync(path.join(ROOT, 'knowledge', 'industry', 'signage_902pp.md'), 'utf8')
+].join('\n\n');
 async function judge(sit, sets, diagnosticSummary) {
   const client = provider.createClient();
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
@@ -244,6 +249,7 @@ function md(results) {
     if (r.errors.length) L.push(`**Ошибки:** ${r.errors.join('; ')}`);
     L.push(`Состояние: ${r.state}. Время: ${r.seconds} с. Стратегия: ${r.strategy.name || '—'} — ${r.strategy.goal || ''}`);
     if (r.verdict?.summary) L.push(`\n**Судья:** ${r.verdict.summary}`);
+    for (const x of r.verdict?.missing || []) L.push(`- 🔎 Не хватает: ${x}`);
     for (const e of r.verdict?.expectations || []) L.push(`- ${e.met === 'да' ? '✅' : e.met === 'частично' ? '🟡' : '❌'} ${e.expectation}${e.comment ? ` — ${e.comment}` : ''}`);
     if (r.residual.length) { L.push('\n**Остались замечания проверок кода:**'); for (const x of r.residual) L.push(`- касание ${x.n}: ${x.fix}`); }
     // Многоуровневая сделка: что Клоузер сделал после каждой дописки.
