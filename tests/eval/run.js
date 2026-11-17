@@ -178,7 +178,13 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   // судья ставил ⛔ на «при старте сегодня — готово 16–17 декабря»). Код отсеивает такие находки.
   const isErr2 = (c) => /^\s*2\b|обещани[ея] срока/i.test(String(c.error || ''));
   const keep = (c) => !isErr2(c) || (/к открыт|успева|успеем|к \d{1,2} (ноябр|декабр|январ)/i.test(String(c.quote || '')) && !/не успева|уже не|позже|временн/i.test(String(c.quote || '')));
-  const extra = (await Promise.all(jobs)).flat().filter(keep);
+  // Ошибка 6 «деньги письменно» — неверна, если на момент хода голос недоступен (прогон 5: судья не верил полю).
+  const { voiceBlocked } = require(path.join(ROOT, 'engine', 'voice.js'));
+  const convOf = (set) => { const m = String(set || '').match(/\[(\d+)\]/); return conv(set === 'before_reply' ? 0 : m ? Number(m[1]) + 1 : steps.length); };
+  const isErr6 = (c) => /^\s*6\b|деньги письменно/i.test(String(c.error || ''));
+  const keep6 = (c) => !isErr6(c) || !voiceBlocked(convOf(c.set));
+  const extra = (await Promise.all(jobs)).flat().filter(keep).filter(keep6);
+  v.critical = (v.critical || []).filter(keep6);
   v.critical = (v.critical || []).filter(keep);
   const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
   const have = new Set((v.critical || []).map(key));

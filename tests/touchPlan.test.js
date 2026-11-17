@@ -420,4 +420,12 @@ check('экзамен 17.11: кружок — один на путь (и раз�
   assert.equal(p.filter((x) => /кружок/i.test(x.channel)).length, 1, JSON.stringify(p.map((x) => x.channel)));
   assert.ok(/примерный диапазон/.test(p[0].how) && /камеру/.test(p[0].how), p[0].how);
 });
+check('экзамен прогон 5: цель стратега «согласовать 650 через полномочия» (650 — цена клиента) — код переписывает', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'Звонок', kind: 'экспертное', day: 0, goal: 'Предложить выезд специалиста с образцами' },
+    { number: 2, channel: 'Звонок', kind: 'экспертное', condition: 'только если согласился', goal: 'Согласовать 650 через полномочия в обмен на подписание до пятницы' }
+  ] }, tl, '2026-11-20', null, { mode: 'step', source: 'Арсен: «Сделаете 650 — и платим 50% сразу, подписываем до пятницы».' });
+  const t = p.find((x) => /650/.test(x.goal));
+  assert.ok(/не сможем/.test(t.goal) && /5–7%/.test(t.how), JSON.stringify(t));
+});
 console.log(`touchPlan: ${n} проверок пройдено`);
