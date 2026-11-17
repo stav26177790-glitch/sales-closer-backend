@@ -409,4 +409,15 @@ check('живой «Сулико» 17.11: кружок одному челове
   const q = buildTouchPlan(JSON.parse(JSON.stringify(seq)), tl, '2026-11-17', { authority: { status: 'Подтверждено' }, trust: { status: 'Риск' } }, { mode: 'full' });
   assert.ok(!q.some((x) => /А если бы выбирали вы/.test(x.how)));
 });
+check('экзамен 17.11: кружок — один на путь (и разным людям одной сделки); «просто цену / зачем Zoom» — отработка в how', () => {
+  const p = buildTouchPlan({ touchpoint_sequence: [
+    { number: 1, channel: 'WhatsApp', kind: 'экспертное', day: 0, recipient: 'Арсен' },
+    { number: 2, channel: 'Кружок', kind: 'эмпатичное', condition: 'Только если логотип не прислан', recipient: 'Вика' },
+    { number: 3, channel: 'Кружок', kind: 'эмпатичное', day: 2, recipient: 'Арсен' },
+    { number: 4, channel: 'Звонок', kind: 'экспертное', day: 4, recipient: 'Арсен' },
+    { number: 5, channel: 'Звонок', kind: 'экспертное', day: 6, recipient: 'Арсен' }
+  ] }, tl, '2026-11-17', null, { mode: 'full', source: 'Вика: зачем нам какой-то Zoom, просто скиньте цену, если сделать без логотипа.' });
+  assert.equal(p.filter((x) => /кружок/i.test(x.channel)).length, 1, JSON.stringify(p.map((x) => x.channel)));
+  assert.ok(/примерный диапазон/.test(p[0].how) && /камеру/.test(p[0].how), p[0].how);
+});
 console.log(`touchPlan: ${n} проверок пройдено`);

@@ -260,4 +260,14 @@ check('живой «Сулико» 17.11: «спросить прямо: про�
   const r = findPlanIssues([{ touchpoint_number: 2, channel: 'Звонок', body: 'Хочу спросить прямо: проект ещё в приоритете у Георгия Давидовича? Если что-то изменилось — скажите, чтобы я не тратила ваше время.' }], plan, 'Я (06.11): Отправила КП');
   assert.ok(/только в последнем касании/.test(JSON.stringify(r)), JSON.stringify(r));
 });
+check('экзамен 17.11: «к открытию» при «не успеваем» по facts — на правку; при «с запасом» — ок; голос снова доступен после Zoom', () => {
+  const body = 'Арсен, решила финально набрать — скажите как есть: проект актуален? Если да — договоримся о шаге, и вывеска будет у вас к открытию 11 декабря. Если нет — можете сказать в открытую, что я сделала не так?';
+  const late = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body }], [{ touchpoint_number: 1, last_chance: true, facts: { status_on_send_day: 'не успеваем', permanent_ready_if_start_that_day: '21–22 декабря' } }], 'Я (09.11): Отправила КП');
+  assert.ok(/НЕ успевает/.test(JSON.stringify(late)), JSON.stringify(late));
+  const ok = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body }], [{ touchpoint_number: 1, last_chance: true, facts: { status_on_send_day: 'с запасом' } }], 'Я (09.11): Отправила КП');
+  assert.ok(!/НЕ успевает/.test(JSON.stringify(ok)));
+  const { voiceBlocked } = require('../engine/voice');
+  assert.equal(voiceBlocked('Вика: говорить не могу — пишите сюда.'), true);
+  assert.equal(voiceBlocked('Вика: говорить не могу — пишите сюда.\nПровела Zoom с Викой и Арсеном.'), false);
+});
 console.log(`planChecks: ${n} проверок пройдено`);

@@ -13,11 +13,21 @@ const VOICE_BLOCKED_RE = new RegExp([
   '(?:не\\s+может|не\\s+могу|неудобно)\\s+говорить',
   'звонить\\s+(?:не\\s+надо|неудобно|не\\s+нужно)',
   'не\\s+звоните',
+  'говорить\\s+(?:сейчас\\s+)?не\\s+(?:могу|может|удобно)',
+  'пишите\\s+(?:сюда|в\\s+(?:whatsapp|ватсап|вотсап|телеграм|мессенджер))',
   'только\\s+(?:в\\s+)?(?:переписк|мессенджер|whatsapp|ватсап|вотсап|телеграм)',
 ].join('|'), 'i');
 
+// Экзамен «Brot & Butter» 17.11: Вика «говорить не могу — пишите сюда», а потом прошёл Zoom с ней и ЛПР —
+// голос снова доступен; признак «голос недоступен» действует, только если после него голосом не говорили.
+const VOICE_HAPPENED_RE = /(провел[аи]?|провели|прош[её]л|был[аи]?|состоял[ся]*)[^.!?\n]{0,15}(zoom|зум|созвон|звонок|встреч)|созвонил[аи]?с[ья]|поговорил[аи]?\s+(по телефону|голосом|с\s)|(zoom|зум)[^.!?\n]{0,20}(с\s+[А-ЯЁ]|состоял)/i;
 function voiceBlocked(sourceText) {
-  return VOICE_BLOCKED_RE.test(String(sourceText || ''));
+  const t = String(sourceText || '');
+  const all = [...t.matchAll(new RegExp(VOICE_BLOCKED_RE.source, 'gi'))];
+  if (!all.length) return false;
+  const lastBlock = all[all.length - 1].index;
+  const spoke = [...t.matchAll(new RegExp(VOICE_HAPPENED_RE.source, 'gi'))].pop();
+  return !(spoke && spoke.index > lastBlock);
 }
 
 // Скидка цифрой — только голосом (правило 77), даже если голос недоступен.
