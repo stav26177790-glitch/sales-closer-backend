@@ -121,7 +121,7 @@ async function judge(sit, sets, diagnosticSummary) {
     what_this_situation_checks: sit.expect, diagnostic_summary: diagnosticSummary,
     before_reply: setOf(sets.before), after_reply: setOf(sets.after),
     // Многоуровневая сделка: промежуточные шаги (после каждой дописки менеджера).
-    intermediate_stages: (sets.stages || []).map((x) => ({ after: x.label, today: x.today, ...setOf(x) }))
+    intermediate_stages: (sets.stages || []).map((x) => ({ after: x.label, today: x.today, what_this_step_checks: x.expect || [], ...setOf(x) }))
   }, null, 1);
   const startedAt = Date.now();
   const r = await client.messages.create({ model, max_tokens: 9000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
@@ -129,6 +129,54 @@ async function judge(sit, sets, diagnosticSummary) {
   calls.push({ situation: sit.id, agent: 'judge', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
   const m = text.match(/\{[\s\S]*\}/);
   try { return JSON.parse(m ? m[0] : text); } catch { return { parse_error: true, raw: text.slice(0, 4000) }; }
+}
+
+// Судья 17.11: в общем вызове (все ходы сразу, ~40 тыс. знаков) грубую ошибку «по цене договорились: 650 000 ₽»
+// судья пропускал трижды. Отдельный короткий вызов на каждый ход — только грубые ошибки, по переписке НА МОМЕНТ
+// хода, с ценой КП. Найденное сливается в verdict.critical; такие касания — «нет».
+const CRITICAL_RUBRIC = (() => {
+  const r = fs.readFileSync(path.join(__dirname, 'rubric.md'), 'utf8');
+  const a = r.indexOf('# Грубые ошибки'); const b = r.indexOf('# Не считай ошибкой'); const d = r.indexOf('# Образцы');
+  return ['Ты — проверяющий касаний отдела продаж вывесок. Найди ТОЛЬКО грубые ошибки по списку ниже — в КАЖДОМ касании, медленно, фраза за фразой. Ничего другого не оценивай.',
+    r.slice(a, b), r.slice(b, d),
+    'Ответ — только JSON: {"critical": [{"n": номер касания, "error": "номер и название ошибки", "quote": "цитата до 15 слов"}]}. Нет ошибок — {"critical": []}.',
+    '# Факты компании\n\n' + fs.readFileSync(path.join(ROOT, 'knowledge', 'industry', 'signage.md'), 'utf8')].join('\n\n');
+})();
+const withFactsC = (touches, plan) => (touches || []).map((t) => {
+  const p = (plan || []).find((q) => q.touchpoint_number === Number(t.touchpoint_number));
+  return p?.facts?.status_on_send_day ? { ...t, srok_na_den_otpravki: `${p.facts.status_on_send_day}; готово при старте в день отправки: ${p.facts.permanent_ready_if_start_that_day}` } : t;
+});
+async function criticalScan(sit, label, today, conversation, x) {
+  if (!x || !x.touches?.length) return [];
+  const client = provider.createClient();
+  const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
+  const model = getAgentConfig('reviewer').model;
+  const kp = String(sit.first || '').match(/КП[^.\n]{0,15}?:?\s*(\d{2,3}(?:[  ]\d{3}))\s*₽/i);
+  const user = JSON.stringify({ today, kp_price: kp ? kp[1] : null, deal: sit.deal, conversation_so_far: conversation,
+    path_mode: x.plan?.[0]?.path_mode || 'full', touches: withFactsC(x.touches, x.plan) }, null, 1);
+  const startedAt = Date.now();
+  const r = await client.messages.create({ model, max_tokens: 3000, temperature: 0, system: CRITICAL_RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
+  const text = r.content.filter((c) => c.type === 'text').map((c) => c.text || '').join('');
+  calls.push({ situation: sit.id, agent: 'judge_critical', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
+  try { return (JSON.parse((text.match(/\{[\s\S]*\}/) || [text])[0]).critical || []).map((c) => ({ ...c, set: label })); } catch { return []; }
+}
+async function judgeWithCritical(sit, sets, diagnosticSummary) {
+  const v = await judge(sit, sets, diagnosticSummary);
+  if (!v || v.parse_error) return v;
+  const steps = sit.steps || [];
+  const conv = (k) => [sit.first, ...steps.slice(0, k).map((x) => `--- ${x.label} (сегодня ${x.today}) ---\n${x.text}`)].join('\n\n');
+  const jobs = [criticalScan(sit, 'before_reply', process.env.KLOUZER_TODAY, conv(0), sets.before)];
+  (sets.stages || []).forEach((x, i) => jobs.push(criticalScan(sit, `intermediate_stages[${i}]`, x.today, conv(i + 1), x)));
+  if (sets.after && steps.length) jobs.push(criticalScan(sit, 'after_reply', steps.at(-1).today, conv(steps.length), sets.after));
+  const extra = (await Promise.all(jobs)).flat();
+  const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
+  const have = new Set((v.critical || []).map(key));
+  v.critical = [...(v.critical || []), ...extra.filter((c) => !have.has(key(c)))];
+  for (const c of v.critical) {
+    const t = (v.touches || []).find((x) => x.set === c.set && Number(x.n) === Number(c.n));
+    if (t && t.send !== 'нет') { t.send = 'нет'; t.issues = [...(t.issues || []), { rule: `Грубая ошибка: ${c.error}`, comment: c.quote || '' }]; }
+  }
+  return v;
 }
 
 // ---------- одна ситуация ----------
@@ -199,7 +247,7 @@ async function runSituationInner(sit) {
   let verdict = null;
   if (JUDGE && finalTouches.length) {
     const sets = sit.reply || sit.steps ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan }, stages: stages.slice(0, -1) } : { before: { touches: finalTouches, plan } };
-    try { verdict = await judge(sit, sets, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
+    try { verdict = await judgeWithCritical(sit, sets, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
   }
   return {
     id: sit.id, name: sit.name, title: sit.title, expect: sit.expect,
@@ -309,9 +357,9 @@ async function rejudge(file) {
     const sit = SITUATIONS.find((x) => x.id === r.id);
     if (!sit || (!r.touches?.length && !r.first_round?.touches?.length)) { results.push(r); continue; }
     // Судья 17.11: при пересуде промежуточные ходы не передавались — «650 договорились» (ход 2 экзамена) судья не видел.
-    const sets = r.first_round ? { before: r.first_round, after: { touches: r.touches, plan: r.plan }, stages: r.stages || [] } : { before: { touches: r.touches, plan: r.plan } };
+    const sets = r.first_round ? { before: r.first_round, after: { touches: r.touches, plan: r.plan }, stages: (r.stages || []).slice(0, -1) } : { before: { touches: r.touches, plan: r.plan } };
     let verdict = null;
-    try { verdict = await als.run(sit.id, () => judge(sit, sets, r.diagnostic?.summary)); } catch (e) { r.errors = [...(r.errors || []), `judge: ${e.message}`]; }
+    try { verdict = await als.run(sit.id, () => judgeWithCritical(sit, sets, r.diagnostic?.summary)); } catch (e) { r.errors = [...(r.errors || []), `judge: ${e.message}`]; }
     results.push({ ...r, verdict });
     console.log(`← ${r.id} пересужено`);
   }
