@@ -646,4 +646,4 @@ function pinToPlan(composerOutput, plan) {
   return { ...composerOutput, messages };
 }
 
-module.exports = { contextHints, NOT_MOSCOW_RE, buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };
+module.exports = { JUST_PRICE_RE, contextHints, NOT_MOSCOW_RE, buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };

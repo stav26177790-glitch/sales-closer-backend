@@ -187,6 +187,28 @@ const ZOOM_FIX = 'Касание «Zoom» — сценарий встречи (�
 // написано «к открытию 11 декабря», а по расчёту на день отправки — не успеваем (21–22 декабря). Выдумка.
 const OPENING_PROMISE_RE = /(будет|успеем|успеваем|смонтируем|повесим|готова?)[^.!?\n]{0,40}к (открытию|дате открытия|\d{1,2} (ноябр|декабр|январ))|к открытию[^.!?\n]{0,25}(точно|успеем|будет)/i;
 const OPENING_PROMISE_FIX = (f) => `По расчёту на день отправки этого касания постоянная вывеска к открытию НЕ успевает (готова ${f.permanent_ready_if_start_that_day}). Не обещать «к открытию» — честно назвать дату готовности и, если ещё можно, предложить временную вывеску (см. facts этого касания).`;
+// Экзамен 17.11: клиент «Сделаете 650 — и платим 50%, подписываем», а касание: «по цене мы договорились: 650 000 ₽,
+// договор готов» — Клоузер сам принял цену клиента (−10%). Цена клиента ниже КП как согласованная — на правку.
+const KP_PRICE_RE = /КП[^.\n]{0,15}?:?\s*(\d{2,3}(?:[ \u00a0]\d{3}))\s*₽/i;
+const PRICE_IN_TEXT_RE = /(\d{2,3})(?:[ \u00a0](\d{3})\s*₽|\s*(?:тыс|тысяч|к\b))/gi;
+const AGREED_RE = /договорились|договор (у меня )?готов|фиксируем|подписываем|зафиксир|оформляем|заключаем/i;
+const RESIST_RE = /не (могу|выйдет|получится|смогу|уложиться)|полномочи|попробую согласовать/i;
+const ACCEPT_FIX = 'Цену клиента ниже КП не принимать как согласованную (владелец: скидке сопротивляемся). Голосом: признать, напомнить, что входит в цену, встречно — небольшая уступка через полномочия («у меня таких полномочий нет, попробую согласовать…») в обмен на решение; или оплата 70/30.';
+function acceptsClientPrice(text, sourceText) {
+  const kp = String(sourceText || '').match(KP_PRICE_RE);
+  if (!kp) return false;
+  const kpVal = Number(kp[1].replace(/\D/g, ''));
+  for (const s of String(text || '').split(/(?<=[.!?\n])/)) {
+    if (!AGREED_RE.test(s) || RESIST_RE.test(s)) continue;
+    for (const m of s.matchAll(PRICE_IN_TEXT_RE)) {
+      const v = m[2] ? Number(m[1] + m[2]) : Number(m[1]) * 1000;
+      if (v < kpVal && v >= kpVal * 0.5) return true;
+    }
+  }
+  return false;
+}
+const NO_ZOOM_RE = /без (zoom|зума)|посчитаю и пришлю[^.!?\n]{0,30}(цен|стоимост|вариант|сегодня)/i;
+const NO_ZOOM_FIX = 'Клиент просит «просто цену / зачем Zoom» — по методике владельца (файл 29) не уходить «без Zoom» и не обещать прислать цены письменно: «могу дать примерный диапазон, а по практике после разбора онлайн выходит либо дешевле, либо эффективнее» → оффер Zoom на 15 минут с днём и временем + «камеру включать не обязательно».';
 function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
@@ -215,6 +237,8 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     }
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     const fx = p?.facts || {};
+    if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
+    if (require('./touchPlan').JUST_PRICE_RE.test(String(sourceText || '').slice(-1500)) && NO_ZOOM_RE.test(t)) fixes.push(NO_ZOOM_FIX);
     // Про временную вывеску «успеем к открытию» — правда (её срок свой): такие фразы не считаем.
     if (/не успеваем|дата прошла/i.test(String(fx.status_on_send_day || '')) && t.split(/(?<=[.!?\n])/).some((x) => OPENING_PROMISE_RE.test(x) && !/временн|баннер/i.test(x))) fixes.push(OPENING_PROMISE_FIX(fx));
     if ((zoomNs.has(n) || /zoom|зум/i.test(String(m?.channel || ''))) && (!ZOOM_TEMP_RE.test(t) || !ZOOM_FIX_RE.test(t))) fixes.push(ZOOM_FIX);
