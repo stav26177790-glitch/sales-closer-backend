@@ -174,7 +174,12 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   const jobs = [criticalScan(sit, 'before_reply', process.env.KLOUZER_TODAY, conv(0), sets.before)];
   (sets.stages || []).forEach((x, i) => jobs.push(criticalScan(sit, `intermediate_stages[${i}]`, x.today, conv(i + 1), x)));
   if (sets.after && steps.length) jobs.push(criticalScan(sit, 'after_reply', steps.at(-1).today, conv(steps.length), sets.after));
-  const extra = (await Promise.all(jobs)).flat();
+  // Ошибка 2 — только обещание к открытию / к дате; честная дата готовности без «к открытию» — не ошибка (прогон 4:
+  // судья ставил ⛔ на «при старте сегодня — готово 16–17 декабря»). Код отсеивает такие находки.
+  const isErr2 = (c) => /^\s*2\b|обещани[ея] срока/i.test(String(c.error || ''));
+  const keep = (c) => !isErr2(c) || (/к открыт|успева|успеем|к \d{1,2} (ноябр|декабр|январ)/i.test(String(c.quote || '')) && !/не успева|уже не|позже|временн/i.test(String(c.quote || '')));
+  const extra = (await Promise.all(jobs)).flat().filter(keep);
+  v.critical = (v.critical || []).filter(keep);
   const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
   const have = new Set((v.critical || []).map(key));
   v.critical = [...(v.critical || []), ...extra.filter((c) => !have.has(key(c)))];
