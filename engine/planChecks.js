@@ -201,6 +201,23 @@ const PRICE_IN_TEXT_RE = /(\d{2,3})(?:[ \u00a0](\d{3})\s*₽|\s*(?:тыс|тыс
 const AGREED_RE = /договорились|договор (у меня )?готов|фиксируем|подписываем|зафиксир|оформляем|заключаем/i;
 const RESIST_RE = /не (могу|выйдет|получится|смогу|уложиться)|полномочи|попробую согласовать/i;
 const ACCEPT_FIX = 'Цену клиента ниже КП не принимать как согласованную (владелец: скидке сопротивляемся). Голосом: признать, напомнить, что входит в цену, встречно — небольшая уступка через полномочия («у меня таких полномочий нет, попробую согласовать…») в обмен на решение; или оплата 70/30.';
+// Экзамен 17.11 (прогон 4): «попробую согласовать 650 с руководством», «наши 650 — уже уступка» — пытаемся
+// выбить ВСЮ цену клиента (−10%). Уступка — небольшая (5–7%), не цена клиента.
+const CONCEDE_CLIENT_RE = /(согласовать|выбить|пробить|уступк|в силе|держится)/i;
+const CONCEDE_FIX = 'Уступка — небольшая (наличные 5–7%, табличка, слот, замер в счёт заказа), не цена клиента: «N — точно не смогу, у меня таких полномочий нет; попробую согласовать небольшую уступку, если подписываем …». Цену клиента не обещать выбить и не называть «уже уступкой».';
+function concedesClientPrice(text, sourceText) {
+  const kp = String(sourceText || '').match(KP_PRICE_RE);
+  if (!kp) return false;
+  const kpVal = Number(kp[1].replace(/\D/g, ''));
+  for (const s of String(text || '').split(/(?<=[.!?\n])/)) {
+    if (!CONCEDE_CLIENT_RE.test(s) || /не (могу|выйдет|получится|смогу)|точно не/i.test(s)) continue;
+    for (const m of s.matchAll(new RegExp('(\\d{2,3})(?:[ \\u00a0](\\d{3})\\s*₽|\\s*(?:тыс|тысяч|к\\b)|(?=[^\\d%]))', 'gi'))) {
+      const v = m[2] ? Number(m[1] + m[2]) : Number(m[1]) * 1000;
+      if (v < kpVal * 0.93 && v >= kpVal * 0.5) return true;
+    }
+  }
+  return false;
+}
 function acceptsClientPrice(text, sourceText) {
   const kp = String(sourceText || '').match(KP_PRICE_RE);
   if (!kp) return false;
@@ -245,9 +262,10 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     const channel = String(m?.channel || byN.get(n)?.channel || '');
     const fx = p?.facts || {};
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
+    else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
     if (require('./touchPlan').JUST_PRICE_RE.test(String(sourceText || '').slice(-1500)) && NO_ZOOM_RE.test(t)) fixes.push(NO_ZOOM_FIX);
     // Про временную вывеску «успеем к открытию» — правда (её срок свой): такие фразы не считаем.
-    if (/не успеваем|дата прошла/i.test(String(fx.status_on_send_day || '')) && t.split(/(?<=[.!?\n])/).some((x) => OPENING_PROMISE_RE.test(x) && !/временн|баннер/i.test(x))) fixes.push(OPENING_PROMISE_FIX(fx));
+    if (/не успеваем|дата прошла/i.test(String(fx.status_on_send_day || '')) && t.split(/(?<=[.!?\n])/).some((x) => OPENING_PROMISE_RE.test(x) && !/временн|баннер|не успева|не успеем|уже не|позже открытия|после открытия/i.test(x))) fixes.push(OPENING_PROMISE_FIX(fx));
     if ((zoomNs.has(n) || /zoom|зум/i.test(String(m?.channel || ''))) && (!ZOOM_TEMP_RE.test(t) || !ZOOM_FIX_RE.test(t))) fixes.push(ZOOM_FIX);
     // Голос в приоритете; голос недоступен (не берёт трубку, просит писать) — о деньгах можно
     // в переписке (владелец 15.11). Скидка цифрой письменно — нет (правило 77).

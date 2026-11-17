@@ -152,7 +152,13 @@ async function criticalScan(sit, label, today, conversation, x) {
   const { getAgentConfig } = require(path.join(ROOT, 'llm', 'registry.js'));
   const model = getAgentConfig('reviewer').model;
   const kp = String(sit.first || '').match(/КП[^.\n]{0,15}?:?\s*(\d{2,3}(?:[  ]\d{3}))\s*₽/i);
+  // Прогон 4: судья ставил «деньги письменно», когда клиент просил писать, и «не тот род» на «решила» / «подготовлю».
+  // Голос и род считает код — судье готовыми фактами.
+  const { voiceBlocked } = require(path.join(ROOT, 'engine', 'voice.js'));
+  const { managerGender } = require(path.join(ROOT, 'engine', 'planChecks.js'));
+  const g = managerGender(conversation);
   const user = JSON.stringify({ today, kp_price: kp ? kp[1] : null, deal: sit.deal, conversation_so_far: conversation,
+    voice_available_now: !voiceBlocked(conversation), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно',
     path_mode: x.plan?.[0]?.path_mode || 'full', touches: withFactsC(x.touches, x.plan) }, null, 1);
   const startedAt = Date.now();
   const r = await client.messages.create({ model, max_tokens: 3000, temperature: 0, system: CRITICAL_RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
