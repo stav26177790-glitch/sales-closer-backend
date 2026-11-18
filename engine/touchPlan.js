@@ -134,6 +134,8 @@ function noteFollowUp(steps, source) {
     if (!VOICE_STEP_RE.test(x.channel || '') || x.lastChance) return;
     if (next && next.sameContact && !VOICE_STEP_RE.test(next.channel || '') && !/кружок|видео/i.test(next.channel || '')) return;
     addHow(x, FOLLOWUP_IN_CALL_NOTE);
+    // Разбор 18.11: после визита в цех итог звал «ждём вас в пятницу в цехе» — клиент уже там. Итог встречи — о шаге ПОСЛЕ неё.
+    if (/встреч/i.test(String(x.channel || '')) || x.production_meeting) addHow(x, ' Итог ЭТОЙ встречи — о следующем шаге после неё (макет, расчёт, запуск, дата монтажа), а не повторное приглашение на ту же встречу.');
   });
   steps.forEach((x, i) => {
     const prev = steps[i - 1];

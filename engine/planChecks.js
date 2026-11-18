@@ -208,10 +208,17 @@ function shingles(text, k = 5) {
   }
   return out;
 }
-function repeatedPhrases(messages, plan = null) {
+function repeatedPhrases(messages, plan = null, sentHistory = []) {
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const seen = new Map();
   const out = [];
+  // Разбор 18.11 («Гараж 77», ход 3): те же три причины слово в слово, что в прошлом ходе тому же человеку.
+  // Касание 1 прошлого хода — уже сказано (sentHistory): его формулировки — «прошлый ход».
+  const mainWho = String((plan || [])[0]?.recipient || '').split(/[\s(,→]/)[0].toLowerCase();
+  for (const h of sentHistory || []) {
+    const who = mainWho || whoOf(h);
+    for (const s of shingles(h?.body)) { const k = `${who}|${s}`; if (!seen.has(k)) seen.set(k, 'прошлого хода (уже сказано клиенту)'); }
+  }
   for (const [i, m] of (messages || []).entries()) {
     const n = Number(m?.touchpoint_number ?? i + 1);
     // Адресат из плана / касания — надёжнее первого слова текста («Сделаем быстро…» — не имя).
@@ -326,7 +333,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const zoomNs = new Set((plan || []).filter((p) => /zoom|зум/i.test(p.channel || '')).map((p) => p.touchpoint_number));
   const out = [];
   const repeats = repeatedArguments(messages, sentHistory, plan);
-  const phraseRepeats = repeatedPhrases(messages, plan);
+  const phraseRepeats = repeatedPhrases(messages, plan, sentHistory);
   (messages || []).forEach((m, i) => {
     const n = Number(m?.touchpoint_number ?? i + 1);
     const t = textOf(m);
