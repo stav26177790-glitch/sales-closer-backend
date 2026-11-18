@@ -100,5 +100,10 @@ check('живой тест 18.11: клиент сам назвал упроще�
   assert.equal(d.soprano_recommendations.length, 2);
   assert.ok(/сам назвал.*902-ПП/.test(d.soprano_recommendations[0]));
   assert.ok(/ориентир бюджета у Марата/.test(d.soprano_recommendations[1]));
+  // ход 5: созвонились, понравилось, торг — совет про упрощения устарел
+  const d2 = { soprano: { 'А': { status: 'частично' } }, soprano_recommendations: ['Спросить Марата о критериях'] };
+  ensureSopranoFromFacts(d2, t + ' Я (27.11): Созвонилась с Маратом. Ему нравится визуализация, но хочет скидку 10%.');
+  assert.equal(d2.soprano['А'].status, 'собрано');
+  assert.deepEqual(d2.soprano_recommendations, ['Спросить Марата о критериях']);
 });
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

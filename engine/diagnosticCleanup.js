@@ -148,7 +148,10 @@ function ensureSopranoFromFacts(diag, sourceText) {
     const msk = /москв|м\.\s?[А-ЯЁ]|902/i.test(t) && /без подсветк|баннер/i.test(q);
     const rec = `Клиент сам назвал, что готов упростить: «${q}». Выяснить, что стоит за «дорого» — жёсткий потолок бюджета или непонятно, за что платить; предложить упрощение, которое не ломает результат, с честным риском отхода от ТЗ` +
       (msk ? '. В Москве буквы без подсветки и баннер на фасаде — нельзя по 902-ПП: сказать как защиту от штрафа и демонтажа, временная вывеска — только внутри.' : '.');
-    if (Array.isArray(diag.soprano_recommendations)) diag.soprano_recommendations = [rec, ...diag.soprano_recommendations];
+    // Сделка ушла дальше (понравилось, созвонились, торг) — совет «что стоит за дорого» устарел (живой тест 18.11, ход 5).
+    const later = t.slice(t.search(OWN_ALTERNATIVE_RE) + q.length);
+    const moved = /нравится|понравил|созвонил|поговорил|скидк|готов[аы]? (созвон|подпис|заключ)/i.test(later);
+    if (!moved && Array.isArray(diag.soprano_recommendations)) diag.soprano_recommendations = [rec, ...diag.soprano_recommendations];
   }
   if (LIMIT_BUDGET_RE.test(t) && LIMIT_DATE_RE.test(t) && markSoprano(diag, 'О2', 'бюджет назван, дата клиента известна')) out.push('О2');
   // Рекомендация «Аналоги: уточнить» больше не нужна, если Аналоги собраны.

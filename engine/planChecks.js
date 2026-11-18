@@ -335,6 +335,13 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
       && !/созвонил|созвон|поговорил|по телефону|провел[аи]? (zoom|зум|встреч)|договорились|договаривались|обещал[аи]? (прислать|скинуть)|пришл[юё]|скину/i.test(String(sourceText || ''))) {
       fixes.push('«Как договаривались» — а договорённости в переписке нет (выдумка). Повод — от себя: «подобрала для вас…», «разбиралась с вашим проектом — подготовила…».');
     }
+    // Живой тест 18.11: «Подготовила варианты под ваш бюджет, как обещала» — а обещания не было ни в переписке,
+    // ни в прошлых касаниях этого плана.
+    if (/как (и )?обещал[аи]?(?![а-яё])/i.test(t)) {
+      const before = [String(sourceText || ''), ...(messages || []).slice(0, i).map(textOf)].join('\n');
+      if (!/(подготовлю|пришлю|уточню|вернусь|посчитаю|отправлю|покажу|обещал[аи]?|сказал[аи]?,? что (уточн|верн|пришл|подготов))/i.test(before))
+        fixes.push('«Как обещала» — а обещания в переписке и прошлых касаниях нет (выдумка). Повод — от себя: «подготовила варианты под ваш бюджет».');
+    }
     for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
