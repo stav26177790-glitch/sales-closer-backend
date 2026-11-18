@@ -105,3 +105,8 @@ Version: 2.1
 # RAG Metadata
 topic: style_guide
 tags: tone, style, language, personalization, communication, b2b, b2c
+
+## Живая речь, а не калька (владелец 18.11)
+
+- Нельзя: «Наберу с одной мыслью», «звоню с мыслью» — так не говорят.
+- Можно: «Единственное, хотел уточнить: …» — и сразу по теме.
