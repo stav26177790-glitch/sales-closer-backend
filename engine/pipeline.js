@@ -99,6 +99,9 @@ function buildWriterInput(baseInput, deal, { feedback, iteration }) {
     value_focus: s.value_focus,
     strategy: { name: s.primary_strategy?.name || s.primary_strategy, goal: s.primary_strategy?.goal, do_not_use: s.do_not_use },
     client_triggers: deal.last_diagnostic_output?.client_triggers || [],
+    // Разбор 18.11: инструкция писателя велит брать вилку ТОЛЬКО из `price_guide`, а во вход оно не передавалось —
+    // писатель вилку не видел и ставил «[вилка — после экспертизы]» даже там, где код её посчитал.
+    price_guide: baseInput.price_guide ?? null,
     materials: { source_materials: baseInput.materials?.source_materials },
     message_length_limits: CONFIG.MAX_MESSAGE_LENGTH,
     iteration

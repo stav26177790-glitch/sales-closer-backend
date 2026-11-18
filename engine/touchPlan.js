@@ -16,6 +16,7 @@
  * Writer пишет по этому плану; канал, дата и тип после него закрепляются кодом.
  */
 const { addWorkingDays, humanDate, computeTimeline, isWorkingDay } = require('./timeline');
+const { compactNotes } = require('./notes');
 
 const DEFAULT_DAYS = [0, 1, 3, 5, 8, 11, 15];
 
@@ -116,7 +117,11 @@ function noteSoprano(steps, soprano, source) {
     if (x.lastChance || (x.scenarios || []).includes('negative')) continue;
     if (/кружок|видео/i.test(String(x.channel || ''))) continue;
     const voice = VOICE_STEP_RE.test(String(x.channel || ''));
-    const limit = voice ? (irritated ? 1 : 3) : 1;
+    // Разбор 18.11 (перегрузка писателя): у сценария свои вопросы (температура, «какое „дорого“»). В его касании —
+    // голосом не больше одного вопроса СОПРАНО, в переписке — ни одного (одно сообщение — один вопрос).
+    const busy = (x.scenarios || []).length > 0;
+    if (busy && (!voice || irritated)) continue;
+    const limit = busy ? 1 : voice ? (irritated ? 1 : 3) : 1;
     const pool = missing.filter((k) => !used.has(k));
     if (!pool.length) break;
     const mine = pool.filter((k) => SOPRANO_Q[k].crit.includes(x.criterion));
@@ -207,13 +212,26 @@ const TRUST_TOOLS = [
   'слот на производстве под его дату открытия — дата держится, от поставщиков не зависим (своё производство)',
   'кейс из раздела «Кейсы» industry/signage.md, похожий по типу бизнеса — с названием, без выдумок'
 ];
-function diversifyTrust(steps) {
+// Разбор 18.11 (перегрузка писателя, «Гараж 77»): клиент сказал «очки втираете со своим ОТК, гарантиями и
+// визуализациями» — а касанию подставлялся инструмент «визуализация на фасаде». Инструмент, которому клиент
+// не поверил, не берём; в приглашении на производство второй инструмент не нужен — доказательство делом.
+const TRUST_DISTRUST = [/визуализ/i, /отк|гаранти|договор/i, /70\s*\/\s*30|частями|рассрочк/i, /слот|срок/i, /кейс|пример/i];
+function distrustedTools(source) {
+  const m = String(source || '').match(/(очки втираете|не верю|сказки|лапшу|все так говорят)[^.!?\n]{0,120}/i);
+  if (!m) return new Set();
+  return new Set(TRUST_DISTRUST.map((re, i) => (re.test(m[0]) ? i : -1)).filter((i) => i >= 0));
+}
+function diversifyTrust(steps, source) {
   let k = 0;
+  const skip = distrustedTools(source);
   for (const x of steps) {
     if (x.conditional || x.production_meeting || x.lastChance) continue;
     if (x.criterion !== 'Д' && !(x.also || []).includes('Д')) continue;
     if (/кружок/i.test(String(x.channel || ''))) continue; // кружок — интрига, не довод
-    const i = k++ % TRUST_TOOLS.length; const tool = TRUST_TOOLS[i];
+    if (PRODUCTION_RE.test(`${x.goal || ''} ${x.key_message || ''}`) && INVITE_RE.test(`${x.goal || ''} ${x.key_message || ''}`)) continue;
+    const free = TRUST_TOOLS.map((_, j) => j).filter((j) => !skip.has(j));
+    if (!free.length) continue;
+    const i = free[k++ % free.length]; const tool = TRUST_TOOLS[i];
     x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия: ${TRUST_SHORT[i]}`;
     addHow(x, `Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`);
     x.trust_tool = tool;
@@ -640,7 +658,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     addHow(lastChance, LAST_CHANCE_GOAL);
   }
 
-  steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source), context.source);
+  steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(steps, context.source), context.dealSize), context.source), context.source);
   noteKrugIdea(steps, context.source, scores);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
@@ -679,6 +697,18 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // клиент не отвечает — касания со 2-го в разное время суток. «Сегодня» и вдогонку — без времени.
   const DAYPARTS = ['утром', 'днём', 'вечером'];
   own.filter((s) => s.day > 0).forEach((s, k) => { s.daypart = DAYPARTS[k % DAYPARTS.length]; });
+
+  // Разбор 18.11 (причина 5 — перегрузка писателя): подсказки касания — без служебных пометок, дублей и
+  // противоречий, в лимите, главное первым (engine/notes.js).
+  for (const s of steps) {
+    const { notes, dropped } = compactNotes(s.how, s);
+    s.how = notes;
+    if (dropped.includes('trust_tool')) {
+      s.goal = String(s.goal || '').replace(/\.?\s*Инструмент доверия: [^.]*$/, '');
+      delete s.trust_tool;
+    }
+    if (dropped.length) console.log(`[touchPlan] касание ${s.orig ?? '+'}: подсказки сняты — ${dropped.join(', ')}`);
+  }
 
   return steps.map((s, i) => {
     const send = s.conditional ? null : (s.day === 0 ? today : addWorkingDays(today, s.day));
