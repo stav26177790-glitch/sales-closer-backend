@@ -234,6 +234,7 @@ async function runSituationInner(sit) {
       if (e.status === 401 || e.status === 402 || /insufficient balance|authentication/i.test(e.message)) { console.error(`Провайдер ${PROVIDER.name} не принял ключ или кончился баланс (${e.status}) — прогон остановлен.`); process.exit(3); }
     }
   };
+  if (sit.today) process.env.KLOUZER_TODAY = sit.today; // свой «сегодня» у первого хода (живой тест владельца)
   await say(sit.first, 'переписка');
   // Сделка без срока: Клоузер просит «сроки — или напишите «без срока»» — отвечаем как менеджер.
   if (!db.deal.last_composer_output?.messages?.length && /без срока/i.test(String(parts[parts.length - 1]?.text || ''))) {
