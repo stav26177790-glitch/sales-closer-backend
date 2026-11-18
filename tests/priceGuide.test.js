@@ -34,4 +34,20 @@ check('буквы + короб — считаются оба', () => {
   const both = priceGuide({ product: 'Световые объёмные буквы + световой короб', industry: 'signage' }, src);
   assert.ok(both.items.some((i) => /короб/.test(i)) && both.items.some((i) => /букв/.test(i)), JSON.stringify(both.items));
 });
+check('аудит 18.11 «Гибкость»: вторая строка считается; «баннер сами повесим» не снимает наш монтаж; КП 128 — в вилке', () => {
+  const deal = { product: 'Световые объёмные буквы из акрила + табличка у входа', industry: 'signage' };
+  const src = 'длина примерно 3 метра + табличка у входа. Текст «ГИБКОСТЬ» и маленькая строка «студия растяжки». Марат: давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч.';
+  const g = priceGuide(deal, src);
+  assert.ok(g.items.some((i) => /вторая строка/.test(i)), JSON.stringify(g.items));
+  assert.ok(g.items.includes('монтаж'), 'монтаж не должен выпадать из-за баннера');
+  assert.ok(g.client_range.from <= 128000 && 128000 <= g.client_range.to, JSON.stringify(g.client_range));
+  assert.ok(!priceGuide(deal, 'длина 3 м, табличка, без монтажа, сами повесим').items.includes('монтаж'));
+});
+check('согласование в Подмосковье — по листу «Согласование», в Москве — нет', () => {
+  const deal = { product: 'Световые объёмные буквы', industry: 'signage' };
+  const myt = priceGuide(deal, 'Мытищи, длина 3 м');
+  const msk = priceGuide(deal, 'Москва, м. Бауманская, длина 3 м');
+  assert.ok(myt.items.some((i) => /согласование \(Мытищи\)/.test(i)) && !msk.items.some((i) => /согласование/.test(i)));
+  assert.equal(myt.x - msk.x, 15000);
+});
 console.log(`priceGuide: ${n} проверок пройдено`);

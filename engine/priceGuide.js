@@ -55,6 +55,19 @@ const MOUNT_BOX = [[1, 4000], [4, 6000], [6, 8000], [8, 9500], [10, 13000]];
 const MOUNT_PLAQUE = { visit: 2500, each: 800 };
 const MOUNT_MIN = 5000;
 
+// Лист «Согласование» (клиентская цена, без коэффициента): Москва — по 902-ПП без согласования; Подмосковье — проект.
+// Порядок — от частного к общему (Люберцы до общего «область»).
+const APPROVAL = [
+  [/балаших/i, 'Балашиха', 16000], [/видн(ое|ом)/i, 'Видное', 10000], [/долгопрудн/i, 'Долгопрудный', 18000],
+  [/истр/i, 'Истра', 10000], [/королёв|королев/i, 'Королёв', 15000], [/котельник/i, 'Котельники', 15000],
+  [/красногорск/i, 'Красногорск', 20000], [/люберц/i, 'Люберцы', 15000], [/мытищ/i, 'Мытищи', 15000],
+  [/одинцов/i, 'Одинцово', 10000], [/орехово/i, 'Орехово-Зуево', 15000], [/подольск/i, 'Подольск', 10000],
+  [/химк/i, 'Химки', 10000], [/щёлков|щелков/i, 'Щёлково', 10000], [/московск[а-яё]* обл|подмосков/i, 'город МО', 10000]
+];
+// Мелкая вторая строка («ГИБКОСТЬ» и маленькая строка «студия растяжки»): высота ≈ 1/3,5 основной, не ниже 10 см.
+const SECOND_LINE_RATIO = 3.5;
+const SECOND_LINE_MIN_CM = 10;
+
 const num = (s) => Number(String(s).replace(',', '.'));
 function rateFor(bands, h) {
   const b = bands.find(([a, z]) => h >= a && h <= z) || (h < bands[0][0] ? bands[0] : bands[bands.length - 1]);
@@ -82,6 +95,9 @@ function parseParams(text) {
   if (h) out.letterHeightCm = num(h[2]);
   const q = t.match(/текст[^«"\n]{0,20}[«"]([^»"\n]{2,40})[»"]/i);
   if (q) out.signText = q[1];
+  // Живой «Гибкость» (аудит 18.11): «Текст «ГИБКОСТЬ» и маленькая строка «студия растяжки»» — вторая строка не считалась.
+  const q2 = t.match(/(?:маленьк[а-яё]*|мелк[а-яё]*|втор[а-яё]*|нижн[а-яё]*|под ним[а-яё]*)\s+(?:строк[а-яё]*|надпис[а-яё]*|подпис[а-яё]*)[^«"\n]{0,10}[«"]([^»"\n]{2,60})[»"]/i);
+  if (q2) out.secondText = q2[1];
   if (/табличк/i.test(t)) out.plaque = /нерж|металл|латун/i.test((t.match(/табличк[^.!?\n]{0,60}/i) || [''])[0]) ? 'steel' : 'plastic';
   if (/короб|лайтбокс/i.test(t)) out.box = /инкрустац/i.test(t) ? (/псевдо/i.test(t) ? 'pseudo' : 'inlay') : 'acrylic';
   const area = t.match(/(\d+(?:[.,]\d+)?)\s*[x×х*]\s*(\d+(?:[.,]\d+)?)\s*(м|см)/i);
@@ -132,6 +148,13 @@ function priceGuide(deal, sourceText = '') {
     metal = metal || !!L.metal;
     items.push(`${L.name}: ${p.lengthCm ? `длина ≈ ${Math.round(p.lengthCm / 10) / 10} м` : `${letters} букв`}${h ? `, высота ≈ ${h} см` : ''}`);
     if (!p.signText) assumptions.push('текст вывески не известен — расчёт по длине');
+    if (p.secondText && h) {
+      const n2 = p.secondText.replace(/[^А-ЯЁA-Zа-яёa-z0-9]/g, '').length;
+      const h2 = Math.max(SECOND_LINE_MIN_CM, Math.round(h / SECOND_LINE_RATIO));
+      cost += Math.max(0, rateFor(L.bands, h2) * h2 * n2);
+      items.push(`вторая строка «${p.secondText}»: ${n2} букв, высота ≈ ${h2} см`);
+      assumptions.push('высота второй строки не известна — взята ≈ 1/3,5 основной');
+    }
   }
   // Короб — и отдельно, и вместе с буквами (буквы + короб «Шиномонтаж»).
   if (p.box && p.areaM2) {
@@ -149,7 +172,10 @@ function priceGuide(deal, sourceText = '') {
     assumptions.push('размер таблички не известен — взята типовая 40 × 30 см');
   }
   // Монтаж — если в сделке он есть (по умолчанию да: «под ключ»), кроме явного «без монтажа».
-  const noMount = /без монтаж|сами (повесим|смонтируем|поставим)/i.test(all);
+  // «Баннер на фасад сами повесим за 15 тысяч» — про баннер-альтернативу, не про нашу вывеску (аудит 18.11).
+  const selfMount = [...all.matchAll(/сами (повесим|смонтируем|поставим)/gi)]
+    .some((m) => !/баннер|плёнк|пленк|наклейк|распечат/i.test(all.slice(Math.max(0, m.index - 60), m.index + 40)));
+  const noMount = /без монтаж/i.test(all) || selfMount;
   if (!noMount) {
     let m = widthM ? pick(kind ? MOUNT_TUBE : MOUNT_BOX, widthM) : MOUNT_MIN;
     if (p.plaque) m += MOUNT_PLAQUE.each;
@@ -157,7 +183,12 @@ function priceGuide(deal, sourceText = '') {
     items.push('монтаж');
   }
   const coef = metal ? COEF.metal : COEF.base;
-  const x = cost * coef;
+  // Согласование в Подмосковье — клиентская цена из листа «Согласование», поверх (без коэффициента).
+  const { MOSCOW_RE } = require('./geo');
+  const city = MOSCOW_RE.test(all) ? null : APPROVAL.find(([re]) => re.test(all));
+  const approval = city ? city[2] : 0;
+  if (city) items.push(`согласование (${city[1]}): дизайн-проект${city[2] >= 15000 ? ' и проекты по листу «Согласование»' : ''}`);
+  const x = cost * coef + approval;
   return {
     source: 'прайс 01.08 (себестоимость) × коэффициент, расчёт кодом',
     items,
@@ -165,7 +196,7 @@ function priceGuide(deal, sourceText = '') {
     coef,
     x: round1000(x),
     client_range: { from: roundDown(x * RANGE.low), to: roundUp(x * RANGE.high) },
-    torg_floor: round1000(cost * COEF.floor),
+    torg_floor: round1000(cost * COEF.floor + approval),
     how_to_use: 'Вилку клиенту — «от … до … ₽ с монтажом»: ориентир, «точную цену дам, когда посмотрю ваш фасад / макет» (владелец 18.11: точная цена — после экспертизы менеджера). Себестоимость, коэффициент и нижнюю границу торга клиенту НЕ называть. torg_floor — для менеджера: ниже неё цену не опускать (коэффициент 1,6). Если в сделке уже есть цена КП — клиенту звучит она, а не вилка.'
   };
 }
