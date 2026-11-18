@@ -46,6 +46,23 @@ check('владелец 18.11: «покажите, чем отличаетесь
   const call = p1.find((x) => /звонок/i.test(x.channel));
   assert.ok(/ИДЕЯ ИЗ КРУЖКА/.test([].concat(call.how || []).join(' ')));
 });
+check('владелец 18.11: вопросы СОПРАНО по несобранным блокам — мессенджер 1, звонок до 3; раздражён — 1; собранное не спрашиваем', () => {
+  const seq3 = [
+    { touchpoint_number: 1, channel: 'WhatsApp', goal: 'кейс', criterion: 'Д', timing_days: 1, recipient: 'Анна' },
+    { touchpoint_number: 2, channel: 'Звонок', goal: 'бюджет', criterion: 'ФВ', timing_days: 3, recipient: 'Анна' },
+    { touchpoint_number: 3, channel: 'WhatsApp', goal: 'финал', criterion: 'ЗС', timing_days: 6, recipient: 'Анна' }
+  ];
+  const sop = { 'С': { status: 'собрано' }, 'Р': { status: 'собрано' }, 'О1': { status: 'нет' }, 'П': { status: 'частично' }, 'А': { status: 'нет' }, 'Н': { status: 'нет' }, 'О2': { status: 'частично' } };
+  const hw = (x) => [].concat((x && x.how) || []).join(' ');
+  const msg = (p) => p.find((x) => /whatsapp|telegram/i.test(x.channel) && !x.last_chance);
+  const call = (p) => p.find((x) => /звонок/i.test(x.channel) && !x.last_chance);
+  const p1 = buildTouchPlan({ touchpoint_sequence: seq3 }, tl, '2026-11-13', null, { source: 'КП отправила.', soprano: sop, mode: 'full' });
+  assert.ok(/вплести один вопрос/.test(hw(msg(p1))), JSON.stringify(p1.map((x) => [x.channel, hw(x).slice(-200)])));
+  assert.ok(/до 3 вопросов/.test(hw(call(p1))), hw(call(p1)));
+  assert.ok(!/Решение \(кто решает\)/.test(p1.map(hw).join(' ')));
+  const p2 = buildTouchPlan({ touchpoint_sequence: seq3 }, tl, '2026-11-13', null, { source: 'Клиент: некогда мне, без воды!', soprano: sop, mode: 'full' });
+  assert.ok(!/до \d вопросов/.test(p2.map(hw).join(' ')));
+});
 check('даты отправки по рабочему календарю; «сразу после» — тот же день; условное — без даты', () => {
   assert.equal(plan[0].send_date, '2026-11-13');
   assert.equal(plan[1].send_date, '2026-11-13');

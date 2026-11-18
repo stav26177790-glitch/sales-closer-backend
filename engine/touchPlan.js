@@ -92,6 +92,40 @@ function noteKrugIdea(steps, source, scores) {
   });
   return steps;
 }
+// Владелец 18.11: вопросы по несобранным блокам СОПРАНО — в касания, аккуратно и созидательно: ответ «разговорит»
+// клиента и двинет формулу закрытия. Мессенджер — 1 вопрос, звонок / Zoom — до 3 (клиент раздражён или «без воды» — 1).
+// Не задаём: негативная фаза, последний шанс; собранный блок — не переспрашивать.
+const SOPRANO_Q = {
+  'Р': { name: 'Решение (кто решает)', crit: ['ЛПР'], q: '«Чтобы не гонять туда-сюда — решение принимаете вы или ещё кто-то участвует?»' },
+  'О2': { name: 'Ограничения (срок, бюджет)', crit: ['ФВ', 'ЗС'], q: '«Чтобы предложить реальное, а не идеальное — в какую сумму комфортно уложиться? К какой дате вывеска нужна обязательно?»' },
+  'А': { name: 'Аналоги', crit: ['ФВ'], q: '«Если по бюджету не сойдётся — что важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?»' },
+  'П': { name: 'Проблемы', crit: ['ОП', 'Д'], q: '«На что смотрите в первую очередь, когда выбираете, кто будет делать вывеску?»' },
+  'О1': { name: 'Опыт', crit: ['Д', 'ОП'], q: '«Уже заказывали вывески раньше? Как прошло — что понравилось, а что нет?»' },
+  'Н': { name: 'Нюансы', crit: ['Д'], q: '«Есть что-то, что точно не должно повториться? На что обратить особое внимание?»' },
+  'С': { name: 'Ситуация', crit: ['ОП'], q: '«Расскажите, какую задачу вывеска должна решить в первую очередь?»' }
+};
+const SOPRANO_ORDER = ['Р', 'О2', 'А', 'П', 'О1', 'Н', 'С'];
+function noteSoprano(steps, soprano, source) {
+  if (!soprano || typeof soprano !== 'object') return steps;
+  const missing = SOPRANO_ORDER.filter((k) => soprano[k] && !/^собран/i.test(String(soprano[k].status || soprano[k] || '')));
+  if (!missing.length) return steps;
+  const tailText = String(source || '').slice(-1200);
+  const irritated = /раздраж|надоел|отнимаете|!!!|без воды|некогда мне|хамит|злится/i.test(tailText);
+  const used = new Set();
+  for (const x of steps) {
+    if (x.lastChance || (x.scenarios || []).includes('negative')) continue;
+    if (/кружок|видео/i.test(String(x.channel || ''))) continue;
+    const voice = VOICE_STEP_RE.test(String(x.channel || ''));
+    const limit = voice ? (irritated ? 1 : 3) : 1;
+    const pool = missing.filter((k) => !used.has(k));
+    if (!pool.length) break;
+    const mine = pool.filter((k) => SOPRANO_Q[k].crit.includes(x.criterion));
+    const pick = [...mine, ...pool.filter((k) => !mine.includes(k))].slice(0, limit);
+    pick.forEach((k) => used.add(k));
+    addHow(x, ` СОПРАНО (владелец 18.11): вплести ${pick.length > 1 ? `до ${pick.length} вопросов` : 'один вопрос'} по несобранным блокам — ${pick.map((k) => `${SOPRANO_Q[k].name}: ${SOPRANO_Q[k].q}`).join('; ')}. Аккуратно и созидательно — как забота о результате, вытекая из разговора, своими словами; ${voice ? 'после каждого — [выслушать]' : 'один вопрос в конце сообщения'}; клиент уже ответил — не переспрашивать.`);
+  }
+  return steps;
+}
 function noteFollowUp(steps, source) {
   const first = steps.find((x) => !x.conditional && !x.lastChance) || steps[0];
   if (first && REAL_CALL_RE.test(lastManagerEvent(source))) addHow(first, FOLLOWUP_REAL_NOTE);
@@ -609,6 +643,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });
+  noteSoprano(steps, context.soprano, context.source);
   // Экзамен 17.11 (прогоны 4–5): стратег ставит цель «согласовать 650 через полномочия» (650 — цена клиента) →
   // writer пишет «650 — точно не смогу», а через фразу «по цене 650». Цель на цену клиента код переписывает.
   const ask = String(context.source || '').match(/сделаете (?:на |за )?(\d{2,3})(?:[ \u00a0]?(?:000|тыс))?/i);
