@@ -435,7 +435,7 @@ async function runCritic(baseInput, deal, composerOutput, onlyNums) {
   } catch (e) { console.warn(`[critic] ошибка: ${e.message}`); return []; }
   const list = Array.isArray(out?.critical) ? out.critical : [];
   const { keepCritical } = require('./criticFilters');
-  return list.filter((c) => keepCritical(c, { source: src, status: plan.find((q) => q.touchpoint_number === Number(c.n))?.facts?.status_on_send_day, channel: touches.find((x) => x.n === Number(c.n))?.channel }));
+  return list.filter((c) => keepCritical(c, { source: src, status: plan.find((q) => q.touchpoint_number === Number(c.n))?.facts?.status_on_send_day, channel: touches.find((x) => x.n === Number(c.n))?.channel, priceGuide: baseInput?.price_guide }));
 }
 function criticVerdict(composerOutput, list) {
   const msgs = messagesOf(composerOutput);

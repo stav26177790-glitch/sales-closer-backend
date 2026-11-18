@@ -188,7 +188,8 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   const keep2 = (c) => !isErr2(c) || !/с запасом|впритык/i.test(String(planOfSet(c.set).find((p) => p.touchpoint_number === Number(c.n))?.facts?.status_on_send_day || ''));
   const { keepCritical } = require(path.join(ROOT, 'engine', 'criticFilters.js'));
   const setTouches = (set) => { const m = String(set || '').match(/\[(\d+)\]/); return (set === 'before_reply' ? sets.before : set === 'after_reply' ? sets.after : m ? (sets.stages || [])[Number(m[1])] : null)?.touches || []; };
-  const keepAll = (c) => keepCritical(c, { source: convOf(c.set), status: planOfSet(c.set).find((p) => p.touchpoint_number === Number(c.n))?.facts?.status_on_send_day, channel: setTouches(c.set).find((t) => Number(t.touchpoint_number) === Number(c.n))?.channel });
+  const { priceGuide } = require(path.join(ROOT, 'engine', 'priceGuide.js'));
+  const keepAll = (c) => keepCritical(c, { priceGuide: priceGuide(sit.deal, convOf(c.set)), source: convOf(c.set), status: planOfSet(c.set).find((p) => p.touchpoint_number === Number(c.n))?.facts?.status_on_send_day, channel: setTouches(c.set).find((t) => Number(t.touchpoint_number) === Number(c.n))?.channel });
   const extra = (await Promise.all(jobs)).flat().filter(keep).filter(keep6).filter(keep2).filter(keepAll);
   v.critical = (v.critical || []).filter(keep2).filter(keepAll);
   v.critical = (v.critical || []).filter(keep6);

@@ -8,9 +8,28 @@ const { voiceBlocked } = require('./voice');
 
 const errNo = (c) => String(c?.error || '').match(/^\s*(\d{1,2})/)?.[1] || (/обещани[ея] срока/i.test(String(c?.error || '')) ? '2' : /деньги письменно/i.test(String(c?.error || '')) ? '6' : null);
 
-function keepCritical(c, { source = '', status = '', channel = '' } = {}) {
+// Суммы в цитате: «50 000», «90000», «от 50 до 90 тысяч» → [50000, 90000].
+function sumsIn(q) {
+  const out = [];
+  for (const m of String(q).matchAll(/(?<![\d.,])(\d{1,3})(?:[ \u00a0]?(\d{3}))?(?![\d%])(\s*(?:тыс|к(?![а-яё])))?/gi)) {
+    // «от 50 до 90 тыс.» — единица одна на оба числа
+    const thousands = m[3] || /\d\s*(?:тыс|к(?![а-яё]))/i.test(String(q).slice(m.index));
+    const v = m[2] ? Number(m[1] + m[2]) : thousands ? Number(m[1]) * 1000 : null;
+    if (v && v >= 1000) out.push(v);
+  }
+  return out;
+}
+
+function keepCritical(c, { source = '', status = '', channel = '', priceGuide = null } = {}) {
   const q = String(c?.quote || '');
   switch (errNo(c)) {
+    case '4': { // прогон 24 + 25 (18.11): вилку посчитал код по прайсу владельца (price_guide) — не выдумка
+      const g = priceGuide?.client_range;
+      if (!g) return true;
+      const ok = new Set([g.from, g.to, priceGuide.x].map(Number));
+      const sums = sumsIn(q);
+      return !(sums.length && sums.every((v) => ok.has(v)));
+    }
     case '1': // честный торг по сценарию владельца: «N не смогу / нет полномочий / небольшая уступка за шаг», цена КП.
       // Прогон 8: «мы согласовали уступку — подписываем» без суммы — не ошибка. Ошибка — цена клиента / «договорились».
       if (!/(?<![\d.,])\d{3}(?:[ \u00a0]?\d{3})?(?!\s*%|\d)|договорились|уже уступка/i.test(q)) return false; // сумма, не «50%»
@@ -34,4 +53,4 @@ function keepCritical(c, { source = '', status = '', channel = '' } = {}) {
   }
 }
 
-module.exports = { keepCritical, errNo };
+module.exports = { keepCritical, errNo, sumsIn };

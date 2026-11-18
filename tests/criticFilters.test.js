@@ -32,3 +32,16 @@ console.log(`criticFilters: ${n} проверок пройдено`);
   assert2.equal(keepCritical({ error: '10. Неживая речь', quote: 'Скажите как есть: проект актуален?' }), false);
   console.log('  ✓ ошибка 10 (неживая речь): номер из двух цифр; живые формулировки владельца не отсекаются как ошибка');
 }
+
+// Прогон 24 + 25 (18.11): судья ставил ⛔ «выдуманный факт» на вилку, которую посчитал код по прайсу.
+{
+  const { keepCritical: kc, sumsIn } = require('../engine/criticFilters');
+  const a = require('assert');
+  const g = { x: 65000, client_range: { from: 50000, to: 90000 } };
+  a.deepEqual(sumsIn('от 50 000 до 90 000 ₽'), [50000, 90000]);
+  a.deepEqual(sumsIn('от 50 до 90 тыс.'), [50000, 90000]);
+  a.equal(kc({ error: '4. Выдуманный факт', quote: 'ориентир от 50 000 до 90 000 ₽ с монтажом' }, { priceGuide: g }), false);
+  a.equal(kc({ error: '4. Выдуманный факт', quote: 'обычно 110–140 тысяч' }, { priceGuide: g }), true);
+  a.equal(kc({ error: '4. Выдуманный факт', quote: 'ориентир от 50 000 до 90 000 ₽' }), true); // без вилки кода — как раньше
+  console.log('  ✓ вилка из прайса (price_guide) — не «выдуманный факт»; чужие суммы — ошибка');
+}
