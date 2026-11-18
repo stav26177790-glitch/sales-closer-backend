@@ -40,7 +40,9 @@ function channelKey(channel) {
 }
 
 // Переписка (все сообщения менеджера) + шапка сделки — здесь ищем цитату повода.
-const sourceTextOf = (baseInput) => [baseInput?.materials?.source_materials?.text, baseInput?.deal?.client, baseInput?.deal?.product].filter(Boolean).join('\n');
+// Числа ценового ориентира (engine/priceGuide.js) — тоже данные сделки, а не выдумка (проверка сумм в planChecks).
+const sourceTextOf = (baseInput) => [baseInput?.materials?.source_materials?.text, baseInput?.deal?.client, baseInput?.deal?.product,
+  require('./priceGuide').priceGuideNumbers(baseInput?.price_guide)].filter(Boolean).join('\n');
 
 const messagesOf = (out) => out?.messages || out?.composer_output?.messages || [];
 

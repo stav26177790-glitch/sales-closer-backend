@@ -9,6 +9,7 @@
  * Плюс защита от дублей и очередь запросов по одной сделке (баг №34).
  */
 const { detectBrand } = require('./brand');
+const { priceGuide } = require('./priceGuide');
 const db = require('../db');
 const { runMemoryUpdate } = require('./pipeline');
 const { isEndSessionCommand } = require('./intent');
@@ -76,6 +77,9 @@ async function advanceInternal(dealId, managerInput, opts = {}) {
       installDaysMax: deal.install_days_max ?? 3,
       industry: deal.industry
     }),
+    // Ценовой ориентир (владелец 18.11): прайс-себестоимость × 1,8 (металл × 2), вилка −20% / +40%, считает код.
+    // null — продукт не распознан / нет размеров: вилку не выдумываем, «[вилка — после экспертизы менеджера]».
+    price_guide: priceGuide(deal, sourceMaterials?.text || ''),
     deal: {
       client: deal.client,
       product: deal.product,
