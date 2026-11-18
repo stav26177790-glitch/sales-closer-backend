@@ -48,6 +48,7 @@ const { voiceBlocked, DISCOUNT_FIGURE_RE } = require('./voice');
 const DISCOUNT_FIX = 'Скидку цифрой письменно не даём (правила 77, 78): размер уступки — голосом и в обмен на шаг к сделке. Письменно — только если клиент не берёт трубку / просит писать, и только в финальных касаниях пути, когда другие варианты исчерпаны (владелец 15.11). Здесь убрать цифру скидки, оставить вопрос о бюджете или предложить созвон.';
 const DISCOUNT_EXCHANGE_FIX = 'Скидка — только в обмен на шаг к сделке (правило 77): привязать к условию — «если оплачиваете / заключаем договор на этой неделе — тогда …». Просто так скидку не даём.';
 const EXCHANGE_RE = /если[^.!?\n]{0,60}(оплат|предоплат|договор|заключ|счёт|счет|запуска|заход|оформля|в работу)|(при|за) (оплат|предоплат)|в обмен/i;
+const MESSENGER_RE = /whatsapp|telegram|мессендж|вотсап|ватсап|tg|телеграм|viber|max(?![a-z])/i;
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
 // Деньги — только звонок или Zoom (владелец 14.11). В письменном касании — не обсуждать
@@ -313,6 +314,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const moscowOrUnknown = !NOT_MOSCOW_RE.test(String(sourceText || ''));
   const byN = new Map((plan || []).map((p) => [p.touchpoint_number, p]));
   const lastN = (plan || []).find((p) => p.last_chance)?.touchpoint_number;
+  const inDorogo = (plan || []).some((x) => (x.scenarios || []).includes('dorogo'));
   const zoomNs = new Set((plan || []).filter((p) => /zoom|зум/i.test(p.channel || '')).map((p) => p.touchpoint_number));
   const out = [];
   const repeats = repeatedArguments(messages, sentHistory, plan);
@@ -342,6 +344,10 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
       if (!/(подготовлю|пришлю|уточню|вернусь|посчитаю|отправлю|покажу|обещал[аи]?|сказал[аи]?,? что (уточн|верн|пришл|подготов))/i.test(before))
         fixes.push('«Как обещала» — а обещания в переписке и прошлых касаниях нет (выдумка). Повод — от себя: «подготовила варианты под ваш бюджет».');
     }
+    // «Дорого» в переписке — и в остальных касаниях-сообщениях этого плана (живой тест 18.11, ход 3: «одна страница
+    // для Марата» — перечень «что входит / почему выгоднее»).
+    if (inDorogo && !(p?.scenarios || []).includes('dorogo') && MESSENGER_RE.test(channel) && require('./scenarios').longJustification(t))
+      fixes.push(require('./scenarios').DOROGO_WRITTEN_FIX);
     for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);

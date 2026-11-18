@@ -23,6 +23,10 @@ check('владелец 17.11 (файл 26, п. 8): письменное «ср�
   assert.ok(/FOLLOW-UP/.test(hows(2)), hows(2));
   assert.ok(!/FOLLOW-UP/.test(hows(4)));
 });
+check('владелец 18.11: звонок без письменного касания следом — итог после звонка строкой в сценарии', () => {
+  const calls = plan.filter((p) => /звонок/i.test(p.channel) && !p.last_chance);
+  assert.ok(calls.some((c) => /FOLLOW-UP после звонка/.test([].concat(c.how || []).join(' '))), JSON.stringify(calls.map((c) => c.how)));
+});
 check('даты отправки по рабочему календарю; «сразу после» — тот же день; условное — без даты', () => {
   assert.equal(plan[0].send_date, '2026-11-13');
   assert.equal(plan[1].send_date, '2026-11-13');
