@@ -112,16 +112,26 @@ async function judge(sit, sets, diagnosticSummary) {
     const p = (plan || []).find((q) => q.touchpoint_number === Number(t.touchpoint_number));
     return p?.facts?.status_on_send_day ? { ...t, srok_na_den_otpravki: `${p.facts.status_on_send_day}; готово при старте в день отправки: ${p.facts.permanent_ready_if_start_that_day}` } : t;
   });
-  const setOf = (x) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', touch_plan: planOf(x.plan), touches: withFacts(x.touches, x.plan) } : null);
+  // Прицельный прогон 18.11: основной судья не получал `voice_available_now` и вилку (их видел только судья грубых
+  // ошибок) — «деньги письменно» клиентке без телефона и «вилка — выдумка» в «Гибкости» (7 ложных «нет»).
+  const { voiceBlocked } = require(path.join(ROOT, 'engine', 'voice.js'));
+  const { priceGuide } = require(path.join(ROOT, 'engine', 'priceGuide.js'));
+  const convAt = (k) => [sit.first, ...(sit.steps || []).slice(0, k).map((x) => x.text)].join('\n\n');
+  const codeFacts = (conv) => {
+    const pg = priceGuide(sit.deal, conv);
+    return { voice_available_now: !voiceBlocked(conv), price_guide: pg ? { client_range: pg.client_range } : null };
+  };
+  const setOf = (x, conv) => (x && x.touches?.length ? { path_mode: x.plan?.[0]?.path_mode || 'full', ...codeFacts(conv), touch_plan: planOf(x.plan), touches: withFacts(x.touches, x.plan) } : null);
   const user = JSON.stringify({
     situation: sit.title, today: process.env.KLOUZER_TODAY, deal: sit.deal,
     conversation: sit.steps
       ? [sit.first, ...sit.steps.map((x) => `--- ${x.label} (сегодня ${x.today}) ---\n${x.text}`)].join('\n\n')
       : [sit.first, sit.reply].filter(Boolean).join('\n\n--- ответ клиента после касаний ---\n\n'),
     what_this_situation_checks: sit.expect, diagnostic_summary: diagnosticSummary,
-    before_reply: setOf(sets.before), after_reply: setOf(sets.after),
+    before_reply: setOf(sets.before, convAt(0)),
+    after_reply: setOf(sets.after, sit.steps ? convAt(sit.steps.length) : [sit.first, sit.reply].filter(Boolean).join('\n\n')),
     // Многоуровневая сделка: промежуточные шаги (после каждой дописки менеджера).
-    intermediate_stages: (sets.stages || []).map((x) => ({ after: x.label, today: x.today, what_this_step_checks: x.expect || [], ...setOf(x) }))
+    intermediate_stages: (sets.stages || []).map((x, i) => ({ after: x.label, today: x.today, what_this_step_checks: x.expect || [], ...setOf(x, convAt(i + 1)) }))
   }, null, 1);
   const startedAt = Date.now();
   const r = await client.messages.create({ model, max_tokens: 9000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
