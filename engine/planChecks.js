@@ -364,7 +364,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
       if (again.length && !/\[\s*если|если (ещё|еще) не|если не успели|если не прислал/i.test(t))
         fixes.push(`Касание после ответа клиента снова просит то, о чём уже просили (${again.join(', ')}). Исходить из ответа: «[если прислал(а) — спасибо, … / если нет — …]», не переспрашивать.`);
     }
-    for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
+    for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice, source: sourceText })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
     if (require('./touchPlan').JUST_PRICE_RE.test(String(sourceText || '').slice(-1500)) && NO_ZOOM_RE.test(t)) fixes.push(NO_ZOOM_FIX);
@@ -443,7 +443,7 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
       fixes.push('Итог после звонка — с пустыми местами в скобках. Владелец 18.11: менеджер копирует и отправляет — два готовых текста («если договорились: …» с днём и временем этого звонка / «если не договорились: …»), без квадратных скобок.');
     // Владелец 18.11 («Гараж 77»): «Разница в том, что [конкретное отличие]», «[состав из КП]» — пустое место там, где
     // ответ известен: состав — в КП сделки, отличия — факты компании (файл 32: 3 причины через «в отличие от…»).
-    const hole = t.match(/\[(конкретн[а-яё]* (отлич|разниц|преимущ|выгод)|отлич[а-яё]*|разниц[а-яё]*|преимуществ[а-яё]*|состав (из )?кп|что входит)[^\]]{0,60}\]/i);
+    const hole = t.match(/\[(конкретн[а-яё]*|отлич[а-яё]*|разниц[а-яё]*|преимуществ[а-яё]*|состав (из )?кп|что входит|\d[–-]\d пункт[а-яё]*|пункт[а-яё]* под|иде[яиюей] |риск(и)?\]|что выяснили)[^\]]{0,80}\]/i);
     if (hole) fixes.push(`Пустое место «${hole[0]}» — ответ известен: состав — из КП сделки, отличия — факты компании (3 причины через «в отличие от…, иначе…», файл 32). Написать текстом.`);
     if (VARIANTS_CLAIM_RE.test(t) && !VARIANTS_SRC_RE.test(String(sourceText || ''))) fixes.push('«Два / оба варианта» — в данных сделки вариантов нет (КП один). Не утверждать, что варианты уже готовы: «подготовлю 2 варианта — [какие]» или про один вариант из КП.');
     // 902-ПП — только Москва; «есть пара моментов» — только реальные, из данных.
