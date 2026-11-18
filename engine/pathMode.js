@@ -78,7 +78,7 @@ function switchPathMode({ deal, baseInput }, mode) {
   const diagnostic = { ...(deal.last_diagnostic_output || {}), _path_mode: mode };
   const strategy = { ...deal.last_strategy_output };
   const plan = buildTouchPlan(strategy, baseInput.timeline, baseInput.today, diagnostic.scores,
-    { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent, mode, dealSize: deal.deal_size, soprano: diagnostic.soprano });
+    { source: baseInput.materials?.source_materials?.text, client: deal.client, daysSilent: deal.days_silent, mode, dealSize: deal.deal_size, soprano: diagnostic.soprano, triggers: diagnostic.client_triggers });
   if (plan) strategy.touch_plan = plan;
   return { nextState: 'STRATEGY_SELECTION', output: { diagnostic_output: diagnostic, strategy_output: strategy } };
 }

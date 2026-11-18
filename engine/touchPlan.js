@@ -19,7 +19,7 @@ const { addWorkingDays, humanDate, computeTimeline, isWorkingDay } = require('./
 const { compactNotes } = require('./notes');
 // Тексты подсказок и целей — справочник engine/notesText.js (аудит 18.11).
 const {
-  PRODUCTION_GOAL, PRODUCTION_BIG_NOTE, LDPR_NOTE, ZOOM_MEETING_NOTE, ZOOM_MOSCOW_NOTE, ZOOM_INVITE_NOTE, FOLLOWUP_NOTE, FOLLOWUP_IN_CALL_NOTE, FOLLOWUP_REAL_NOTE, KRUG_IDEA_NOTE, KRUG_IDEA_FAR_NOTE, SOPRANO_Q, PRODUCTION_WHO_NOTE, TRUST_SHORT, TRUST_TOOLS, LAST_CHANCE_SHORT, LAST_CHANCE_GOAL
+  PRODUCTION_GOAL, PRODUCTION_BIG_NOTE, LDPR_NOTE, ZOOM_MEETING_NOTE, ZOOM_MOSCOW_NOTE, ZOOM_INVITE_NOTE, FOLLOWUP_NOTE, FOLLOWUP_IN_CALL_NOTE, FOLLOWUP_REAL_NOTE, KRUG_IDEA_NOTE, KRUG_IDEA_FAR_NOTE, SOPRANO_Q, PRODUCTION_WHO_NOTE, TRUST_SHORT, TRUST_TOOLS, LAST_CHANCE_SHORT, LAST_CHANCE_GOAL, ARGUMENT_ANGLES
 } = require('./notesText');
 const { MOSCOW_RE, NOT_MOSCOW_RE } = require('./geo');
 
@@ -104,6 +104,43 @@ function noteSoprano(steps, soprano, source) {
     const pick = [...mine, ...pool.filter((k) => !mine.includes(k))].slice(0, limit);
     pick.forEach((k) => used.add(k));
     addHow(x, ` СОПРАНО (владелец 18.11): вплести ${pick.length > 1 ? `до ${pick.length} вопросов` : 'один вопрос'} по несобранным блокам — ${pick.map((k) => `${SOPRANO_Q[k].name}: ${SOPRANO_Q[k].q}`).join('; ')}. Аккуратно и созидательно — как забота о результате, вытекая из разговора, своими словами; ${voice ? 'после каждого — [выслушать]' : 'один вопрос в конце сообщения'}; клиент уже ответил — не переспрашивать.`);
+  }
+  return steps;
+}
+// «План как договор» (владелец 18.11): у каждого касания — ОДИН угол довода, без повторов смысла между касаниями
+// одному адресату. Порядок выбора: триггеры клиента из диагностики (ведущий первым) → критерий касания → остальное.
+// Не трогаем: кружок (интрига), последний шанс, касания со сценарием (у сценария свой ход), приглашение на производство
+// (его довод — «своими глазами»). Инструмент доверия касания = его угол (второй не добавляем).
+function assignArguments(steps, triggers, source) {
+  const order = (Array.isArray(triggers) ? triggers : []).map((t) => String(t?.trigger || t || '').trim()).filter(Boolean);
+  const moscowKnown = MOSCOW_RE.test(String(source || '')) || /обл|подмосков|мытищ|химк|люберц|балаших|подольск|королев|королёв|красногорск|одинцов/i.test(String(source || ''));
+  const usedBy = new Map(); // адресат → Set(key)
+  const who = (x) => String(x.recipient || '').split(/[\s(,→]/)[0].toLowerCase() || '—';
+  const used = (x) => { if (!usedBy.has(who(x))) usedBy.set(who(x), new Set()); return usedBy.get(who(x)); };
+  const byTrust = (i) => ARGUMENT_ANGLES.find((a) => a.trust === i);
+  // Сначала — что уже занято: инструменты доверия и приглашения на производство.
+  for (const x of steps) {
+    if (Number.isInteger(x.trust_idx) && byTrust(x.trust_idx)) { x.argument = byTrust(x.trust_idx).key; used(x).add(x.argument); }
+    if (x.production_meeting || (PRODUCTION_RE.test(`${x.goal || ''} ${x.key_message || ''}`) && INVITE_RE.test(`${x.goal || ''} ${x.key_message || ''}`))) { x.argument = 'see_yourself'; used(x).add('see_yourself'); }
+  }
+  for (const x of steps) {
+    if (x.argument || x.lastChance || /кружок|видео/i.test(String(x.channel || '')) || (x.scenarios || []).length) continue;
+    const u = used(x);
+    const ok = (a) => !u.has(a.key) && (a.key !== 'law' || moscowKnown);
+    const crit = [x.criterion, ...(x.also || [])].filter(Boolean);
+    const pick = order.map((t) => ARGUMENT_ANGLES.find((a) => a.trigger === t && ok(a) && a.crit.some((c) => crit.includes(c))) || ARGUMENT_ANGLES.find((a) => a.trigger === t && ok(a))).find(Boolean)
+      || ARGUMENT_ANGLES.find((a) => ok(a) && a.crit.some((c) => crit.includes(c)))
+      || ARGUMENT_ANGLES.find(ok);
+    if (!pick) continue;
+    x.argument = pick.key; u.add(pick.key);
+  }
+  // Подсказка писателю: свой угол + чужие (не повторять).
+  for (const x of steps) {
+    // у инструмента доверия — своя подсказка; у сценария — свой ход (в «Почему мы» производство уже есть)
+    if (!x.argument || Number.isInteger(x.trust_idx) || (x.scenarios || []).length) continue;
+    const me = ARGUMENT_ANGLES.find((a) => a.key === x.argument);
+    const others = [...used(x)].filter((k) => k !== x.argument).map((k) => `«${ARGUMENT_ANGLES.find((a) => a.key === k)?.name}»`);
+    addHow(x, `ДОВОД ЭТОГО КАСАНИЯ (договор плана): «${me.name}» — ${me.meaning}. Своими словами, через его ситуацию; один довод, не перечень.${others.length ? ` Доводы других касаний (${others.join(', ')}) здесь не повторять ни словами, ни смыслом.` : ''}`);
   }
   return steps;
 }
@@ -198,6 +235,7 @@ function diversifyTrust(steps, source) {
     x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия: ${TRUST_SHORT[i]}`;
     addHow(x, `Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`);
     x.trust_tool = tool;
+    x.trust_idx = i;
   }
   return steps;
 }
@@ -634,6 +672,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });
   noteSoprano(steps, context.soprano, context.source);
+  assignArguments(steps, context.triggers, context.source);
   // Экзамен 17.11 (прогоны 4–5): стратег ставит цель «согласовать 650 через полномочия» (650 — цена клиента) →
   // writer пишет «650 — точно не смогу», а через фразу «по цене 650». Цель на цену клиента код переписывает.
   const ask = String(context.source || '').match(/сделаете (?:на |за )?(\d{2,3})(?:[ \u00a0]?(?:000|тыс))?/i);

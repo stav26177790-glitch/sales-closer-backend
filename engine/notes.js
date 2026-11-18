@@ -31,6 +31,7 @@ const KINDS = [
   { key: 'production_who', re: /^Встречу на производстве проводит/, prio: 5 },
   { key: 'production_big', re: /^Личная встреча с менеджером/, prio: 4 },
   { key: 'trust_tool', re: /^Инструмент доверия этого касания/, prio: 4 },
+  { key: 'argument', re: /^ДОВОД ЭТОГО КАСАНИЯ/, prio: 7, keep: true },
   { key: 'ldpr', re: /^ЛДПР/, prio: 3 },
   { key: 'soprano', re: /^СОПРАНО/, prio: 2 },
   { key: 'pre', re: /^ПРЕДВОСХИЩЕНИЕ/, prio: 1 }

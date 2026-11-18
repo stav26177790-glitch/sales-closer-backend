@@ -95,4 +95,23 @@ check('полный прогон 18.11 («Зерно»): не успеваем �
   assert.ok(!plan2[0].facts.honesty, 'успеваем — без пометки');
 });
 
+check('план как договор: у касаний разные углы довода; первым — ведущий триггер клиента; кружок и последний шанс — без угла', () => {
+  const strat = { touchpoint_sequence: [
+    { number: 1, day: 0, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Олег', goal: 'Визуализация', criterion: 'ОП' },
+    { number: 2, day: 2, kind: 'экспертное', channel: 'Звонок', recipient: 'Олег', goal: 'Разбор КП', criterion: 'ФВ' },
+    { number: 3, day: 4, kind: 'эмпатичное', channel: 'Кружок', recipient: 'Олег', goal: 'Интрига', criterion: 'Д' },
+    { number: 4, day: 6, kind: 'экспертное', channel: 'Звонок', recipient: 'Олег', goal: 'Слот', criterion: 'ЗС' },
+    { number: 5, day: 9, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Олег', goal: 'Финально', criterion: 'ЗС' }
+  ], must_include: [] };
+  console.log = () => {};
+  const plan = buildTouchPlan(strat, null, '2026-11-19', null, { source: 'Кафе, Подольск. КП 290 000 ₽.', mode: 'full', triggers: [{ trigger: 'Тщеславие' }, { trigger: 'Удобство' }] });
+  console.log = log;
+  const args = plan.map((p) => (p.how.match(/ДОВОД ЭТОГО КАСАНИЯ \(договор плана\): «([^»]+)»/) || [])[1] || null);
+  const named = args.filter(Boolean);
+  assert.equal(new Set(named).size, named.length, JSON.stringify(args));
+  assert.ok(named.length >= 2, JSON.stringify(args));
+  assert.equal(args[0], 'выглядит достойно', JSON.stringify(args)); // ведущий триггер — Тщеславие
+  plan.forEach((p, i) => { if (/кружок/i.test(p.channel) || p.last_chance) assert.equal(args[i], null, `${p.channel}: ${args[i]}`); });
+});
+
 console.log(`notes: ${n} проверок пройдено`);
