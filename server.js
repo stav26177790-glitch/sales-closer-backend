@@ -75,6 +75,12 @@ app.get('/api/ping-db', async (req, res) => {
 });
 
 // Список сделок менеджера
+// Справочник методик для менеджеров (владелец 18.11): страницы handbook/*.md.
+app.get('/api/handbook', requireManager, (req, res) => {
+  try { res.json({ pages: require('./engine/handbook').handbookPages() }); }
+  catch (e) { res.status(500).json({ error: 'Справочник не загрузился' }); }
+});
+
 app.get('/api/deals', requireManager, async (req, res) => {
   try {
     const deals = await db.listDeals(req.managerId);
