@@ -11,7 +11,7 @@
  *   LLM_PROVIDER     — anthropic | deepseek (по умолчанию anthropic)
  *   DEEPSEEK_API_KEY — ключ DeepSeek (для deepseek); ANTHROPIC_API_KEY — для anthropic
  *   LLM_MODEL_MAIN   — модель «основных» агентов (по умолчанию: claude-sonnet-4-6 / deepseek-v4-pro)
- *   LLM_MODEL_SMALL  — модель «простых» агентов: memory, advisor, intent_classifier
+ *   LLM_MODEL_SMALL  — модель «простых» агентов: memory, advisor
  *                      (по умолчанию: claude-haiku-4-5 / deepseek-v4-flash)
  *   LLM_THINKING     — enabled — включить режим рассуждений DeepSeek (по умолчанию выключен:
  *                      дешевле и быстрее; включать — только после сравнения прогоном набора)

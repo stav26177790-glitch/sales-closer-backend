@@ -1,9 +1,8 @@
 /**
  * engine/intent.js — что имел в виду менеджер: одобрение, правка, вопрос,
- * да/нет, команда завершения. Пока решают списки фраз; LLM-классификатор
- * работает в тени (logIntentClassificationShadow) и только логирует.
+ * да/нет, команда завершения. Решают списки фраз (аудит 18.11: «теневой» LLM-классификатор убран —
+ * вызывался на каждое сообщение менеджера и только писал расхождения в лог, который никто не читал).
  */
-const { callAgent } = require('../agentRunner');
 
 // Раньше в системе не было НИКАКОГО способа для менеджера сказать "закончи
 // сессию прямо сейчас" — фраза вроде "заверши сессию" просто уходила как
@@ -144,41 +143,6 @@ function isNegativeResponse(text) {
   return false;
 }
 
-// Блок 3 (сессия 3, ТЕНЕВОЙ РЕЖИМ) — маппинг категорий LLM-классификатора
-// на то, что фактически решил regex в текущей точке кода. Порядок
-// проверки должен зеркалить порядок проверок в самом COMPOSING-кейсе:
-// isPureApproval проверяется раньше isManagerQuestion, поэтому если
-// сообщение прошло как approval — question уже не имеет значения.
-function regexIntentLabel(isApproval, isQuestion) {
-  if (isApproval) return 'approval';
-  if (isQuestion) return 'question';
-  return 'revision'; // всё остальное сейчас уходит в composer как правка
-}
-
-
-// Fire-and-forget: НЕ await'ится в вызывающем коде, чтобы не добавлять
-// задержку к ответу менеджеру. Любая ошибка (сеть, парсинг) молча
-// проглатывается здесь же — это диагностический слой, а не часть
-// критического пути, он не должен иметь возможности уронить сессию.
-function logIntentClassificationShadow(managerInput, isApproval, isQuestion, dealId) {
-  const regexLabel = regexIntentLabel(isApproval, isQuestion);
-  callAgent('intent_classifier', { text: managerInput }, 200)
-    .then((result) => {
-      const llmLabel = result?.intent_classifier_output?.intent || result?.intent;
-      if (!llmLabel) return; // сломанный/неожиданный ответ — не наш критический путь, просто пропускаем
-      if (llmLabel !== regexLabel) {
-        console.warn(
-          `[intent-shadow] Расхождение (сделка: ${dealId || 'unknown_deal'}): ` +
-          `сообщение "${managerInput}" — regex решил "${regexLabel}", LLM решила "${llmLabel}". ` +
-          `Реальное поведение сейчас определяет regex (теневой режим, ничего не меняется автоматически).`
-        );
-      }
-    })
-    .catch((err) => {
-      console.warn(`[intent-shadow] Не удалось получить теневую классификацию (сделка: ${dealId || 'unknown_deal'}): ${err.message}`);
-    });
-}
-
 module.exports = {
   isGoAhead,
   isEndSessionCommand,
@@ -186,5 +150,4 @@ module.exports = {
   isManagerQuestion,
   isAffirmativeResponse,
   isNegativeResponse,
-  logIntentClassificationShadow,
 };

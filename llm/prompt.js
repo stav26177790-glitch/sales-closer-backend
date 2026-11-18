@@ -59,11 +59,9 @@ function loadIndustryKnowledge(industry, { skip = [] } = {}) {
 // 902-ПП — правила города Москвы (13 тыс. символов). Писателю (владелец 18.11: «да, если будет оптимизация и
 // ничего не сломается») — только если сделка не явно за пределами Москвы. Город не ясен — грузим, как раньше.
 // Остальным агентам — как раньше (стратегия ставит подсказки 902-ПП сама, критику нужен для проверки фактов).
-const MSK_RE = /москв|мск([^а-яё]|$)|метро(?![а-яё])|м\.\s?[А-ЯЁ]|902-?пп/i;
 function clearlyNotMoscow(inputData) {
-  const { NOT_MOSCOW_RE } = require('../engine/touchPlan');
   const text = `${JSON.stringify(inputData?.deal || {})} ${inputData?.materials?.source_materials?.text || ''}`;
-  return !MSK_RE.test(text) && NOT_MOSCOW_RE.test(text);
+  return require('../engine/geo').clearlyNotMoscow(text);
 }
 function industrySkip(agentName, inputData) {
   return agentName === 'writer' && inputData && clearlyNotMoscow(inputData) ? ['signage_902pp.md'] : [];

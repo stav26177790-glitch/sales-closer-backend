@@ -63,10 +63,6 @@ function createRunner(script) {
     leftovers: () => Object.entries(queues).filter(([, q]) => q.length).map(([a, q]) => `${a}: ${q.length}`),
     api: {
       async callAgent(agentName, input, maxTokens) {
-        // Теневой классификатор вызывается в фоне и не влияет на поведение.
-        if (agentName === 'intent_classifier') {
-          return { intent_classifier_output: { intent: 'other', confidence: 'low' } };
-        }
         calls.push({ agent: agentName, maxTokens: maxTokens ?? null, input });
         const q = queues[agentName];
         if (!q || !q.length) {

@@ -429,7 +429,8 @@ async function runCritic(baseInput, deal, composerOutput, onlyNums) {
   let out;
   try {
     out = await callAgentSafe('critic', {
-      today: baseInput.today, deal: baseInput.deal, conversation: src, kp_price: kp ? kp[1] : null, client_price_ask: ask ? ask[1] : null,
+      today: baseInput.today, deal: baseInput.deal, conversation: src, kp_price: kp ? kp[1] : null,
+      price_guide: baseInput?.price_guide?.client_range ? { client_range: baseInput.price_guide.client_range } : null, client_price_ask: ask ? ask[1] : null,
       voice_available_now: !voiceBlocked(src), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно', touches
     }, 3000);
   } catch (e) { console.warn(`[critic] ошибка: ${e.message}`); return []; }

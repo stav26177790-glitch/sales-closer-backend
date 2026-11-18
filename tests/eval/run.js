@@ -157,7 +157,8 @@ async function criticalScan(sit, label, today, conversation, x) {
   const { voiceBlocked } = require(path.join(ROOT, 'engine', 'voice.js'));
   const { managerGender } = require(path.join(ROOT, 'engine', 'planChecks.js'));
   const g = managerGender(conversation);
-  const user = JSON.stringify({ today, kp_price: kp ? kp[1] : null, deal: sit.deal, conversation_so_far: conversation,
+  const pg = require(path.join(ROOT, 'engine', 'priceGuide.js')).priceGuide(sit.deal, conversation);
+  const user = JSON.stringify({ today, kp_price: kp ? kp[1] : null, price_guide: pg ? { client_range: pg.client_range } : null, deal: sit.deal, conversation_so_far: conversation,
     voice_available_now: !voiceBlocked(conversation), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно',
     path_mode: x.plan?.[0]?.path_mode || 'full', touches: withFactsC(x.touches, x.plan) }, null, 1);
   const startedAt = Date.now();

@@ -14,21 +14,8 @@ const { CONFIG } = require('../config');
 const { composeUntilReady, channelKey } = require('../autoCompose');
 const { modeCommand, rebuildMode, switchPathMode } = require('../pathMode');
 const {
-  isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse, logIntentClassificationShadow
+  isPureApproval, isManagerQuestion, isAffirmativeResponse, isNegativeResponse
 } = require('../intent');
-
-// Касание длиннее лимита канала (для старых тестов и внешних вызовов).
-function validateMessageLength(composerOutput) {
-  const messages = composerOutput?.composer_output?.messages || [];
-  const violations = [];
-  messages.forEach((msg, i) => {
-    const maxLen = CONFIG.MAX_MESSAGE_LENGTH[channelKey(msg.channel)];
-    if (maxLen && msg.body?.length > maxLen) {
-      violations.push({ touchpoint: i + 1, channel: msg.channel, current: msg.body.length, max: maxLen });
-    }
-  });
-  return { valid: violations.length === 0, violations };
-}
 
 // Результат автоцикла → поля хода (advance сохраняет их в сделку).
 function composedOutput(res, extra = {}) {
@@ -146,10 +133,8 @@ async function composing(ctx) {
   const modeCmd = modeCommand(managerInput);
   if (ctx.opts?.path && modeCmd && deal.last_strategy_output) return switchPathMode(ctx, modeCmd);
   if (ctx.opts?.path && !isPureApproval(managerInput) && isNewFacts(managerInput)) return rebuildPath(ctx);
-  // Теневой режим: сравниваем решение списков фраз с LLM-классификатором.
-  logIntentClassificationShadow(managerInput, isPureApproval(managerInput), isManagerQuestion(managerInput), deal.id);
   if (isPureApproval(managerInput)) return accept(ctx);
   return isManagerQuestion(managerInput) ? managerQuestion(ctx) : managerEdit(ctx);
 }
 
-module.exports = { channelKey, composing, validateMessageLength, composedOutput, isNewFacts };
+module.exports = { channelKey, composing, composedOutput, isNewFacts };

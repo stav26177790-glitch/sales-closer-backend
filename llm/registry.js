@@ -18,7 +18,7 @@ const { main: SONNET, small: HAIKU } = providerConfig().models;
 // Включено для агентов, которые в одной сессии вызываются повторно:
 //   composer — доработки и правки менеджера; reviewer — каждое «ок»;
 //   advisor — вопросы менеджера по касаниям.
-// strategy и memory вызываются раз за сессию, planner и intent_classifier
+// strategy и memory вызываются раз за сессию, planner
 // короче минимума для кэша — им кэш только добавил бы 25% к цене.
 // Решение пересмотреть по логам «[agentRunner] ←» (поле cache) через 1–2 недели.
 const AGENTS = {
@@ -101,10 +101,6 @@ const AGENTS = {
       '07_decision_authority.md', '23_lpr_tactics.md', '24_client_triggers.md',
       '26_perepiska_metodika.md', '28_vozrazheniya_trening.md', '29_zoom.md', '30_offer.md', '31_negative_phase.md', '32_otstroyka.md', '33_podumayu_predvoskhishchenie.md', '34_chto_poluchaet_klient.md'
     ]
-  },
-  intent_classifier: {
-    model: HAIKU, temperature: 0.1, industryCases: false, cache: false,
-    knowledge: []
   }
 };
 
