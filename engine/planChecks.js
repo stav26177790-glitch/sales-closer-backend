@@ -49,6 +49,13 @@ const DISCOUNT_FIX = 'Скидку цифрой письменно не даём
 const DISCOUNT_EXCHANGE_FIX = 'Скидка — только в обмен на шаг к сделке (правило 77): привязать к условию — «если оплачиваете / заключаем договор на этой неделе — тогда …». Просто так скидку не даём.';
 const EXCHANGE_RE = /если[^.!?\n]{0,60}(оплат|предоплат|договор|заключ|счёт|счет|запуска|заход|оформля|в работу)|(при|за) (оплат|предоплат)|в обмен/i;
 const MESSENGER_RE = /whatsapp|telegram|мессендж|вотсап|ватсап|tg|телеграм|viber|max(?![a-z])/i;
+const REQUEST_RE = /(пришлите|пришлёте|пришлете|скиньте|скинете|отправьте|подскажите|напишите|нужн[оаы]? (только )?)[^.!?\n]{0,80}/gi;
+const REQ_ITEMS = { 'фото фасада': /фото/i, 'текст вывески': /текст/i, 'размеры': /размер|длин|высот/i, 'логотип': /логотип/i, 'адрес': /адрес/i, 'бюджет': /бюджет/i };
+function requestedItems(text) {
+  const out = new Set();
+  for (const m of String(text || '').replace(/\[[^\]]*\]/g, ' ').matchAll(REQUEST_RE)) for (const [k, re] of Object.entries(REQ_ITEMS)) if (re.test(m[0])) out.add(k);
+  return [...out];
+}
 const textOf = (m) => [m?.body, m?.attachment?.content].filter(Boolean).join('\n');
 
 // Деньги — только звонок или Zoom (владелец 14.11). В письменном касании — не обсуждать
@@ -348,6 +355,15 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     // для Марата» — перечень «что входит / почему выгоднее»).
     if (inDorogo && !(p?.scenarios || []).includes('dorogo') && MESSENGER_RE.test(channel) && require('./scenarios').longJustification(t))
       fixes.push(require('./scenarios').DOROGO_WRITTEN_FIX);
+    // Живой тест 18.11: касание «только если ответила на касание 1» снова просит фото и текст, о которых просили в
+    // касании 1. После ответа — исходить из ответа: «[если прислала — …; если нет — …]», а не переспрашивать.
+    if (p?.condition && /ответил|ответит|прислал|пришл[её]т|дал[аи]?|напишет|написал/i.test(String(p.condition))) {
+      const asked = new Set();
+      (messages || []).slice(0, i).forEach((pm) => { for (const k of requestedItems(textOf(pm))) asked.add(k); });
+      const again = requestedItems(t).filter((k) => asked.has(k));
+      if (again.length && !/\[\s*если|если (ещё|еще) не|если не успели|если не прислал/i.test(t))
+        fixes.push(`Касание после ответа клиента снова просит то, о чём уже просили (${again.join(', ')}). Исходить из ответа: «[если прислал(а) — спасибо, … / если нет — …]», не переспрашивать.`);
+    }
     for (const f of require('./scenarios').checkScenario(t, p?.scenarios, { channel: String(m?.channel || p?.channel || ''), voiceOk: !noVoice })) fixes.push(f);
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
