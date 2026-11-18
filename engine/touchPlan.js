@@ -84,6 +84,7 @@ function noteSoprano(steps, soprano, source) {
   if (!missing.length) return steps;
   const tailText = String(source || '').slice(-1200);
   const irritated = /раздраж|надоел|отнимаете|!!!|без воды|некогда мне|хамит|злится/i.test(tailText);
+  const voiceOff = require('./voice').voiceBlocked(source);
   const used = new Set();
   for (const x of steps) {
     if (x.lastChance || (x.scenarios || []).includes('negative')) continue;
@@ -94,8 +95,11 @@ function noteSoprano(steps, soprano, source) {
     const busy = (x.scenarios || []).length > 0;
     if (busy && (!voice || irritated)) continue;
     const limit = busy ? 1 : voice ? (irritated ? 1 : 3) : 1;
-    const pool = missing.filter((k) => !used.has(k));
-    if (!pool.length) break;
+    // Полный прогон 18.11: вопрос о бюджете («в какую сумму…», «если по бюджету не сойдётся…») код ставил и в переписку —
+    // судья: «деньги письменно при доступном голосе» (3 из 22). Деньги — голосом: такие блоки — только звонку / Zoom.
+    const moneyQ = (k) => /сумм|бюджет|цен|стоимост/i.test(SOPRANO_Q[k].q);
+    const pool = missing.filter((k) => !used.has(k) && (voice || voiceOff || !moneyQ(k)));
+    if (!pool.length) continue;
     const mine = pool.filter((k) => SOPRANO_Q[k].crit.includes(x.criterion));
     const pick = [...mine, ...pool.filter((k) => !mine.includes(k))].slice(0, limit);
     pick.forEach((k) => used.add(k));
