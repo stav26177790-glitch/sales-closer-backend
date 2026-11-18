@@ -62,6 +62,10 @@ function rateFor(bands, h) {
 }
 const pick = (table, w) => (table.find(([max]) => w <= max) || table[table.length - 1])[1];
 const round1000 = (x) => Math.round(x / 1000) * 1000;
+// Вилка клиенту — круглыми цифрами (владелец 18.11: «ориентир, округляй цифры в диапазоне»): шаг 1 / 5 / 10 тыс.
+const stepOf = (x) => (x < 30000 ? 1000 : x < 100000 ? 5000 : 10000);
+const roundDown = (x) => Math.floor(x / stepOf(x)) * stepOf(x);
+const roundUp = (x) => Math.ceil(x / stepOf(x)) * stepOf(x);
 
 /** Параметры из текста сделки: длина вывески (см), высота букв (см), текст вывески, табличка, короб, площадь. */
 function parseParams(text) {
@@ -158,7 +162,7 @@ function priceGuide(deal, sourceText = '') {
     assumptions,
     coef,
     x: round1000(x),
-    client_range: { from: round1000(x * RANGE.low), to: round1000(x * RANGE.high) },
+    client_range: { from: roundDown(x * RANGE.low), to: roundUp(x * RANGE.high) },
     torg_floor: round1000(cost * COEF.floor),
     how_to_use: 'Вилку клиенту — «от … до … ₽ с монтажом»: ориентир, «точную цену дам, когда посмотрю ваш фасад / макет» (владелец 18.11: точная цена — после экспертизы менеджера). Себестоимость, коэффициент и нижнюю границу торга клиенту НЕ называть. torg_floor — для менеджера: ниже неё цену не опускать (коэффициент 1,6). Если в сделке уже есть цена КП — клиенту звучит она, а не вилка.'
   };

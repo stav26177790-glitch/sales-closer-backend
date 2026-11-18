@@ -9,8 +9,8 @@ check('живой тест 18.11 «Гибкость»: 3 м световых б�
     'Нужна световая вывеска на студию, длина примерно 3 метра + табличка у входа. Сколько стоит?');
   assert.equal(g.coef, 1.8);
   assert.ok(g.x > 50000 && g.x < 80000, String(g.x));
-  assert.equal(g.client_range.from, Math.round(g.x * 0.8 / 1000) * 1000);
-  assert.ok(g.client_range.to >= g.x * 1.39);
+  assert.ok(g.client_range.from <= g.x * 0.8 && g.client_range.from % 5000 === 0, String(g.client_range.from));
+  assert.ok(g.client_range.to >= g.x * 1.4 && g.client_range.to % 5000 === 0, String(g.client_range.to));
   assert.ok(g.torg_floor < g.x);
 });
 check('металл — коэффициент 2; высота и текст — без допущения о длине', () => {
