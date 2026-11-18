@@ -86,7 +86,9 @@ const AGENTS = {
   editor: {
     // cache: true (14.11) — за путь вызывается до 2 раз подряд.
     model: SONNET, temperature: 0.3, industryCases: false, industryKnowledge: true, cache: true,
-    knowledge: []
+    // Разбор 18.11: замечания «отстройка / на чём экономят / заполнить пустое место» редактор чинить не мог —
+    // у него не было файла отстройки, пустые места оставались. Даём только его (короткий промпт сохраняется).
+    knowledge: ['32_otstroyka.md']
   },
   memory: {
     model: HAIKU, temperature: 0.1, industryCases: false, cache: false,

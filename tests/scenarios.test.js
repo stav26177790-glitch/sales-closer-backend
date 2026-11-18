@@ -90,4 +90,9 @@ check('«Почему мы»: клиент не поверил «ОТК, гар�
   assert.equal(checkScenario(bad, ['why_us'], { source: src }).length, 1);
   assert.equal(checkScenario(good, ['why_us'], { source: src }).length, 0);
 });
+check('разбор 18.11: «раздражённо: очки втираете, у всех одинаково» — «Почему мы» без конфликтующего «Негатива»', () => {
+  const src = '[Сообщение менеджера 2]\nСергей Петрович (перезвонил, раздражённо): у всех всё одинаково, вы мне очки втираете!!!';
+  const got = ids(src);
+  assert.ok(got.includes('why_us') && !got.includes('negative'), JSON.stringify(got));
+});
 console.log(`scenarios: ${n} проверок пройдено`);
