@@ -1,0 +1,2144 @@
+{
+ "today": "2026-11-18",
+ "calls": [
+  {
+   "situation": 24,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1912,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2688,
+    "output_tokens": 422,
+    "service_tier": "standard"
+   },
+   "ms": 5482,
+   "cost": 0.004313232
+  },
+  {
+   "situation": 24,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2354,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 34432,
+    "output_tokens": 1471,
+    "service_tier": "standard"
+   },
+   "ms": 15649,
+   "cost": 0.010447448
+  },
+  {
+   "situation": 24,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4035,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 97024,
+    "output_tokens": 1698,
+    "service_tier": "standard"
+   },
+   "ms": 21160,
+   "cost": 0.016319336
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2202,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 49664,
+    "output_tokens": 359,
+    "service_tier": "standard"
+   },
+   "ms": 4569,
+   "cost": 0.006513496000000001
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 7198,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28416,
+    "output_tokens": 503,
+    "service_tier": "standard"
+   },
+   "ms": 6647,
+   "cost": 0.012743543999999999
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2499,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 314,
+    "service_tier": "standard"
+   },
+   "ms": 3493,
+   "cost": 0.005195432000000001
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2832,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 32768,
+    "output_tokens": 541,
+    "service_tier": "standard"
+   },
+   "ms": 7594,
+   "cost": 0.007322392
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2502,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 342,
+    "service_tier": "standard"
+   },
+   "ms": 4338,
+   "cost": 0.0053102719999999996
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 831,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1408,
+   "cost": 0.001761056
+  },
+  {
+   "situation": 24,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3709,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2688,
+    "output_tokens": 392,
+    "service_tier": "standard"
+   },
+   "ms": 4595,
+   "cost": 0.006566471999999999
+  },
+  {
+   "situation": 24,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4125,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 34432,
+    "output_tokens": 1746,
+    "service_tier": "standard"
+   },
+   "ms": 17239,
+   "cost": 0.013874168
+  },
+  {
+   "situation": 24,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4886,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 97024,
+    "output_tokens": 1995,
+    "service_tier": "standard"
+   },
+   "ms": 21691,
+   "cost": 0.018618776
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2365,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 49664,
+    "output_tokens": 379,
+    "service_tier": "standard"
+   },
+   "ms": 6164,
+   "cost": 0.006807856
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 61,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 51968,
+    "output_tokens": 405,
+    "service_tier": "standard"
+   },
+   "ms": 5443,
+   "cost": 0.003970911999999999
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 8124,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28416,
+    "output_tokens": 331,
+    "service_tier": "standard"
+   },
+   "ms": 4679,
+   "cost": 0.013284744000000001
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2524,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 459,
+    "service_tier": "standard"
+   },
+   "ms": 4598,
+   "cost": 0.005802631999999999
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 71,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 36480,
+    "output_tokens": 301,
+    "service_tier": "standard"
+   },
+   "ms": 3751,
+   "cost": 0.0028908000000000002
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2485,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 379,
+    "service_tier": "standard"
+   },
+   "ms": 4301,
+   "cost": 0.005434352
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 987,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1132,
+   "cost": 0.001966976
+  },
+  {
+   "situation": 24,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3433,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2304,
+    "output_tokens": 500,
+    "service_tier": "standard"
+   },
+   "ms": 6428,
+   "cost": 0.006612936000000001
+  },
+  {
+   "situation": 24,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3953,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 34048,
+    "output_tokens": 1749,
+    "service_tier": "standard"
+   },
+   "ms": 17918,
+   "cost": 0.013642112
+  },
+  {
+   "situation": 24,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5304,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 96640,
+    "output_tokens": 2980,
+    "service_tier": "standard"
+   },
+   "ms": 31832,
+   "cost": 0.02305424
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3207,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 49664,
+    "output_tokens": 1098,
+    "service_tier": "standard"
+   },
+   "ms": 13104,
+   "cost": 0.010766536
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3556,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 1102,
+    "service_tier": "standard"
+   },
+   "ms": 9074,
+   "cost": 0.009711152
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1765,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 52864,
+    "output_tokens": 1183,
+    "service_tier": "standard"
+   },
+   "ms": 9716,
+   "cost": 0.009340496
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1765,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 52864,
+    "output_tokens": 1187,
+    "service_tier": "standard"
+   },
+   "ms": 9371,
+   "cost": 0.009356336
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 10843,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28032,
+    "output_tokens": 604,
+    "service_tier": "standard"
+   },
+   "ms": 8105,
+   "cost": 0.017938008
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1702,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1513,
+   "cost": 0.002910776
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 100,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 18304,
+    "output_tokens": 1091,
+    "service_tier": "standard"
+   },
+   "ms": 8768,
+   "cost": 0.005257736
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1691,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1246,
+   "cost": 0.0028962559999999994
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1913,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 52864,
+    "output_tokens": 1187,
+    "service_tier": "standard"
+   },
+   "ms": 9069,
+   "cost": 0.009551696
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 38,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 16128,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1349,
+   "cost": 0.000787512
+  },
+  {
+   "situation": 24,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3094,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2688,
+    "output_tokens": 411,
+    "service_tier": "standard"
+   },
+   "ms": 4280,
+   "cost": 0.0058299120000000005
+  },
+  {
+   "situation": 24,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3535,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 34432,
+    "output_tokens": 1955,
+    "service_tier": "standard"
+   },
+   "ms": 21147,
+   "cost": 0.013923008
+  },
+  {
+   "situation": 24,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5587,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 96640,
+    "output_tokens": 2582,
+    "service_tier": "standard"
+   },
+   "ms": 28461,
+   "cost": 0.021851719999999998
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4541,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 49664,
+    "output_tokens": 2025,
+    "service_tier": "standard"
+   },
+   "ms": 21203,
+   "cost": 0.016198336
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5289,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 2179,
+    "service_tier": "standard"
+   },
+   "ms": 16508,
+   "cost": 0.016263632
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3880,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 54144,
+    "output_tokens": 2441,
+    "service_tier": "standard"
+   },
+   "ms": 18868,
+   "cost": 0.017170296
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3880,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 54144,
+    "output_tokens": 2448,
+    "service_tier": "standard"
+   },
+   "ms": 19391,
+   "cost": 0.017198016
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 13991,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28032,
+    "output_tokens": 755,
+    "service_tier": "standard"
+   },
+   "ms": 9343,
+   "cost": 0.022691328
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2447,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1515,
+   "cost": 0.0038941759999999996
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4887,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 1453,
+    "service_tier": "standard"
+   },
+   "ms": 11314,
+   "cost": 0.012858032000000002
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1908,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1183,
+   "cost": 0.003182696
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3943,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 54144,
+    "output_tokens": 2216,
+    "service_tier": "standard"
+   },
+   "ms": 17157,
+   "cost": 0.016362456
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 437,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 15360,
+    "output_tokens": 11,
+    "service_tier": "standard"
+   },
+   "ms": 2572,
+   "cost": 0.00129624
+  },
+  {
+   "situation": 24,
+   "agent": "planner",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3691,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2304,
+    "output_tokens": 429,
+    "service_tier": "standard"
+   },
+   "ms": 5518,
+   "cost": 0.006672336
+  },
+  {
+   "situation": 24,
+   "agent": "diagnostic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 4145,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 34048,
+    "output_tokens": 1847,
+    "service_tier": "standard"
+   },
+   "ms": 20432,
+   "cost": 0.014283632
+  },
+  {
+   "situation": 24,
+   "agent": "strategy",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 5616,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 96640,
+    "output_tokens": 2027,
+    "service_tier": "standard"
+   },
+   "ms": 22303,
+   "cost": 0.0196922
+  },
+  {
+   "situation": 24,
+   "agent": "writer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3631,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 49664,
+    "output_tokens": 1121,
+    "service_tier": "standard"
+   },
+   "ms": 11523,
+   "cost": 0.011417296
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3762,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 588,
+    "service_tier": "standard"
+   },
+   "ms": 5869,
+   "cost": 0.007947632
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 12028,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 28032,
+    "output_tokens": 478,
+    "service_tier": "standard"
+   },
+   "ms": 5846,
+   "cost": 0.019003248
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3761,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14848,
+    "output_tokens": 760,
+    "service_tier": "standard"
+   },
+   "ms": 7021,
+   "cost": 0.008627432
+  },
+  {
+   "situation": 24,
+   "agent": "reviewer",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 7370,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 32768,
+    "output_tokens": 506,
+    "service_tier": "standard"
+   },
+   "ms": 6818,
+   "cost": 0.013173952
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3680,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 15104,
+    "output_tokens": 524,
+    "service_tier": "standard"
+   },
+   "ms": 4867,
+   "cost": 0.007597216
+  },
+  {
+   "situation": 24,
+   "agent": "editor",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3497,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 15104,
+    "output_tokens": 661,
+    "service_tier": "standard"
+   },
+   "ms": 5669,
+   "cost": 0.007898176
+  },
+  {
+   "situation": 24,
+   "agent": "critic",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1895,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 14464,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1612,
+   "cost": 0.003165536
+  },
+  {
+   "situation": 24,
+   "agent": "judge",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 11637,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 19584,
+    "output_tokens": 1558,
+    "service_tier": "standard"
+   },
+   "ms": 17864,
+   "cost": 0.022392216
+  },
+  {
+   "situation": 24,
+   "agent": "judge_critical",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 932,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 11264,
+    "output_tokens": 11,
+    "service_tier": "standard"
+   },
+   "ms": 1474,
+   "cost": 0.001769416
+  },
+  {
+   "situation": 24,
+   "agent": "judge_critical",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 3379,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 11264,
+    "output_tokens": 7,
+    "service_tier": "standard"
+   },
+   "ms": 1482,
+   "cost": 0.004983616000000001
+  },
+  {
+   "situation": 24,
+   "agent": "judge_critical",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1149,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 11264,
+    "output_tokens": 11,
+    "service_tier": "standard"
+   },
+   "ms": 1512,
+   "cost": 0.0020558559999999996
+  },
+  {
+   "situation": 24,
+   "agent": "judge_critical",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 2565,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 11264,
+    "output_tokens": 11,
+    "service_tier": "standard"
+   },
+   "ms": 1591,
+   "cost": 0.003924976
+  },
+  {
+   "situation": 24,
+   "agent": "judge_critical",
+   "model": "deepseek-v4-pro",
+   "usage": {
+    "input_tokens": 1962,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 11264,
+    "output_tokens": 11,
+    "service_tier": "standard"
+   },
+   "ms": 1963,
+   "cost": 0.003129016
+  }
+ ],
+ "results": [
+  {
+   "id": 24,
+   "name": "stretch_live_test",
+   "title": "«Студия растяжки Гибкость» (живой тест 18.11: лид из Telegram без телефона, «просто цену, вы третья компания», менеджер — женщина, Москва 902-ПП, совладелец решает деньги, «без подсветки / баннер сами», раздражение «надоели», созвон → торг 10% и монтаж в выходной)",
+   "expect": [
+    "первый ход: «просто цену, вы третья компания» — не спорить, сориентировать вилкой и продать 2–3 вопроса / созвон как экономию её времени; коротко, в переписке",
+    "Москва — 902-ПП учтён (без подсветки и баннер — нельзя)",
+    "бренд «Яркая Реклама» (акрил)",
+    "глаголы менеджера — женский род",
+    "выход на ЛПР Марата",
+    "нет «да, но», нет ИИ-штампов, выгода разными словами",
+    "сильный оффер конкретикой"
+   ],
+   "seconds": 562,
+   "state": "COMPOSING",
+   "errors": [],
+   "diagnostic": {
+    "scores": {
+     "financial": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Марат (ЛПР по деньгам) вышел на прямой контакт и торгуется: просит скидку 10% — это условие покупки, а не отказ",
+       "Назван ориентир бюджета: «до 100 тысяч» (Алина, 18.11), КП на 128 000 ₽ — разница ≈ 28%, запрошенная скидка 10% (≈ 12 800 ₽) укладывается в логику торга",
+       "Клиент готов заказать при выполнении условия — значит, деньги на сделку есть"
+      ],
+      "confidence": "high"
+     },
+     "need": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Клиент сам инициировал контакт: заявка с сайта в Telegram (17.11)",
+       "Сам описал задачу: световая вывеска ~3 метра + табличка у входа, текст «ГИБКОСТЬ», строка «студия растяжки»",
+       "Есть жёсткий дедлайн: открытие 15 декабря",
+       "Марату нравится визуализация — решение по сути принято, остались условия"
+      ],
+      "confidence": "high"
+     },
+     "trust": {
+      "status": "Вероятно",
+      "evidence": [
+       "Марат согласился на прямой созвон и сказал, что визуализация нравится — позитивный сигнал",
+       "Алина после резкого сообщения («вы мне уже надоели») извинилась и дала контакт Марата — контакт не потерян",
+       "Прямого подтверждения глубокого доверия пока нет: обсуждаются условия, а не детали внедрения"
+      ],
+      "confidence": "medium"
+     },
+     "authority": {
+      "status": "Подтверждено",
+      "evidence": [
+       "ЛПР по деньгам назван явно: «Бюджет — Марат говорит до 100 тысяч, решает он» (Алина, 18.11)",
+       "Марат вышел на прямой контакт: дал номер, состоялся созвон 27.11",
+       "Марат лично выдвигает условия сделки (скидка 10%, монтаж в воскресенье) — принимает решение сам"
+      ],
+      "confidence": "high"
+     },
+     "urgency": {
+      "status": "Подтверждено",
+      "evidence": [
+       "Жёсткий дедлайн: открытие студии 15 декабря",
+       "Марат торгуется и называет конкретные условия — это сигнал готовности покупать сейчас, а не «подумаем»",
+       "Монтаж в воскресенье обсуждается как реальное условие запуска — клиент мысленно уже в процессе",
+       "По расчёту: старт сегодня даёт готовность 10–11 декабря, запас до открытия есть"
+      ],
+      "confidence": "high"
+     }
+    },
+    "summary": "Сделка здоровая, на стадии дожима. Все пять критериев подтверждены или вероятны: потребность явная (открытие 15 декабря), ЛПР вышел на прямой контакт и торгуется, деньги есть — Марат называет условие покупки (скидка 10%), а не отказывается. Торг — это сигнал к покупке, а не потеря доверия. Главный рабочий вопрос — согласовать скидку и возможность воскресного монтажа, не потеряв дедлайн. Менеджер обещала вернуться до 18:00 сегодня — решение нужно дать в срок, иначе клиент воспримет задержку как необязательность.",
+    "soprano_recommendations": [
+     "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+     "Уточнить у Марата, смотрит ли он другие варианты подрядчиков или сравнивает только с баннером/буквами без подсветки — это покажет, с кем реально конкурируем",
+     "Спросить, что для него важнее при выборе: цена, срок к открытию или надёжность — чтобы понять, чем закрывать оставшиеся сомнения"
+    ]
+   },
+   "strategy": {},
+   "plan": [
+    {
+     "touchpoint_number": 1,
+     "send_date": "2026-11-27",
+     "timing": "Сегодня, 27 ноября (пт)",
+     "channel": "Звонок",
+     "kind": "экспертное",
+     "recipient": "Марат (совладелец, ЛПР по деньгам)",
+     "condition": "",
+     "goal": "Дать ответ на оба условия Марата: скидка 10% и монтаж в воскресенье. Согласовать уступку через полномочия в обмен на решение сегодня. Проверить дату открытия.",
+     "how": "",
+     "scenarios": [],
+     "key_message": "Марат, я уточнила у руководителя. Скидку 10% дать не могу — таких полномочий у меня нет. Но я попробую согласовать 5% за то, что решаем сегодня и запускаем производство. Монтаж в воскресенье — проверю у бригады, обычно монтажи по будням, но для вас уточню. Дата открытия 15 декабря в силе?",
+     "value": "Марат получает конкретный ответ в обещанный срок, уступку через усилие менеджера и заботу о его дате открытия — вывеска будет к 15 декабря",
+     "criterion": "ФВ — финансовая возможность",
+     "also_criteria": [],
+     "must_include": [
+      "Касание 1 (звонок Марату): ответить на оба условия — скидка 10% и монтаж в воскресенье — в обещанный срок до 18:00 сегодня, иначе клиент воспримет задержку как необязательность",
+      "Касание 1 (звонок Марату): скидку 10% не давать — предложить 5% через полномочия («у меня таких полномочий нет, попробую согласовать») в обмен на решение сегодня",
+      "Касание 1 (звонок Марату): сверить дату открытия 15 декабря одним вопросом — «дата в силе?»"
+     ],
+     "facts": {
+      "status_on_send_day": "с запасом",
+      "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": false,
+     "last_chance": false,
+     "weekend": false,
+     "path_mode": "step"
+    },
+    {
+     "touchpoint_number": 2,
+     "send_date": null,
+     "timing": "только если Марат в звонке согласился на условия — после согласия, в тот же день",
+     "channel": "Telegram",
+     "kind": "экспертное",
+     "recipient": "Марат (совладелец, ЛПР по деньгам)",
+     "condition": "только если Марат в звонке согласился на условия",
+     "goal": "Зафиксировать договорённости письменно: уступка, дата старта, монтаж, дата открытия. Дать Марату и Алине одну точку правды.",
+     "how": "",
+     "scenarios": [],
+     "key_message": "Марат, резюмирую наш разговор: согласовали [уступка] при запуске сегодня, производство 7 рабочих дней, монтаж [дата из timeline], вывеска и табличка к открытию 15 декабря. Отправляю договор — как подпишете, запускаем.",
+     "value": "Марат и Алина видят зафиксированные условия — ничего не потеряется, всё по договору",
+     "criterion": "Д — доверие",
+     "also_criteria": [],
+     "must_include": [
+      "Касание 2 (Telegram после звонка): зафиксировать договорённости письменно — уступка, дата старта, монтаж, дата открытия"
+     ],
+     "facts": {
+      "status_on_send_day": "с запасом",
+      "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": false,
+     "last_chance": false,
+     "weekend": false,
+     "path_mode": "step"
+    },
+    {
+     "touchpoint_number": 3,
+     "send_date": null,
+     "timing": "только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)",
+     "channel": "Telegram",
+     "kind": "эмпатичное",
+     "recipient": "Алина (совладелица, контактное лицо)",
+     "condition": "только если после звонка Марату нет подтверждения запуска",
+     "goal": "Мягко напомнить о дедлайне через заботу о дате открытия, не давить. Последний день старта — 30 ноября.",
+     "how": "",
+     "scenarios": [],
+     "key_message": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?",
+     "value": "Алина получает уверенность, что вывеска будет к открытию, и конкретный шаг, который держит слот",
+     "criterion": "ЗС — здесь и сейчас",
+     "also_criteria": [],
+     "must_include": [],
+     "facts": {
+      "status_on_send_day": "с запасом",
+      "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+      "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+     },
+     "inserted": false,
+     "last_chance": false,
+     "weekend": false,
+     "path_mode": "step"
+    }
+   ],
+   "touches": [
+    {
+     "touchpoint_number": 1,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Марат (совладелец, ЛПР по деньгам)",
+       "value": "Конкретный ответ в обещанный срок, уступка через усилие менеджера и забота о дате открытия — вывеска будет к 15 декабря"
+      }
+     ],
+     "hook": {
+      "quote": "Марат готов созвониться 5 минут, наберите его",
+      "prep": "Перед звонком: уточнить у руководителя возможность уступки 5% за решение сегодня; позвонить на производство и спросить бригаду про монтаж в воскресенье.",
+      "opening": "Марат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям."
+     },
+     "body": "Марат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям.\n\nСкажите, а в целом решение вам подходит? [пауза, выслушать]\n\nПо «дорого» — хочу понять, что именно: для одних это «сейчас не нужно», для других — «не рассчитывали такую сумму», третьи просто хотят поторговаться. У вас какой вариант? [пауза, выслушать]\n\n[по ответу: не нужно сейчас — актуализация; не рассчитывали — состав цены и ценность; поторговаться — варианты под бюджет с честным риском или уступка в обмен на шаг]\n\nПо скидке: 10% дать не могу — у меня таких полномочий нет. Но я попробую согласовать с руководителем 5%, если решаем сегодня и запускаем производство. Это непросто, но я постараюсь убедить.\n\nПо монтажу в воскресенье: обычно бригада работает по будням, но я спросила — для вас уточню, возможно ли. Если нет — предложу ближайший будний день, чтобы не мешать тренировкам.\n\nИ ещё: дата открытия 15 декабря в силе? Если да — при запуске сегодня вывеска будет готова 10–11 декабря, с запасом до открытия. Вам спокойно, гости увидят вывеску с первого дня.\n\n[пауза, выслушать]\n\nЕсли я согласую 5% и монтаж в удобный день — запускаем сегодня?",
+     "channel": "Звонок",
+     "timing": "Сегодня, 27 ноября (пт)",
+     "kind": "экспертное",
+     "criterion": "ФВ — финансовая возможность",
+     "last_chance": false
+    },
+    {
+     "touchpoint_number": 2,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Марат (совладелец, ЛПР по деньгам)",
+       "value": "Зафиксированные условия — ничего не потеряется, всё по договору"
+      }
+     ],
+     "hook": {
+      "quote": "Марат готов созвониться 5 минут, наберите его",
+      "prep": "Перед отправкой: сверить с договором согласованные в звонке уступку, дату старта и монтажа.",
+      "opening": "Марат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды."
+     },
+     "body": "Марат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды.\n\nДоговорились:\n— уступка [размер] при запуске сегодня;\n— производство 7 рабочих дней;\n— монтаж [дата из timeline];\n— вывеска и табличка к открытию 15 декабря.\n\nОтправляю договор — как подпишете, запускаем производство. Всё верно?",
+     "channel": "Telegram",
+     "timing": "только если Марат в звонке согласился на условия — после согласия, в тот же день",
+     "kind": "экспертное",
+     "criterion": "Д — доверие",
+     "last_chance": false
+    },
+    {
+     "touchpoint_number": 3,
+     "subject": null,
+     "value_for_recipient": [
+      {
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "value": "Уверенность, что вывеска будет к открытию, и конкретный шаг, который держит слот"
+      }
+     ],
+     "hook": {
+      "quote": "Открытие 15 декабря",
+      "prep": "Перед отправкой: проверить по timeline дату монтажа при старте 30 ноября.",
+      "opening": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня."
+     },
+     "body": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?",
+     "channel": "Telegram",
+     "timing": "только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)",
+     "kind": "эмпатичное",
+     "criterion": "ЗС — здесь и сейчас",
+     "last_chance": false
+    }
+   ],
+   "check": {
+    "approved": false,
+    "rounds": 5,
+    "reviews": 2,
+    "fixedAfterReview": [
+     1
+    ],
+    "trace": [
+     "составил",
+     "код вернул 1",
+     "редактор",
+     "проверка вернула 1",
+     "редактор",
+     "проверка вернула 1",
+     "редактор",
+     "код после редактора вернул 1",
+     "редактор"
+    ],
+    "critic": "чисто"
+   },
+   "first_round": {
+    "plan": [
+     {
+      "touchpoint_number": 1,
+      "send_date": "2026-11-18",
+      "timing": "Сегодня, 18 ноября (ср)",
+      "channel": "Telegram",
+      "kind": "экспертное",
+      "recipient": "Алина (совладелица, тренер)",
+      "condition": "",
+      "goal": "Дать вилку цены, чтобы Алина не ушла к конкурентам, и получить один факт для точного расчёта",
+      "how": "ЛДПР (владелец 17.11, файл 28): если адресат — не ЛПР, а контактное лицо и его влияние на решение ещё не выяснено, — одним вопросом выяснить, как бы между делом: «А если бы выбирали вы, [имя]?» / «А вам-то как в целом?» / «А как вы влияете на решение [ЛПР]?». Влияет — можно аккуратно заходить и через него (редко: не обходить ЛПР и не перекладывать на контакт всё, чтобы не слить сделку).",
+      "scenarios": [],
+      "key_message": "Алина, поняла вас — даю ориентир сразу. Световые объёмные буквы из акрила на 3 метра + табличка у входа — обычно 110–140 тысяч с монтажом. Точную цену посчитаю, когда пришлёте текст вывески и фото фасада — это займёт у вас две минуты, а я пришлю расчёт сегодня.",
+      "value": "Алина получает цену без созвона и лишних вопросов — экономит время между тренировками",
+      "criterion": "ОП — осознанная потребность",
+      "also_criteria": [],
+      "must_include": [
+       "Касание 1 (Алине): дать вилку цены сразу — она прямо попросила «просто цену скажите» (18.11, 9:25), иначе уйдёт к четвёртой компании",
+       "Касание 2 (Алине): спросить про Марата и кто решает — в переписке это не выяснено, а Алина отказывается от созвона",
+       "Касание 3 (Алине): если молчит — кружок с похожим проектом, без давления и без «ну что решили»"
+      ],
+      "facts": {
+       "status_on_send_day": "с запасом",
+       "permanent_ready_if_start_that_day": "1 декабря (вт) – 2 декабря (ср)",
+       "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+      },
+      "inserted": false,
+      "last_chance": false,
+      "weekend": false,
+      "path_mode": "step"
+     }
+    ],
+    "touches": [
+     {
+      "touchpoint_number": 1,
+      "subject": null,
+      "value_for_recipient": [
+       {
+        "recipient": "Алина",
+        "value": "Получает ориентир по цене сразу, без созвона и лишних вопросов — экономит время между тренировками"
+       }
+      ],
+      "hook": {
+       "quote": "Просто цену скажите. Вы уже третья компания, которая вместо цены задаёт вопросы.",
+       "prep": "Перед касанием: открыть прайс и примеры похожих вывесок для студий (акрил, 3 метра, табличка), чтобы дать честную вилку без выдуманных цифр.",
+       "opening": "Алина, добрый день! Поняла вас — даю ориентир сразу, без лишних вопросов."
+      },
+      "body": "Алина, добрый день! Поняла вас — даю ориентир сразу, без лишних вопросов.\n\nСветовые объёмные буквы из акрила на 3 метра + табличка у входа — по цене выйдет примерно 110–140 тысяч с монтажом.\n\nЧтобы посчитать точно, пришлите текст вывески и фото фасада — это займёт у вас две минуты, а расчёт пришлю сегодня. Так вы получите цену без созвона и лишних вопросов, между тренировками.\n\nПришлёте?",
+      "channel": "Telegram",
+      "timing": "Сегодня, 18 ноября (ср)",
+      "kind": "экспертное",
+      "criterion": "ОП — осознанная потребность",
+      "last_chance": false
+     }
+    ]
+   },
+   "stages": [
+    {
+     "label": "ответила на вопросы, КП отправлено",
+     "today": "2026-11-19",
+     "expect": [
+      "следующий шаг после КП",
+      "бюджет 100 против 128 — не скидкой, прояснить; Марат решает деньги — выход на ЛПР (вопрос Алине о его влиянии, предложить созвон / Zoom втроём как выгоду)",
+      "переписка: коротко, вопрос в конце, «продать созвон» на 3–5 минут как экономию её времени",
+      "менеджер — женщина: глаголы в женском роде",
+      "оффер конкретикой (дата к открытию из расчёта, 902-ПП как защита от штрафа), без «качественно / быстро»"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-19",
+       "timing": "Сегодня, 19 ноября (чт)",
+       "channel": "Telegram",
+       "kind": "экспертное",
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "condition": "",
+       "goal": "Получить реакцию на КП и выяснить, как Марат участвует в решении",
+       "how": "ЛДПР (владелец 17.11, файл 28): если адресат — не ЛПР, а контактное лицо и его влияние на решение ещё не выяснено, — одним вопросом выяснить, как бы между делом: «А если бы выбирали вы, [имя]?» / «А вам-то как в целом?» / «А как вы влияете на решение [ЛПР]?». Влияет — можно аккуратно заходить и через него (редко: не обходить ЛПР и не перекладывать на контакт всё, чтобы не слить сделку).",
+       "scenarios": [],
+       "key_message": "Алина, КП отправила. Чтобы Марату было проще принять решение, могу подготовить короткую страницу для него: что входит в 128 000, почему это выгоднее, чем 100 000, и как вывеска окупается. Перешлёте ему? И подскажите: он сам будет смотреть КП или вам нужно ему всё объяснять?",
+       "value": "Алине не придётся пересказывать Марату детали и отвечать на его вопросы — она просто перешлёт готовую страницу",
+       "criterion": "ЛПР — определён",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (Алине): попросить переслать Марату готовую страницу с обоснованием цены — Алина сказала «решает он», прямого контакта с Маратом нет",
+        "Касание 2 (Алине): уточнить бюджет — Марат назвал «до 100 тысяч», КП на 128 000, разрыв 28 000 не объяснён",
+        "Касание 4 (звонок Алине): только если Алина не ответила на касания 1–3 — согласия на прямой контакт с Маратом пока нет"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "2 декабря (ср) – 3 декабря (чт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Алина",
+         "value": "Не придётся пересказывать Марату детали и отвечать на его вопросы — просто перешлёт готовую страницу"
+        }
+       ],
+       "hook": {
+        "quote": "Бюджет — Марат говорит до 100 тысяч, решает он",
+        "prep": "Перед касанием: открыть КП, собрать короткую страницу для Марата — что входит в 128 000 ₽, почему это выгоднее 100 000 ₽, как вывеска окупается. Проверить по 902-ПП адрес Бауманская, 11 — жилой дом, 1 этаж, чтобы в странице была строка про проверку до производства.",
+        "opening": "Алина, добрый день! Собрала для Марата короткую страницу по КП — чтобы ему было проще принять решение, а вам не пришлось ничего пересказывать."
+       },
+       "body": "Алина, добрый день! Собрала для Марата короткую страницу по КП — чтобы ему было проще принять решение, а вам не пришлось ничего пересказывать.\n\nТам простым языком: что входит в 128 000, почему это выгоднее, чем 100 000, и как вывеска окупается. Перешлёте ему?\n\nИ подскажите: он сам будет смотреть КП или вам нужно ему всё объяснять? А если бы выбирали вы — как вам в целом?",
+       "channel": "Telegram",
+       "timing": "Сегодня, 19 ноября (чт)",
+       "kind": "экспертное",
+       "criterion": "ЛПР — определён",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Риск",
+       "evidence": [
+        "Алина: «Бюджет — Марат говорит до 100 тысяч»",
+        "КП отправлено на 128 000 ₽ — разрыв 28 000 ₽ с названным бюджетом",
+        "Бюджет назван не ЛПР, а через Алину со слов Марата"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Алина сама пришла с заявкой: «Нужна световая вывеска на студию, Бауманская 11, длина примерно 3 метра + табличка у входа»",
+        "Назвала конкретные параметры: текст «ГИБКОСТЬ» + строка «студия растяжки», логотипа нет",
+        "Прислала фото фасада",
+        "Назвала дату открытия — 15 декабря"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Неизвестно",
+       "evidence": [
+        "Алина раздражена вопросами: «Вы уже третья компания, которая вместо цены задаёт вопросы»",
+        "Тема доверия не проявлялась, общение формальное",
+        "Алина прислала фото фасада и детали — но это вынужденный шаг ради цены, а не знак доверия"
+       ],
+       "confidence": "medium"
+      },
+      "authority": {
+       "status": "Риск",
+       "evidence": [
+        "Алина: «Бюджет — Марат говорит до 100 тысяч, решает он»",
+        "Марат — второй совладелец, отвечает за деньги, с ним связи нет",
+        "Алина отказывается от созвона: «созваниваться некогда»",
+        "Контакт с финансовым ЛПР отсутствует, решение по деньгам за Маратом"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Открытие 15 декабря — конкретная дата",
+        "Алина назвала дату сама, без наводящих вопросов",
+        "По расчёту сроков: успеваем с запасом 7 рабочих дней, последний день старта — 30 ноября"
+       ],
+       "confidence": "high"
+      }
+     },
+     "soprano": {
+      "С": {
+       "status": "собрано",
+       "note": "Студия растяжки «Гибкость», Москва, Бауманская 11, 1 этаж жилого дома, вход с улицы. Нужна световая вывеска ~3 метра + табличка у входа. Открытие 15 декабря."
+      },
+      "О1": {
+       "status": "нет",
+       "note": "Опыт с вывесками и подрядчиками не обсуждался."
+      },
+      "П": {
+       "status": "нет",
+       "note": "Критерии выбора подрядчика не выяснены. Известно только, что Алина уже обращалась в две другие компании."
+      },
+      "Р": {
+       "status": "частично",
+       "note": "Алина — совладелица и тренер, ведёт переписку. Марат — второй совладелец, отвечает за деньги, «решает он». Прямого контакта с Маратом нет, процесс согласования не ясен."
+      },
+      "А": {
+       "status": "частично",
+       "note": "Алина сравнивает: «Вы уже третья компания». Какие именно альтернативы и что готова менять при несовпадении бюджета — неизвестно."
+      },
+      "Н": {
+       "status": "нет",
+       "note": "Чего хочет избежать, какие моменты критичны — не обсуждалось."
+      },
+      "О2": {
+       "status": "частично",
+       "note": "Бюджет: «до 100 тысяч» со слов Марата. Срок: открытие 15 декабря. Технические ограничения не выяснены."
+      }
+     },
+     "soprano_recs": [
+      "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+      "Уточнить у Алины, кто финально принимает решение по заказу и как Марат участвует в выборе подрядчика — можно ли получить его контакт или переслать ему КП напрямую.",
+      "Уточнить бюджет: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»"
+     ],
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n_Если изменилась дата, к которой нужно клиенту, — обновите «Сроки» в шапке сделки: расчёт берётся оттуда._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Неизвестно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Удобство:** «Созваниваться некогда» — весь день на тренировках, хочет получить цену быстро и без лишних вопросов. (Алина)\n\n**Вывод:** Сделка на ранней стадии: КП отправлено, клиент молчит 1 день. Потребность и срочность подтверждены — Алина сама пришла с конкретной задачей, параметрами и датой открытия 15 декабря. Главный блокер — ЛПР: контакт ведёт Алина, а деньги и решение у Марата, с которым связи нет, и Алина отказывается от созвона. Второй блокер — финансы: бюджет до 100 тыс. против КП на 128 тыс., разрыв 28 тыс., причина не выяснена. Доверие не проявлено — Алина раздражена вопросами и сравнивает с конкурентами. Следующий шаг — выяснить, как вовлечь Марата, и прояснить бюджетный разрыв, не потеряв Алину.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (нет), Проблемы (нет), Решение (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, кто финально принимает решение по заказу и как Марат участвует в выборе подрядчика — можно ли получить его контакт или переслать ему КП напрямую.\n- Уточнить бюджет: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 19 ноября (чт): производство 7 рабочих дней — до 30 ноября (пн), монтаж 2–3 раб. дн. — готово 2 декабря (ср) – 3 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 7 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Вовлечь Марата (финансового ЛПР) в сделку через Алину, не обходя её\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Удобство\n- **Контактному лицу:** Алине не придётся пересказывать Марату детали и отвечать на его вопросы — она просто перешлёт готовую страницу и получит готовые ответы\n- **ЛПР:** Марат получит вывеску к открытию 15 декабря точно в срок, по цене из КП без доплат, и ему не придётся самому искать и сравнивать подрядчиков\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): попросить переслать Марату готовую страницу с обоснованием цены — Алина сказала «решает он», прямого контакта с Маратом нет\n2. Касание 2 (Алине): уточнить бюджет — Марат назвал «до 100 тысяч», КП на 128 000, разрыв 28 000 не объяснён\n3. Касание 4 (звонок Алине): только если Алина не ответила на касания 1–3 — согласия на прямой контакт с Маратом пока нет\n\n### Следующий шаг\n\n1. **Сегодня, 19 ноября (чт) · Telegram** · экспертное · ЛПР\n  Кому: Алина (совладелица, контактное лицо)\n  Получить реакцию на КП и выяснить, как Марат участвует в решении\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка на ранней стадии: КП отправлено, клиент молчит 1 день. Главный блокер — ЛПР: Алина ведёт переписку, но решение за Маратом, с которым связи нет. Стратегия — вовлечь Марата через Алину: дать ей готовый материал для пересылки, выяснить его роль в решении, параллельно прояснить бюджетный разрыв 28 тыс. и удержать цену через ценность. Касания чередуем: экспертное → экспертное → эмпатичное → экспертное. Если Алина не отвечает — звонок с прямым вопросом о статусе. Сроки не давим: открытие 15 декабря, запас 7 рабочих дней.\n\n## ✅ Касания готовы\n\n### Касание 1 · Telegram · экспертное · ЛПР\n_Когда: Сегодня, 19 ноября (чт)_\n\n**Перед касанием:** открыть КП, собрать короткую страницу для Марата — что входит в 128 000 ₽, почему это выгоднее 100 000 ₽, как вывеска окупается. Проверить по 902-ПП адрес Бауманская, 11 — жилой дом, 1 этаж, чтобы в странице была строка про проверку до производства.\n\nАлина, добрый день! Собрала для Марата короткую страницу по КП — чтобы ему было проще принять решение, а вам не пришлось ничего пересказывать.\n\nТам простым языком: что входит в 128 000, почему это выгоднее, чем 100 000, и как вывеска окупается. Перешлёте ему?\n\nИ подскажите: он сам будет смотреть КП или вам нужно ему всё объяснять? А если бы выбирали вы — как вам в целом?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "«дорого, без подсветки или баннер сами»",
+     "today": "2026-11-21",
+     "expect": [
+      "Москва: буквы без подсветки и баннер на фасаде — нельзя (902-ПП), сказать как защиту от штрафа и демонтажа, не пугать; временная вывеска — только внутри, в витрине",
+      "«дорого» — прояснить и down sell в рамках правил (проще конструкция, табличку отдельно, без монтажа таблички), кружок / фото вариантов вместо длинного обоснования",
+      "деньги не обсуждать цифрами в длинном тексте; голос пока недоступен — «пишите здесь» соблюдать, но предложить созвон как выгоду",
+      "выход на Марата аккуратно"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-21",
+       "timing": "Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн)",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "condition": "",
+       "goal": "Ответить на «дорого» Марата, прояснить жёсткость бюджета и что важнее сохранить, предложить варианты под бюджет с честным риском",
+       "how": "СЦЕНАРИЙ «ДОРОГО» (владелец, файл 28): 1) локализовать — «стоимость — вопрос важный, я вас очень понимаю; при этом по цене мы с клиентами почти всегда договариваемся. А в целом решение вам подходит?» [выслушать]; 2) ПРОЯСНИТЬ, какое «дорого»: «для одних „дорого“ — не нужно сейчас, для других — не рассчитывали, третьи хотят поторговаться. У вас какой вариант?» [выслушать]; 3) по ответу: не нужно сейчас — актуализация; не рассчитывали — ценность по триггерам клиента и варианты под бюджет с честным риском отхода от ТЗ; поторговаться — сценарий «Торг»; 4) после отработки — выход на сделку или договорённость о шаге с датой. Скидку сами не предлагаем. Деньги — голосом (голос недоступен — можно в переписке). ЛДПР (владелец 17.11, файл 28): если адресат — не ЛПР, а контактное лицо и его влияние на решение ещё не выяснено, — одним вопросом выяснить, как бы между делом: «А если бы выбирали вы, [имя]?» / «А вам-то как в целом?» / «А как вы влияете на решение [ЛПР]?». Влияет — можно аккуратно заходить и через него (редко: не обходить ЛПР и не перекладывать на контакт всё, чтобы не слить сделку).",
+       "scenarios": [
+        "dorogo"
+       ],
+       "key_message": "Алина, поняла — Марат считает 128 000 дорого. Давайте разберёмся, как попасть в его бюджет без потери результата. Подскажите: «до 100 тысяч» — это жёсткий потолок или ориентир? И что для вас важнее сохранить: размер букв, подсветку или материал? От этого зависит, какие варианты я предложу.",
+       "value": "Алина получит конкретные варианты под бюджет Марата, а не просто «дорого — и всё»; ей не придётся самой придумывать, чем пожертвовать",
+       "criterion": "ФВ — финансовая возможность",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (Алине): ответить на «дорого» Марата — не игнорировать возражение, а прояснить жёсткость бюджета и что важнее сохранить",
+        "Касание 2 (Алине): каждый вариант под бюджет — с честным риском отхода от ТЗ, как в файле отрасли (уменьшить высоту — хуже читается; реже диоды — неравномерное свечение; пластиковый борт — меньше жёсткость)",
+        "Касание 4 (Алине): страница для Марата начинается с того, что он получает — вывеску, которая окупается и приводит клиентов, — а не с проблемы «дорого»",
+        "Касание 4 (Алине): просьба контакта Марата — только с согласия Алины; в timing пометка «только если Алина даст контакт или согласится переслать»",
+        "Касание 5 (звонок Алине): только если Алина не отвечает на касание 4 или отвечает уклончиво — не раньше"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "4 декабря (пт) – 7 декабря (пн)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": true,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Алина",
+         "value": "Конкретные варианты под бюджет Марата, чтобы ей не пришлось самой придумывать, чем пожертвовать"
+        }
+       ],
+       "hook": {
+        "quote": "Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч",
+        "prep": "Перед звонком: открыть КП и переписку, посмотреть фото фасада, подготовить 2–3 варианта под бюджет с честным риском (уменьшить высоту букв, реже диоды, пластиковый борт). Проверить по 902-ПП: буквы без подсветки в Москве нельзя — это будет главный аргумент против варианта Марата.",
+        "opening": "Алина, добрый день! Это Ольга, «Яркая Реклама». Не отвлекаю в выходной? Если удобнее в будни — наберу в понедельник. Я посмотрела, что Марат написал про бюджет — решила сразу набрать, чтобы не мучить вас перепиской."
+       },
+       "body": "Алина, добрый день! Это Ольга, «Яркая Реклама». Не отвлекаю в выходной? Если удобнее в будни — наберу в понедельник.\n\n[пауза, выслушать]\n\nЯ посмотрела, что Марат написал про бюджет — решила сразу набрать, чтобы не мучить вас перепиской. По цене мы, уверена, договоримся) Только хочу понять: а в целом решение вам подходит? Буквы, табличка, как на визуализации — вам с Маратом нравится?\n\n[пауза, выслушать]\n\nПоняла. А можно уточнить: когда Марат говорит «дорого» — это какой случай? Для одних «дорого» — значит, не нужно сейчас, для других — не рассчитывали на такую сумму, а третьи просто хотят поторговаться. У вас какой вариант ближе?\n\n[пауза, выслушать]\n\n[Если «не рассчитывали»:]\nПонимаю. Тогда давайте разберёмся, как попасть в его бюджет. Подскажите: «до 100 тысяч» — это жёсткий потолок или ориентир? И что для вас важнее сохранить: размер букв, подсветку или материал? От этого зависит, какие варианты я предложу.\n\n[пауза, выслушать]\n\n[Если «поторговаться»:]\nПоняла вас, знаете, у меня таких полномочий нет, конечно. Но я могу попробовать согласовать с руководителем небольшую уступку — только это обычно непросто. Если получится — готовы заключаться тогда?\n\n[пауза, выслушать]\n\n[Если «не нужно сейчас»:]\nА решение-то в целом понравилось? На какую перспективу смотрите — открытие же 15 декабря, верно?\n\n[пауза, выслушать]\n\n[После отработки:]\nКстати, Алина, а вам-то как в целом? Если бы выбирали вы — согласовали бы?\n\n[пауза, выслушать]\n\n[Если Алина влияет на решение:]\nТогда давайте так: я подготовлю для Марата короткую страницу — что он получает за эти деньги и какие есть варианты под бюджет, с честным раскладом, чем рискуем. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Подготовить?\n\n[пауза, выслушать]\n\n[Если да:]\nОтлично, пришлю сегодня-завтра. И ещё: буквы без подсветки в Москве по правилам города нельзя — это я сразу скажу, чтобы Марат не тратил время на этот вариант. А баннер на фасаде — тоже нельзя, только внутри. Но это всё будет на странице, с объяснением.\n\n[Закрытие:]\nДоговорились. Тогда я готовлю страницу для Марата и варианты под бюджет — пришлю вам в понедельник утром, ок? И если Марат захочет обсудить голосом — я на связи, это быстрее, чем переписка.",
+       "channel": "Звонок",
+       "timing": "Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн)",
+       "kind": "экспертное",
+       "criterion": "ФВ — финансовая возможность",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Риск",
+       "evidence": [
+        "Марат прямо сказал «дорого» после получения КП на 128 000 ₽",
+        "Назван бюджет «до 100 тысяч» — КП превышает его на 28 000 ₽",
+        "Предложены дешёвые альтернативы: буквы без подсветки или баннер за 15 тысяч",
+        "Клиент сравнивает с самостоятельным решением «сами повесим баннер»"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Алина сама инициировала контакт с запросом на световую вывеску и табличку",
+        "Назван конкретный текст «ГИБКОСТЬ» и строка «студия растяжки»",
+        "Есть конкретная дата открытия — 15 декабря",
+        "Прислала фото фасада для расчёта"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Вероятно",
+       "evidence": [
+        "Алина прислала фото фасада и детали заказа после первого касания",
+        "Отвечает быстро и по существу",
+        "Но прямых сигналов доверия нет — клиент сравнивает с другими компаниями («вы уже третья компания»)"
+       ],
+       "confidence": "medium"
+      },
+      "authority": {
+       "status": "Риск",
+       "evidence": [
+        "Алина прямо сказала: «Бюджет — Марат говорит до 100 тысяч, решает он»",
+        "Прямого контакта с Маратом нет",
+        "Марат уже высказал позицию «дорого» — но через Алину, не напрямую",
+        "Алина — совладелица, но финансовое решение за Маратом"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Открытие 15 декабря — конкретная дата",
+        "Клиент сам назвал срок в первом сообщении",
+        "По расчёту сроков успеваем с запасом 5 рабочих дней"
+       ],
+       "confidence": "high"
+      }
+     },
+     "soprano": {
+      "С": {
+       "status": "собрано",
+       "note": "Студия растяжки «Гибкость», Бауманская 11, открытие 15 декабря, нужна световая вывеска ~3 метра + табличка"
+      },
+      "О1": {
+       "status": "частично",
+       "note": "Упомянуто, что это уже третья компания, к которой обращаются — значит, опыт общения с подрядчиками есть, но детали не выяснены"
+      },
+      "П": {
+       "status": "нет",
+       "note": "Критерии выбора подрядчика не выяснены"
+      },
+      "Р": {
+       "status": "частично",
+       "note": "Известно, что решает Марат, но процесс согласования и его роль в выборе подрядчика не ясны"
+      },
+      "А": {
+       "status": "частично",
+       "note": "Клиент сам предложил альтернативы: буквы без подсветки или баннер за 15 тысяч. Сравнивает с другими компаниями («третья компания»)"
+      },
+      "Н": {
+       "status": "нет",
+       "note": "Нежелательные моменты не обсуждались"
+      },
+      "О2": {
+       "status": "частично",
+       "note": "Бюджет назван как ориентир «до 100 тысяч» со слов Марата, но не подтверждён как жёсткий потолок"
+      }
+     },
+     "soprano_recs": [
+      "Уточнить у Алины: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»",
+      "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+      "Уточнить у Алины, как Марат участвует в выборе подрядчика: можно ли получить его контакт или переслать ему КП напрямую"
+     ],
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» (Марат)\n- **Удобство:** «Созваниваться некогда, пишите здесь» — Алина весь день на тренировках, хочет решить вопрос перепиской без звонков (Алина)\n\n**Вывод:** Сделка на ранней стадии: КП отправлено, получено прямое возражение по цене от финансового ЛПР Марата через Алину. Потребность подтверждена — клиент сам инициировал запрос, назвал конкретные детали и дату открытия. Срочность подтверждена — открытие 15 декабря, успеваем с запасом. Главный блокер — финансы: Марат сказал «дорого», бюджет «до 100 тысяч» не совпадает с КП на 128 000 ₽, клиент предлагает альтернативы в 8 раз дешевле. Вторичный блокер — ЛПР: решение за Маратом, но прямого контакта с ним нет, вся коммуникация через Алину. Доверие на уровне «вероятно» — Алина отвечает быстро и прислала материалы, но клиент сравнивает с другими компаниями. Работать нужно с ценовым возражением через ценность и параллельно выходить на Марата через Алину.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (нет), Решение (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Уточнить у Алины: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, как Марат участвует в выборе подрядчика: можно ли получить его контакт или переслать ему КП напрямую\n\n## Сроки — УСПЕВАЕМ\n\nСтарт в ближайший рабочий день, 23 ноября (пн): производство 7 рабочих дней — до 2 декабря (ср), монтаж 2–3 раб. дн. — готово 4 декабря (пт) – 7 декабря (пн). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 5 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Снять ценовое возражение Марата через ценность и варианты под бюджет, не обесценивая предложение\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не придётся пересказывать Марату технические детали и отвечать на его вопросы за подрядчика — она получит готовую страницу с обоснованием цены и варианты под бюджет, которые просто перешлёт\n- **ЛПР:** Марат получит вывеску, которая окупается: световые буквы работают 24/7 и приводят клиентов годами, а не баннер за 15 тысяч, который через месяц выглядит дёшево и не привлекает. Цена 128 000 — это вложение в поток клиентов, а не разовая трата\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): ответить на «дорого» Марата — не игнорировать возражение, а прояснить жёсткость бюджета и что важнее сохранить\n2. Касание 2 (Алине): каждый вариант под бюджет — с честным риском отхода от ТЗ, как в файле отрасли (уменьшить высоту — хуже читается; реже диоды — неравномерное свечение; пластиковый борт — меньше жёсткость)\n3. Касание 4 (Алине): страница для Марата начинается с того, что он получает — вывеску, которая окупается и приводит клиентов, — а не с проблемы «дорого»\n4. Касание 4 (Алине): просьба контакта Марата — только с согласия Алины; в timing пометка «только если Алина даст контакт или согласится переслать»\n5. Касание 5 (звонок Алине): только если Алина не отвечает на касание 4 или отвечает уклончиво — не раньше\n\n### Следующий шаг\n\n1. **Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн) · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Ответить на «дорого» Марата, прояснить жёсткость бюджета и что важнее сохранить, предложить варианты под бюджет с честным риском\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка на ранней стадии: КП отправлено, получено прямое возражение по цене от финансового ЛПР Марата через Алину. Главный блокер — финансы: разрыв 28 000 ₽ между бюджетом «до 100 тысяч» и КП на 128 000 ₽. Вторичный блокер — ЛПР: решения принимает Марат, но прямого контакта с ним нет. Стратегия: сначала прояснить жёсткость бюджета и что важнее сохранить, затем дать варианты под бюджет с честным риском, параллельно выходить на Марата через Алину (готовая страница с обоснованием цены или контакт для прямого разговора). Сроки не давим: открытие 15 декабря, запас 5 рабочих дней, последний день старта — 30 ноября. Если Алина не отвечает — звонок с прямым вопросом о статусе.\n\n## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн)_\n\n**Перед касанием:** Перед звонком: открыть КП и переписку, посмотреть фото фасада, подготовить 2–3 варианта под бюджет с честным риском (уменьшить высоту букв, реже диоды, пластиковый борт). Проверить по 902-ПП: буквы без подсветки в Москве нельзя — это будет главный аргумент против варианта Марата.\n\nАлина, добрый день! Это Ольга, «Яркая Реклама». Не отвлекаю в выходной? Если удобнее в будни — наберу в понедельник.\n\n[пауза, выслушать]\n\nЯ посмотрела, что Марат написал про бюджет — решила сразу набрать, чтобы не мучить вас перепиской. По цене мы, уверена, договоримся) Только хочу понять: а в целом решение вам подходит? Буквы, табличка, как на визуализации — вам с Маратом нравится?\n\n[пауза, выслушать]\n\nПоняла. А можно уточнить: когда Марат говорит «дорого» — это какой случай? Для одних «дорого» — значит, не нужно сейчас, для других — не рассчитывали на такую сумму, а третьи просто хотят поторговаться. У вас какой вариант ближе?\n\n[пауза, выслушать]\n\n[Если «не рассчитывали»:]\nПонимаю. Тогда давайте разберёмся, как попасть в его бюджет. Подскажите: «до 100 тысяч» — это жёсткий потолок или ориентир? И что для вас важнее сохранить: размер букв, подсветку или материал? От этого зависит, какие варианты я предложу.\n\n[пауза, выслушать]\n\n[Если «поторговаться»:]\nПоняла вас, знаете, у меня таких полномочий нет, конечно. Но я могу попробовать согласовать с руководителем небольшую уступку — только это обычно непросто. Если получится — готовы заключаться тогда?\n\n[пауза, выслушать]\n\n[Если «не нужно сейчас»:]\nА решение-то в целом понравилось? На какую перспективу смотрите — открытие же 15 декабря, верно?\n\n[пауза, выслушать]\n\n[После отработки:]\nКстати, Алина, а вам-то как в целом? Если бы выбирали вы — согласовали бы?\n\n[пауза, выслушать]\n\n[Если Алина влияет на решение:]\nТогда давайте так: я подготовлю для Марата короткую страницу — что он получает за эти деньги и какие есть варианты под бюджет, с честным раскладом, чем рискуем. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Подготовить?\n\n[пауза, выслушать]\n\n[Если да:]\nОтлично, пришлю сегодня-завтра. И ещё: буквы без подсветки в Москве по правилам города нельзя — это я сразу скажу, чтобы Марат не тратил время на этот вариант. А баннер на фасаде — тоже нельзя, только внутри. Но это всё будет на странице, с объяснением.\n\n[Закрытие:]\nДоговорились. Тогда я готовлю страницу для Марата и варианты под бюджет — пришлю вам в понедельник утром, ок? И если Марат захочет обсудить голосом — я на связи, это быстрее, чем переписка.\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "тишина → «вы мне надоели»",
+     "today": "2026-11-26",
+     "expect": [
+      "негатив — ВПР: поддержка без оправданий и без «да, но», вопрос о её видении / «всё верно?», без продажи в этом касании",
+      "не сливаться: оставить дверь открытой, снизить частоту",
+      "честно: к 15.12 ещё успеваем — только если это уместно после деэскалации",
+      "далее — не давить; «последний шанс» финально с «что я сделала не так?»"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-26",
+       "timing": "Сегодня, 26 ноября (чт)",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "condition": "",
+       "goal": "Снять раздражение Алины, признать что касания были лишними, вернуть диалог",
+       "how": "СЦЕНАРИЙ «НЕГАТИВ» (владелец, файл 31 — клиент в эмоциях, аргументы сейчас не работают): 1) дать выпустить пар, не спорить, не оправдываться — поддержка / комплимент: «понимаю вас», «спасибо, что сказали прямо», «ценю ваш деловой подход», «вижу, как вы внимательны к деталям»; 2) проверить понимание — «правильно понимаю, что [цепочка событий]? всё верно?»; 3) спросить видение клиента — «как вы видите правильный выход?»; 4) если нужно решение — «уйду на согласование и вернусь с двумя вариантами до [день]», если клиент хочет быстрого ответа — короткое конкретное предложение вопросом («давайте сориентирую по вилке цен, могу так?»). Нельзя: «да, но», «однако», «именно поэтому», перечень фактов «почему мы правы», оффер и закрытие сделки в этом касании. ЛДПР (владелец 17.11, файл 28): если адресат — не ЛПР, а контактное лицо и его влияние на решение ещё не выяснено, — одним вопросом выяснить, как бы между делом: «А если бы выбирали вы, [имя]?» / «А вам-то как в целом?» / «А как вы влияете на решение [ЛПР]?». Влияет — можно аккуратно заходить и через него (редко: не обходить ЛПР и не перекладывать на контакт всё, чтобы не слить сделку).",
+       "scenarios": [
+        "negative"
+       ],
+       "key_message": "Алина, вы правы — я переборщила с сообщениями. Извините. Больше не буду писать без дела. Один вопрос, и я отстану: Марат сказал «дорого» — это жёсткий потолок бюджета или просто ориентир? Если потолок — я подберу варианты под 100 тысяч, чтобы вы не переплачивали. Если ориентир — объясню, что входит в 128.",
+       "value": "Алина получает: я признаю её правоту, перестаю давить и сразу перехожу к делу — ей не нужно ничего объяснять, просто ответить на один вопрос",
+       "criterion": "ФВ — финансовая возможность",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (Алине): признать, что сообщений было слишком много — она написала «вы мне уже надоели своими сообщениями!!!» (26.11), без этого шага дальнейшие касания только усилят раздражение",
+        "Касание 1 (Алине): спросить, что значит «дорого» для Марата — жёсткий потолок или ориентир, потому что Марат сказал «дорого» (20.11), но причина не выяснена",
+        "Касание 4 (сверка даты): опираться на условие, которое менеджер уже называла — производство 7 рабочих дней после согласования макета (19.11), и на дату открытия 15 декабря, без новых обещаний"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "9 декабря (ср) – 10 декабря (чт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      },
+      {
+       "touchpoint_number": 2,
+       "send_date": null,
+       "timing": "Только если Алина ответила на касание 1, не раньше 27 ноября (пт)",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "condition": "Только если Алина ответила на касание 1",
+       "goal": "Дать Алине готовую страницу для пересылки Марату: что он получает за 128 000 ₽ и какие есть варианты под бюджет с честным риском",
+       "how": "СЦЕНАРИЙ «ДОРОГО» (владелец, файл 28): 1) локализовать — «стоимость — вопрос важный, я вас очень понимаю; при этом по цене мы с клиентами почти всегда договариваемся. А в целом решение вам подходит?» [выслушать]; 2) ПРОЯСНИТЬ, какое «дорого»: «для одних „дорого“ — не нужно сейчас, для других — не рассчитывали, третьи хотят поторговаться. У вас какой вариант?» [выслушать]; 3) по ответу: не нужно сейчас — актуализация; не рассчитывали — ценность по триггерам клиента и варианты под бюджет с честным риском отхода от ТЗ; поторговаться — сценарий «Торг»; 4) после отработки — выход на сделку или договорённость о шаге с датой. Скидку сами не предлагаем. Деньги — голосом (голос недоступен — можно в переписке).",
+       "scenarios": [
+        "dorogo"
+       ],
+       "key_message": "Алина, спасибо. Подготовила для Марата короткую страницу — что входит в 128 000 ₽ и какие есть варианты под бюджет, с честным раскладом, чем рискуем. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Прислать?",
+       "value": "Алине не нужно пересказывать Марату и отвечать на его вопросы за подрядчика — она просто пересылает готовую страницу и снимает с себя задачу",
+       "criterion": "ФВ — финансовая возможность",
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "9 декабря (ср) – 10 декабря (чт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      },
+      {
+       "touchpoint_number": 3,
+       "send_date": null,
+       "timing": "Только если Алина согласилась на касание 2 — после согласия, в тот же день",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Алина (для пересылки Марату)",
+       "condition": "Только если Алина согласилась на касание 2",
+       "goal": "Передать Алине готовый документ: результат за 128 000 ₽ + варианты под бюджет (уменьшить высоту букв, реже диоды, пластиковый борт) с честным риском каждого + объяснение, почему буквы без подсветки и баннер на фасаде в Москве нельзя",
+       "how": "",
+       "scenarios": [],
+       "key_message": "Вот страница для Марата. На ней: что вы получаете за 128 000 ₽ — вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору. И варианты под бюджет: уменьшить высоту букв — хуже читается с дороги; реже диоды — свечение может быть пятнами; пластиковый борт — служит меньше. Буквы без подсветки в Москве нельзя по правилам города, баннер на фасаде — тоже, только внутри. Марат выберет сам.",
+       "value": "Марат получает: понятный выбор — что он получает за свои деньги и чем рискует при экономии, решение за 15 минут без переговоров",
+       "criterion": "ФВ — финансовая возможность",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 3 (страница для Марата): объяснить, что буквы без подсветки и баннер на фасаде в Москве нельзя — Марат предлагал эти варианты (20.11), нужно снять их сразу, чтобы он не тратил время",
+        "Касание 3 (страница для Марата): начинается с того, что Марат получает — вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору, — а не с проблемы «дорого»"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "9 декабря (ср) – 10 декабря (чт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Алина",
+         "value": "Я признаю её правоту, перестаю давить и сразу перехожу к делу — ей не нужно ничего объяснять, просто ответить на один вопрос"
+        }
+       ],
+       "hook": {
+        "quote": "Ольга, вы мне уже надоели своими сообщениями!!! Я сказала — дорого. Нам сейчас не до вывески, открытие на носу.",
+        "prep": "Перед звонком: перечитать переписку с Алиной, особенно её последнее сообщение (26.11), чтобы точно помнить её слова и не оправдываться. Подготовить для себя два варианта вопроса про «дорого» — про жёсткий потолок и про ориентир, чтобы задать его коротко и по делу.",
+        "opening": "Алина, добрый день! Это Ольга из «Яркой Рекламы». Я прочитала ваше сообщение — вы правы, я переборщила с сообщениями. Извините, пожалуйста."
+       },
+       "body": "Алина, добрый день! Это Ольга из «Яркой Рекламы». Я прочитала ваше сообщение — вы правы, я переборщила с сообщениями. Извините, пожалуйста.\n\n[пауза, дать Алине высказаться, если она хочет — не перебивать, не спорить, не оправдываться]\n\nСпасибо, что сказали прямо — мне это правда важно. Я правильно понимаю: вы написали, что дорого, а я вместо ответа прислала ещё сообщение с фото. Всё верно?\n\n[выслушать]\n\nАлина, можно один вопрос — и я больше не буду писать без дела? Марат сказал «дорого» — это жёсткий потолок бюджета, или просто ориентир? Если потолок — я подберу варианты под 100 тысяч, но скажу честно: это отход от ТЗ. Если уменьшить буквы — вывеску хуже видно издалека; если реже поставить диоды — свечение может быть пятнами. Посчитаю и пришлю. Если ориентир — объясню, что входит в 128.\n\n[выслушать ответ]\n\nПоняла вас, спасибо. [Если Алина ответила — договориться о следующем шаге: «Тогда я подготовлю для Марата короткую страницу — что входит в 128 и какие есть варианты под бюджет, с честным раскладом. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Прислать?»]\n\n[Если Алина не хочет говорить или просит писать — предложить ответить письменно, коротко: «Хорошо, тогда напишу вам сюда — ответите, когда будет удобно. Спасибо, Алина!»]",
+       "channel": "Звонок",
+       "timing": "Сегодня, 26 ноября (чт)",
+       "kind": "экспертное",
+       "criterion": "ФВ — финансовая возможность",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 2,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Алина",
+         "value": "Алине не нужно пересказывать Марату и отвечать на его вопросы за подрядчика — она просто пересылает готовую страницу и снимает с себя задачу"
+        }
+       ],
+       "hook": {
+        "quote": "Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч.",
+        "prep": "Перед звонком: подготовить черновик страницы для Марата — что входит в 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору) и варианты под бюджет с честным риском каждого (уменьшить высоту букв, реже диоды, пластиковый борт). Держать перед глазами, чтобы в разговоре коротко перечислить.",
+        "opening": "Алина, добрый день! Спасибо, что ответили. Я подготовила для Марата короткую страницу — что входит в 128 000 ₽ и какие есть варианты под бюджет, с честным раскладом, чем рискуем."
+       },
+       "body": "Алина, добрый день! Спасибо, что ответили. Я подготовила для Марата короткую страницу — что входит в 128 000 ₽ и какие есть варианты под бюджет, с честным раскладом, чем рискуем.\n\n[пауза]\n\nВы просто перешлёте ему — и вам не придётся ничего пересказывать или отвечать за меня на его вопросы. Прислать?\n\n[выслушать]\n\n[Если Алина согласна — договориться о шаге: «Отправлю сегодня в течение часа. И, Алина, можно ещё вопрос? А вам-то самой как в целом решение? Если бы выбирали вы — согласовали бы?»]\n\n[выслушать]\n\n[Если Алина отвечает положительно — «Спасибо! Тогда отправляю страницу. Если Марату что-то будет непонятно — пусть напишет или наберёт, я всё объясню. Договорились?»]\n\n[Если Алина не хочет пересылать или сомневается — «Понимаю. А как вам было бы удобнее? Могу сама коротко объяснить Марату по телефону, если дадите его номер — или напишу ему сюда, если он есть в этом чате. Как лучше?»]",
+       "channel": "Звонок",
+       "timing": "Только если Алина ответила на касание 1, не раньше 27 ноября (пт)",
+       "kind": "экспертное",
+       "criterion": "ФВ — финансовая возможность",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 3,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Марат",
+         "value": "Марат получает: понятный выбор — что он получает за свои деньги и чем рискует при экономии, решение за 15 минут без переговоров"
+        }
+       ],
+       "hook": {
+        "quote": "Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч.",
+        "prep": "Перед звонком: оформить страницу для Марата — коротко, по пунктам: 1) что он получает за 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору); 2) варианты под бюджет с честным риском каждого (уменьшить высоту букв — хуже читается с дороги; реже диоды — свечение может быть пятнами; пластиковый борт — служит меньше); 3) почему буквы без подсветки и баннер на фасаде в Москве нельзя. Проверить, что всё по фактам из КП и 902-ПП.",
+        "opening": "Алина, добрый день! Отправляю страницу для Марата, как договорились."
+       },
+       "body": "Алина, добрый день! Отправляю страницу для Марата, как договорились.\n\n—\n\nМарат, здравствуйте! Это Ольга из «Яркой Рекламы». Алина попросила подготовить для вас короткую страницу — что вы получаете за 128 000 ₽ и какие есть варианты под бюджет.\n\nЧто вы получаете за 128 000 ₽:\n— вывеска «ГИБКОСТЬ» и табличка у входа смонтированы к открытию 15 декабря;\n— проект проверен по 902-ПП до производства — вывеску не придётся переделывать или снимать по требованию города, штрафа не будет;\n— гарантия по договору: если что-то случится — приедем в течение 3 рабочих дней и отремонтируем бесплатно.\n\nМарат, скажите, а в целом решение вам подходит? Если бы не цена — взяли бы?\n\n[выслушать]\n\nЕсли подходит — тогда давайте разберёмся с «дорого». Для одних «дорого» — это «не нужно сейчас», для других — «не рассчитывали на такую сумму», третьи хотят поторговаться. У вас какой вариант?\n\n[выслушать]\n\n[Если «не рассчитывали» — объяснить состав цены и ценность: вывеска к открытию, проверка по 902-ПП, гарантия по договору]\n\n[Если «поторговаться» — предложить варианты под бюджет с честным риском: уменьшить высоту букв — хуже читается издалека и с дороги; реже расставить диоды — свечение может быть неравномерным, «пятнами»; пластиковый борт вместо алюминиевого — служит меньше, может повести от перепадов температуры. Посчитаю и пришлю.]\n\n[Если «не нужно сейчас» — актуализировать: открытие 15 декабря, вывеска к открытию]\n\nМарат, если что-то будет непонятно — напишите или наберите, я всё объясню. Выбор за вами.",
+       "channel": "Звонок",
+       "timing": "Только если Алина согласилась на касание 2 — после согласия, в тот же день",
+       "kind": "экспертное",
+       "criterion": "ФВ — финансовая возможность",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Риск",
+       "evidence": [
+        "Марат (финансовый ЛПР) прямо сказал «дорого»",
+        "Бюджет назван: «до 100 тысяч», КП на 128 000 ₽ — разрыв 28 000 ₽",
+        "Марат предложил альтернативы дешевле: буквы без подсветки или баннер за 15 тысяч",
+        "Причина «дорого» не выяснена — менеджер не успел задать уточняющий вопрос, клиент раздражён"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Вероятно",
+       "evidence": [
+        "Алина сама инициировала контакт: «Нужна световая вывеска на студию»",
+        "Назвала конкретные параметры: длина ~3 метра, табличка у входа, текст «ГИБКОСТЬ»",
+        "Есть событие-дедлайн: открытие 15 декабря",
+        "Но приоритет вывески низкий: «Нам сейчас не до вывески, открытие на носу»"
+       ],
+       "confidence": "medium"
+      },
+      "trust": {
+       "status": "Риск",
+       "evidence": [
+        "Алина раздражена: «вы мне уже надоели своими сообщениями!!!»",
+        "С самого начала была настроена скептически: «Вы уже третья компания, которая вместо цены задаёт вопросы»",
+        "Повторные касания без новой ценности вызвали отторжение, а не сближение"
+       ],
+       "confidence": "high"
+      },
+      "authority": {
+       "status": "Риск",
+       "evidence": [
+        "Алина прямо сказала: «Бюджет — Марат говорит до 100 тысяч, решает он»",
+        "Марат — второй совладелец, отвечает за деньги, но прямого контакта с ним нет",
+        "Всё общение идёт через Алину, которая сама не принимает финансовое решение",
+        "Алина занята («весь день на тренировках») и не мотивирована продвигать проект"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Срок близко: с запасом, запас 2 раб. дн.",
+        "Открытие 15 декабря — конкретная дата",
+        "По расчёту timeline: успеваем с запасом 2 рабочих дня, последний день старта — 30 ноября",
+        "Но Алина говорит «нам сейчас не до вывески» — приоритет низкий, несмотря на близкий дедлайн"
+       ],
+       "confidence": "medium"
+      }
+     },
+     "soprano": {
+      "С": {
+       "status": "собрано",
+       "note": "Студия растяжки «Гибкость», Москва, Бауманская 11, 1 этаж жилого дома, вход с улицы. Нужна световая вывеска ~3 метра + табличка у входа. Открытие 15 декабря."
+      },
+      "О1": {
+       "status": "частично",
+       "note": "Опыт с подрядчиками не выяснен. Известно только, что Алина уже обращалась в две компании до нас («вы уже третья компания»)."
+      },
+      "П": {
+       "status": "частично",
+       "note": "Критерии выбора не названы. Единственный явный критерий — цена (Марат: «дорого», предлагает дешёвые альтернативы)."
+      },
+      "Р": {
+       "status": "собрано",
+       "note": "Решает Марат (совладелец, отвечает за деньги). Алина — совладелица и тренер, передаёт информацию."
+      },
+      "А": {
+       "status": "частично",
+       "note": "Алина обращалась минимум в две другие компании. Рассматривает ли сейчас альтернативы — неизвестно. Готовность менять параметры (размер, подсветка, материал) не выяснена."
+      },
+      "Н": {
+       "status": "нет",
+       "note": "Чего хочет избежать клиент — не обсуждалось."
+      },
+      "О2": {
+       "status": "частично",
+       "note": "Бюджет назван: «до 100 тысяч» (со слов Марата через Алину). Жёсткость бюджета не выяснена. Срок — открытие 15 декабря."
+      }
+     },
+     "soprano_recs": [
+      "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+      "Уточнить у Алины, смотрят ли они сейчас другие варианты или уже определились с подрядчиком — и что для них важнее: цена или чтобы вывеска была к открытию.",
+      "Выяснить, что именно значит «дорого» для Марата: жёсткий потолок бюджета или ориентир, и что важнее сохранить — размер букв, подсветку или материал."
+     ],
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Вероятно\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «дорого», «давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» — считает деньги, ищет самый дешёвый вариант. (Марат)\n- **Удобство:** «созваниваться некогда», «пишите здесь», «весь день на тренировках» — нет времени на разговоры, хочет решить быстро и без лишних действий. (Алина)\n\n**Вывод:** Сделка на ранней стадии, но уже под угрозой. Главный блокер — финансы: Марат прямо сказал «дорого», бюджет «до 100 тысяч» против КП 128 000 ₽, причина не выяснена. Вторичный блокер — ЛПР: решения принимает Марат, но прямого контакта нет, всё идёт через Алину, которая сейчас раздражена повторными касаниями. Доверие тоже в зоне риска: клиентку «достали» сообщениями, и это может закрыть сделку окончательно. Срочность формально есть (открытие 15 декабря, запас 2 рабочих дня), но клиент сам говорит «не до вывески» — приоритет низкий. Дальнейшие касания без новой ценности и без смены подхода только усилят раздражение. Нужно сначала восстановить контакт и прояснить причину «дорого», затем — выходить на Марата с подготовленными материалами.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, смотрят ли они сейчас другие варианты или уже определились с подрядчиком — и что для них важнее: цена или чтобы вывеска была к открытию.\n- Выяснить, что именно значит «дорого» для Марата: жёсткий потолок бюджета или ориентир, и что важнее сохранить — размер букв, подсветку или материал.\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 26 ноября (чт): производство 7 рабочих дней — до 7 декабря (пн), монтаж 2–3 раб. дн. — готово 9 декабря (ср) – 10 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 2 рабочих дня. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Восстановить контакт с Алиной, выяснить причину «дорого» и подготовить для Марата материалы с вариантами под бюджет\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не нужно пересказывать Марату и отвечать на его вопросы за подрядчика — она просто пересылает готовую страницу и снимает с себя задачу, а я признаю её правоту и перестаю давить\n- **ЛПР:** Марат получает: вывеска к открытию 15 декабря по цене из КП, без доплат по ходу, с гарантией по договору — или варианты под бюджет с честным раскладом, чем рискует при экономии\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): признать, что сообщений было слишком много — она написала «вы мне уже надоели своими сообщениями!!!» (26.11), без этого шага дальнейшие касания только усилят раздражение\n2. Касание 1 (Алине): спросить, что значит «дорого» для Марата — жёсткий потолок или ориентир, потому что Марат сказал «дорого» (20.11), но причина не выяснена\n3. Касание 3 (страница для Марата): объяснить, что буквы без подсветки и баннер на фасаде в Москве нельзя — Марат предлагал эти варианты (20.11), нужно снять их сразу, чтобы он не тратил время\n4. Касание 3 (страница для Марата): начинается с того, что Марат получает — вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору, — а не с проблемы «дорого»\n5. Касание 4 (сверка даты): опираться на условие, которое менеджер уже называла — производство 7 рабочих дней после согласования макета (19.11), и на дату открытия 15 декабря, без новых обещаний\n\n### Следующий шаг\n\n1. **Сегодня, 26 ноября (чт) · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Снять раздражение Алины, признать что касания были лишними, вернуть диалог\n2. **Только если Алина ответила на касание 1 · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Дать Алине готовую страницу для пересылки Марату: что он получает за 128 000 ₽ и какие есть варианты под бюджет с честным риском\n3. **Только если Алина согласилась на касание 2 · Звонок** · экспертное · ФВ\n  Кому: Алина (для пересылки Марату)\n  Передать Алине готовый документ: результат за 128 000 ₽ + варианты под бюджет (уменьшить высоту букв, реже диоды, пластиковый борт) с честным риском каждого + объяснение, почему буквы без подсветки и баннер на фасаде в Москве нельзя\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка под угрозой: Алина раздражена повторными касаниями, Марат сказал «дорого», причина не выяснена. Первый шаг — снять раздражение и вернуть диалог через извинение и один вопрос о причине «дорого». Затем — дать Алине готовую страницу для Марата: что он получает за 128 000 ₽ и варианты под бюджет с честным риском. Буквы без подсветки и баннер на фасаде в Москве нельзя — это снимаем сразу. Сроки успеваем: последний день старта 30 ноября, вывеска к 14 декабря. Если после страницы Марат не отвечает — мягко сверить дату открытия и держать слот как заботу о дате.\n\n## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 26 ноября (чт)_\n\n**Перед касанием:** Перед звонком: перечитать переписку с Алиной, особенно её последнее сообщение (26.11), чтобы точно помнить её слова и не оправдываться. Подготовить для себя два варианта вопроса про «дорого» — про жёсткий потолок и про ориентир, чтобы задать его коротко и по делу.\n\nАлина, добрый день! Это Ольга из «Яркой Рекламы». Я прочитала ваше сообщение — вы правы, я переборщила с сообщениями. Извините, пожалуйста.\n\n[пауза, дать Алине высказаться, если она хочет — не перебивать, не спорить, не оправдываться]\n\nСпасибо, что сказали прямо — мне это правда важно. Я правильно понимаю: вы написали, что дорого, а я вместо ответа прислала ещё сообщение с фото. Всё верно?\n\n[выслушать]\n\nАлина, можно один вопрос — и я больше не буду писать без дела? Марат сказал «дорого» — это жёсткий потолок бюджета, или просто ориентир? Если потолок — я подберу варианты под 100 тысяч, но скажу честно: это отход от ТЗ. Если уменьшить буквы — вывеску хуже видно издалека; если реже поставить диоды — свечение может быть пятнами. Посчитаю и пришлю. Если ориентир — объясню, что входит в 128.\n\n[выслушать ответ]\n\nПоняла вас, спасибо. [Если Алина ответила — договориться о следующем шаге: «Тогда я подготовлю для Марата короткую страницу — что входит в 128 и какие есть варианты под бюджет, с честным раскладом. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Прислать?»]\n\n[Если Алина не хочет говорить или просит писать — предложить ответить письменно, коротко: «Хорошо, тогда напишу вам сюда — ответите, когда будет удобно. Спасибо, Алина!»]\n\n---\n\n### Касание 2 · Звонок · экспертное · ФВ\n_Когда: Только если Алина ответила на касание 1, не раньше 27 ноября (пт)_\n\n**Перед касанием:** Перед звонком: подготовить черновик страницы для Марата — что входит в 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору) и варианты под бюджет с честным риском каждого (уменьшить высоту букв, реже диоды, пластиковый борт). Держать перед глазами, чтобы в разговоре коротко перечислить.\n\nАлина, добрый день! Спасибо, что ответили. Я подготовила для Марата короткую страницу — что входит в 128 000 ₽ и какие есть варианты под бюджет, с честным раскладом, чем рискуем.\n\n[пауза]\n\nВы просто перешлёте ему — и вам не придётся ничего пересказывать или отвечать за меня на его вопросы. Прислать?\n\n[выслушать]\n\n[Если Алина согласна — договориться о шаге: «Отправлю сегодня в течение часа. И, Алина, можно ещё вопрос? А вам-то самой как в целом решение? Если бы выбирали вы — согласовали бы?»]\n\n[выслушать]\n\n[Если Алина отвечает положительно — «Спасибо! Тогда отправляю страницу. Если Марату что-то будет непонятно — пусть напишет или наберёт, я всё объясню. Договорились?»]\n\n[Если Алина не хочет пересылать или сомневается — «Понимаю. А как вам было бы удобнее? Могу сама коротко объяснить Марату по телефону, если дадите его номер — или напишу ему сюда, если он есть в этом чате. Как лучше?»]\n\n---\n\n### Касание 3 · Звонок · экспертное · ФВ\n_Когда: Только если Алина согласилась на касание 2 — после согласия, в тот же день_\n\n**Перед касанием:** Перед звонком: оформить страницу для Марата — коротко, по пунктам: 1) что он получает за 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору); 2) варианты под бюджет с честным риском каждого (уменьшить высоту букв — хуже читается с дороги; реже диоды — свечение может быть пятнами; пластиковый борт — служит меньше); 3) почему буквы без подсветки и баннер на фасаде в Москве нельзя. Проверить, что всё по фактам из КП и 902-ПП.\n\nАлина, добрый день! Отправляю страницу для Марата, как договорились.\n\n—\n\nМарат, здравствуйте! Это Ольга из «Яркой Рекламы». Алина попросила подготовить для вас короткую страницу — что вы получаете за 128 000 ₽ и какие есть варианты под бюджет.\n\nЧто вы получаете за 128 000 ₽:\n— вывеска «ГИБКОСТЬ» и табличка у входа смонтированы к открытию 15 декабря;\n— проект проверен по 902-ПП до производства — вывеску не придётся переделывать или снимать по требованию города, штрафа не будет;\n— гарантия по договору: если что-то случится — приедем в течение 3 рабочих дней и отремонтируем бесплатно.\n\nМарат, скажите, а в целом решение вам подходит? Если бы не цена — взяли бы?\n\n[выслушать]\n\nЕсли подходит — тогда давайте разберёмся с «дорого». Для одних «дорого» — это «не нужно сейчас», для других — «не рассчитывали на такую сумму», третьи хотят поторговаться. У вас какой вариант?\n\n[выслушать]\n\n[Если «не рассчитывали» — объяснить состав цены и ценность: вывеска к открытию, проверка по 902-ПП, гарантия по договору]\n\n[Если «поторговаться» — предложить варианты под бюджет с честным риском: уменьшить высоту букв — хуже читается издалека и с дороги; реже расставить диоды — свечение может быть неравномерным, «пятнами»; пластиковый борт вместо алюминиевого — служит меньше, может повести от перепадов температуры. Посчитаю и пришлю.]\n\n[Если «не нужно сейчас» — актуализировать: открытие 15 декабря, вывеска к открытию]\n\nМарат, если что-то будет непонятно — напишите или наберите, я всё объясню. Выбор за вами.\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    },
+    {
+     "label": "созвон с Маратом: −10% и монтаж в выходной",
+     "today": "2026-11-27",
+     "expect": [
+      "торг — не отдавать 10% просто так: обмен на шаг (оплата / подписание сегодня), уступка только через «согласовала с руководителем» и честно",
+      "монтаж в выходной — не обещать без проверки, уточнить и вернуться",
+      "follow-up после звонка: резюме договорённостей и «ок?»",
+      "дата готовности к открытию 15.12 — из расчёта, честно (с запасом / впритык)",
+      "менеджер — женщина"
+     ],
+     "plan": [
+      {
+       "touchpoint_number": 1,
+       "send_date": "2026-11-27",
+       "timing": "Сегодня, 27 ноября (пт)",
+       "channel": "Звонок",
+       "kind": "экспертное",
+       "recipient": "Марат (совладелец, ЛПР по деньгам)",
+       "condition": "",
+       "goal": "Дать ответ на оба условия Марата: скидка 10% и монтаж в воскресенье. Согласовать уступку через полномочия в обмен на решение сегодня. Проверить дату открытия.",
+       "how": "",
+       "scenarios": [],
+       "key_message": "Марат, я уточнила у руководителя. Скидку 10% дать не могу — таких полномочий у меня нет. Но я попробую согласовать 5% за то, что решаем сегодня и запускаем производство. Монтаж в воскресенье — проверю у бригады, обычно монтажи по будням, но для вас уточню. Дата открытия 15 декабря в силе?",
+       "value": "Марат получает конкретный ответ в обещанный срок, уступку через усилие менеджера и заботу о его дате открытия — вывеска будет к 15 декабря",
+       "criterion": "ФВ — финансовая возможность",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 1 (звонок Марату): ответить на оба условия — скидка 10% и монтаж в воскресенье — в обещанный срок до 18:00 сегодня, иначе клиент воспримет задержку как необязательность",
+        "Касание 1 (звонок Марату): скидку 10% не давать — предложить 5% через полномочия («у меня таких полномочий нет, попробую согласовать») в обмен на решение сегодня",
+        "Касание 1 (звонок Марату): сверить дату открытия 15 декабря одним вопросом — «дата в силе?»"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      },
+      {
+       "touchpoint_number": 2,
+       "send_date": null,
+       "timing": "только если Марат в звонке согласился на условия — после согласия, в тот же день",
+       "channel": "Telegram",
+       "kind": "экспертное",
+       "recipient": "Марат (совладелец, ЛПР по деньгам)",
+       "condition": "только если Марат в звонке согласился на условия",
+       "goal": "Зафиксировать договорённости письменно: уступка, дата старта, монтаж, дата открытия. Дать Марату и Алине одну точку правды.",
+       "how": "",
+       "scenarios": [],
+       "key_message": "Марат, резюмирую наш разговор: согласовали [уступка] при запуске сегодня, производство 7 рабочих дней, монтаж [дата из timeline], вывеска и табличка к открытию 15 декабря. Отправляю договор — как подпишете, запускаем.",
+       "value": "Марат и Алина видят зафиксированные условия — ничего не потеряется, всё по договору",
+       "criterion": "Д — доверие",
+       "also_criteria": [],
+       "must_include": [
+        "Касание 2 (Telegram после звонка): зафиксировать договорённости письменно — уступка, дата старта, монтаж, дата открытия"
+       ],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      },
+      {
+       "touchpoint_number": 3,
+       "send_date": null,
+       "timing": "только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)",
+       "channel": "Telegram",
+       "kind": "эмпатичное",
+       "recipient": "Алина (совладелица, контактное лицо)",
+       "condition": "только если после звонка Марату нет подтверждения запуска",
+       "goal": "Мягко напомнить о дедлайне через заботу о дате открытия, не давить. Последний день старта — 30 ноября.",
+       "how": "",
+       "scenarios": [],
+       "key_message": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?",
+       "value": "Алина получает уверенность, что вывеска будет к открытию, и конкретный шаг, который держит слот",
+       "criterion": "ЗС — здесь и сейчас",
+       "also_criteria": [],
+       "must_include": [],
+       "facts": {
+        "status_on_send_day": "с запасом",
+        "permanent_ready_if_start_that_day": "10 декабря (чт) – 11 декабря (пт)",
+        "note": "Каждый рабочий день ожидания сдвигает готовность на рабочий день."
+       },
+       "inserted": false,
+       "last_chance": false,
+       "weekend": false,
+       "path_mode": "step"
+      }
+     ],
+     "touches": [
+      {
+       "touchpoint_number": 1,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Марат (совладелец, ЛПР по деньгам)",
+         "value": "Конкретный ответ в обещанный срок, уступка через усилие менеджера и забота о дате открытия — вывеска будет к 15 декабря"
+        }
+       ],
+       "hook": {
+        "quote": "Марат готов созвониться 5 минут, наберите его",
+        "prep": "Перед звонком: уточнить у руководителя возможность уступки 5% за решение сегодня; позвонить на производство и спросить бригаду про монтаж в воскресенье.",
+        "opening": "Марат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям."
+       },
+       "body": "Марат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям.\n\nСкажите, а в целом решение вам подходит? [пауза, выслушать]\n\nПо «дорого» — хочу понять, что именно: для одних это «сейчас не нужно», для других — «не рассчитывали такую сумму», третьи просто хотят поторговаться. У вас какой вариант? [пауза, выслушать]\n\n[по ответу: не нужно сейчас — актуализация; не рассчитывали — состав цены и ценность; поторговаться — варианты под бюджет с честным риском или уступка в обмен на шаг]\n\nПо скидке: 10% дать не могу — у меня таких полномочий нет. Но я попробую согласовать с руководителем 5%, если решаем сегодня и запускаем производство. Это непросто, но я постараюсь убедить.\n\nПо монтажу в воскресенье: обычно бригада работает по будням, но я спросила — для вас уточню, возможно ли. Если нет — предложу ближайший будний день, чтобы не мешать тренировкам.\n\nИ ещё: дата открытия 15 декабря в силе? Если да — при запуске сегодня вывеска будет готова 10–11 декабря, с запасом до открытия. Вам спокойно, гости увидят вывеску с первого дня.\n\n[пауза, выслушать]\n\nЕсли я согласую 5% и монтаж в удобный день — запускаем сегодня?",
+       "channel": "Звонок",
+       "timing": "Сегодня, 27 ноября (пт)",
+       "kind": "экспертное",
+       "criterion": "ФВ — финансовая возможность",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 2,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Марат (совладелец, ЛПР по деньгам)",
+         "value": "Зафиксированные условия — ничего не потеряется, всё по договору"
+        }
+       ],
+       "hook": {
+        "quote": "Марат готов созвониться 5 минут, наберите его",
+        "prep": "Перед отправкой: сверить с договором согласованные в звонке уступку, дату старта и монтажа.",
+        "opening": "Марат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды."
+       },
+       "body": "Марат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды.\n\nДоговорились:\n— уступка [размер] при запуске сегодня;\n— производство 7 рабочих дней;\n— монтаж [дата из timeline];\n— вывеска и табличка к открытию 15 декабря.\n\nОтправляю договор — как подпишете, запускаем производство. Всё верно?",
+       "channel": "Telegram",
+       "timing": "только если Марат в звонке согласился на условия — после согласия, в тот же день",
+       "kind": "экспертное",
+       "criterion": "Д — доверие",
+       "last_chance": false
+      },
+      {
+       "touchpoint_number": 3,
+       "subject": null,
+       "value_for_recipient": [
+        {
+         "recipient": "Алина (совладелица, контактное лицо)",
+         "value": "Уверенность, что вывеска будет к открытию, и конкретный шаг, который держит слот"
+        }
+       ],
+       "hook": {
+        "quote": "Открытие 15 декабря",
+        "prep": "Перед отправкой: проверить по timeline дату монтажа при старте 30 ноября.",
+        "opening": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня."
+       },
+       "body": "Алина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?",
+       "channel": "Telegram",
+       "timing": "только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)",
+       "kind": "эмпатичное",
+       "criterion": "ЗС — здесь и сейчас",
+       "last_chance": false
+      }
+     ],
+     "scores": {
+      "financial": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Марат (ЛПР по деньгам) вышел на прямой контакт и торгуется: просит скидку 10% — это условие покупки, а не отказ",
+        "Назван ориентир бюджета: «до 100 тысяч» (Алина, 18.11), КП на 128 000 ₽ — разница ≈ 28%, запрошенная скидка 10% (≈ 12 800 ₽) укладывается в логику торга",
+        "Клиент готов заказать при выполнении условия — значит, деньги на сделку есть"
+       ],
+       "confidence": "high"
+      },
+      "need": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Клиент сам инициировал контакт: заявка с сайта в Telegram (17.11)",
+        "Сам описал задачу: световая вывеска ~3 метра + табличка у входа, текст «ГИБКОСТЬ», строка «студия растяжки»",
+        "Есть жёсткий дедлайн: открытие 15 декабря",
+        "Марату нравится визуализация — решение по сути принято, остались условия"
+       ],
+       "confidence": "high"
+      },
+      "trust": {
+       "status": "Вероятно",
+       "evidence": [
+        "Марат согласился на прямой созвон и сказал, что визуализация нравится — позитивный сигнал",
+        "Алина после резкого сообщения («вы мне уже надоели») извинилась и дала контакт Марата — контакт не потерян",
+        "Прямого подтверждения глубокого доверия пока нет: обсуждаются условия, а не детали внедрения"
+       ],
+       "confidence": "medium"
+      },
+      "authority": {
+       "status": "Подтверждено",
+       "evidence": [
+        "ЛПР по деньгам назван явно: «Бюджет — Марат говорит до 100 тысяч, решает он» (Алина, 18.11)",
+        "Марат вышел на прямой контакт: дал номер, состоялся созвон 27.11",
+        "Марат лично выдвигает условия сделки (скидка 10%, монтаж в воскресенье) — принимает решение сам"
+       ],
+       "confidence": "high"
+      },
+      "urgency": {
+       "status": "Подтверждено",
+       "evidence": [
+        "Жёсткий дедлайн: открытие студии 15 декабря",
+        "Марат торгуется и называет конкретные условия — это сигнал готовности покупать сейчас, а не «подумаем»",
+        "Монтаж в воскресенье обсуждается как реальное условие запуска — клиент мысленно уже в процессе",
+        "По расчёту: старт сегодня даёт готовность 10–11 декабря, запас до открытия есть"
+       ],
+       "confidence": "high"
+      }
+     },
+     "soprano": {
+      "С": {
+       "status": "собрано",
+       "note": "Студия растяжки «Гибкость», Бауманская 11, открытие 15 декабря, вывеска ~3 м + табличка"
+      },
+      "О1": {
+       "status": "частично",
+       "note": "Алина упомянула, что они «уже третья компания» — значит, опыт общения с подрядчиками есть, но детали не выяснены"
+      },
+      "П": {
+       "status": "частично",
+       "note": "Главный критерий — цена («дорого», «до 100 тысяч»), остальные критерии выбора не названы"
+      },
+      "Р": {
+       "status": "собрано",
+       "note": "Решает Марат (деньги), Алина — совладелица и контактное лицо"
+      },
+      "А": {
+       "status": "частично",
+       "note": "Клиент сравнивает с альтернативами: буквы без подсветки, баннер за 15 тысяч — но других подрядчиков в явном виде не называл"
+      },
+      "Н": {
+       "status": "нет",
+       "note": "Чего хочет избежать — не обсуждалось"
+      },
+      "О2": {
+       "status": "собрано",
+       "note": "Бюджет «до 100 тысяч» (Марат), дедлайн 15 декабря, монтаж желательно в воскресенье"
+      }
+     },
+     "soprano_recs": [
+      "Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.",
+      "Уточнить у Марата, смотрит ли он другие варианты подрядчиков или сравнивает только с баннером/буквами без подсветки — это покажет, с кем реально конкурируем",
+      "Спросить, что для него важнее при выборе: цена, срок к открытию или надёжность — чтобы понять, чем закрывать оставшиеся сомнения"
+     ],
+     "chat": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «Дорого», «давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» — считает деньги и ищет самый дешёвый вариант (Марат)\n- **Надёжность:** «Открытие 15 декабря», «нам сейчас не до вывески, открытие на носу» — боится не успеть к сроку (Алина)\n\n**Вывод:** Сделка здоровая, на стадии дожима. Все пять критериев подтверждены или вероятны: потребность явная (открытие 15 декабря), ЛПР вышел на прямой контакт и торгуется, деньги есть — Марат называет условие покупки (скидка 10%), а не отказывается. Торг — это сигнал к покупке, а не потеря доверия. Главный рабочий вопрос — согласовать скидку и возможность воскресного монтажа, не потеряв дедлайн. Менеджер обещала вернуться до 18:00 сегодня — решение нужно дать в срок, иначе клиент воспримет задержку как необязательность.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (частично), Аналоги (частично), Нюансы (нет).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Марата, смотрит ли он другие варианты подрядчиков или сравнивает только с баннером/буквами без подсветки — это покажет, с кем реально конкурируем\n- Спросить, что для него важнее при выборе: цена, срок к открытию или надёжность — чтобы понять, чем закрывать оставшиеся сомнения\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 27 ноября (пт): производство 7 рабочих дней — до 8 декабря (вт), монтаж 2–3 раб. дн. — готово 10 декабря (чт) – 11 декабря (пт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 1 рабочий день. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._\n\n## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Закрыть сделку через обмен: небольшая уступка в обмен на решение сегодня, не потеряв дедлайн 15 декабря\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не нужно пересказывать Марату условия — всё зафиксировано письменно, она занимается тренировками, а не вывеской\n- **ЛПР:** Марат получает вывеску к открытию 15 декабря по цене из КП, без доплат по ходу, с гарантией по договору — вложение работает на бизнес с первого дня\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Марату): ответить на оба условия — скидка 10% и монтаж в воскресенье — в обещанный срок до 18:00 сегодня, иначе клиент воспримет задержку как необязательность\n2. Касание 1 (звонок Марату): скидку 10% не давать — предложить 5% через полномочия («у меня таких полномочий нет, попробую согласовать») в обмен на решение сегодня\n3. Касание 1 (звонок Марату): сверить дату открытия 15 декабря одним вопросом — «дата в силе?»\n4. Касание 2 (Telegram после звонка): зафиксировать договорённости письменно — уступка, дата старта, монтаж, дата открытия\n\n### Следующий шаг\n\n1. **Сегодня, 27 ноября (пт) · Звонок** · экспертное · ФВ\n  Кому: Марат (совладелец, ЛПР по деньгам)\n  Дать ответ на оба условия Марата: скидка 10% и монтаж в воскресенье. Согласовать уступку через полномочия в обмен на решение сегодня. Проверить дату открытия.\n2. **Только если Марат в звонке согласился на условия · Telegram** · экспертное · Д\n  Кому: Марат (совладелец, ЛПР по деньгам)\n  Зафиксировать договорённости письменно: уступка, дата старта, монтаж, дата открытия. Дать Марату и Алине одну точку правды.\n3. **Только если после звонка Марату нет подтверждения запуска · Telegram** · эмпатичное · ЗС\n  Кому: Алина (совладелица, контактное лицо)\n  Мягко напомнить о дедлайне через заботу о дате открытия, не давить. Последний день старта — 30 ноября.\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка здоровая, на стадии дожима. Марат торгуется — это сигнал к покупке. Главное — ответить в обещанный срок (до 18:00 сегодня) и согласовать уступку через полномочия: не 10%, а 5% в обмен на решение сегодня. Монтаж в воскресенье — проверить, но не обещать без подтверждения бригады. После звонка — письменная фиксация договорённостей. Если подтверждения нет — 30 ноября мягкое касание Алине через заботу о дате открытия.\n\n## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 27 ноября (пт)_\n\n**Перед касанием:** Перед звонком: уточнить у руководителя возможность уступки 5% за решение сегодня; позвонить на производство и спросить бригаду про монтаж в воскресенье.\n\nМарат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям.\n\nСкажите, а в целом решение вам подходит? [пауза, выслушать]\n\nПо «дорого» — хочу понять, что именно: для одних это «сейчас не нужно», для других — «не рассчитывали такую сумму», третьи просто хотят поторговаться. У вас какой вариант? [пауза, выслушать]\n\n[по ответу: не нужно сейчас — актуализация; не рассчитывали — состав цены и ценность; поторговаться — варианты под бюджет с честным риском или уступка в обмен на шаг]\n\nПо скидке: 10% дать не могу — у меня таких полномочий нет. Но я попробую согласовать с руководителем 5%, если решаем сегодня и запускаем производство. Это непросто, но я постараюсь убедить.\n\nПо монтажу в воскресенье: обычно бригада работает по будням, но я спросила — для вас уточню, возможно ли. Если нет — предложу ближайший будний день, чтобы не мешать тренировкам.\n\nИ ещё: дата открытия 15 декабря в силе? Если да — при запуске сегодня вывеска будет готова 10–11 декабря, с запасом до открытия. Вам спокойно, гости увидят вывеску с первого дня.\n\n[пауза, выслушать]\n\nЕсли я согласую 5% и монтаж в удобный день — запускаем сегодня?\n\n---\n\n### Касание 2 · Telegram · экспертное · Д\n_Когда: только если Марат в звонке согласился на условия — после согласия, в тот же день_\n\n**Перед касанием:** Перед отправкой: сверить с договором согласованные в звонке уступку, дату старта и монтажа.\n\nМарат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды.\n\nДоговорились:\n— уступка [размер] при запуске сегодня;\n— производство 7 рабочих дней;\n— монтаж [дата из timeline];\n— вывеска и табличка к открытию 15 декабря.\n\nОтправляю договор — как подпишете, запускаем производство. Всё верно?\n\n---\n\n### Касание 3 · Telegram · эмпатичное · ЗС\n_Когда: только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)_\n\n**Перед касанием:** Перед отправкой: проверить по timeline дату монтажа при старте 30 ноября.\n\nАлина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._"
+    }
+   ],
+   "residual": [],
+   "verdict": {
+    "critical": [],
+    "summary": "Касания в целом выстроены грамотно: путь соответствует этапам сделки, режим step соблюдён, 902-ПП учтён, деньги обсуждаются голосом, ЛПР выводится через контакт. Главная проблема — в after_reply касание 1 обещает «попробую согласовать 5%» без предварительного согласования с руководителем (в prep указано «уточнить у руководителя возможность уступки 5%», но в тексте звонка менеджер уже обещает клиенту конкретную цифру), а также в intermediate_stages[2] касание 1 содержит письменное обсуждение бюджета и вариантов под бюджет в звонке, что допустимо, но в тексте есть фраза «По цене мы, уверена, договоримся)» — слишком легковесное обещание уступки.",
+    "touches": [
+     {
+      "set": "before_reply",
+      "n": 1,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "after_reply",
+      "n": 1,
+      "send": "с мелкой правкой",
+      "issues": [
+       {
+        "rule": "Уступка через полномочия",
+        "comment": "В prep указано «уточнить у руководителя возможность уступки 5%», но в тексте звонка менеджер уже обещает: «я попробую согласовать с руководителем 5%, если решаем сегодня». Это нормально как сценарий, но лучше сначала согласовать с руководителем, а потом звонить клиенту с готовым ответом — иначе менеджер рискует пообещать то, что не согласуют."
+       }
+      ]
+     },
+     {
+      "set": "after_reply",
+      "n": 2,
+      "send": "как есть",
+      "issues": []
+     },
+     {
+      "set": "after_reply",
+      "n": 3,
+      "send": "как есть",
+      "issues": []
+     }
+    ],
+    "expectations": [
+     {
+      "expectation": "первый ход: «просто цену, вы третья компания» — не спорить, сориентировать вилкой и продать 2–3 вопроса / созвон как экономию её времени; коротко, в переписке",
+      "met": "да",
+      "comment": "Вилка 110–140 тыс. дана сразу, вопросы сведены к двум (текст и фото), обещание расчёта сегодня — конкретика."
+     },
+     {
+      "expectation": "Москва — 902-ПП учтён (без подсветки и баннер — нельзя)",
+      "met": "да",
+      "comment": "В intermediate_stages[1] касание 1 (звонок) прямо сказано: «буквы без подсветки в Москве по правилам города нельзя», «баннер на фасаде — тоже нельзя, только внутри»."
+     },
+     {
+      "expectation": "бренд «Яркая Реклама» (акрил)",
+      "met": "да",
+      "comment": "Везде указан бренд «Яркая Реклама», продукт — акрил."
+     },
+     {
+      "expectation": "глаголы менеджера — женский род",
+      "met": "да",
+      "comment": "«Поняла», «собрала», «подготовила», «решила», «уточнила» — женский род соблюдён."
+     },
+     {
+      "expectation": "выход на ЛПР Марата",
+      "met": "да",
+      "comment": "В intermediate_stages[0] касание 1 — вопрос Алине о влиянии («А если бы выбирали вы — как вам в целом?»), предложение переслать страницу Марату. В after_reply — прямой звонок Марату по его номеру."
+     },
+     {
+      "expectation": "нет «да, но», нет ИИ-штампов, выгода разными словами",
+      "met": "частично",
+      "comment": "ИИ-штампов нет, «да, но» нет. Выгода в основном через «вы получаете», но в intermediate_stages[2] касание 1 есть фраза «По цене мы, уверена, договоримся)» — слишком легковесное обещание, звучит как пустая уверенность."
+     },
+     {
+      "expectation": "сильный оффер конкретикой",
+      "met": "да",
+      "comment": "Даты готовности из timeline, проверка по 902-ПП, гарантия по договору, слот на производстве — конкретика есть."
+     }
+    ],
+    "plan_issues": [
+     "В after_reply касание 1: менеджер обещает клиенту «попробую согласовать 5%» до того, как согласовала с руководителем. По prep она должна была уточнить у руководителя ДО звонка, но в тексте звонка это подано как будущее действие. Лучше: сначала согласовать, потом звонить с готовым ответом.",
+     "В intermediate_stages[2] касание 1: звонок в выходной (суббота 21.11) — менеджер уточняет «Не отвлекаю в выходной?» — это правильно, но сам звонок в выходной по плану. Владелец допускает звонок в выходной только с уточнением удобства, что и сделано."
+    ],
+    "missing": [
+     "В after_reply касание 1 не хватает чёткого ответа на вопрос Марата о монтаже в воскресенье: менеджер говорит «уточню, возможно ли», но не даёт конкретики. Если бригада не работает в воскресенье — нужно сразу предложить альтернативу (например, монтаж в субботу или вечером в будни), чтобы не оставлять вопрос открытым.",
+     "В intermediate_stages[2] касание 1: после отработки «дорого» менеджер не фиксирует конкретный следующий шаг с датой — только «пришлю в понедельник утром, ок?». Для step-режима этого достаточно, но можно было бы зафиксировать точнее: «пришлю страницу в понедельник до 12:00, и если Марат захочет обсудить — наберу его в 15:00»."
+    ]
+   },
+   "chat": [
+    {
+     "label": "переписка",
+     "text": "## Формула закрытия\n\n- **ФВ — финансовая возможность:** Неизвестно\n- **ОП — осознанная потребность:** Вероятно\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Неизвестно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Удобство:** «Созваниваться некогда» — весь день на тренировках, хочет быстро получить цену без лишних вопросов (Алина)\n\n**Вывод:** Сделка на ранней стадии квалификации. Алина сама пришла с конкретной задачей и датой открытия — потребность и срочность просматриваются, но деталей нет. Главный риск — ЛПР: контакт ведёт Алина, а деньги у Марата, с которым связи нет, и Алина отказывается от созвона, закрывая путь к выяснению полномочий. Бюджет не обсуждался. Алина уже сравнивает с конкурентами и раздражена вопросами — важно не потерять её, но и не давать цену вслепую без понимания задачи и того, кто решает.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Ситуация (частично), Опыт (нет), Проблемы (нет), Решение (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, кто финально принимает решение по заказу и участвует ли Марат в выборе подрядчика\n- Спросить, смотрят ли они другие варианты и что для них важнее при выборе — цена, срок, качество\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 18 ноября (ср): производство 7 рабочих дней — до 27 ноября (пт), монтаж 2–3 раб. дн. — готово 1 декабря (вт) – 2 декабря (ср). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 8 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "переписка",
+     "text": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Выяснить, кто принимает решение, и вовлечь Марата, не потеряв Алину\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Удобство\n- **Контактному лицу:** Алина получает цену и расчёт без созвона и лишних вопросов — всё в переписке, между тренировками\n- **ЛПР:** Марат получает готовый расчёт и визуализацию, которые не нужно расшифровывать — решение займёт минуты, а вывеска будет к открытию 15 декабря\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): дать вилку цены сразу — она прямо попросила «просто цену скажите» (18.11, 9:25), иначе уйдёт к четвёртой компании\n2. Касание 2 (Алине): спросить про Марата и кто решает — в переписке это не выяснено, а Алина отказывается от созвона\n3. Касание 3 (Алине): если молчит — кружок с похожим проектом, без давления и без «ну что решили»\n\n### Следующий шаг\n\n1. **Сегодня, 18 ноября (ср) · Telegram** · экспертное · ОП\n  Кому: Алина (совладелица, тренер)\n  Дать вилку цены, чтобы Алина не ушла к конкурентам, и получить один факт для точного расчёта\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Алина просит цену и не хочет созваниваться. Даём вилку сразу, чтобы не потерять её, и одним вопросом получаем детали для точного расчёта. Параллельно выясняем, кто решает — Алина или Марат, — чтобы не готовить расчёт вслепую. Если Алина замолчит — мягкий кружок с похожим проектом. Сроки не давим: открытие 15 декабря, запас 8 рабочих дней, успеваем.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "переписка",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Telegram · экспертное · ОП\n_Когда: Сегодня, 18 ноября (ср)_\n\n**Перед касанием:** открыть прайс и примеры похожих вывесок для студий (акрил, 3 метра, табличка), чтобы дать честную вилку без выдуманных цифр.\n\nАлина, добрый день! Поняла вас — даю ориентир сразу, без лишних вопросов.\n\nСветовые объёмные буквы из акрила на 3 метра + табличка у входа — по цене выйдет примерно 110–140 тысяч с монтажом.\n\nЧтобы посчитать точно, пришлите текст вывески и фото фасада — это займёт у вас две минуты, а расчёт пришлю сегодня. Так вы получите цену без созвона и лишних вопросов, между тренировками.\n\nПришлёте?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "ответила на вопросы, КП отправлено",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n_Если изменилась дата, к которой нужно клиенту, — обновите «Сроки» в шапке сделки: расчёт берётся оттуда._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Неизвестно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Удобство:** «Созваниваться некогда» — весь день на тренировках, хочет получить цену быстро и без лишних вопросов. (Алина)\n\n**Вывод:** Сделка на ранней стадии: КП отправлено, клиент молчит 1 день. Потребность и срочность подтверждены — Алина сама пришла с конкретной задачей, параметрами и датой открытия 15 декабря. Главный блокер — ЛПР: контакт ведёт Алина, а деньги и решение у Марата, с которым связи нет, и Алина отказывается от созвона. Второй блокер — финансы: бюджет до 100 тыс. против КП на 128 тыс., разрыв 28 тыс., причина не выяснена. Доверие не проявлено — Алина раздражена вопросами и сравнивает с конкурентами. Следующий шаг — выяснить, как вовлечь Марата, и прояснить бюджетный разрыв, не потеряв Алину.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (нет), Проблемы (нет), Решение (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, кто финально принимает решение по заказу и как Марат участвует в выборе подрядчика — можно ли получить его контакт или переслать ему КП напрямую.\n- Уточнить бюджет: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 19 ноября (чт): производство 7 рабочих дней — до 30 ноября (пн), монтаж 2–3 раб. дн. — готово 2 декабря (ср) – 3 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 7 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "ответила на вопросы, КП отправлено",
+     "text": "## Стратегия\n\n- **Название:** Охват всех участников решения\n- **Цель:** Вовлечь Марата (финансового ЛПР) в сделку через Алину, не обходя её\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Удобство\n- **Контактному лицу:** Алине не придётся пересказывать Марату детали и отвечать на его вопросы — она просто перешлёт готовую страницу и получит готовые ответы\n- **ЛПР:** Марат получит вывеску к открытию 15 декабря точно в срок, по цене из КП без доплат, и ему не придётся самому искать и сравнивать подрядчиков\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): попросить переслать Марату готовую страницу с обоснованием цены — Алина сказала «решает он», прямого контакта с Маратом нет\n2. Касание 2 (Алине): уточнить бюджет — Марат назвал «до 100 тысяч», КП на 128 000, разрыв 28 000 не объяснён\n3. Касание 4 (звонок Алине): только если Алина не ответила на касания 1–3 — согласия на прямой контакт с Маратом пока нет\n\n### Следующий шаг\n\n1. **Сегодня, 19 ноября (чт) · Telegram** · экспертное · ЛПР\n  Кому: Алина (совладелица, контактное лицо)\n  Получить реакцию на КП и выяснить, как Марат участвует в решении\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка на ранней стадии: КП отправлено, клиент молчит 1 день. Главный блокер — ЛПР: Алина ведёт переписку, но решение за Маратом, с которым связи нет. Стратегия — вовлечь Марата через Алину: дать ей готовый материал для пересылки, выяснить его роль в решении, параллельно прояснить бюджетный разрыв 28 тыс. и удержать цену через ценность. Касания чередуем: экспертное → экспертное → эмпатичное → экспертное. Если Алина не отвечает — звонок с прямым вопросом о статусе. Сроки не давим: открытие 15 декабря, запас 7 рабочих дней.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "ответила на вопросы, КП отправлено",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Telegram · экспертное · ЛПР\n_Когда: Сегодня, 19 ноября (чт)_\n\n**Перед касанием:** открыть КП, собрать короткую страницу для Марата — что входит в 128 000 ₽, почему это выгоднее 100 000 ₽, как вывеска окупается. Проверить по 902-ПП адрес Бауманская, 11 — жилой дом, 1 этаж, чтобы в странице была строка про проверку до производства.\n\nАлина, добрый день! Собрала для Марата короткую страницу по КП — чтобы ему было проще принять решение, а вам не пришлось ничего пересказывать.\n\nТам простым языком: что входит в 128 000, почему это выгоднее, чем 100 000, и как вывеска окупается. Перешлёте ему?\n\nИ подскажите: он сам будет смотреть КП или вам нужно ему всё объяснять? А если бы выбирали вы — как вам в целом?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "«дорого, без подсветки или баннер сами»",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» (Марат)\n- **Удобство:** «Созваниваться некогда, пишите здесь» — Алина весь день на тренировках, хочет решить вопрос перепиской без звонков (Алина)\n\n**Вывод:** Сделка на ранней стадии: КП отправлено, получено прямое возражение по цене от финансового ЛПР Марата через Алину. Потребность подтверждена — клиент сам инициировал запрос, назвал конкретные детали и дату открытия. Срочность подтверждена — открытие 15 декабря, успеваем с запасом. Главный блокер — финансы: Марат сказал «дорого», бюджет «до 100 тысяч» не совпадает с КП на 128 000 ₽, клиент предлагает альтернативы в 8 раз дешевле. Вторичный блокер — ЛПР: решение за Маратом, но прямого контакта с ним нет, вся коммуникация через Алину. Доверие на уровне «вероятно» — Алина отвечает быстро и прислала материалы, но клиент сравнивает с другими компаниями. Работать нужно с ценовым возражением через ценность и параллельно выходить на Марата через Алину.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (нет), Решение (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Уточнить у Алины: «Марат назвал до 100 тысяч — это жёсткий потолок или ориентир? Если по бюджету не сойдёмся, что важнее сохранить: размер, подсветку или материал?»\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, как Марат участвует в выборе подрядчика: можно ли получить его контакт или переслать ему КП напрямую\n\n## Сроки — УСПЕВАЕМ\n\nСтарт в ближайший рабочий день, 23 ноября (пн): производство 7 рабочих дней — до 2 декабря (ср), монтаж 2–3 раб. дн. — готово 4 декабря (пт) – 7 декабря (пн). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 5 рабочих дней. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "«дорого, без подсветки или баннер сами»",
+     "text": "## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Снять ценовое возражение Марата через ценность и варианты под бюджет, не обесценивая предложение\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не придётся пересказывать Марату технические детали и отвечать на его вопросы за подрядчика — она получит готовую страницу с обоснованием цены и варианты под бюджет, которые просто перешлёт\n- **ЛПР:** Марат получит вывеску, которая окупается: световые буквы работают 24/7 и приводят клиентов годами, а не баннер за 15 тысяч, который через месяц выглядит дёшево и не привлекает. Цена 128 000 — это вложение в поток клиентов, а не разовая трата\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): ответить на «дорого» Марата — не игнорировать возражение, а прояснить жёсткость бюджета и что важнее сохранить\n2. Касание 2 (Алине): каждый вариант под бюджет — с честным риском отхода от ТЗ, как в файле отрасли (уменьшить высоту — хуже читается; реже диоды — неравномерное свечение; пластиковый борт — меньше жёсткость)\n3. Касание 4 (Алине): страница для Марата начинается с того, что он получает — вывеску, которая окупается и приводит клиентов, — а не с проблемы «дорого»\n4. Касание 4 (Алине): просьба контакта Марата — только с согласия Алины; в timing пометка «только если Алина даст контакт или согласится переслать»\n5. Касание 5 (звонок Алине): только если Алина не отвечает на касание 4 или отвечает уклончиво — не раньше\n\n### Следующий шаг\n\n1. **Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн) · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Ответить на «дорого» Марата, прояснить жёсткость бюджета и что важнее сохранить, предложить варианты под бюджет с честным риском\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка на ранней стадии: КП отправлено, получено прямое возражение по цене от финансового ЛПР Марата через Алину. Главный блокер — финансы: разрыв 28 000 ₽ между бюджетом «до 100 тысяч» и КП на 128 000 ₽. Вторичный блокер — ЛПР: решения принимает Марат, но прямого контакта с ним нет. Стратегия: сначала прояснить жёсткость бюджета и что важнее сохранить, затем дать варианты под бюджет с честным риском, параллельно выходить на Марата через Алину (готовая страница с обоснованием цены или контакт для прямого разговора). Сроки не давим: открытие 15 декабря, запас 5 рабочих дней, последний день старта — 30 ноября. Если Алина не отвечает — звонок с прямым вопросом о статусе.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "«дорого, без подсветки или баннер сами»",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 21 ноября (сб) — выходной: уточните у клиента, удобно ли на связи; если нет — 23 ноября (пн)_\n\n**Перед касанием:** Перед звонком: открыть КП и переписку, посмотреть фото фасада, подготовить 2–3 варианта под бюджет с честным риском (уменьшить высоту букв, реже диоды, пластиковый борт). Проверить по 902-ПП: буквы без подсветки в Москве нельзя — это будет главный аргумент против варианта Марата.\n\nАлина, добрый день! Это Ольга, «Яркая Реклама». Не отвлекаю в выходной? Если удобнее в будни — наберу в понедельник.\n\n[пауза, выслушать]\n\nЯ посмотрела, что Марат написал про бюджет — решила сразу набрать, чтобы не мучить вас перепиской. По цене мы, уверена, договоримся) Только хочу понять: а в целом решение вам подходит? Буквы, табличка, как на визуализации — вам с Маратом нравится?\n\n[пауза, выслушать]\n\nПоняла. А можно уточнить: когда Марат говорит «дорого» — это какой случай? Для одних «дорого» — значит, не нужно сейчас, для других — не рассчитывали на такую сумму, а третьи просто хотят поторговаться. У вас какой вариант ближе?\n\n[пауза, выслушать]\n\n[Если «не рассчитывали»:]\nПонимаю. Тогда давайте разберёмся, как попасть в его бюджет. Подскажите: «до 100 тысяч» — это жёсткий потолок или ориентир? И что для вас важнее сохранить: размер букв, подсветку или материал? От этого зависит, какие варианты я предложу.\n\n[пауза, выслушать]\n\n[Если «поторговаться»:]\nПоняла вас, знаете, у меня таких полномочий нет, конечно. Но я могу попробовать согласовать с руководителем небольшую уступку — только это обычно непросто. Если получится — готовы заключаться тогда?\n\n[пауза, выслушать]\n\n[Если «не нужно сейчас»:]\nА решение-то в целом понравилось? На какую перспективу смотрите — открытие же 15 декабря, верно?\n\n[пауза, выслушать]\n\n[После отработки:]\nКстати, Алина, а вам-то как в целом? Если бы выбирали вы — согласовали бы?\n\n[пауза, выслушать]\n\n[Если Алина влияет на решение:]\nТогда давайте так: я подготовлю для Марата короткую страницу — что он получает за эти деньги и какие есть варианты под бюджет, с честным раскладом, чем рискуем. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Подготовить?\n\n[пауза, выслушать]\n\n[Если да:]\nОтлично, пришлю сегодня-завтра. И ещё: буквы без подсветки в Москве по правилам города нельзя — это я сразу скажу, чтобы Марат не тратил время на этот вариант. А баннер на фасаде — тоже нельзя, только внутри. Но это всё будет на странице, с объяснением.\n\n[Закрытие:]\nДоговорились. Тогда я готовлю страницу для Марата и варианты под бюджет — пришлю вам в понедельник утром, ок? И если Марат захочет обсудить голосом — я на связи, это быстрее, чем переписка.\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "тишина → «вы мне надоели»",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Риск\n- **ОП — осознанная потребность:** Вероятно\n- **ЛПР — определён:** Риск\n- **Д — доверие:** Риск\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «дорого», «давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» — считает деньги, ищет самый дешёвый вариант. (Марат)\n- **Удобство:** «созваниваться некогда», «пишите здесь», «весь день на тренировках» — нет времени на разговоры, хочет решить быстро и без лишних действий. (Алина)\n\n**Вывод:** Сделка на ранней стадии, но уже под угрозой. Главный блокер — финансы: Марат прямо сказал «дорого», бюджет «до 100 тысяч» против КП 128 000 ₽, причина не выяснена. Вторичный блокер — ЛПР: решения принимает Марат, но прямого контакта нет, всё идёт через Алину, которая сейчас раздражена повторными касаниями. Доверие тоже в зоне риска: клиентку «достали» сообщениями, и это может закрыть сделку окончательно. Срочность формально есть (открытие 15 декабря, запас 2 рабочих дня), но клиент сам говорит «не до вывески» — приоритет низкий. Дальнейшие касания без новой ценности и без смены подхода только усилят раздражение. Нужно сначала восстановить контакт и прояснить причину «дорого», затем — выходить на Марата с подготовленными материалами.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (частично), Аналоги (частично), Нюансы (нет), Ограничения (частично).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Алины, смотрят ли они сейчас другие варианты или уже определились с подрядчиком — и что для них важнее: цена или чтобы вывеска была к открытию.\n- Выяснить, что именно значит «дорого» для Марата: жёсткий потолок бюджета или ориентир, и что важнее сохранить — размер букв, подсветку или материал.\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 26 ноября (чт): производство 7 рабочих дней — до 7 декабря (пн), монтаж 2–3 раб. дн. — готово 9 декабря (ср) – 10 декабря (чт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 2 рабочих дня. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "тишина → «вы мне надоели»",
+     "text": "## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Восстановить контакт с Алиной, выяснить причину «дорого» и подготовить для Марата материалы с вариантами под бюджет\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не нужно пересказывать Марату и отвечать на его вопросы за подрядчика — она просто пересылает готовую страницу и снимает с себя задачу, а я признаю её правоту и перестаю давить\n- **ЛПР:** Марат получает: вывеска к открытию 15 декабря по цене из КП, без доплат по ходу, с гарантией по договору — или варианты под бюджет с честным раскладом, чем рискует при экономии\n\n### Обязательно в касаниях\n\n1. Касание 1 (Алине): признать, что сообщений было слишком много — она написала «вы мне уже надоели своими сообщениями!!!» (26.11), без этого шага дальнейшие касания только усилят раздражение\n2. Касание 1 (Алине): спросить, что значит «дорого» для Марата — жёсткий потолок или ориентир, потому что Марат сказал «дорого» (20.11), но причина не выяснена\n3. Касание 3 (страница для Марата): объяснить, что буквы без подсветки и баннер на фасаде в Москве нельзя — Марат предлагал эти варианты (20.11), нужно снять их сразу, чтобы он не тратил время\n4. Касание 3 (страница для Марата): начинается с того, что Марат получает — вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору, — а не с проблемы «дорого»\n5. Касание 4 (сверка даты): опираться на условие, которое менеджер уже называла — производство 7 рабочих дней после согласования макета (19.11), и на дату открытия 15 декабря, без новых обещаний\n\n### Следующий шаг\n\n1. **Сегодня, 26 ноября (чт) · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Снять раздражение Алины, признать что касания были лишними, вернуть диалог\n2. **Только если Алина ответила на касание 1 · Звонок** · экспертное · ФВ\n  Кому: Алина (совладелица, контактное лицо)\n  Дать Алине готовую страницу для пересылки Марату: что он получает за 128 000 ₽ и какие есть варианты под бюджет с честным риском\n3. **Только если Алина согласилась на касание 2 · Звонок** · экспертное · ФВ\n  Кому: Алина (для пересылки Марату)\n  Передать Алине готовый документ: результат за 128 000 ₽ + варианты под бюджет (уменьшить высоту букв, реже диоды, пластиковый борт) с честным риском каждого + объяснение, почему буквы без подсветки и баннер на фасаде в Москве нельзя\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка под угрозой: Алина раздражена повторными касаниями, Марат сказал «дорого», причина не выяснена. Первый шаг — снять раздражение и вернуть диалог через извинение и один вопрос о причине «дорого». Затем — дать Алине готовую страницу для Марата: что он получает за 128 000 ₽ и варианты под бюджет с честным риском. Буквы без подсветки и баннер на фасаде в Москве нельзя — это снимаем сразу. Сроки успеваем: последний день старта 30 ноября, вывеска к 14 декабря. Если после страницы Марат не отвечает — мягко сверить дату открытия и держать слот как заботу о дате.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "тишина → «вы мне надоели»",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 26 ноября (чт)_\n\n**Перед касанием:** Перед звонком: перечитать переписку с Алиной, особенно её последнее сообщение (26.11), чтобы точно помнить её слова и не оправдываться. Подготовить для себя два варианта вопроса про «дорого» — про жёсткий потолок и про ориентир, чтобы задать его коротко и по делу.\n\nАлина, добрый день! Это Ольга из «Яркой Рекламы». Я прочитала ваше сообщение — вы правы, я переборщила с сообщениями. Извините, пожалуйста.\n\n[пауза, дать Алине высказаться, если она хочет — не перебивать, не спорить, не оправдываться]\n\nСпасибо, что сказали прямо — мне это правда важно. Я правильно понимаю: вы написали, что дорого, а я вместо ответа прислала ещё сообщение с фото. Всё верно?\n\n[выслушать]\n\nАлина, можно один вопрос — и я больше не буду писать без дела? Марат сказал «дорого» — это жёсткий потолок бюджета, или просто ориентир? Если потолок — я подберу варианты под 100 тысяч, но скажу честно: это отход от ТЗ. Если уменьшить буквы — вывеску хуже видно издалека; если реже поставить диоды — свечение может быть пятнами. Посчитаю и пришлю. Если ориентир — объясню, что входит в 128.\n\n[выслушать ответ]\n\nПоняла вас, спасибо. [Если Алина ответила — договориться о следующем шаге: «Тогда я подготовлю для Марата короткую страницу — что входит в 128 и какие есть варианты под бюджет, с честным раскладом. Вы просто перешлёте ему, и вам не придётся ничего пересказывать. Прислать?»]\n\n[Если Алина не хочет говорить или просит писать — предложить ответить письменно, коротко: «Хорошо, тогда напишу вам сюда — ответите, когда будет удобно. Спасибо, Алина!»]\n\n---\n\n### Касание 2 · Звонок · экспертное · ФВ\n_Когда: Только если Алина ответила на касание 1, не раньше 27 ноября (пт)_\n\n**Перед касанием:** Перед звонком: подготовить черновик страницы для Марата — что входит в 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору) и варианты под бюджет с честным риском каждого (уменьшить высоту букв, реже диоды, пластиковый борт). Держать перед глазами, чтобы в разговоре коротко перечислить.\n\nАлина, добрый день! Спасибо, что ответили. Я подготовила для Марата короткую страницу — что входит в 128 000 ₽ и какие есть варианты под бюджет, с честным раскладом, чем рискуем.\n\n[пауза]\n\nВы просто перешлёте ему — и вам не придётся ничего пересказывать или отвечать за меня на его вопросы. Прислать?\n\n[выслушать]\n\n[Если Алина согласна — договориться о шаге: «Отправлю сегодня в течение часа. И, Алина, можно ещё вопрос? А вам-то самой как в целом решение? Если бы выбирали вы — согласовали бы?»]\n\n[выслушать]\n\n[Если Алина отвечает положительно — «Спасибо! Тогда отправляю страницу. Если Марату что-то будет непонятно — пусть напишет или наберёт, я всё объясню. Договорились?»]\n\n[Если Алина не хочет пересылать или сомневается — «Понимаю. А как вам было бы удобнее? Могу сама коротко объяснить Марату по телефону, если дадите его номер — или напишу ему сюда, если он есть в этом чате. Как лучше?»]\n\n---\n\n### Касание 3 · Звонок · экспертное · ФВ\n_Когда: Только если Алина согласилась на касание 2 — после согласия, в тот же день_\n\n**Перед касанием:** Перед звонком: оформить страницу для Марата — коротко, по пунктам: 1) что он получает за 128 000 ₽ (вывеска к открытию 15 декабря, проверка по 902-ПП, гарантия по договору); 2) варианты под бюджет с честным риском каждого (уменьшить высоту букв — хуже читается с дороги; реже диоды — свечение может быть пятнами; пластиковый борт — служит меньше); 3) почему буквы без подсветки и баннер на фасаде в Москве нельзя. Проверить, что всё по фактам из КП и 902-ПП.\n\nАлина, добрый день! Отправляю страницу для Марата, как договорились.\n\n—\n\nМарат, здравствуйте! Это Ольга из «Яркой Рекламы». Алина попросила подготовить для вас короткую страницу — что вы получаете за 128 000 ₽ и какие есть варианты под бюджет.\n\nЧто вы получаете за 128 000 ₽:\n— вывеска «ГИБКОСТЬ» и табличка у входа смонтированы к открытию 15 декабря;\n— проект проверен по 902-ПП до производства — вывеску не придётся переделывать или снимать по требованию города, штрафа не будет;\n— гарантия по договору: если что-то случится — приедем в течение 3 рабочих дней и отремонтируем бесплатно.\n\nМарат, скажите, а в целом решение вам подходит? Если бы не цена — взяли бы?\n\n[выслушать]\n\nЕсли подходит — тогда давайте разберёмся с «дорого». Для одних «дорого» — это «не нужно сейчас», для других — «не рассчитывали на такую сумму», третьи хотят поторговаться. У вас какой вариант?\n\n[выслушать]\n\n[Если «не рассчитывали» — объяснить состав цены и ценность: вывеска к открытию, проверка по 902-ПП, гарантия по договору]\n\n[Если «поторговаться» — предложить варианты под бюджет с честным риском: уменьшить высоту букв — хуже читается издалека и с дороги; реже расставить диоды — свечение может быть неравномерным, «пятнами»; пластиковый борт вместо алюминиевого — служит меньше, может повести от перепадов температуры. Посчитаю и пришлю.]\n\n[Если «не нужно сейчас» — актуализировать: открытие 15 декабря, вывеска к открытию]\n\nМарат, если что-то будет непонятно — напишите или наберите, я всё объясню. Выбор за вами.\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    },
+    {
+     "label": "созвон с Маратом: −10% и монтаж в выходной",
+     "text": "_Учёл новое — перестраиваю путь: оценка → стратегия → касания._\n\n## Формула закрытия\n\n- **ФВ — финансовая возможность:** Подтверждено\n- **ОП — осознанная потребность:** Подтверждено\n- **ЛПР — определён:** Подтверждено\n- **Д — доверие:** Вероятно\n- **ЗС — здесь и сейчас:** Подтверждено\n\n## Что важно клиенту\n\n- **Прибыль:** «Дорого», «давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч» — считает деньги и ищет самый дешёвый вариант (Марат)\n- **Надёжность:** «Открытие 15 декабря», «нам сейчас не до вывески, открытие на носу» — боится не успеть к сроку (Алина)\n\n**Вывод:** Сделка здоровая, на стадии дожима. Все пять критериев подтверждены или вероятны: потребность явная (открытие 15 декабря), ЛПР вышел на прямой контакт и торгуется, деньги есть — Марат называет условие покупки (скидка 10%), а не отказывается. Торг — это сигнал к покупке, а не потеря доверия. Главный рабочий вопрос — согласовать скидку и возможность воскресного монтажа, не потеряв дедлайн. Менеджер обещала вернуться до 18:00 сегодня — решение нужно дать в срок, иначе клиент воспримет задержку как необязательность.\n\n### СОПРАНО — что уточнить\n\nНе собрано: Опыт (частично), Проблемы (частично), Аналоги (частично), Нюансы (нет).\n\nРекомендую уточнить у клиента:\n- Альтернативы (СОПРАНО: Аналоги): это нужно было выяснить заранее, до КП — не выяснено, уточнить сейчас: что клиент готов изменить, если бюджет не сойдётся, и с чем ещё сравнивает. «Если по бюджету не сойдётся — что для вас важно сохранить обязательно, а чем можно пожертвовать: размером, подсветкой, материалом?» Это задел для ответа на «дорого»: альтернативы клиент назовёт сам.\n- Уточнить у Марата, смотрит ли он другие варианты подрядчиков или сравнивает только с баннером/буквами без подсветки — это покажет, с кем реально конкурируем\n- Спросить, что для него важнее при выборе: цена, срок к открытию или надёжность — чтобы понять, чем закрывать оставшиеся сомнения\n\n## Сроки — УСПЕВАЕМ\n\nСтарт сегодня, 27 ноября (пт): производство 7 рабочих дней — до 8 декабря (вт), монтаж 2–3 раб. дн. — готово 10 декабря (чт) – 11 декабря (пт). Клиенту нужно к 15 декабря (вт) (готово не позже 14 декабря (пн)): успеваем с запасом 1 рабочий день. Последний день старта (согласования макета) с учётом монтажа 3 дн. — 30 ноября (пн).\n\n_Считаются только рабочие дни (без выходных и праздников РФ)._",
+     "state": "DIAGNOSING"
+    },
+    {
+     "label": "созвон с Маратом: −10% и монтаж в выходной",
+     "text": "## Стратегия\n\n- **Название:** Экономическое обоснование\n- **Цель:** Закрыть сделку через обмен: небольшая уступка в обмен на решение сегодня, не потеряв дедлайн 15 декабря\n\n### Ценность для клиента\n\n- **Через что подаём ценность:** Прибыль\n- **Контактному лицу:** Алине не нужно пересказывать Марату условия — всё зафиксировано письменно, она занимается тренировками, а не вывеской\n- **ЛПР:** Марат получает вывеску к открытию 15 декабря по цене из КП, без доплат по ходу, с гарантией по договору — вложение работает на бизнес с первого дня\n\n### Обязательно в касаниях\n\n1. Касание 1 (звонок Марату): ответить на оба условия — скидка 10% и монтаж в воскресенье — в обещанный срок до 18:00 сегодня, иначе клиент воспримет задержку как необязательность\n2. Касание 1 (звонок Марату): скидку 10% не давать — предложить 5% через полномочия («у меня таких полномочий нет, попробую согласовать») в обмен на решение сегодня\n3. Касание 1 (звонок Марату): сверить дату открытия 15 декабря одним вопросом — «дата в силе?»\n4. Касание 2 (Telegram после звонка): зафиксировать договорённости письменно — уступка, дата старта, монтаж, дата открытия\n\n### Следующий шаг\n\n1. **Сегодня, 27 ноября (пт) · Звонок** · экспертное · ФВ\n  Кому: Марат (совладелец, ЛПР по деньгам)\n  Дать ответ на оба условия Марата: скидка 10% и монтаж в воскресенье. Согласовать уступку через полномочия в обмен на решение сегодня. Проверить дату открытия.\n2. **Только если Марат в звонке согласился на условия · Telegram** · экспертное · Д\n  Кому: Марат (совладелец, ЛПР по деньгам)\n  Зафиксировать договорённости письменно: уступка, дата старта, монтаж, дата открытия. Дать Марату и Алине одну точку правды.\n3. **Только если после звонка Марату нет подтверждения запуска · Telegram** · эмпатичное · ЗС\n  Кому: Алина (совладелица, контактное лицо)\n  Мягко напомнить о дедлайне через заботу о дате открытия, не давить. Последний день старта — 30 ноября.\n\n_Показан следующий шаг — идёт разговор с клиентом. Если клиент снова замолчит, напишите «клиент молчит» — построю весь путь до «последнего шанса»._\n\n**Обоснование:** Сделка здоровая, на стадии дожима. Марат торгуется — это сигнал к покупке. Главное — ответить в обещанный срок (до 18:00 сегодня) и согласовать уступку через полномочия: не 10%, а 5% в обмен на решение сегодня. Монтаж в воскресенье — проверить, но не обещать без подтверждения бригады. После звонка — письменная фиксация договорённостей. Если подтверждения нет — 30 ноября мягкое касание Алине через заботу о дате открытия.",
+     "state": "STRATEGY_SELECTION"
+    },
+    {
+     "label": "созвон с Маратом: −10% и монтаж в выходной",
+     "text": "## ✅ Касания готовы\n\n### Касание 1 · Звонок · экспертное · ФВ\n_Когда: Сегодня, 27 ноября (пт)_\n\n**Перед касанием:** Перед звонком: уточнить у руководителя возможность уступки 5% за решение сегодня; позвонить на производство и спросить бригаду про монтаж в воскресенье.\n\nМарат, добрый день! Это Ольга, «Яркая Реклама». Обещала вернуться до 18:00 — как раз успеваю. Уточнила у руководителя и у бригады, есть ответы по обоим вашим условиям.\n\nСкажите, а в целом решение вам подходит? [пауза, выслушать]\n\nПо «дорого» — хочу понять, что именно: для одних это «сейчас не нужно», для других — «не рассчитывали такую сумму», третьи просто хотят поторговаться. У вас какой вариант? [пауза, выслушать]\n\n[по ответу: не нужно сейчас — актуализация; не рассчитывали — состав цены и ценность; поторговаться — варианты под бюджет с честным риском или уступка в обмен на шаг]\n\nПо скидке: 10% дать не могу — у меня таких полномочий нет. Но я попробую согласовать с руководителем 5%, если решаем сегодня и запускаем производство. Это непросто, но я постараюсь убедить.\n\nПо монтажу в воскресенье: обычно бригада работает по будням, но я спросила — для вас уточню, возможно ли. Если нет — предложу ближайший будний день, чтобы не мешать тренировкам.\n\nИ ещё: дата открытия 15 декабря в силе? Если да — при запуске сегодня вывеска будет готова 10–11 декабря, с запасом до открытия. Вам спокойно, гости увидят вывеску с первого дня.\n\n[пауза, выслушать]\n\nЕсли я согласую 5% и монтаж в удобный день — запускаем сегодня?\n\n---\n\n### Касание 2 · Telegram · экспертное · Д\n_Когда: только если Марат в звонке согласился на условия — после согласия, в тот же день_\n\n**Перед касанием:** Перед отправкой: сверить с договором согласованные в звонке уступку, дату старта и монтажа.\n\nМарат, добрый день! Резюмирую наш разговор, чтобы у вас с Алиной была одна точка правды.\n\nДоговорились:\n— уступка [размер] при запуске сегодня;\n— производство 7 рабочих дней;\n— монтаж [дата из timeline];\n— вывеска и табличка к открытию 15 декабря.\n\nОтправляю договор — как подпишете, запускаем производство. Всё верно?\n\n---\n\n### Касание 3 · Telegram · эмпатичное · ЗС\n_Когда: только если после звонка Марату нет подтверждения запуска, не раньше 30 ноября (пн)_\n\n**Перед касанием:** Перед отправкой: проверить по timeline дату монтажа при старте 30 ноября.\n\nАлина, добрый день! Чтобы вывеска точно была к открытию 15 декабря, макет нужно согласовать сегодня — тогда ставлю вас в ближайший слот, и монтаж будет [дата из timeline]. Дата открытия в силе?\n\n---\n\n_Клиент ответил или что-то изменилось — вставьте ответ или напишите, что нового: перестрою путь. «ок» — сохранить итог сессии._",
+     "state": "COMPOSING"
+    }
+   ]
+  }
+ ]
+}
