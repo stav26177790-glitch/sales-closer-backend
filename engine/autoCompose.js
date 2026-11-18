@@ -340,7 +340,13 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
       continue;
     }
 
-    if (reviews >= CONFIG.AUTO_REVIEWS) break; // защита: вердикт — последняя проверка reviewer'а
+    if (reviews >= CONFIG.AUTO_REVIEWS) {
+      // Аудит 18.11 (38 прогонов): reviewer ни разу не одобрил касания — 176 вызовов, 14% денег, ~1 мин на ход;
+      // в 41 из 75 возвратов его замечания так и не вносились. Без него: проверки кода прошли → дальше критик
+      // (грубые ошибки + обязательные пункты) и редактор в criticalGate.
+      if (CONFIG.AUTO_REVIEWS === 0 && code.verdict === 'ОДОБРЕНО') return done(composerOutput, code, true, rounds, reviews, { trace: [...trace, 'код принял'] });
+      break;
+    }
     stage(reviews === 0 ? 'Проверяю касания: тон, выгода, давление, обязательные пункты…' : 'Проверяю касания ещё раз…');
     // Лимит 12000: ответ reviewer'а самый объёмный (14 критериев на касание).
     const result = await callAgentSafe('reviewer', {
@@ -412,6 +418,8 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
 const { voiceBlocked } = require('./voice');
 const { managerGender } = require('./planChecks');
 function sourceTextForCritic(baseInput) { return sourceTextOf(baseInput); }
+const mustIncludeOf = (deal) => (deal?.last_strategy_output?.must_include || [])
+  .map((x) => (typeof x === 'string' ? x : x?.text || x?.item || '')).filter(Boolean);
 async function runCritic(baseInput, deal, composerOutput, onlyNums) {
   const plan = deal.last_strategy_output?.touch_plan || [];
   const src = sourceTextForCritic(baseInput);
@@ -431,7 +439,9 @@ async function runCritic(baseInput, deal, composerOutput, onlyNums) {
     out = await callAgentSafe('critic', {
       today: baseInput.today, deal: baseInput.deal, conversation: src, kp_price: kp ? kp[1] : null,
       price_guide: baseInput?.price_guide?.client_range ? { client_range: baseInput.price_guide.client_range } : null, client_price_ask: ask ? ask[1] : null,
-      voice_available_now: !voiceBlocked(src), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно', touches
+      voice_available_now: !voiceBlocked(src), manager_gender: g === 'f' ? 'женщина' : g === 'm' ? 'мужчина' : 'неизвестно', touches,
+      // Аудит 18.11: обязательные пункты проверял reviewer (убран) — теперь критик, только по полному набору касаний.
+      ...(!onlyNums && mustIncludeOf(deal).length ? { must_include: mustIncludeOf(deal) } : {})
     }, 3000);
   } catch (e) { console.warn(`[critic] ошибка: ${e.message}`); return []; }
   const list = Array.isArray(out?.critical) ? out.critical : [];

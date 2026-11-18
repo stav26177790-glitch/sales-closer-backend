@@ -87,6 +87,8 @@ const pathVariants = [];
     if (d.agents._reviewerTwice) { d.agents.reviewer.push(d.agents.reviewer[0]); delete d.agents._reviewerTwice; }
     // Касания по плану пишет writer; в сценариях ответы записаны как composer — тот же формат.
     if (d.agents.composer && !d.agents.writer && d.agents.strategy) { d.agents.writer = d.agents.composer; delete d.agents.composer; }
+    // Аудит 18.11: reviewer в проде выключен (CONFIG.AUTO_REVIEWS = 0) — его заготовки в виртуальных сделках не нужны.
+    if (!Number(process.env.AUTO_REVIEWS ?? 0)) delete d.agents.reviewer;
     // 14.11: writer отдаёт повод касания (hook), а план добавляет касания на непокрытые
     // критерии формулы закрытия. Сыгранные ответы написаны до этого — дополняем их:
     // повод из начала переписки, на добавленные касания — короткая заглушка.

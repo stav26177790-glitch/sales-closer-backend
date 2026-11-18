@@ -67,5 +67,15 @@ const bad = { messages: [{ touchpoint_number: 1, channel: 'Звонок', hook: 
     const r = await composeUntilReady(base, { id: 't', last_composer_output: noHook, last_strategy_output: { touch_plan: plan } }, { startWith: noHook });
     assert.equal(r.composer_output._check.critic, 'переписано заново', JSON.stringify(r.composer_output._check));
   });
+  await check('аудит 18.11: без reviewer — код принял → сразу критик; обязательные пункты уходят критику', async () => {
+    calls.length = 0;
+    script = { critic: { critical: [] }, editor: { editor_output: { messages: good.messages } }, writer: good };
+    const deal = { id: 't', last_composer_output: good, last_strategy_output: { touch_plan: plan, must_include: ['Назвать дату готовности при старте сегодня'] } };
+    const r = await composeUntilReady(base, deal, { startWith: good });
+    assert.ok(!calls.some((c) => c.name === 'reviewer'), 'reviewer не вызывается');
+    const cr = calls.find((c) => c.name === 'critic');
+    assert.deepEqual(cr.input.must_include, ['Назвать дату готовности при старте сегодня']);
+    assert.ok(r.approved !== false || r.composer_output._check, JSON.stringify(r).slice(0, 300));
+  });
   console.log(`critic: ${n} проверок пройдено`);
 })().catch((e) => { console.error(e); process.exit(1); });

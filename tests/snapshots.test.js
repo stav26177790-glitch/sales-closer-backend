@@ -25,6 +25,9 @@ const fs = require('fs');
 const path = require('path');
 const { runScenario } = require('./harness');
 const scenarios = require('./scenarios');
+// Сценарии 11–17.11 записаны на цикл с reviewer'ом. В проде он выключен (аудит 18.11, CONFIG.AUTO_REVIEWS = 0;
+// путь без него — tests/critic.test.js), но остаётся включаемым — снимки сторожат и этот путь.
+process.env.AUTO_REVIEWS = '2'; // harness перезагружает модули — настройка через окружение
 
 const SNAP_DIR = path.join(__dirname, '__snapshots__');
 const update = process.argv.includes('--update');
