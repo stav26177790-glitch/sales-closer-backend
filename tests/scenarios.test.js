@@ -3,6 +3,7 @@
  */
 const assert = require('assert');
 const { detectScenarios, attachScenarios, checkScenario } = require('../engine/scenarios');
+const { SCENARIOS } = require('../engine/scenarios');
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
 const ids = (src) => detectScenarios(src).map((s) => s.id).sort();
@@ -69,5 +70,12 @@ check('владелец 18.11, файл 32: «чем вы отличаетесь
   assert.ok(ids(src).includes('why_us'));
   assert.equal(checkScenario('Сергей Петрович, вот вывеска для автосервиса. Как вам?', ['why_us']).length, 1);
   assert.equal(checkScenario('Три вещи: своё производство — в отличие от многих, дата не уедет. Приезжайте в цех в Мытищах — пятница в 11?', ['why_us']).length, 0);
+});
+check('владелец 18.11, файл 33: «я подумаю и сам перезвоню» — сценарий «Я подумаю»; «буду ждать звонка» — на правку; карточки с предвосхищением', () => {
+  assert.deepEqual(ids('[Сообщение менеджера 1]\nСергей Петрович: Посмотрел. Я подумаю и сам перезвоню.'), ['think_now']);
+  assert.deepEqual(ids('[Сообщение менеджера 1]\nОбещал подумать до пятницы. Пятница прошла, тишина.'), ['think_silence']);
+  assert.equal(checkScenario('Сергей Петрович, понял вас. Буду ждать вашего звонка.', ['think_now']).length, 1);
+  assert.equal(checkScenario('Конечно. А в целом подходит, или есть моменты, которые смущают? Наберу в четверг в 11 — удобно?', ['think_now']).length, 0);
+  assert.ok(/ПРЕДВОСХИЩЕНИЕ/.test(SCENARIOS.find((x) => x.id === 'dorogo').card()));
 });
 console.log(`scenarios: ${n} проверок пройдено`);
