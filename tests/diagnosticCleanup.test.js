@@ -77,4 +77,19 @@ check('владелец 16.11: СОПРАНО по фактам — негати
   // симулятор 16.11 «Дента Плюс»: «нам предлагают за 480 тысяч» — тоже аналог
   assert.deepEqual(ensureSopranoFromFacts({ soprano: { 'А': { status: 'частично' } } }, 'Игорь Петрович говорит, дороговато — нам предлагают за 480 тысяч.'), ['А']);
 });
+check('живой тест 18.11: бюджет ниже КП — ФВ «Вероятно»; ЛПР назван, контакт сотрудничает — «Вероятно»; «денег нет» / разрыв в разы — без подъёма', () => {
+  const { ensureEvidenceScores } = require('../engine/diagnosticCleanup');
+  const mk = () => ({ scores: { financial: { status: 'Риск' }, need: { status: 'Подтверждено' }, trust: { status: 'Неизвестно' }, authority: { status: 'Риск' }, urgency: { status: 'Неизвестно' } } });
+  let d = mk();
+  ensureEvidenceScores(d, 'Второй совладелец — Марат, он отвечает за деньги. Алина: Бюджет — Марат говорит до 100 тысяч, решает он. Я: Отправила КП: 128 000 ₽.', null);
+  assert.equal(d.scores.financial.status, 'Вероятно');
+  assert.equal(d.scores.authority.status, 'Вероятно');
+  d = mk();
+  ensureEvidenceScores(d, 'Бюджет до 100 тысяч. Отправила КП: 300 000 ₽.', null);
+  assert.equal(d.scores.financial.status, 'Риск');
+  d = mk();
+  ensureEvidenceScores(d, 'Бюджет был 100 тысяч, но денег нет — заморозили. Решает он, но ему не надо звонить.', null);
+  assert.equal(d.scores.financial.status, 'Риск');
+  assert.equal(d.scores.authority.status, 'Риск');
+});
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);

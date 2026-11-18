@@ -269,6 +269,36 @@ function acceptsClientPrice(text, sourceText) {
 }
 const NO_ZOOM_RE = /без (zoom|зума)|посчитаю и пришлю[^.!?\n]{0,30}(цен|стоимост|вариант|сегодня)/i;
 const NO_ZOOM_FIX = 'Клиент просит «просто цену / зачем Zoom» — по методике владельца (файл 29) не уходить «без Zoom» и не обещать прислать цены письменно: «могу дать примерный диапазон, а по практике после разбора онлайн выходит либо дешевле, либо эффективнее» → оффер Zoom на 15 минут с днём и временем + «камеру включать не обязательно».';
+// Суммы в тексте («128 000 ₽», «110–140 тысяч», «до 100 тыс.»), в рублях. Текст в [квадратных скобках] — место под данные.
+const SUM_RE = /(\d{1,3}(?:[ \u00a0]\d{3})+|\d+)(?:\s*[–—-]\s*(\d{1,3}(?:[ \u00a0]\d{3})+|\d+))?\s*(тыс[а-яё]*\.?|к(?![а-яё])|₽|руб[а-яё]*\.?)/gi;
+function sumsOf(text) {
+  const out = [];
+  for (const m of String(text || '').replace(/\[[^\]]*\]/g, ' ').matchAll(SUM_RE)) {
+    const thousands = /^(тыс|к)/i.test(m[3]);
+    for (const raw of [m[1], m[2]].filter(Boolean)) {
+      const n = Number(raw.replace(/[ \u00a0]/g, ''));
+      if (!n) continue;
+      out.push({ raw: m[0].trim(), rub: thousands || n < 1000 ? n * 1000 : n });
+    }
+  }
+  return out;
+}
+function inventedSums(text, sourceText) {
+  if (!String(sourceText || '').trim()) return []; // без материалов сделки сверять не с чем
+  const src = sumsOf(sourceText).map((x) => x.rub);
+  // Голые числа источника («до 100», «у других 150») — тоже данные.
+  for (const m of String(sourceText || '').matchAll(/(\d{1,3}(?:[ \u00a0]\d{3})+|\d{2,})/g)) {
+    const n = Number(m[1].replace(/[ \u00a0]/g, ''));
+    if (n) src.push(n, n * 1000);
+  }
+  src.push(5000); // замер 5000 ₽ — факт компании (владелец 17.11)
+  const ok = (v) => src.some((a) => Math.abs(a - v) <= 1 || src.some((b) => Math.abs(Math.abs(a - b) - v) <= 1));
+  const bad = sumsOf(text).filter((x) => x.rub >= 5000 && !ok(x.rub)).map((x) => x.raw);
+  return [...new Set(bad)];
+}
+const VARIANTS_CLAIM_RE = /(подготовил[а]?|собрал[а]?|сделал[а]?|отправил[а]?|прислал[а]?|там|вот|в кп)[^.!?\n]{0,40}(два|оба|2|три|3|несколько) вариант/i;
+const VARIANTS_SRC_RE = /(два|оба|2|три|3|несколько|разные|пара) вариант|вариант[а-яё]* (1|2|а|б)(?![а-яё\d])/i;
+
 function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
   const gender = managerGender(sourceText);
   const noVoice = voiceBlocked(sourceText);
@@ -368,6 +398,11 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     if (gender === 'f' && masc.length) fixes.push(`Менеджер — женщина (по её словам в материалах): «${masc.slice(0, 3).join('», «')}» → в женском роде («проверила», «поняла», «посчитала»).`);
     else if (gender === 'm' && fem.length) fixes.push(`Менеджер — мужчина (по его словам в материалах): «${fem.slice(0, 3).join('», «')}» → в мужском роде.`);
     else if (!gender && masc.length && fem.length) fixes.push(`В одном касании глаголы менеджера в разном роде («${masc[0]}» и «${fem[0]}») — привести к одному.`);
+    // Владелец 18.11 (живой тест «Гибкость»): вилка «110–140 тысяч» придумана — цен в базе нет; «два варианта» —
+    // а в КП один. Суммы — только из данных сделки (КП, переписка) или производные от них.
+    const badSum = inventedSums(t, sourceText);
+    if (badSum.length) fixes.push(`Сумма «${badSum.slice(0, 2).join('», «')}» — не из данных сделки (нет в КП и переписке). Цены и вилку — только из КП / прайса; если их нет — место под вилку «[вилка из прайса: от … до …]», без выдуманных цифр.`);
+    if (VARIANTS_CLAIM_RE.test(t) && !VARIANTS_SRC_RE.test(String(sourceText || ''))) fixes.push('«Два / оба варианта» — в данных сделки вариантов нет (КП один). Не утверждать, что варианты уже готовы: «подготовлю 2 варианта — [какие]» или про один вариант из КП.');
     // 902-ПП — только Москва; «есть пара моментов» — только реальные, из данных.
     if (PP902_RE.test(t) && !isMoscow) fixes.push('902-ПП — правила Москвы, а город объекта в данных не указан. Убрать 902-ПП: «посмотрю ваш макет по требованиям города, чтобы не пришлось переделывать» (или уточнить город).');
     if (INVENTED_ISSUES_RE.test(t) && !INVENTED_ISSUES_RE.test(String(sourceText || ''))) fixes.push('«Есть пара моментов» — обещание найденных проблем, которых в данных нет. Иначе: «посмотрю ваш макет по требованиям города — чтобы вывеску не пришлось переделывать».');
@@ -405,4 +440,5 @@ function applyPlanChecks(verdict, messages, plan, sourceText = '', sentHistory =
 }
 
 module.exports = {
+  inventedSums,
   repeatedPhrases, managerGender, findPlanIssues, applyPlanChecks, repeatedArguments, LAST_CHANCE_RE, ALT_RE, RISK_RE };
