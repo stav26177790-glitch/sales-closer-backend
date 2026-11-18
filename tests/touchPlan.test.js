@@ -34,6 +34,18 @@ check('владелец 18.11: разговор уже был — первому
   const p2 = buildTouchPlan({ touchpoint_sequence: seq }, tl, '2026-11-13', null, { source: '[Сообщение менеджера 1]\nКП отправила, тишина 3 дня.' });
   assert.ok(!/FOLLOW-UP прошедшего разговора/.test([].concat(p2[0].how || []).join(' ')));
 });
+check('владелец 18.11: «покажите, чем отличаетесь» — звонку после кружка идея = производство; в шаге кружок без звонка следом не остаётся', () => {
+  const seq2 = [
+    { touchpoint_number: 1, channel: 'Кружок', goal: 'интрига', criterion: 'Д', timing_days: 1, recipient: 'Сергей Петрович' },
+    { touchpoint_number: 2, channel: 'Звонок', goal: 'раскрыть идею', criterion: 'Д', timing_days: 2, recipient: 'Сергей Петрович' },
+    { touchpoint_number: 3, channel: 'WhatsApp', goal: 'кейс', criterion: 'ФВ', timing_days: 5, recipient: 'Сергей Петрович' }
+  ];
+  const src = '[Сообщение менеджера 2]\nСергей Петрович: Ладно. Покажите, чем вы отличаетесь. Только без воды.';
+  const p1 = buildTouchPlan({ touchpoint_sequence: seq2 }, tl, '2026-11-13', { trust: { status: 'Риск' } }, { source: src, mode: 'step' });
+  assert.ok(p1.some((x) => /звонок/i.test(x.channel)), JSON.stringify(p1.map((x) => x.channel)));
+  const call = p1.find((x) => /звонок/i.test(x.channel));
+  assert.ok(/ИДЕЯ ИЗ КРУЖКА/.test([].concat(call.how || []).join(' ')));
+});
 check('даты отправки по рабочему календарю; «сразу после» — тот же день; условное — без даты', () => {
   assert.equal(plan[0].send_date, '2026-11-13');
   assert.equal(plan[1].send_date, '2026-11-13');

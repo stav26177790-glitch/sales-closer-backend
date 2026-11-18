@@ -73,6 +73,25 @@ function lastManagerEvent(src) {
   const parts = String(src || '').split(/\[Сообщение менеджера \d+\]\s*/).map((x) => x.trim()).filter(Boolean);
   return parts.length ? parts[parts.length - 1] : '';
 }
+// Владелец 18.11 (живой «Гараж 77»): клиент просит «покажите, чем отличаетесь» / доверие не открыто — после кружка
+// «появилась идея» звонок раскрывает идею: приглашение на производство (Москва и МО). Регион далеко — Zoom с показом.
+const FAR_RE = /(санкт-петербург|спб|петербург|казан|екатеринбург|новосибирск|краснодар|нижн[а-яё]* новгород|самар|ростов|уф[аеы](?![а-яё])|перм|воронеж|твер|ярослав|владимир|рязан|тул[аеы](?![а-яё])|калуг|край(?![а-яё])|республик)/i;
+const KRUG_IDEA_NOTE = ' ИДЕЯ ИЗ КРУЖКА (владелец 18.11): звонок сразу после кружка «появилась идея» раскрывает её — приглашение на наше производство (акрил — Мытищи, металл — Щёлково; проводит заведующий производством): «словам верить не обязаны — приезжайте, своими глазами увидите, кто и как делает вашу вывеску и как ОТК её проверяет». День и время — два варианта на выбор.';
+const KRUG_IDEA_FAR_NOTE = ' ИДЕЯ ИЗ КРУЖКА (владелец 18.11): звонок сразу после кружка раскрывает идею — короткий Zoom с показом производства и кейса «было / стало», день и время на выбор.';
+function noteKrugIdea(steps, source, scores) {
+  const t = String(source || '');
+  const askShow = /покажите|чем вы (отличаетесь|лучше)|очки втираете|не верю|у всех (вс[её] )?одинаков/i.test(t);
+  const trust = String(scores?.trust?.status || '');
+  if (!askShow && !/риск|неизвестно/i.test(trust)) return steps;
+  steps.forEach((x, i) => {
+    if (!/кружок/i.test(String(x.channel || ''))) return;
+    const call = steps.slice(i + 1).find((y) => !y.conditional && VOICE_STEP_RE.test(String(y.channel || '')));
+    if (!call || call.lastChance) return;
+    addHow(call, FAR_RE.test(t) ? KRUG_IDEA_FAR_NOTE : KRUG_IDEA_NOTE);
+    if (!FAR_RE.test(t)) call.production_meeting = true;
+  });
+  return steps;
+}
 function noteFollowUp(steps, source) {
   const first = steps.find((x) => !x.conditional && !x.lastChance) || steps[0];
   if (first && REAL_CALL_RE.test(lastManagerEvent(source))) addHow(first, FOLLOWUP_REAL_NOTE);
@@ -457,7 +476,11 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   const stepMode = context.mode === 'step';
   if (stepMode) {
     const firstRegular = steps.findIndex((x) => !x.conditional && !x.sameContact);
-    const nextRegular = steps.findIndex((x, i) => i > firstRegular && !x.conditional && !x.sameContact);
+    let nextRegular = steps.findIndex((x, i) => i > firstRegular && !x.conditional && !x.sameContact);
+    // Владелец 18.11: кружок «появилась идея — наберёмся?» без звонка следом — интрига в пустоту. Звонок — в шаг.
+    if (nextRegular > 0 && /кружок/i.test(String(steps[firstRegular]?.channel || '')) && VOICE_STEP_RE.test(String(steps[nextRegular]?.channel || ''))) {
+      nextRegular = steps.findIndex((x, i) => i > nextRegular && !x.conditional && !x.sameContact);
+    }
     if (firstRegular >= 0 && nextRegular > 0) steps = steps.slice(0, nextRegular);
   }
 
@@ -582,6 +605,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   }
 
   steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(steps), context.dealSize), context.source), context.source);
+  noteKrugIdea(steps, context.source, scores);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });

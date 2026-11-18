@@ -21,7 +21,8 @@ const ALIASES = {
   '10_zoom': ['Zoom'],
   '11_lpr': ['ЛДПР', 'ЛПР'],
   '12_price': ['Цена'],
-  '13_last_chance': ['Последний шанс']
+  '13_last_chance': ['Последний шанс'],
+  '14_otstroyka': ['Отстройка']
 };
 
 let cache = null;
