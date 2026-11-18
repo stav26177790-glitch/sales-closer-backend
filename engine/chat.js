@@ -130,7 +130,9 @@ function formatTouchpoint(m, i) {
   // Повод должен быть правдой: что менеджер делает перед касанием.
   const prepText = String(m.hook?.prep || '').replace(/^\s*перед касанием:?\s*/i, '').trim();
   const prep = prepText ? `**Перед касанием:** ${prepText}\n\n` : '';
-  return `### Касание ${i + 1}${channel}${kind}\n${timing}${prep}${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}`;
+  // «Наставник» (владелец 18.11): строки «>> » — интерфейс показывает их блоком «Почему так» и прячет переключателем.
+  const mentor = Array.isArray(m.mentor) && m.mentor.length ? `\n\n>> **Почему так**\n${m.mentor.map((x) => `>> ${x}`).join('\n')}` : '';
+  return `### Касание ${i + 1}${channel}${kind}\n${timing}${prep}${subject}${m.body || ''}${formatAttachmentBlock(m.attachment)}${mentor}`;
 }
 
 const STRATEGY_LABELS = { name: 'Название', goal: 'Цель' };

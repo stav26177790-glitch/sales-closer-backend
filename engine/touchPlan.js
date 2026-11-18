@@ -676,7 +676,8 @@ function pinToPlan(composerOutput, plan) {
   if (!Array.isArray(msgs) || !Array.isArray(plan)) return composerOutput;
   const messages = msgs.map((m, i) => {
     const p = plan.find((x) => x.touchpoint_number === Number(m?.touchpoint_number ?? i + 1));
-    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind, criterion: p.criterion || null, last_chance: !!p.last_chance } : m;
+    // «Наставник» (владелец 18.11): почему касание такое — из плана, кодом.
+    return p ? { ...m, channel: p.channel, timing: p.timing, kind: p.kind, criterion: p.criterion || null, last_chance: !!p.last_chance, mentor: require('./mentor').mentorWhy(p) } : m;
   });
   return { ...composerOutput, messages };
 }
