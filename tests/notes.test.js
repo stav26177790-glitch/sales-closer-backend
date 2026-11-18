@@ -71,12 +71,28 @@ check('план «Гараж 77»: в первом звонке один пол�
   assert.ok(!/вплести/.test(first.how));
   assert.ok(plan.slice(1).some((p) => /вплести/.test(p.how)));
   // было 3 700 символов (замер 18.11); остаются только обязательные — сценарий и итог звонка
-  assert.ok(first.how.length < 2500, String(first.how.length));
+  assert.ok(first.how.replace(/СЛОТ ДЛЯ ШАГА[^]*$/, '').length < 2500, String(first.how.length));
+  // полный прогон 18.11: у звонка с итогом — конкретный слот от кода, без «[день, время]»
+  assert.ok(/СЛОТ ДЛЯ ШАГА \(код\): в звонке предложить «\d+ [а-я]+ \([а-я]{2}\) в 11:00/.test(first.how), first.how.slice(-300));
 });
 
 check('наставник узнаёт вопрос СОПРАНО без служебной пометки', () => {
   const w = mentorWhy({ goal: 'Слот', criterion: 'ЗС — здесь и сейчас', kind: 'экспертное', how: 'СОПРАНО: вплести один вопрос по несобранным блокам' });
   assert.ok(w.some((x) => /СОПРАНО/.test(x)), w.join(' | '));
+});
+
+check('полный прогон 18.11 («Зерно»): не успеваем к дате клиента — в facts прямое «к … постоянную уже не успеваем»', () => {
+  const { computeTimeline } = require('../engine/timeline');
+  const tl = computeTimeline({ today: '2026-11-18', clientDeadline: '2026-12-01', productionDays: 10, installDaysMin: 2, installDaysMax: 3 });
+  console.log = () => {};
+  const plan = buildTouchPlan(STRATEGY, tl, '2026-11-18', SCORES, { source: SRC, client: 'Зерно', mode: 'full' });
+  console.log = log;
+  assert.ok(/постоянную уже не успеваем/.test(plan[0].facts.honesty || ''), JSON.stringify(plan[0].facts));
+  const ok = computeTimeline({ today: '2026-11-18', clientDeadline: '2027-01-20', productionDays: 10, installDaysMin: 2, installDaysMax: 3 });
+  console.log = () => {};
+  const plan2 = buildTouchPlan(STRATEGY, ok, '2026-11-18', SCORES, { source: SRC, client: 'Зерно', mode: 'full' });
+  console.log = log;
+  assert.ok(!plan2[0].facts.honesty, 'успеваем — без пометки');
 });
 
 console.log(`notes: ${n} проверок пройдено`);

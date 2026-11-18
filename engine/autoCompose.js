@@ -54,6 +54,16 @@ function isForwardMaterial(step, m) {
   return /пересыл|переслать|для передачи/i.test(t);
 }
 
+// Полный прогон 18.11: сценарий звонка гонялся на «сократить» 4 круга (2 040 из 1 800), потому что в длину шли готовые
+// сообщения «после звонка» / «сразу» — это тексты для мессенджера, не речь. Длину звонка считаем без них.
+function spokenPart(m) {
+  const body = String(m?.body || '');
+  if (!/звон|zoom|зум|встреч/i.test(String(m?.channel || ''))) return body;
+  return body
+    .replace(/\*\*Сообщение после звонка[\s\S]*$/i, '')
+    .replace(/\*\*Сообщение сразу[^\n]*\n?(?:[^\n]+\n?)*?(?=\n\s*\n|$)/i, '')
+    .trim();
+}
 function codeChecks(composerOutput, timeline, plan, sourceText, sentHistory = []) {
   const msgs = messagesOf(composerOutput);
   const r = {
@@ -76,7 +86,7 @@ function codeChecks(composerOutput, timeline, plan, sourceText, sentHistory = []
     // Материал для пересылки ЛПР (живой «Зерно 5»): это не реплика в чате, а готовый
     // текст-«одна страница» — лимит как у письма, иначе проверка режет суть стратегии.
     const max = isForwardMaterial(planStep(m, i), m) ? CONFIG.MAX_MESSAGE_LENGTH.email : CONFIG.MAX_MESSAGE_LENGTH[channelKey(m?.channel)];
-    const len = String(m?.body || '').length;
+    const len = spokenPart(m).length;
     // Владелец 17.11 («превышение небольшое — сам посмотри и прими решение»): до 10% сверх лимита не гоняем
     // круг правок — сценарий звонка с развилками важнее нескольких лишних знаков.
     if (max && len > Math.round(max * 1.1)) {

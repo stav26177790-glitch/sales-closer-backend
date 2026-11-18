@@ -367,6 +367,14 @@ function readyText(t) {
   return s.installed_earliest === s.installed_latest ? humanDate(s.installed_latest) : `${humanDate(s.installed_earliest)} – ${humanDate(s.installed_latest)}`;
 }
 
+// Полный прогон 18.11: в «Сообщении после звонка» писатель оставлял «[день, время]», «[дата]» (7 остатков, круги
+// переписывания) — исход звонка не знает. Код даёт конкретный слот: его и предлагать в звонке, он же — в «Если договорились».
+function slotNote(s, send) {
+  if (!send || !(s.how || []).some((h) => /^\s*FOLLOW-UP после звонка/.test(h))) return [];
+  const d = addWorkingDays(send, 1);
+  return [`СЛОТ ДЛЯ ШАГА (код): в звонке предложить «${humanDate(d)} в 11:00 — удобно?» (не подходит — «а в 15:00?»); в «Если договорились» — ровно «${humanDate(d)} в 11:00». Сумма — из КП / вилки, даты готовности — из facts; квадратных скобок нет.`];
+}
+const b0 = (timeline) => !!(timeline?.temp_banner && timeline.temp_banner.fits_client_deadline);
 // Факты по срокам на день отправки касания.
 function factsFor(sendIso, timeline) {
   if (!timeline || !timeline.if_start_today || !sendIso) return { dates: 'Дат готовности не называть — сроки не посчитаны.' };
@@ -382,6 +390,11 @@ function factsFor(sendIso, timeline) {
     permanent_ready_if_start_that_day: readyText(at),
     note: 'Каждый рабочий день ожидания сдвигает готовность на рабочий день.'
   };
+  // Полный прогон 18.11 («Зерно»: 5 из 11 «нет»): «готова 7–8 декабря» в ответ на «открываемся 1 декабря» без прямого
+  // «не успеваем» читается как увиливание. Не успеваем — называем это прямо, одной фразой, рядом с датой.
+  if (/не успева|прошла/i.test(String(at?.status || '')) && timeline.client_deadline) {
+    out.honesty = `К ${humanDate(timeline.client_deadline)} (дата клиента) постоянную вывеску уже не успеваем. Называешь дату готовности — в той же фразе прямо: «к ${humanDate(timeline.client_deadline)} постоянную уже не успеваем — при старте сегодня готова ${readyText(at)}»${b0(timeline) ? ' и что делаем к открытию (временная — по `temp_banner`)' : ''}. Не «к открытию», не «успеваем», не «в срок».`;
+  }
   const b = timeline.temp_banner;
   if (b && b.fits_client_deadline) {
     out.temp_banner = sendIso <= b.latest_start_date
@@ -687,7 +700,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
       recipient: s.recipient,
       condition: s.conditional ? (s.condition || 'только при условии') : '',
       goal: s.goal,
-      how: (s.how || []).join(' '),
+      how: [...(s.how || []), ...slotNote(s, send)].join(' '),
       scenarios: s.scenarios || [],
       key_message: s.key_message,
       value: s.value,
