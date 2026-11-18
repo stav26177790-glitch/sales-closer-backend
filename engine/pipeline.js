@@ -121,6 +121,9 @@ async function runComposer(baseInput, deal, options) {
     const out = result?.composer_output || result;
     return pinToPlan(out, plan);
   }
+  // Аудит 18.11: сюда попадают только сделки до 13.11 (стратегия без плана). Заменить на writer — 19 из 32 снимков
+  // переписать; путь редкий, поэтому оставлен. Метка в логе Render — видно, ходит ли сюда кто-то; нет — убрать.
+  console.warn(`[composer] старый путь без плана касаний: ${deal?.client || deal?.id || ''}`);
   const result = await callAgentSafe('composer', buildComposerInput(baseInput, deal, options), COMPOSER_MAX_TOKENS);
   return result?.composer_output || result;
 }
