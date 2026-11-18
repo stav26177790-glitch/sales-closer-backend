@@ -48,7 +48,7 @@ async function callAgent(agentName, inputData, maxTokens = 4000) {
   const dealLabel = dealLabelOf(inputData);
   console.log(`[agentRunner] → ${agentName} (сделка: ${dealLabel}, ${new Date().toISOString()})`);
   const config = getAgentConfig(agentName);
-  const systemPrompt = buildSystemPrompt(agentName, inputData?.deal?.industry);
+  const systemPrompt = buildSystemPrompt(agentName, inputData?.deal?.industry, inputData);
   const startedAt = Date.now();
 
   // Ответ не разобрался как JSON — один раз переспрашиваем (DeepSeek 15.11 дважды ломал структуру

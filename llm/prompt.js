@@ -46,20 +46,34 @@ function loadAgentPrompt(agentName) {
 
 // Знания об отрасли сделки: knowledge/industry/<отрасль>.md и дополнения
 // <отрасль>_*.md (например, signage_902pp.md — правила Москвы). Файлов может не быть.
-function loadIndustryKnowledge(industry) {
+function loadIndustryKnowledge(industry, { skip = [] } = {}) {
   if (!industry || !/^[a-z0-9_]+$/.test(industry)) return '';
   const dir = path.join(KNOWLEDGE_BASE_PATH, 'industry');
   const main = path.join(dir, `${industry}.md`);
   if (!fs.existsSync(main)) return '';
-  const extras = fs.readdirSync(dir).filter((f) => f.startsWith(`${industry}_`) && f.endsWith('.md')).sort();
+  const extras = fs.readdirSync(dir).filter((f) => f.startsWith(`${industry}_`) && f.endsWith('.md') && !skip.includes(f)).sort();
   const parts = [main, ...extras.map((f) => path.join(dir, f))].map((f) => fs.readFileSync(f, 'utf8'));
   return `\n\n---\n# ОТРАСЛЬ СДЕЛКИ: ${industry}\n---\n\n${parts.join('\n\n---\n\n')}\n`;
 }
 
-function buildSystemPrompt(agentName, industry) {
+// 902-ПП — правила города Москвы (13 тыс. символов). Писателю (владелец 18.11: «да, если будет оптимизация и
+// ничего не сломается») — только если сделка не явно за пределами Москвы. Город не ясен — грузим, как раньше.
+// Остальным агентам — как раньше (стратегия ставит подсказки 902-ПП сама, критику нужен для проверки фактов).
+const MSK_RE = /москв|мск([^а-яё]|$)|метро(?![а-яё])|м\.\s?[А-ЯЁ]|902-?пп/i;
+function clearlyNotMoscow(inputData) {
+  const { NOT_MOSCOW_RE } = require('../engine/touchPlan');
+  const text = `${JSON.stringify(inputData?.deal || {})} ${inputData?.materials?.source_materials?.text || ''}`;
+  return !MSK_RE.test(text) && NOT_MOSCOW_RE.test(text);
+}
+function industrySkip(agentName, inputData) {
+  return agentName === 'writer' && inputData && clearlyNotMoscow(inputData) ? ['signage_902pp.md'] : [];
+}
+
+// inputData (необязательно) — вход агента: по нему решается, нужен ли 902-ПП писателю.
+function buildSystemPrompt(agentName, industry, inputData) {
   let systemPrompt = loadAgentPrompt(agentName) + loadKnowledgeForAgent(agentName);
   if (getAgentConfig(agentName).industryKnowledge) {
-    systemPrompt += loadIndustryKnowledge(industry);
+    systemPrompt += loadIndustryKnowledge(industry, { skip: industrySkip(agentName, inputData) });
   }
   if (getAgentConfig(agentName).industryCases) {
     systemPrompt += loadIndustryCases(industry);
@@ -75,4 +89,4 @@ function toApiSystem(agentName, systemPrompt) {
   return [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }];
 }
 
-module.exports = { buildSystemPrompt, toApiSystem, loadIndustryCases };
+module.exports = { buildSystemPrompt, toApiSystem, loadIndustryCases, clearlyNotMoscow };

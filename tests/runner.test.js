@@ -106,6 +106,16 @@ async function test(name, fn) {
     assert.ok(!has('composer', '../agents'), 'путь отрасли не должен выходить за папку');
   });
 
+  await test('902-ПП писателю — только если сделка не явно вне Москвы; остальным — как раньше', async () => {
+    const myt = { deal: { client: 'Автосервис Гараж 77' }, materials: { source_materials: { text: 'Мытищи, Олимпийский проспект, 29' } } };
+    const msk = { deal: { client: 'Гибкость' }, materials: { source_materials: { text: 'Москва, ул. Бауманская, 11 (м. Бауманская)' } } };
+    const unknown = { deal: { client: 'Кафе' }, materials: { source_materials: { text: 'нужна вывеска' } } };
+    assert.ok(buildSystemPrompt('writer', 'signage', msk).length - buildSystemPrompt('writer', 'signage', myt).length > 5000, 'Мытищи: 902-ПП не нужен писателю');
+    assert.ok(buildSystemPrompt('writer', 'signage', msk) === buildSystemPrompt('writer', 'signage'), 'Москва: писатель как раньше');
+    assert.ok(buildSystemPrompt('writer', 'signage', unknown) === buildSystemPrompt('writer', 'signage'), 'город не ясен — как раньше');
+    assert.ok(buildSystemPrompt('strategy', 'signage', myt) === buildSystemPrompt('strategy', 'signage'), 'стратегия — как раньше');
+  });
+
   await test('Шесть триггеров (24_client_triggers.md) есть у diagnostic, strategy, composer, reviewer, advisor', async () => {
     for (const a of ['diagnostic', 'strategy', 'composer', 'reviewer', 'advisor']) {
       assert.ok(AGENTS[a].knowledge.includes('24_client_triggers.md'), a);
