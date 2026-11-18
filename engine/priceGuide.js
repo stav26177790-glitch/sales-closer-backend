@@ -132,11 +132,13 @@ function priceGuide(deal, sourceText = '') {
     metal = metal || !!L.metal;
     items.push(`${L.name}: ${p.lengthCm ? `длина ≈ ${Math.round(p.lengthCm / 10) / 10} м` : `${letters} букв`}${h ? `, высота ≈ ${h} см` : ''}`);
     if (!p.signText) assumptions.push('текст вывески не известен — расчёт по длине');
-  } else if (p.box && p.areaM2) {
+  }
+  // Короб — и отдельно, и вместе с буквами (буквы + короб «Шиномонтаж»).
+  if (p.box && p.areaM2) {
     const B = BOX[p.box];
     cost += Math.max(B.min, B.rate * p.areaM2);
     items.push(`${B.name}: ${Math.round(p.areaM2 * 100) / 100} м²`);
-  } else {
+  } else if (!kind) {
     return null;
   }
   if (p.plaque) {

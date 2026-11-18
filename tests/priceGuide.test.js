@@ -29,4 +29,9 @@ check('«без монтажа» — монтаж не считаем; разб�
   assert.ok(b.x < a.x);
   assert.equal(parseParams('длина 250 см').lengthCm, 250);
 });
+check('буквы + короб — считаются оба', () => {
+  const src = 'Световые буквы, текст «ГАРАЖ 77», высота букв 60 см, световой короб «Шиномонтаж» 2 x 0,6 м';
+  const both = priceGuide({ product: 'Световые объёмные буквы + световой короб', industry: 'signage' }, src);
+  assert.ok(both.items.some((i) => /короб/.test(i)) && both.items.some((i) => /букв/.test(i)), JSON.stringify(both.items));
+});
 console.log(`priceGuide: ${n} проверок пройдено`);
