@@ -27,6 +27,13 @@ check('владелец 18.11: звонок без письменного кас
   const calls = plan.filter((p) => /звонок/i.test(p.channel) && !p.last_chance);
   assert.ok(calls.some((c) => /FOLLOW-UP после звонка/.test([].concat(c.how || []).join(' '))), JSON.stringify(calls.map((c) => c.how)));
 });
+check('владелец 18.11: разговор уже был — первому касанию готовый итог прошедшего разговора; не было — нет', () => {
+  const src = '[Сообщение менеджера 1]\nКП отправила.\n\n[Сообщение менеджера 2]\nСозвонилась с Маратом. Хочет скидку 10% и монтаж в воскресенье. Сказала, что уточню и вернусь до 18:00.';
+  const p1 = buildTouchPlan({ touchpoint_sequence: seq }, tl, '2026-11-13', null, { source: src });
+  assert.ok(/FOLLOW-UP прошедшего разговора/.test([].concat(p1[0].how || []).join(' ')));
+  const p2 = buildTouchPlan({ touchpoint_sequence: seq }, tl, '2026-11-13', null, { source: '[Сообщение менеджера 1]\nКП отправила, тишина 3 дня.' });
+  assert.ok(!/FOLLOW-UP прошедшего разговора/.test([].concat(p2[0].how || []).join(' ')));
+});
 check('даты отправки по рабочему календарю; «сразу после» — тот же день; условное — без даты', () => {
   assert.equal(plan[0].send_date, '2026-11-13');
   assert.equal(plan[1].send_date, '2026-11-13');
