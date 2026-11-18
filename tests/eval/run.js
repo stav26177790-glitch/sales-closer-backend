@@ -203,6 +203,32 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   return v;
 }
 
+// ---------- живой прогресс (владелец 18.11: «показывать прогресс симуляции онлайн») ----------
+// После каждого хода — ответ Клоузера (как в чате) в ветку eval-live: live/<run_id>/<ситуация>.md. Только в GitHub Actions.
+const { execSync } = require('child_process');
+const LIVE_DIR = '/tmp/live';
+let liveReady = false;
+function liveSh(cmd, cwd) { return execSync(cmd, { cwd, stdio: ['ignore', 'pipe', 'pipe'] }).toString(); }
+function livePublish(sit, label, chatText) {
+  if (!process.env.GITHUB_ACTIONS || !process.env.GITHUB_RUN_ID) return;
+  try {
+    if (!liveReady) {
+      liveSh('git config user.name "eval-bot" && git config user.email "eval-bot@users.noreply.github.com"', ROOT);
+      let remote = true;
+      try { liveSh('git ls-remote --exit-code --heads origin eval-live', ROOT); } catch { remote = false; }
+      if (remote) liveSh(`git fetch -q --depth 1 origin eval-live && git worktree add -q -B eval-live ${LIVE_DIR} FETCH_HEAD`, ROOT);
+      else liveSh(`git worktree add -q --orphan -b eval-live ${LIVE_DIR}`, ROOT);
+      liveReady = true;
+    }
+    const dir = path.join(LIVE_DIR, 'live', String(process.env.GITHUB_RUN_ID));
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, `${sit.id}.md`);
+    const head = fs.existsSync(file) ? '' : `# ${sit.id}. ${sit.title}\n\n`;
+    fs.appendFileSync(file, `${head}## ${new Date().toISOString().slice(11, 16)} UTC — ${label} (сегодня ${process.env.KLOUZER_TODAY})\n\n${chatText || '(ответа нет)'}\n\n---\n\n`);
+    liveSh(`git add -A && git commit -qm "live ${sit.id}: ${label.replace(/["`$]/g, '')}" && (git push -q origin eval-live || (git pull -q --rebase origin eval-live && git push -q origin eval-live))`, LIVE_DIR);
+  } catch (e) { console.error(`живой прогресс: ${String(e.message).slice(0, 200)}`); }
+}
+
 // ---------- одна ситуация ----------
 // Многоуровневые сделки меняют «сегодня» через process.env (одно на процесс) — параллельно две такие
 // сделки путали даты (симулятор 16.11: шаг 20.11 посчитался от 19.11). Идут по очереди.
@@ -240,6 +266,7 @@ async function runSituationInner(sit) {
   if (!db.deal.last_composer_output?.messages?.length && /без срока/i.test(String(parts[parts.length - 1]?.text || ''))) {
     await say('без срока', 'без срока');
   }
+  livePublish(sit, 'первый ход', parts.filter((x) => x.label === 'переписка' || x.label === 'без срока').map((x) => x.text).join('\n\n'));
   const firstTouches = db.deal.last_composer_output?.messages || [];
   const firstPlan = db.deal.last_strategy_output?.touch_plan || [];
   if (sit.reply) await say(sit.reply, 'ответ клиента');
@@ -255,6 +282,7 @@ async function runSituationInner(sit) {
       plan: d.last_strategy_output?.touch_plan || [], touches: d.last_composer_output !== before ? (d.last_composer_output?.messages || []) : [],
       scores: d.last_diagnostic_output?.scores, soprano: d.last_diagnostic_output?.soprano, soprano_recs: d.last_diagnostic_output?.soprano_recommendations,
       chat: parts.filter((x) => x.label === st.label).map((x) => x.text).join('\n\n') });
+    livePublish(sit, st.label, stages[stages.length - 1].chat);
   }
   const deal = db.deal;
   const finalTouches = deal.last_composer_output?.messages || [];
@@ -273,6 +301,13 @@ async function runSituationInner(sit) {
   if (JUDGE && finalTouches.length) {
     const sets = sit.reply || sit.steps ? { before: { touches: firstTouches, plan: firstPlan }, after: { touches: finalTouches, plan }, stages: stages.slice(0, -1) } : { before: { touches: finalTouches, plan } };
     try { verdict = await judgeWithCritical(sit, sets, deal.last_diagnostic_output?.diagnostic_summary); } catch (e) { errors.push(`judge: ${e.message}`); }
+    if (verdict && !verdict.parse_error) {
+      const msgs = verdict.touches || [];
+      const cnt = (re) => msgs.filter((m) => re.test(String(m.send || ''))).length;
+      const crit = (verdict.critical || []).map((c) => `- ⛔ ${c.error}: «${String(c.quote || '').slice(0, 120)}»`).join('\n');
+      const miss = (verdict.missing || []).map((m) => `- 🔎 ${String(m).slice(0, 200)}`).join('\n');
+      livePublish(sit, 'оценка судьи', `**Касаний: ${msgs.length} · как есть ${cnt(/как есть/i)} · с правкой ${cnt(/правк/i)} · нет ${cnt(/^нет/i)}**\n\n${verdict.summary || ''}\n\n${crit}\n${miss}`);
+    }
   }
   return {
     id: sit.id, name: sit.name, title: sit.title, expect: sit.expect,
