@@ -6,7 +6,7 @@
  */
 const { voiceBlocked } = require('./voice');
 
-const errNo = (c) => String(c?.error || '').match(/^\s*(\d)/)?.[1] || (/обещани[ея] срока/i.test(String(c?.error || '')) ? '2' : /деньги письменно/i.test(String(c?.error || '')) ? '6' : null);
+const errNo = (c) => String(c?.error || '').match(/^\s*(\d{1,2})/)?.[1] || (/обещани[ея] срока/i.test(String(c?.error || '')) ? '2' : /деньги письменно/i.test(String(c?.error || '')) ? '6' : null);
 
 function keepCritical(c, { source = '', status = '', channel = '' } = {}) {
   const q = String(c?.quote || '');
@@ -26,6 +26,9 @@ function keepCritical(c, { source = '', status = '', channel = '' } = {}) {
     case '6': // голос недоступен — деньги в переписке можно; звонок / Zoom / встреча — это голос (4 экзамена: ⛔ на звонке)
       if (/звонок|zoom|зум|встреч|видеозвон/i.test(String(channel || ''))) return false;
       return !voiceBlocked(source);
+    case '10': // неживая речь — не трогать живые формулировки владельца
+      if (!q.trim()) return false;
+      return !/^(скажите как есть|в открытую|мне правда важно|спасибо,? что сказали прямо|коротко и по делу|единственное,? хотел[аи]? уточнить|понял[аи]? вас|как вам в целом|появилась (одна )?идея|по рукам|можно вопрос|как вы на это смотрите)/i.test(q.trim());
     default:
       return true;
   }

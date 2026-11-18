@@ -23,3 +23,12 @@ check('4 экзамена: «деньги письменно» в звонке �
   assert.equal(keepCritical({ error: '6. Деньги письменно', quote: 'Скидка 5%' }, { channel: 'WhatsApp' }), true);
 });
 console.log(`criticFilters: ${n} проверок пройдено`);
+
+{
+  const { keepCritical, errNo } = require('../engine/criticFilters');
+  const assert2 = require('assert');
+  assert2.equal(errNo({ error: '10. Неживая речь' }), '10');
+  assert2.equal(keepCritical({ error: '10. Неживая речь', quote: 'наберу с одной мыслью' }), true);
+  assert2.equal(keepCritical({ error: '10. Неживая речь', quote: 'Скажите как есть: проект актуален?' }), false);
+  console.log('  ✓ ошибка 10 (неживая речь): номер из двух цифр; живые формулировки владельца не отсекаются как ошибка');
+}
