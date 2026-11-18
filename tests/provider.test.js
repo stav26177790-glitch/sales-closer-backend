@@ -43,9 +43,13 @@ check('неизвестный провайдер — понятная ошибк
 check('цена: Claude Sonnet $3/$15, DeepSeek V4 Pro $1.32/$3.96, кэш DeepSeek — $0.044', () => {
   const u = { input_tokens: 1e6, output_tokens: 1e6 };
   assert.equal(costOf('claude-sonnet-4-6', u, {}), 18);
-  assert.equal(costOf('deepseek-v4-pro', u, { LLM_PROVIDER: 'deepseek' }).toFixed(2), '5.28');
-  assert.equal(costOf('deepseek-v4-pro', { cache_read_input_tokens: 1e6 }, { LLM_PROVIDER: 'deepseek' }).toFixed(3), '0.044');
-  assert.equal(costOf('deepseek-v4-flash', u, { LLM_PROVIDER: 'deepseek' }).toFixed(2), '1.50');
+  const peak = new Date('2026-11-18T08:00:00Z'), off = new Date('2026-11-18T15:00:00Z'), sat = new Date('2026-11-21T08:00:00Z');
+  assert.equal(costOf('deepseek-v4-pro', u, { LLM_PROVIDER: 'deepseek' }, peak).toFixed(2), '5.28');
+  // вне пика и в выходные — вдвое дешевле (прайс DeepSeek с 16.08.2026)
+  assert.equal(costOf('deepseek-v4-pro', u, { LLM_PROVIDER: 'deepseek' }, off).toFixed(2), '2.64');
+  assert.equal(costOf('deepseek-v4-pro', u, { LLM_PROVIDER: 'deepseek' }, sat).toFixed(2), '2.64');
+  assert.equal(costOf('deepseek-v4-pro', { cache_read_input_tokens: 1e6 }, { LLM_PROVIDER: 'deepseek' }, peak).toFixed(3), '0.044');
+  assert.equal(costOf('deepseek-v4-flash', u, { LLM_PROVIDER: 'deepseek' }, peak).toFixed(2), '1.50');
 });
 
 console.log(`provider: ${n} проверок пройдено`);

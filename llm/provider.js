@@ -74,13 +74,24 @@ function createClient(env = process.env) {
   return new Anthropic({ maxRetries: 4, baseURL: cfg.baseURL, apiKey: cfg.apiKey });
 }
 
+// DeepSeek (api-docs.deepseek.com/quick_start/pricing, проверено 18.11): пик — будни 01:00–04:00 и 06:00–10:00 UTC
+// (по Москве 04:00–07:00 и 09:00–13:00), остальное время и выходные — вдвое дешевле. Цены в PROVIDERS — пиковые.
+// Китайские праздники (тоже не пик) не учитываем — ошибка в сторону завышения.
+function isDeepseekPeak(at = new Date()) {
+  const d = at.getUTCDay();
+  if (d === 0 || d === 6) return false;
+  const h = at.getUTCHours();
+  return (h >= 1 && h < 4) || (h >= 6 && h < 10);
+}
+
 // Цена вызова в USD по usage ответа (поля формата Anthropic).
-function costOf(model, usage, env = process.env) {
+function costOf(model, usage, env = process.env, at = new Date()) {
   if (!usage) return 0;
   const cfg = providerConfig(env);
   const p = model && model === cfg.models.small ? cfg.price.small : cfg.price.main;
-  return ((usage.input_tokens || 0) * p.in + (usage.output_tokens || 0) * p.out +
+  const k = cfg.name === 'deepseek' && !isDeepseekPeak(at) ? 0.5 : 1;
+  return k * ((usage.input_tokens || 0) * p.in + (usage.output_tokens || 0) * p.out +
     (usage.cache_creation_input_tokens || 0) * p.cacheWrite + (usage.cache_read_input_tokens || 0) * p.cacheRead) / 1e6;
 }
 
-module.exports = { PROVIDERS, providerName, providerConfig, createClient, costOf };
+module.exports = { PROVIDERS, providerName, providerConfig, createClient, costOf, isDeepseekPeak };
