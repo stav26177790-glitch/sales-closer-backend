@@ -114,6 +114,12 @@ const sentenceAt = (t, idx) => {
 // Проблемы (собрано); появилась альтернатива (другой подрядчик, «у других дешевле») — Аналоги (собрано).
 const NEG_EXPERIENCE_RE = /(обожгл[а-яё]*|подв[её]л[а-яё]*|подвели|погасл[а-яё]*|перестал[а-яё]* брать трубку|пропал[а-яё]*|негативн[а-яё]* опыт|плох[а-яё]* опыт|кинул[а-яё]*|сорвал[а-яё]* срок)/i;
 const ALTERNATIVE_RE = /(други[ея] (предлага|компани|подрядчик)|у других|конкурент[а-яё]*|ещё (одн[а-яё]* )?(компани|подрядчик|вариант)|дешевле у|предлагают (на \d+\s*% дешевле|за \d)|нашли за \d|сравнива[а-яё]* с)/i;
+// Клиент сам назвал, чем заменить / что упростить (живой тест 18.11: «давайте без подсветки, или баннер сами повесим
+// за 15 тысяч») — Аналоги собраны: альтернативы клиент уже назвал, спрашивать «чем пожертвовать?» поздно.
+const OWN_ALTERNATIVE_RE = /(давайте[^.!?\n]{0,30}без (подсветк|монтаж)|без подсветки[^.!?\n]{0,20}(давайте|можно|сделаем)|(баннер|наклейк|плёнк|пленк|печать)[^.!?\n]{0,40}(сами|за \d)|сами (повесим|смонтируем|поставим|сделаем)|а если (без|попроще|поменьше)|попроще вариант|вариант подешевле)/i;
+// Ограничения: бюджет назван цифрой и есть дата клиента.
+const LIMIT_BUDGET_RE = /бюджет[^.!?\n]{0,40}?\d/i;
+const LIMIT_DATE_RE = /(открыти[ея]|открываемся|нужно к|к \d{1,2}[ .](декабр|январ|феврал|март|апрел|ма[яй]|июн|июл|август|сентябр|октябр|ноябр|\d))/i;
 function markSoprano(diag, key, note) {
   if (!diag.soprano || typeof diag.soprano !== 'object') return false;
   const cur = diag.soprano[key];
@@ -121,6 +127,12 @@ function markSoprano(diag, key, note) {
   diag.soprano[key] = { ...(cur && typeof cur === 'object' ? cur : {}), status: 'собрано', note };
   return true;
 }
+const sentenceOf = (t, idx) => {
+  if (idx < 0) return '';
+  const start = Math.max(t.lastIndexOf('\n', idx), t.lastIndexOf('. ', idx)) + 1;
+  const endRel = t.slice(idx).search(/[.!?\n]/);
+  return t.slice(start, endRel < 0 ? undefined : idx + endRel).trim().slice(0, 160);
+};
 function ensureSopranoFromFacts(diag, sourceText) {
   const t = String(sourceText || '');
   if (!diag || typeof diag !== 'object' || !t) return [];
@@ -130,9 +142,18 @@ function ensureSopranoFromFacts(diag, sourceText) {
     if (markSoprano(diag, 'П', 'проблема — страх повторения прошлого негативного опыта')) out.push('П');
   }
   if (ALTERNATIVE_RE.test(t) && markSoprano(diag, 'А', 'клиент сравнивает с другим подрядчиком / вариантом')) out.push('А');
+  else if (OWN_ALTERNATIVE_RE.test(t) && markSoprano(diag, 'А', 'клиент сам назвал, чем заменить / что упростить')) {
+    out.push('А');
+    const q = sentenceOf(t, t.search(OWN_ALTERNATIVE_RE));
+    const msk = /москв|м\.\s?[А-ЯЁ]|902/i.test(t) && /без подсветк|баннер/i.test(q);
+    const rec = `Клиент сам назвал, что готов упростить: «${q}». Выяснить, что стоит за «дорого» — жёсткий потолок бюджета или непонятно, за что платить; предложить упрощение, которое не ломает результат, с честным риском отхода от ТЗ` +
+      (msk ? '. В Москве буквы без подсветки и баннер на фасаде — нельзя по 902-ПП: сказать как защиту от штрафа и демонтажа, временная вывеска — только внутри.' : '.');
+    if (Array.isArray(diag.soprano_recommendations)) diag.soprano_recommendations = [rec, ...diag.soprano_recommendations];
+  }
+  if (LIMIT_BUDGET_RE.test(t) && LIMIT_DATE_RE.test(t) && markSoprano(diag, 'О2', 'бюджет назван, дата клиента известна')) out.push('О2');
   // Рекомендация «Аналоги: уточнить» больше не нужна, если Аналоги собраны.
   if (out.includes('А') && Array.isArray(diag.soprano_recommendations))
-    diag.soprano_recommendations = diag.soprano_recommendations.filter((r) => !/СОПРАНО: Аналоги/.test(String(r)));
+    diag.soprano_recommendations = diag.soprano_recommendations.filter((r) => !/СОПРАНО: Аналоги|други[ех] (вариант|компани)|с чем (ещё |еще )?сравнива|чем (можно )?пожертвова/i.test(String(r))).slice(0, 3);
   return out;
 }
 

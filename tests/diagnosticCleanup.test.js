@@ -92,4 +92,13 @@ check('живой тест 18.11: бюджет ниже КП — ФВ «Веро
   assert.equal(d.scores.financial.status, 'Риск');
   assert.equal(d.scores.authority.status, 'Риск');
 });
+check('живой тест 18.11: клиент сам назвал упрощения — Аналоги собраны, старые «уточнить альтернативы» убраны, новая рекомендация с 902-ПП; бюджет + дата — Ограничения собраны', () => {
+  const { ensureSopranoFromFacts } = require('../engine/diagnosticCleanup');
+  const d = { soprano: { 'А': { status: 'частично' }, 'О2': { status: 'частично' } }, soprano_recommendations: ['Альтернативы (СОПРАНО: Аналоги): уточнить', 'Уточнить у Алины, смотрят ли они другие варианты', 'Уточнить ориентир бюджета у Марата'] };
+  const t = 'Москва, Бауманская. Открытие 15 декабря. Бюджет — Марат говорит до 100 тысяч. Алина (20.11): Марат посмотрел — дорого. Говорит, давайте буквы без подсветки, или вообще баннер на фасад сами повесим за 15 тысяч.';
+  assert.deepEqual(ensureSopranoFromFacts(d, t), ['А', 'О2']);
+  assert.equal(d.soprano_recommendations.length, 2);
+  assert.ok(/сам назвал.*902-ПП/.test(d.soprano_recommendations[0]));
+  assert.ok(/ориентир бюджета у Марата/.test(d.soprano_recommendations[1]));
+});
 console.log(`diagnosticCleanup: ${n} проверок пройдено`);
