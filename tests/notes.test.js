@@ -114,4 +114,18 @@ check('план как договор: у касаний разные углы �
   plan.forEach((p, i) => { if (/кружок/i.test(p.channel) || p.last_chance) assert.equal(args[i], null, `${p.channel}: ${args[i]}`); });
 });
 
+check('договор: доводы не повторяются и между разными адресатами (звонок контактному → письмо для ЛПР)', () => {
+  const strat = { touchpoint_sequence: [
+    { number: 1, day: 0, kind: 'экспертное', channel: 'Звонок', recipient: 'Ирина', goal: 'Разбор', criterion: 'ОП' },
+    { number: 2, day: 1, kind: 'экспертное', channel: 'Email', recipient: 'Ирина → Константин Сергеевич (переслать)', goal: 'Страница для ЛПР', criterion: 'ЛПР' },
+    { number: 3, day: 4, kind: 'экспертное', channel: 'Звонок', recipient: 'Константин Сергеевич', goal: 'Слот', criterion: 'ЗС' },
+    { number: 4, day: 7, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Ирина', goal: 'Финально', criterion: 'ЗС' }
+  ], must_include: [] };
+  console.log = () => {};
+  const plan = buildTouchPlan(strat, null, '2026-11-19', null, { source: 'Клиника МедЛайн, КП 260 000 ₽.', mode: 'full', triggers: [{ trigger: 'Тщеславие' }] });
+  console.log = log;
+  const args = plan.map((p) => (p.how.match(/ДОВОД ЭТОГО КАСАНИЯ \(договор плана\): «([^»]+)»/) || [])[1]).filter(Boolean);
+  assert.equal(new Set(args).size, args.length, JSON.stringify(args));
+});
+
 console.log(`notes: ${n} проверок пройдено`);
