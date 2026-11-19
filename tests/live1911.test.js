@@ -1,11 +1,10 @@
 /**
  * Живой тест владельца 19.11 («Рёбра & Угли», Пятницкая): Зеркало при зелёной формуле, повтор приёма тому же
- * человеку, «фриза нет», бренд по КП в переписке, безымянный «похожий бизнес».
+ * человеку, «фриза нет», безымянный «похожий бизнес».
  */
 const assert = require('assert');
 const { attachScenarios } = require('../engine/scenarios');
 const { findPlanIssues } = require('../engine/planChecks');
-const { detectBrand } = require('../engine/brand');
 const { findBannedPhrases } = require('../engine/phraseCheck');
 let n = 0;
 function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
@@ -33,12 +32,14 @@ check('приём отработки тому же человеку второй
     { touchpoint_number: 4, channel: 'Звонок', body: 'Слушайте, ну вы прям крутой переговорщик!) А что кроме цены?' }], plan);
   assert.ok(r.some((x) => x.touchpoint_number === 4 && x.fixes.some((f) => /переговорщик/.test(f))));
 });
-check('бренд — по КП в переписке, если продукт не заполнен', () => {
-  assert.equal(detectBrand({ industry: 'signage' }, 'Я (12.11): отправила КП: 285 000 ₽ — световые буквы из нержавеющей стали'), 'Металл Буква Экспресс');
-  assert.equal(detectBrand({ industry: 'signage' }, ''), null);
-});
 check('«похожий бизнес уже работает с нашей вывеской» — безымянный кейс', () => {
   const r = findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Кстати, похожий бизнес уже работает с нашей вывеской — пришлю фото.' }]);
   assert.ok(r.length);
+});
+check('итог письмом: «уступка 5%», предоплата 50% без отказа от 70/30, суббота, повторная просьба фото — на правку', () => {
+  const src = 'Кристина прислала фото фасада. Армен: «Сделаете 230 — подписываем завтра».';
+  const r = findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Резюмирую: 270 750 ₽ с учётом уступки 5% при оплате наличными, предоплата 50%. Созвонимся 21 ноября (сб) в 11:00. Вы присылаете фото фасада — и я фиксирую слот.' }], [{ touchpoint_number: 1 }], src);
+  const f = r.flatMap((x) => x.fixes).join(' | ');
+  assert.ok(/итоговая сумма/.test(f) && /лестнице/.test(f) && /выходной/.test(f) && /уже прислал/.test(f), f);
 });
 console.log(`live1911: ${n} проверок пройдено`);

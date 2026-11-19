@@ -38,6 +38,7 @@ function voiceBlocked(sourceText) {
 }
 
 // Скидка цифрой — только голосом (правило 77), даже если голос недоступен.
-const DISCOUNT_FIGURE_RE = /скидк[^.!?\n]{0,30}\d+\s*%|\d+\s*%[^.!?\n]{0,20}скидк/i;
+// Живой тест 19.11: «270 750 ₽ с учётом уступки 5% при оплате наличными» в WhatsApp — «уступка» не ловилась.
+const DISCOUNT_FIGURE_RE = /(скидк|уступк)[^.!?\n]{0,30}\d+\s*%|\d+\s*%[^.!?\n]{0,20}(скидк|уступк)/i;
 
 module.exports = { voiceBlocked, VOICE_BLOCKED_RE, DISCOUNT_FIGURE_RE };
