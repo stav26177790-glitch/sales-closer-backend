@@ -17,7 +17,7 @@ function lastEvent(src) {
   const real = parts.filter((x) => x.length > 25 && !/^(ок|окей|да|следующий шаг|клиент молчит|весь путь)\.?$/i.test(x));
   return real.length ? real[real.length - 1] : String(src || '').slice(-700);
 }
-const { PRE_NOTE, DOROGO_WRITTEN_FIX } = require('./notesText'); // справочник текстов (аудит 18.11)
+const { PRE_NOTE, DOROGO_WRITTEN_FIX, OBJECTION_VARIANTS } = require('./notesText'); // справочник текстов (аудит 18.11)
 const tail = (src, n = 1500) => lastEvent(src).slice(-n);
 const VOICE_CH_RE = /звонок|zoom|зум|встреч|видеозвон/i;
 // Негатив клиента в последнем событии: упрёки, злость, «отнимаете время», «обманули», «сорвали срок».
@@ -166,8 +166,26 @@ function detectScenarios(source) {
 // step (следующий шаг): ответ на последнее событие — касание 1 (шероховатость 1, 17.11: после Zoom торг уехал в
 // условное касание). Голосовой сценарий в мессенджере при доступном голосе — касание 1 зовёт к разговору.
 // Разбор 18.11 (перегрузка подсказок): предвосхищение — один раз на касание, даже если сценариев два.
+// Вариант по сделке (тренинг владельца, 19.11): стабильно для одной сделки, разный для разных сделок.
+function variantFor(list, source, salt = '') {
+  if (!Array.isArray(list) || !list.length) return '';
+  const key = `${String(source || '').slice(0, 300)}|${salt}`;
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  return list[h % list.length];
+}
+function variantsLine(id, source) {
+  const v = OBJECTION_VARIANTS[id];
+  if (!v) return '';
+  const parts = [];
+  if (v.entry) parts.push(`вход — ${variantFor(v.entry, source, 'entry')}`);
+  if (v.recognize) parts.push(`признать — ${variantFor(v.recognize, source, 'rec')}`);
+  if (v.technique) parts.push(`техника — ${variantFor(v.technique, source, 'tech')}`);
+  if (id === 'dorogo' || id === 'torg' || id === 'think_now') parts.push(`закрывающий после «как вам в целом?» — ${variantFor(OBJECTION_VARIANTS.close, source, 'close')}`);
+  return parts.length ? ` ВАРИАНТ ДЛЯ ЭТОЙ СДЕЛКИ (тренинг владельца, своими словами, не дословно): ${parts.join('; ')}.` : '';
+}
 function cardFor(step, sc, source) {
-  const c = sc.card(source);
+  const c = sc.card(source) + variantsLine(sc.id, source);
   return [].concat(step.how || []).join(' ').includes('ПРЕДВОСХИЩЕНИЕ') ? c.replace(PRE_NOTE, '') : c;
 }
 function attachScenarios(steps, source, addHow, { step = false, voiceOk = true } = {}) {

@@ -27,7 +27,8 @@ check('СОПРАНО: вопрос о бюджете — только в зво
     { number: 3, day: 5, kind: 'экспертное', channel: 'WhatsApp', recipient: 'Олег', goal: 'Финально', criterion: 'ЗС' }
   ], must_include: [] };
   const log = console.log; console.log = () => {};
-  const plan = buildTouchPlan(strat, null, '2026-11-19', null, { source: SRC, mode: 'full', soprano: { 'О2': { status: 'не собрано' }, 'А': { status: 'не собрано' } } });
+  // без сценария в звонке (иначе вопрос СОПРАНО уступает место ходу сценария по лимиту подсказок)
+  const plan = buildTouchPlan(strat, null, '2026-11-19', null, { source: 'Кафе «Зерно», КП 290 000 ₽ отправлено 12.11, клиент пока не ответил.', mode: 'full', soprano: { 'О2': { status: 'не собрано' }, 'А': { status: 'не собрано' } } });
   console.log = log;
   assert.ok(!/сумм|бюджет/.test(plan[0].how), plan[0].how);
   const call = plan.find((p) => p.channel === 'Звонок' && !p.last_chance);

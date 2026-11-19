@@ -128,4 +128,18 @@ check('договор: доводы не повторяются и между р
   assert.equal(new Set(args).size, args.length, JSON.stringify(args));
 });
 
+check('тренинг 19.11: у карточки «Дорого» — вариант формулировки по сделке (стабильно в сделке, разный в разных)', () => {
+  const { SCENARIOS } = require('../engine/scenarios');
+  const sc = SCENARIOS.find((x) => x.id === 'dorogo');
+  const { attachScenarios } = require('../engine/scenarios');
+  const card = (src) => { const st = [{ channel: 'Звонок', how: [] }]; attachScenarios(st, src, (x, t) => x.how.push(t), { step: true }); return st[0].how.join(' '); };
+  const a = 'Кафе «Альфа», КП 200 000. Клиент: дорого.';
+  assert.ok(/ВАРИАНТ ДЛЯ ЭТОЙ СДЕЛКИ/.test(card(a)), card(a).slice(0, 200));
+  assert.equal(card(a), card(a));
+  const variants = new Set(['Кафе «Альфа»', 'Салон «Бета»', 'Клиника «Гамма»', 'Пекарня «Дельта»', 'Автосервис «Эпсилон»', 'Отель «Зета»']
+    .map((c) => (card(`${c}, КП 200 000. Клиент: дорого.`).match(/вход — «([^»]{0,30})/) || [])[1]));
+  assert.ok(variants.size >= 2, [...variants].join(' | '));
+  assert.ok(sc);
+});
+
 console.log(`notes: ${n} проверок пройдено`);
