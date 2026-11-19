@@ -5,7 +5,8 @@
  * Владелец 18.11: «накопи статистику — будет понятен вектор, куда копать».
  *
  * Запуск (нужна папка с отчётами — ветка eval-reports):
- *   node tests/eval/stats.js <папка eval-reports> [--since 2026-11-18] [--last 5] [--full-only]
+ *   node tests/eval/stats.js <папка eval-reports> [--since 2026-11-18] [--last 5] [--full-only] [--drops]
+ * --drops — просадки: два последних прогона выборки, по ситуациям и причинам (⚠ — хуже).
  * --full-only — только прогоны, где ситуаций ≥ 20 (полные; частичные прогоны 24 / 25 перекашивают картину).
  *
  * Причины судьи пишутся по-разному («деньги письменно», «⛔ ошибка 6. Деньги письменно при доступном голосе», …) —
@@ -15,10 +16,10 @@ const fs = require('fs');
 const path = require('path');
 
 const CATEGORIES = [
-  ['Деньги письменно', /деньги письменно|бюджет[а-яё]* (в переписк|письменн)|письменно[^.]{0,30}(цен|деньг|бюджет)/i],
-  ['Обещание срока', /обещани[ея] срока|к открытию|сроки по facts|^сроки$|ошибка 2/i],
-  ['Цена клиента / торг', /цена клиента|уступк|торг|ошибка 1\b|^1\./i],
-  ['Менеджер сам едет / проводит', /сам едет|сам проводит|ошибка 7/i],
+  ['Деньги письменно', /деньги письменно|деньги в переписк|бюджет[а-яё]* (в переписк|письменн)|письменно[^.]{0,30}(цен|деньг|бюджет)/i],
+  ['Обещание срока', /обещани[ея] срока|к открытию|сроки по facts|^сроки|срок[а-яё]* (по|из|не по) (факт|расч|facts)|честность о срок|временная вывеска|ошибка 2/i],
+  ['Цена клиента / торг', /цена клиента|уступк|торг|скидк[а-яё]* без|сначала согласие, потом деньги|ошибка 1\b|^1\./i],
+  ['Менеджер сам едет / проводит', /сам едет|сам проводит|личная встреча|выезд менеджера|встреча на производстве|ошибка 7/i],
   ['Выдуманный факт / кейс', /выдуман|факты — только|кейс|ошибка 4/i],
   ['Упрёк клиенту', /упрёк|упрек|ошибка 3/i],
   ['902-ПП', /902/i],
@@ -29,7 +30,11 @@ const CATEGORIES = [
   ['ЛДПР', /лдпр/i],
   ['Закрывающий вопрос / температура', /закрывающ|температур/i],
   ['Квадратные скобки / пустые места', /скобк|пустые места/i],
-  ['Последний шанс', /последний шанс/i],
+  ['Последний шанс / обратная связь', /последний шанс|обратн[а-яё]* связ/i],
+  ['Инструмент доверия', /инструмент доверия/i],
+  ['Сценарий «Негатив»', /негатив/i],
+  ['Цель / принцип пути / канал', /цел[ьи] плана|не выполняет цель|принцип пути|^канал/i],
+  ['Много вопросов', /много вопросов|один вопрос за касание/i],
   ['Выгода клиента', /выгод/i],
   ['Закрытый критерий / режим', /закрыт[а-яё]* критери|режим/i],
   ['Кружок', /кружок|кружке/i]
@@ -72,12 +77,63 @@ function stats(runs) {
   return { total, ok, fix, no, cats, perRun };
 }
 
+// Просадки (владелец 19.11: «отмечай статистику — где просадки; это выявит уязвимости»): сравнение двух прогонов
+// по каждой ситуации (как есть, «нет», ожидания) и по каждой причине. ⚠ — хуже на порог и больше.
+function bySituation(run) {
+  const out = {};
+  for (const x of run.r.results || []) {
+    const v = x.verdict || {};
+    const t = v.touches || [];
+    const ok = t.filter((y) => !/^нет|правк/.test(String(y.send || ''))).length;
+    const no = t.filter((y) => /^нет/.test(String(y.send || ''))).length;
+    const ex = Array.isArray(v.expectations) ? v.expectations : [];
+    const exOk = ex.filter((e) => e.met === true || /^да/i.test(String(e.met || e.status || ''))).length;
+    out[x.id] = { title: x.title || '', n: t.length, ok, no, pct: t.length ? Math.round((ok / t.length) * 100) : null, ex: ex.length ? `${exOk}/${ex.length}` : '', exPct: ex.length ? exOk / ex.length : null };
+  }
+  return out;
+}
+function drops(a, b, { pctDrop = 20, noRise = 2 } = {}) {
+  const A = bySituation(a); const B = bySituation(b);
+  const rows = [];
+  for (const id of Object.keys(B).sort((x, y) => x - y)) {
+    const p = A[id]; const q = B[id];
+    if (!p || q.n === 0 || p.n === 0) { rows.push({ id, q, p, flag: q.n === 0 ? '⚠ 0 касаний оценено' : '' }); continue; }
+    const flags = [];
+    if (q.pct !== null && p.pct !== null && p.pct - q.pct >= pctDrop) flags.push(`как есть ${p.pct}% → ${q.pct}%`);
+    if (q.no - p.no >= noRise) flags.push(`«нет» ${p.no} → ${q.no}`);
+    if (p.exPct !== null && q.exPct !== null && p.exPct - q.exPct >= 0.2) flags.push(`ожидания ${p.ex} → ${q.ex}`);
+    rows.push({ id, p, q, flag: flags.length ? `⚠ ${flags.join('; ')}` : '' });
+  }
+  const ca = stats([a]).cats; const cb = stats([b]).cats;
+  const catRows = [...new Set([...Object.keys(ca), ...Object.keys(cb)])].map((c) => ({ c, a: ca[c] || { no: 0, fix: 0 }, b: cb[c] || { no: 0, fix: 0 } }))
+    .map((r) => ({ ...r, d: (r.b.no - r.a.no) * 2 + (r.b.fix - r.a.fix) })).sort((x, y) => y.d - x.d);
+  return { rows, catRows };
+}
+
 if (require.main === module) {
   const args = process.argv.slice(2);
   const root = args.find((a) => !a.startsWith('--') && !/^\d/.test(a));
   if (!root) { console.error('Укажите папку с отчётами (ветка eval-reports).'); process.exit(1); }
   const val = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : undefined; };
   const runs = loadRuns(root, { since: val('--since') || '', last: Number(val('--last') || 0), fullOnly: args.includes('--full-only') });
+  if (args.includes('--drops')) {
+    // Два последних прогона из выборки (обычно с --full-only): было → стало.
+    if (runs.length < 2) { console.error('Для просадок нужно минимум два прогона в выборке.'); process.exit(1); }
+    const [a, b] = runs.slice(-2);
+    const { rows, catRows } = drops(a, b);
+    const sa = stats([a]); const sb = stats([b]);
+    const pc = (s, k) => (s.total ? Math.round((s[k] / s.total) * 100) : 0);
+    console.log(`Было: ${a.name.slice(0, 16)} — как есть ${pc(sa, 'ok')}%, нет ${pc(sa, 'no')}% (${sa.total} кас.)`);
+    console.log(`Стало: ${b.name.slice(0, 16)} — как есть ${pc(sb, 'ok')}%, нет ${pc(sb, 'no')}% (${sb.total} кас.)\n`);
+    console.log('По ситуациям (как есть %, «нет», ожидания):');
+    for (const r of rows) {
+      const f = (x) => (x ? `${x.pct ?? '—'}% / нет ${x.no} / ${x.ex || '—'}` : '—');
+      console.log(`  ${String(r.id).padStart(2)} ${String(r.q.title || '').slice(0, 26).padEnd(26)} ${f(r.p).padEnd(22)} → ${f(r.q).padEnd(22)} ${r.flag}`);
+    }
+    console.log('\nПричины (нет / правка): было → стало; сверху — что ухудшилось');
+    for (const r of catRows) console.log(`  ${r.d > 0 ? '⚠' : r.d < 0 ? '✓' : ' '} ${r.c.padEnd(34)} ${r.a.no}/${r.a.fix} → ${r.b.no}/${r.b.fix}`);
+    process.exit(0);
+  }
   const s = stats(runs);
   const pct = (a) => (s.total ? Math.round((a / s.total) * 100) : 0);
   console.log(`Прогонов: ${runs.length}. Касаний: ${s.total} — как есть ${s.ok} (${pct(s.ok)}%), с правкой ${s.fix}, нет ${s.no}. Планка владельца — 80%.\n`);
@@ -90,4 +146,4 @@ if (require.main === module) {
   for (const r of s.perRun) console.log(`  ${r.name.slice(0, 16)}: ${r.touches} касаний, как есть ${r.touches ? Math.round((r.ok / r.touches) * 100) : 0}%, нет ${r.no}`);
 }
 
-module.exports = { stats, loadRuns, catOf, CATEGORIES };
+module.exports = { stats, loadRuns, catOf, CATEGORIES, bySituation, drops };
