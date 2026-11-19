@@ -17,6 +17,12 @@ check('ситуация — по последнему событию', () => {
   assert.deepEqual(ids('Георгий Давидович хочет сначала своими глазами посмотреть, как делают буквы.'), ['want_see']);
   assert.deepEqual(ids('Тамара: Спасибо, покажу Георгию Давидовичу.'), []);
 });
+check('«Зеркало» в торге — только когда Доверие закрыто (владелец 19.11)', () => {
+  const mk = () => [{ channel: 'Звонок', kind: 'экспертное' }];
+  const a = mk(); attachScenarios(a, 'Арсен: «Сделаете 650 — подпишем».', addHow);
+  const b = mk(); attachScenarios(b, 'Арсен: «Сделаете 650 — подпишем».', addHow, { trustOk: true });
+  assert.ok(!/Зеркало/.test(a[0].how.join(' ')) && /Зеркало/.test(b[0].how.join(' ')));
+});
 check('карточка — в how голосового касания-ответа', () => {
   const steps = [{ channel: 'WhatsApp', kind: 'экспертное' }, { channel: 'Звонок', kind: 'экспертное' }];
   attachScenarios(steps, 'Арсен: «Сделаете 650 — подпишем».', addHow);

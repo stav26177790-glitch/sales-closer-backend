@@ -672,7 +672,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   noteKrugIdea(steps, context.source, scores);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
-  require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source) });
+  require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source), trustOk: /подтвержд/i.test(String(scores?.trust?.status || '')) });
   noteSoprano(steps, context.soprano, context.source);
   assignArguments(steps, context.triggers, context.source);
   // Экзамен 17.11 (прогоны 4–5): стратег ставит цель «согласовать 650 через полномочия» (650 — цена клиента) →

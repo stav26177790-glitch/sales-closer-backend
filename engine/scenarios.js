@@ -184,11 +184,13 @@ function variantsLine(id, source) {
   if (id === 'dorogo' || id === 'torg' || id === 'think_now') parts.push(`закрывающий после «как вам в целом?» — ${variantFor(OBJECTION_VARIANTS.close, source, 'close')}`);
   return parts.length ? ` ВАРИАНТ ДЛЯ ЭТОЙ СДЕЛКИ (тренинг владельца, своими словами, не дословно): ${parts.join('; ')}.` : '';
 }
-function cardFor(step, sc, source) {
-  const c = sc.card(source) + variantsLine(sc.id, source);
+// «Зеркало» (тренинг владельца, встреча 19) — для сильной позиции; владелец 19.11: «сильная позиция — когда есть Доверие».
+const MIRROR = ' СИЛЬНАЯ ПОЗИЦИЯ (Доверие закрыто): вместо уступки можно «Зеркало» — «Меньше цену я сделать не могу, к сожалению: в ней себестоимость, зарплаты людей. А вы бы как поступили на моём месте?) Дали бы скидку?» [выслушать] → «как вам в целом?» → закрывающий. Голосом.';
+function cardFor(step, sc, source, trustOk = false) {
+  const c = sc.card(source) + variantsLine(sc.id, source) + (trustOk && sc.id === 'torg' ? MIRROR : '');
   return [].concat(step.how || []).join(' ').includes('ПРЕДВОСХИЩЕНИЕ') ? c.replace(PRE_NOTE, '') : c;
 }
-function attachScenarios(steps, source, addHow, { step = false, voiceOk = true } = {}) {
+function attachScenarios(steps, source, addHow, { step = false, voiceOk = true, trustOk = false } = {}) {
   const found = detectScenarios(source);
   const used = new Set();
   if (step && found.length) {
@@ -196,7 +198,7 @@ function attachScenarios(steps, source, addHow, { step = false, voiceOk = true }
     if (first) {
       const sc = found[0];
       // Канал не меняем: в переписке при доступном голосе верный ход — позвать к разговору (checkScenario это принимает).
-      addHow(first, cardFor(first, sc, source));
+      addHow(first, cardFor(first, sc, source, trustOk));
       first.scenarios = [...new Set([...(first.scenarios || []), sc.id])];
       used.add(first);
       found.shift();
@@ -213,7 +215,7 @@ function attachScenarios(steps, source, addHow, { step = false, voiceOk = true }
     if (!target) continue;
     // Разбор 18.11 (перегрузка писателя): второй сценарий в том же касании — короткой версией, ход первого главный.
     const busy = (target.scenarios || []).length > 0;
-    addHow(target, busy && sc.short ? sc.short : cardFor(target, sc, source));
+    addHow(target, busy && sc.short ? sc.short : cardFor(target, sc, source, trustOk));
     target.scenarios = [...new Set([...(target.scenarios || []), sc.id])];
   }
   return steps;

@@ -10,6 +10,11 @@ function check(name, fn) { fn(); n++; console.log(`  ✓ ${name}`); }
 
 const plan = [1, 2, 3, 4].map((i) => ({ touchpoint_number: i, last_chance: i === 4 }));
 
+check('шутка про коньячок — только в звонке (владелец 19.11)', () => {
+  const body = 'Марина, приезжайте на производство: кофе, а может и коньячок.';
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body }], plan).some((r) => r.fixes.some((f) => /коньячок/.test(f))));
+  assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body }], plan).some((r) => r.fixes.some((f) => /коньячок/.test(f))));
+});
 check('«есть ли у меня шанс» не в последнем касании — на доработку', () => {
   const r = findPlanIssues([{ touchpoint_number: 2, body: 'Марина, есть ли у меня реальный шанс на этот проект?' }], plan);
   assert.equal(r.length, 1);
