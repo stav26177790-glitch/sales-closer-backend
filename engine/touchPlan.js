@@ -36,7 +36,10 @@ const CRITERIA = {
   ЛПР: { key: 'authority', label: 'ЛПР — определён',
     goal: 'Дать контактному лицу готовый материал для ЛПР или предложить короткий совместный звонок — только с его согласия.' },
   Д: { key: 'trust', label: 'Д — доверие',
-    goal: 'Добавить доверия через КЕЙС, в котором клиент увидит себя: под его слова (бюджет → бюджетный, качество → металл, «как на первой точке» → та же конструкция) и тот же тип бизнеса — из кейсов компании (файл отрасли): название, что сделали, где посмотреть.' },
+    // Живой тест 19.11 («Рёбра & Угли»): примеры подбора («как на первой точке» → та же конструкция) стояли в цели
+    // для менеджера — он принял их за факты сделки («откуда первая точка?»). Цель — коротко, подбор — в how писателю.
+    goal: 'Добавить доверия через кейс того же типа бизнеса из кейсов компании: название, что сделали, где посмотреть.',
+    how: 'Кейс подобрать так, чтобы клиент увидел себя, — ТОЛЬКО по тому, что он сам говорил в переписке (говорил про бюджет → бюджетный кейс; про качество → металл; про прошлую вывеску → та же конструкция). Чего клиент не говорил — не приписывать.' },
   ЗС: { key: 'urgency', label: 'ЗС — здесь и сейчас',
     goal: 'Перевести в «здесь и сейчас» как заботу о планах клиента: сроки на день отправки, предложить забронировать слот на производстве, один конкретный шаг (Давайте / Чтобы / Если / То).' }
 };
@@ -365,12 +368,12 @@ function coverCriteria(steps, scores) {
       out.push({ orig: null, day: lastDay + 2, conditional: false, sameContact: false, condition: '',
         channel: kind === 'эмпатичное' ? 'Кружок' : 'WhatsApp', kind,
         recipient: (out.find((s) => !s.conditional) || {}).recipient || '',
-        goal: CRITERIA[c].goal, key_message: '', value: '', criterion: c, added_for_criterion: true });
+        goal: CRITERIA[c].goal, how: CRITERIA[c].how ? [CRITERIA[c].how] : undefined, key_message: '', value: '', criterion: c, added_for_criterion: true });
       continue;
     }
     // Деньги, доверие, сроки — не в кружок (прогон 14.11: кружок стал списком компромиссов).
     const host = regular().filter((s) => !s.sameContact && (c === 'ОП' || c === 'ЛПР' || s.kind === 'экспертное')).pop();
-    if (host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
+    if (host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); if (CRITERIA[c].how) addHow(host, CRITERIA[c].how); }
   }
   // Новые шаги — в конце (их день позже всех), порядок остальных не трогаем.
   return out;
@@ -656,7 +659,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     for (const c of lost) {
       const host = own.slice(0, -1).filter((x) => c === 'ОП' || c === 'ЛПР' || x.kind === 'экспертное').pop();
       const coveredElsewhere = steps.some((x) => x !== lastChance && !x.conditional && (x.criterion === c || (x.also || []).includes(c)));
-      if (!coveredElsewhere && host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); }
+      if (!coveredElsewhere && host) { host.also = [...(host.also || []), c]; host.goal = [host.goal, `Заодно (${CRITERIA[c].label}): ${CRITERIA[c].goal}`].filter(Boolean).join(' '); if (CRITERIA[c].how) addHow(host, CRITERIA[c].how); }
     }
     lastChance.lastChance = true;
     // «Последний шанс» — прямой вопрос «скажите как есть», а кружок — интрига (правило 73):
