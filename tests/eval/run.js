@@ -230,6 +230,18 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
     t.issues = rest;
     t.send = rest.length ? 'с мелкой правкой' : 'как есть';
   }
+  // Прогон 19.11 (день): «деньги письменно» звонку (ситуация 6) и при `voice_available_now: false` (19, 24) — рубрика это
+  // прямо разрешает, судья не слушал. Снимаем только такие «нет»; остальные его находки остаются.
+  for (const t of v.touches || []) {
+    if (t.send !== 'нет' || !(t.issues || []).length) continue;
+    const money = (i) => /деньги письменно/i.test(String(i.rule || ''));
+    const ch = String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.channel || '');
+    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)))) continue;
+    const rest = t.issues.filter((i) => !money(i));
+    t.filtered = (t.filtered || []).concat(t.issues.filter(money));
+    t.issues = rest;
+    t.send = rest.length ? 'с мелкой правкой' : 'как есть';
+  }
   const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
   const have = new Set((v.critical || []).map(key));
   v.critical = [...(v.critical || []), ...extra.filter((c) => !have.has(key(c)))];

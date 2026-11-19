@@ -47,4 +47,13 @@ check('прогон 19.11: «барбершоп похожего формата,
     assert.ok(findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: b }]).length, b);
   assert.ok(!findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Делали вывеску для кафе «Капи» — посмотрите.' }]).length);
 });
+check('деньги письменно: каждое предложение, а не только первое (прогон 19.11, день)', () => {
+  const { moneySentences } = require('../engine/planChecks');
+  for (const b of ['По цене — давайте обсудим голосом на Zoom. Скажу сразу: 20% так не получится, у меня таких полномочий нет.',
+    'По цене без логотипа: посчитаю и пришлю сегодня.', 'КП глянул? По сумме 140 000 попали или не совсем?',
+    'Сравнение: что входит в наши 260 000 ₽ и какие вопросы задать по второму предложению.'])
+    assert.ok(moneySentences(b).length, b);
+  for (const b of ['Цена: 118 000 ₽ с монтажом, без доплат по ходу.', 'По стоимости удобнее голосом: созвонимся сегодня на 5 минут?'])
+    assert.ok(!moneySentences(b).length, b);
+});
 console.log(`live1911: ${n} проверок пройдено`);

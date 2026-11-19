@@ -65,9 +65,9 @@ check('«каждый день ожидания сдвигает дату» — 
 // Владелец 14.11 (правило): всё, что касается денег, — только звонок или Zoom.
 check('деньги в мессенджере — на доработку; звонок / Zoom — ок; предложение созвониться — ок; цена КП как факт — ок', () => {
   const t = 'Марина, по бюджету: подберу варианты, чтобы вы не переплачивали.';
-  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /звонком или в Zoom/.test(h.fixes.join(' '))));
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /Zoom или звонком/.test(h.fixes.join(' '))));
   // Zoom 17.11: сценарий встречи требует ещё температуру и фиксацию (файл 29) — здесь проверяем только «деньги».
-  assert.ok(!/звонком или в Zoom/.test(JSON.stringify(findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: t + ' Это отход от ТЗ, есть риск.' }], plan, ''))));
+  assert.ok(!/Zoom или звонком/.test(JSON.stringify(findPlanIssues([{ touchpoint_number: 1, channel: 'Zoom', body: t + ' Это отход от ТЗ, есть риск.' }], plan, ''))));
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Марина, по стоимости баннера удобнее голосом — созвонимся сегодня на 5 минут?' }], plan, '').length);
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Андрей, КП на вывеску — 185 000 ₽ с монтажом, цена фиксированная.' }], plan, '').length);
 });
@@ -165,7 +165,7 @@ check('владелец 15.11: голос недоступен (не берёт 
   assert.ok(findPlanIssues([{ touchpoint_number: 3, channel: 'WhatsApp', body: 'Марина, если заключаем договор на этой неделе — скидка 5%.' }], plan, 'Покровка')
     .some((h) => /Скидку цифрой письменно/.test(h.fixes.join(' '))));
   // Без признака — по-прежнему звонком.
-  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /звонком или в Zoom/.test(h.fixes.join(' '))));
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: t }], plan, 'Покровка').some((h) => /Zoom или звонком/.test(h.fixes.join(' '))));
 });
 check('прогон 14.11: «в понедельник в 10:00 наберу вас» — давление; «удобно, если наберу?» — ок', () => {
   assert.equal(findPlanIssues([{ touchpoint_number: 2, channel: 'Кружок', body: 'Марина, в понедельник в 10:00 наберу вас.' }], plan, '').length, 1);
