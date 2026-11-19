@@ -133,12 +133,18 @@ async function judge(sit, sets, diagnosticSummary) {
     // Многоуровневая сделка: промежуточные шаги (после каждой дописки менеджера).
     intermediate_stages: (sets.stages || []).map((x, i) => ({ after: x.label, today: x.today, what_this_step_checks: x.expect || [], ...setOf(x, convAt(i + 1)) }))
   }, null, 1);
-  const startedAt = Date.now();
-  const r = await client.messages.create({ model, max_tokens: 9000, temperature: 0, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
-  const text = r.content.filter((c) => c.type === 'text').map((c) => c.text || '').join('');
-  calls.push({ situation: sit.id, agent: 'judge', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
-  const m = text.match(/\{[\s\S]*\}/);
-  try { return JSON.parse(m ? m[0] : text); } catch { return { parse_error: true, raw: text.slice(0, 4000) }; }
+  // Полный прогон 19.11 (ситуация 24): судья зациклился на одной находке и упёрся в лимит — JSON оборван, 0 касаний
+  // оценено. Один повтор с небольшой температурой (при 0 повтор дал бы ту же петлю).
+  let last;
+  for (const temperature of [0, 0.3]) {
+    const startedAt = Date.now();
+    const r = await client.messages.create({ model, max_tokens: 9000, temperature, system: RUBRIC, messages: [{ role: 'user', content: user }], ...PROVIDER.extraParams });
+    const text = r.content.filter((c) => c.type === 'text').map((c) => c.text || '').join('');
+    calls.push({ situation: sit.id, agent: 'judge', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
+    const m = text.match(/\{[\s\S]*\}/);
+    try { return JSON.parse(m ? m[0] : text); } catch { last = { parse_error: true, raw: text.slice(0, 4000) }; }
+  }
+  return last;
 }
 
 // Судья 17.11: в общем вызове (все ходы сразу, ~40 тыс. знаков) грубую ошибку «по цене договорились: 650 000 ₽»
@@ -205,6 +211,25 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   v.critical = (v.critical || []).filter(keep2).filter(keepAll);
   v.critical = (v.critical || []).filter(keep6);
   v.critical = (v.critical || []).filter(keep);
+  // Полный прогон 19.11 (ситуация 19): основной судья ставил «нет» по «честности сроков» на «готова 7–8 декабря»
+  // при «с запасом» и на «готова 15–16 декабря» при «не успеваем» — это и есть расчётная дата (рубрика: не ошибка).
+  // Снимаем такие «нет», только если в тексте касания нет обещания к открытию / к дате клиента.
+  const PROMISE_RE = /к открыт|успеем|успеваем|к \d{1,2} (ноябр|декабр|январ)/i;
+  const honestDates = (set, n) => {
+    const st = String(planOfSet(set).find((p) => p.touchpoint_number === Number(n))?.facts?.status_on_send_day || '');
+    if (/с запасом|впритык/i.test(st)) return true;
+    const body = String(setTouches(set).find((t) => Number(t.touchpoint_number) === Number(n))?.body || '');
+    return !body.split(/(?<=[.!?\n])/).some((x) => PROMISE_RE.test(x) && !/не успева|не успеем|уже не|позже|временн/i.test(x));
+  };
+  for (const t of v.touches || []) {
+    if (t.send !== 'нет' || !(t.issues || []).length) continue;
+    const srok = (i) => /срок|обещание к (открыт|дат)/i.test(String(i.rule || '')) && !/грубая/i.test(String(i.rule || ''));
+    if (!t.issues.some(srok) || !honestDates(t.set, t.n)) continue;
+    const rest = t.issues.filter((i) => !srok(i));
+    t.filtered = (t.filtered || []).concat(t.issues.filter(srok));
+    t.issues = rest;
+    t.send = rest.length ? 'с мелкой правкой' : 'как есть';
+  }
   const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
   const have = new Set((v.critical || []).map(key));
   v.critical = [...(v.critical || []), ...extra.filter((c) => !have.has(key(c)))];
