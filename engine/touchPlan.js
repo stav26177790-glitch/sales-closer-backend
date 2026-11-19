@@ -81,8 +81,12 @@ function noteKrugIdea(steps, source, scores) {
   return steps;
 }
 const SOPRANO_ORDER = ['Р', 'О2', 'А', 'П', 'О1', 'Н', 'С'];
-function noteSoprano(steps, soprano, source) {
+function noteSoprano(steps, soprano, source, { closing = false } = {}) {
   if (!soprano || typeof soprano !== 'object') return steps;
+  // Живой тест 19.11 («Рёбра & Угли», ход 3): формула вся зелёная, ЛПР торгуется «сделаете 230 — подписываем», а в звонке
+  // и в касании-ответе — «заказывали раньше?», «что не должно повториться?», «чем готовы пожертвовать?». На дожиме
+  // вопросы СОПРАНО сбивают закрытие и ослабляют позицию — не ставим.
+  if (closing) return steps;
   const missing = SOPRANO_ORDER.filter((k) => soprano[k] && !/^собран/i.test(String(soprano[k].status || soprano[k] || '')));
   if (!missing.length) return steps;
   const tailText = String(source || '').slice(-1200);
@@ -285,6 +289,9 @@ function contextHints(context) {
   const moscow = !NOT_MOSCOW_RE.test(src);
   if (moscow && /козыр[её]к|козырьк/i.test(src)) {
     out.push('Экспертный повод (902-ПП): клиент писал про козырёк — по правилам Москвы на козырьке вывеску размещают во фризе козырька (п. 18.3.4); говорить так, а не «на козырьке нельзя». Спросить, есть ли у козырька фриз и какой высоты, — как заботу, чтобы вывеску не пришлось снимать. Без пугалок.');
+  } else if (moscow && /фриза нет|нет фриза|без фриза|фриз[а-яё]* отсутству/i.test(src)) {
+    // Живой тест 19.11: в сделке «фриза нет», а касание: «по панораме видно, что фриз есть, вывеска только на нём».
+    out.push('Экспертный повод (902-ПП): фриза у фасада НЕТ — про фриз не говорить. Настенная вывеска (п. 18.1–18.2): над входом или окнами своего помещения, на уровне линии между 1 и 2 этажами или ниже, высота не более 0,50 м, выступ не более 0,20 м. Как заботу — чтобы вывеску не пришлось снимать.');
   } else if (moscow && /фриз/i.test(src)) {
     out.push('Экспертный повод (902-ПП): у фасада есть фриз — вывеска только на нём, буквы до 70% высоты фриза (п. 18.3). Уточнить высоту фриза — как заботу.');
   }
@@ -676,7 +683,8 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source), trustOk: /подтвержд/i.test(String(scores?.trust?.status || '')) });
-  noteSoprano(steps, context.soprano, context.source);
+  const allGreen = ['financial', 'need', 'authority', 'trust', 'urgency'].every((k) => /подтвержд/i.test(String(scores?.[k]?.status || '')));
+  noteSoprano(steps, context.soprano, context.source, { closing: allGreen || steps.some((x) => (x.scenarios || []).includes('torg')) });
   assignArguments(steps, context.triggers, context.source);
   // Экзамен 17.11 (прогоны 4–5): стратег ставит цель «согласовать 650 через полномочия» (650 — цена клиента) →
   // writer пишет «650 — точно не смогу», а через фразу «по цене 650». Цель на цену клиента код переписывает.

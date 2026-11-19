@@ -199,6 +199,16 @@ function repeatedArguments(messages, sentHistory = [], plan = null) {
 const REPEAT_OK_RE = /как вам в целом|таких полномочий нет|скажите как есть|помните мы проговаривали|в открытую|добрый день|доброе утро|добрый вечер|по правилам москвы|камеру включать|что я сделал|что я сделала|можем коротко набраться|появилась идея|идея уверен|уверен[а]?( она)? вас|она вас точно|не буду больше отвлекать|пауза выслушать/i;
 // Только формулировки выгоды (мантра) — не общие слова «по вашей вывеске на фасад».
 const BENEFIT_WORD_RE = /получ|увид|видят|видно|найдут|гост|клиент|покупател|прохож|спокойн|без (переделок|штраф|риск|сюрприз)|первого дня|замет|узна|выгляд|успеете|к открытию|надежн|уверен/;
+const OBJ_TECHNIQUES = [
+  ['одно из трёх', /одно из тр[её]х|(не нужно|не надо) (прямо )?сейчас[^.?!]{0,60}не рассчитывали/i],
+  ['переговорщик', /переговорщик/i],
+  ['цена забудется', /цена забудется/i],
+  ['решение подходит? — видели своими глазами', /видели? (вс[её] )?своими глазами/i],
+  ['чем пожертвовать', /пожертвовать|сохранить обязательно/i],
+  ['на что смотрите в первую очередь', /смотрите в первую очередь|смотрит в первую очередь/i],
+  ['что не должно повториться', /не должно повториться/i],
+  ['заказывали раньше', /заказывали (вывески )?раньше|раньше заказывали/i]
+];
 function shingles(text, k = 5) {
   const w = String(text || '').toLowerCase().replace(/ё/g, 'е').replace(/\[[^\]]*\]/g, ' ').replace(/[^а-яa-z0-9\s-]/g, ' ').split(/\s+/).filter(Boolean);
   const out = new Set();
@@ -228,6 +238,15 @@ function repeatedPhrases(messages, plan = null, sentHistory = []) {
     const sh = shingles(m?.body);
     let hit = null;
     for (const s of sh) { const k = `${who}|${s}`; if (seen.has(k) && !hit) hit = { phrase: s, firstIn: seen.get(k) }; }
+    // Живой тест 19.11 («Рёбра & Угли»): Армену в касании 1 и 4 — тот же заход «в целом решение подходит? вы же видели
+    // своими глазами», «переговорщик» дважды, «одно из трёх» и «чем пожертвовать» повторно. Приём отработки
+    // возражения одному и тому же человеку — один раз за путь (второй раз звучит как скрипт).
+    for (const [name, re] of OBJ_TECHNIQUES) {
+      if (!re.test(String(m?.body || ''))) continue;
+      const k = `${who}|приём:${name}`;
+      if (seen.has(k) && !hit) hit = { phrase: `приём «${name}»`, firstIn: seen.get(k) };
+      if (!seen.has(k)) seen.set(k, n);
+    }
     for (const s of sh) { const k = `${who}|${s}`; if (!seen.has(k)) seen.set(k, n); }
     if (hit) out.push({ touchpoint_number: n, ...hit });
   }
@@ -381,6 +400,8 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     if (acceptsClientPrice(t, sourceText)) fixes.push(ACCEPT_FIX);
     else if (concedesClientPrice(t, sourceText)) fixes.push(CONCEDE_FIX);
     if (require('./touchPlan').JUST_PRICE_RE.test(String(sourceText || '').slice(-1500)) && NO_ZOOM_RE.test(t)) fixes.push(NO_ZOOM_FIX);
+    // Живой тест 19.11: формула зелёная, торг — а Зеркала в звонке нет.
+    if (p?.mirror && !/на моём месте|на моем месте/i.test(t)) fixes.push(require('./scenarios').MIRROR_FIX);
     // Тренинг владельца 19.11: юмор (кофе / коньячок на производстве, «монтажники не пьют») — только в телефонном звонке.
     if (!/звон|телефон/i.test(String(m?.channel || '')) && /коньяк|коньячок|не пьют|выпьем|по рюмочке/i.test(t)) fixes.push(HUMOR_FIX);
     // Про временную вывеску «успеем к открытию» — правда (её срок свой): такие фразы не считаем.
@@ -495,7 +516,8 @@ function findPlanIssues(messages, plan, sourceText = '', sentHistory = []) {
     // Письмо с предложением созвониться — нормально: прояснять будут голосом (деньги — голосом, правило 7).
     if (i === 0 && (plan || [])[0]?.path_mode === 'step' && STEP_EXPENSIVE_RE.test(String(sourceText || '').slice(-700)) && !CLARIFY_RE.test(t)
       && (VOICE_CHANNEL_RE.test(channel) || noVoice)) fixes.push(CLARIFY_FIX);
-    for (const r of phraseRepeats.filter((x) => x.touchpoint_number === n)) fixes.push(`Повтор формулировки «…${r.phrase}…» — уже было в касании ${r.firstIn} тому же человеку. Тот же смысл — другими словами или другая выгода (владелец: «смысл + вариативность, не мантра»).`);
+    for (const r of phraseRepeats.filter((x) => x.touchpoint_number === n && /^приём/.test(x.phrase))) fixes.push(`Повтор ${r.phrase} — уже был в касании ${r.firstIn} тому же человеку. Приём отработки — один раз за путь: здесь другой ход (Зеркало, полномочия в обмен на шаг, вариант под бюджет с честным риском, закрывающий вопрос) — иначе звучит как скрипт (владелец 19.11).`);
+    for (const r of phraseRepeats.filter((x) => x.touchpoint_number === n && !/^приём/.test(x.phrase))) fixes.push(`Повтор формулировки «…${r.phrase}…» — уже было в касании ${r.firstIn} тому же человеку. Тот же смысл — другими словами или другая выгода (владелец: «смысл + вариативность, не мантра»).`);
     for (const r of repeats.filter((x) => x.touchpoint_number === n)) fixes.push(`Повтор довода: «${r.key}» уже был в касании ${r.firstIn}. Здесь — другой инструмент (визуализация, ОТК и договор, оплата 70/30, слот под дату, кейс, встреча на производстве) или другой ход; одно и то же не повторять (владелец 16.11).`);
     if (fixes.length) out.push({ touchpoint_number: n, fixes });
   });

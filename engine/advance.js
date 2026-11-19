@@ -86,7 +86,7 @@ async function advanceInternal(dealId, managerInput, opts = {}) {
       deal_size: deal.deal_size,
       industry: deal.industry,
       // Бренд (вывески): цифры опыта и гарантии — только своего (engine/brand.js, 14.11).
-      brand: detectBrand(deal),
+      brand: detectBrand(deal, sourceMaterials?.text || ''),
       last_contact: deal.last_contact,
       // Менеджер вводит «дней без ответа» при создании сделки, дальше число
       // устаревало. Считаем на сегодня: введённое + дни с даты создания.
