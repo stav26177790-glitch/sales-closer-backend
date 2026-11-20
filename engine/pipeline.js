@@ -117,6 +117,26 @@ function buildWriterInput(baseInput, deal, { feedback, iteration }) {
 async function runComposer(baseInput, deal, options) {
   const plan = deal.last_strategy_output?.touch_plan;
   if (Array.isArray(plan) && plan.length) {
+    // Оптимизация 20.11: при переписывании писатель писал ВСЕ касания заново (≈ 2,7 тыс. токенов на выходе, 23 с),
+    // а одобренные потом подменялись старыми. Теперь — только забракованные (rewrite_only), остальные из прошлого
+    // набора остаются дословно и идут писателю как контекст.
+    const only = Array.isArray(options?.only) ? options.only.map(Number) : null;
+    const prevMsgs = deal.last_composer_output?.messages;
+    if (only && only.length && Array.isArray(prevMsgs) && prevMsgs.length === plan.length && only.length < plan.length) {
+      const input = buildWriterInput(baseInput, deal, options);
+      input.rewrite_only = only;
+      input.touch_plan = plan.filter((p) => only.includes(Number(p.touchpoint_number)));
+      const result = await callAgentSafe('writer', input, COMPOSER_MAX_TOKENS);
+      const raw = result?.composer_output || result;
+      // Номера касаний — по rewrite_only, если писатель их не проставил (иначе pinToPlan сопоставит по позиции 1, 2…).
+      if (Array.isArray(raw?.messages) && raw.messages.length === only.length) raw.messages.forEach((m, i) => { if (m && m.touchpoint_number == null) m.touchpoint_number = only[i]; });
+      const fresh = pinToPlan(raw, input.touch_plan);
+      const got = new Map((fresh?.messages || []).map((m) => [Number(m.touchpoint_number), m]));
+      if (only.every((n) => got.has(n))) {
+        return { ...deal.last_composer_output, ...fresh, messages: prevMsgs.map((m) => got.get(Number(m.touchpoint_number)) || m) };
+      }
+      console.warn('[writer] частичное переписывание вернуло не все касания — пишу набор целиком');
+    }
     const result = await callAgentSafe('writer', buildWriterInput(baseInput, deal, options), COMPOSER_MAX_TOKENS);
     const out = result?.composer_output || result;
     return pinToPlan(out, plan);

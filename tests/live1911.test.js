@@ -134,4 +134,26 @@ check('аудит 20.11: [Имя менеджера] — подставляет�
   const k = { messages: [{ body: 'Это [Имя менеджера].' }] };
   assert.equal(fillManagerName(k, 'без имени').messages[0].body, 'Это [Имя менеджера].');
 });
+check('живой тест 20.11: «да, делали — для барбершопа» без такого кейса; дата шага раньше касания; «правильно понимаю… по рукам?» не зацикливает', () => {
+  const f = (b, p = {}) => findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: b }], [{ touchpoint_number: 1, ...p }]).flatMap((x) => x.fixes);
+  assert.ok(f('Да, делали. Например, вывеску для барбершопа «[название из портфолио]».').some((x) => /Кейса «барбершоп» у компании нет/.test(x)));
+  assert.ok(!f('Делали вывеску для кафе «Капи».').some((x) => /у компании нет/.test(x)));
+  assert.ok(f('Предлагаю 26 ноября (чт) в 11:00 — удобно?', { send_date: '2026-11-27' }).some((x) => /раньше даты самого касания/.test(x)));
+  assert.ok(!f('Предлагаю 30 ноября (пн) в 11:00 — удобно?', { send_date: '2026-11-27' }).some((x) => /раньше даты/.test(x)));
+  assert.ok(!findBannedPhrases([{ touchpoint_number: 1, channel: 'Звонок', body: 'Правильно понимаю, что в целом вам нравится — по рукам? Оформляемся?' }]).length);
+});
+check('оптимизация 20.11: переписываются только забракованные касания, остальные — дословно', async () => {
+  process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost'; process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'x';
+  const ar = require('../agentRunner'); const orig = ar.callAgent; let seen = null;
+  ar.callAgent = async (name, input) => { seen = input; return { composer_output: { messages: input.touch_plan.map((p) => ({ body: 'NEW ' + p.touchpoint_number })) } }; };
+  delete require.cache[require.resolve('../engine/pipeline')];
+  const { runComposer } = require('../engine/pipeline');
+  const plan = [1, 2, 3].map((n) => ({ touchpoint_number: n, channel: 'WhatsApp', timing: 't', kind: 'экспертное' }));
+  const deal = { last_strategy_output: { touch_plan: plan }, last_composer_output: { messages: plan.map((p) => ({ touchpoint_number: p.touchpoint_number, body: 'OLD ' + p.touchpoint_number })) } };
+  return runComposer({}, deal, { feedback: {}, only: [2] }).then((out) => {
+    ar.callAgent = orig;
+    assert.deepEqual(out.messages.map((m) => m.body), ['OLD 1', 'NEW 2', 'OLD 3']);
+    assert.ok(seen.touch_plan.length === 1 && seen.rewrite_only[0] === 2);
+  });
+});
 console.log(`live1911: ${n} проверок пройдено`);

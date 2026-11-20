@@ -332,7 +332,8 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
       const fresh = await runComposer(baseInput, cur, {
         feedback: fb,
         channelHistory: rounds === 0 ? channelHistory : undefined,
-        iteration: rounds + 1
+        iteration: rounds + 1,
+        only: fb && rounds > 0 ? (reviewedOf(fb)?.messages_reviewed || []).filter((m) => m?.verdict && m.verdict !== 'ОДОБРЕНО').map((m) => Number(m.touchpoint_number)) : null
       });
       rounds++;
       reviewOnly = null; // переписано целиком — проверять всё
