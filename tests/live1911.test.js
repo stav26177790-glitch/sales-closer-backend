@@ -120,4 +120,11 @@ check('живой тест 20.11: «из чего складывается» —
   const good = 'Давайте объясню, из чего она складывается, можно? Буквы из акрила, борт гнёт станок — ровно, без щелей. Свет — модули ELF, технолог заранее проверяет толщину букв под диоды, тёмных пятен не будет. Замер — специалист исследует фасад, крепёж учтён заранее. Это всё мы закладываем в стоимость. Мы на процессах не экономим — именно поэтому цена такая.';
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: good }], [{ touchpoint_number: 1, channel: 'Звонок' }]).some((x) => x.fixes.some((f) => /ПОЧЕМУ ИМЕННО ТАКАЯ ЦЕНА/.test(f))));
 });
+check('живой тест 20.11: ответ клиента со «?» внутри — новые факты (перестройка пути), а не вопрос советнику', () => {
+  process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost'; process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'x';
+  const { isNewFacts } = require('../engine/steps/composing');
+  assert.ok(isNewFacts('Отправил касание 1. Денис (20.11, WhatsApp): Руслан посмотрел. Говорит дорого — нам за 120 делают то же самое. И спрашивает: вы вообще для барбершопов делали?'));
+  assert.ok(!isNewFacts('что ответить на дорого?'));
+  assert.ok(!isNewFacts('касание 2 короче'));
+});
 console.log(`live1911: ${n} проверок пройдено`);
