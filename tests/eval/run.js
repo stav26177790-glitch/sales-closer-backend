@@ -516,6 +516,7 @@ async function rejudge(file) {
   fs.mkdirSync(OUT, { recursive: true });
   const results = [];
   for (const r of prev.results) {
+    if (ONLY && !ONLY.has(r.id)) continue; // пересуд части ситуаций (шаг 5, 20.11)
     const sit = SITUATIONS.find((x) => x.id === r.id);
     if (!sit || (!r.touches?.length && !r.first_round?.touches?.length)) { results.push(r); continue; }
     // Судья 17.11: при пересуде промежуточные ходы не передавались — «650 договорились» (ход 2 экзамена) судья не видел.
