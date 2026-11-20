@@ -65,4 +65,11 @@ check('письмо для пересылки ЛПР: «что входит в 2
   assert.ok(!r.some((x) => x.fixes.some((f) => /голосом \(правило/.test(f))));
   for (const b of ['По деньгам она как раз в ваши 30 тысяч.', 'Оплату разобьём на части — 70% сейчас, 30% перед отгрузкой.']) assert.ok(moneySentences(b).length, b);
 });
+check('кейс под тип бизнеса: тот же → смежный → нет (шаг 3, владелец 20.11)', () => {
+  const { caseNote } = require('../engine/cases');
+  assert.ok(/тип «кафе».*Капи/.test(caseNote('Кофейня «Зерно»')));
+  assert.ok(/СМЕЖНЫЙ.*KV/.test(caseNote('Барбершоп «Борода»')));
+  assert.ok(/СМЕЖНЫЙ.*Капи/.test(caseNote('Ресторан «Рёбра & Угли»')));
+  assert.equal(caseNote('ООО «Ромашка», вывеска'), null);
+});
 console.log(`live1911: ${n} проверок пройдено`);

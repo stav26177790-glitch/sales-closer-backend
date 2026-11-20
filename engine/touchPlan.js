@@ -230,9 +230,25 @@ function distrustedTools(source) {
   if (!m) return new Set();
   return new Set(TRUST_DISTRUST.map((re, i) => (re.test(m[0]) ? i : -1)).filter((i) => i >= 0));
 }
+// Шаг 3 (20.11): цель «Д» для менеджера требует кейс — но кейса такого / смежного типа у компании может не быть.
+// Тогда цель — другие инструменты доверия; если есть — писателю конкретный кейс из списка.
+const D_CASE_GOAL = 'Добавить доверия через кейс того же типа бизнеса из кейсов компании: название, что сделали, где посмотреть.';
+const D_NOCASE_GOAL = 'Добавить доверия: визуализация на фасаде, ОТК и договор или встреча на производстве — кейса такого или смежного типа бизнеса у компании нет, кейс не называть.';
+function adjustCaseGoals(steps, source) {
+  const note = require('./cases').caseNote(source);
+  for (const x of steps) {
+    if (!String(x.goal || '').includes(D_CASE_GOAL)) continue;
+    if (!note) x.goal = String(x.goal).split(D_CASE_GOAL).join(D_NOCASE_GOAL);
+    else if (!(x.how || []).some((h) => String(h).includes(note))) addHow(x, note);
+  }
+  return steps;
+}
 function diversifyTrust(steps, source) {
   let k = 0;
   const skip = distrustedTools(source);
+  // Шаг 3 дорожной карты (20.11): кейс — только реальный из списка компании, того же или смежного типа бизнеса.
+  const caseNote = require('./cases').caseNote(source);
+  if (!caseNote) skip.add(TRUST_TOOLS.length - 1);
   for (const x of steps) {
     if (x.conditional || x.production_meeting || x.lastChance) continue;
     if (x.criterion !== 'Д' && !(x.also || []).includes('Д')) continue;
@@ -243,6 +259,7 @@ function diversifyTrust(steps, source) {
     const i = free[k++ % free.length]; const tool = TRUST_TOOLS[i];
     x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия: ${TRUST_SHORT[i]}`;
     addHow(x, `Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`);
+    if (i === TRUST_TOOLS.length - 1 && caseNote) addHow(x, caseNote);
     x.trust_tool = tool;
     x.trust_idx = i;
   }
@@ -686,7 +703,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     addHow(lastChance, LAST_CHANCE_GOAL);
   }
 
-  steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(steps, context.source), context.dealSize), context.source), context.source);
+  steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(adjustCaseGoals(steps, context.source), context.source), context.dealSize), context.source), context.source);
   noteKrugIdea(steps, context.source, scores);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
