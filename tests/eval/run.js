@@ -276,8 +276,13 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   }
   // Прогон 19.11 (день): «деньги письменно» звонку (ситуация 6) и при `voice_available_now: false` (19, 24) — рубрика это
   // прямо разрешает, судья не слушал. Снимаем только такие «нет»; остальные его находки остаются.
+  // Шаг 7 (20.11): итоговое письмо после договорённости голосом — финальная сумма и условия письменно можно
+  // (владелец 19.11: «только итоговая сумма, без „уступка N%“»); судья ставил «деньги письменно».
+  const SUMMARY_RE = /резюмир|договор[её]нност|по итогам (наш|встреч|звонк|разговор|созвон)|как (и )?договорились|фиксирую (наши )?договор/i;
+  const summaryOk = (body) => SUMMARY_RE.test(body) && !/уступк|скидк|минус \d|−\s*\d/i.test(body);
   for (const t of v.touches || []) {
-    if (t.send !== 'нет' || !(t.issues || []).length) continue;
+    // Шаг 7: снимаем ложные «деньги письменно» и с «мелкой правки», а не только с «нет» (ситуации 1, 14, 18).
+    if (t.send === 'как есть' || !(t.issues || []).length) continue;
     const money = (i) => /деньги письменно/i.test(String(i.rule || ''));
     const ch = String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.channel || '');
     // Шаг 5 (20.11): цена / состав / условия из КП в письме для пересылки ЛПР — можно (владелец 20.11); судья не слушал.
@@ -287,7 +292,7 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
     // Разбор 20.11: приглашение обсудить цену голосом («в Zoom … и по цене сразу всё обсудим») — это и есть «деньги
     // голосом» (владелец 20.11: «там всё в Zoom или звонке проговаривается»); сроки и гарантия — не деньги.
     const inviteOk = !moneySentences(body).length && t.issues.filter(money).every((i) => /обсуд|проговор|zoom|звон|созвон|срок|рабочих дн|гаранти|отк/i.test(String(i.comment || '')));
-    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)) || lprOk || inviteOk)) continue;
+    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)) || lprOk || inviteOk || summaryOk(body))) continue;
     const rest = t.issues.filter((i) => !money(i));
     t.filtered = (t.filtered || []).concat(t.issues.filter(money));
     t.issues = rest;
@@ -300,7 +305,24 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   { const { moneySentences } = require(path.join(ROOT, 'engine', 'planChecks.js'));
     const lprOk = (c) => { const b = String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '');
       return /пересыл|переслать|перешл|передайте|для передачи|для (руководител|собственник|владельц|директор)/i.test(b) && !moneySentences(b, { forLpr: true }).length; };
-    v.critical = v.critical.filter((c) => !(isErr6(c) && lprOk(c))); }
+    const chOf = (c) => String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.channel || '');
+    const bodyOf = (c) => String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '');
+    // Шаг 7: цена в сценарии звонка — это голос; итог после договорённости голосом — финальная сумма письменно можно.
+    v.critical = v.critical.filter((c) => !(isErr6(c) && (lprOk(c) || /звон|zoom|зум|встреч/i.test(chOf(c)) || summaryOk(bodyOf(c))))); }
+  // Шаг 7 (20.11): «Что я сделал(а) не так?» — шаблон владельца для последнего шанса / проигранной сделки (рубрика п.3),
+  // судья снимал его как «самобичевание» (ситуация 15). Замечания, которые цепляются только за этот шаблон, снимаем.
+  { const OWNER_TPL_RE = /что я сделал[а]? не так|в открытую/i;
+    for (const t of v.touches || []) {
+      if (t.send === 'как есть' || !(t.issues || []).length) continue;
+      const tpl = (i) => !/грубая/i.test(String(i.rule || '')) && OWNER_TPL_RE.test(String(i.comment || '') + ' ' + String(i.quote || ''));
+      if (!t.issues.some(tpl)) continue;
+      const rest = t.issues.filter((i) => !tpl(i));
+      t.filtered = (t.filtered || []).concat(t.issues.filter(tpl));
+      t.issues = rest;
+      if (!rest.length) t.send = 'как есть';
+      else if (t.send === 'нет' && !rest.some((i) => /грубая/i.test(String(i.rule || '')))) t.send = 'с мелкой правкой';
+    }
+    v.critical = (v.critical || []).filter((c) => !OWNER_TPL_RE.test(String(c.quote || ''))); }
   for (const c of v.critical) {
     const t = (v.touches || []).find((x) => x.set === c.set && Number(x.n) === Number(c.n));
     if (t && t.send !== 'нет') { t.send = 'нет'; t.issues = [...(t.issues || []), { rule: `Грубая ошибка: ${c.error}`, comment: c.quote || '' }]; }

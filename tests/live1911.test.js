@@ -156,4 +156,13 @@ check('оптимизация 20.11: переписываются только �
     assert.ok(seen.touch_plan.length === 1 && seen.rewrite_only[0] === 2);
   });
 });
+check('шаг 7: повтор довода «срок держится / слот», «своими глазами», «в какую сумму» тому же человеку — на правку; итоговое письмо — не повтор', () => {
+  const { repeatedArguments, repeatedPhrases } = require('../engine/planChecks');
+  const m = (n, body) => ({ touchpoint_number: n, channel: 'WhatsApp', recipient: 'Марина', body });
+  const r = repeatedArguments([m(1, 'Марина, производство своё — слот под вашу дату держим.'), m(2, 'Марина, ставлю вас в ближайший слот.')]);
+  assert.ok(r.some((x) => /слот/.test(x.key) && x.touchpoint_number === 2));
+  assert.ok(repeatedArguments([m(1, 'Марина, приезжайте — своими глазами увидите.'), m(3, 'Марина, чтобы своими глазами увидели.')]).some((x) => x.key === 'своими глазами'));
+  assert.ok(!repeatedArguments([m(1, 'Оплата 70/30.'), m(4, 'Резюмирую наши договорённости: оплата 70/30.')]).length);
+  assert.ok(repeatedPhrases([m(1, 'А в какую сумму хотели бы уместиться?'), m(2, 'В какую сумму хотите уложиться?')]).some((x) => /сумму/.test(x.phrase)));
+});
 console.log(`live1911: ${n} проверок пройдено`);
