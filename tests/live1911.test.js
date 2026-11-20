@@ -72,4 +72,15 @@ check('кейс под тип бизнеса: тот же → смежный →
   assert.ok(/СМЕЖНЫЙ.*Капи/.test(caseNote('Ресторан «Рёбра & Угли»')));
   assert.equal(caseNote('ООО «Ромашка», вывеска'), null);
 });
+check('шаг 4: упрёк «так и не пришло / не добрались», три вопроса в мессенджере, ЛДПР без вопроса о влиянии', () => {
+  for (const b of ['Мы договаривались, что пришлёте фото фасада — оно так и не пришло.', 'Вы не добрались до нас?', 'Помните, Вика обещала прислать макет?'])
+    assert.ok(findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: b }]).length, b);
+  const q = findPlanIssues([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'На какой месяц ориентируетесь? На что смотрите? Как вам в целом?' }], [{ touchpoint_number: 1 }]);
+  assert.ok(q.some((x) => x.fixes.some((f) => /один главный вопрос/.test(f))));
+  const call = findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'На какой месяц? На что смотрите? Как вам в целом?' }], [{ touchpoint_number: 1, channel: 'Звонок' }]);
+  assert.ok(!call.some((x) => x.fixes.some((f) => /один главный вопрос/.test(f))));
+  const plan = [{ touchpoint_number: 1, ldpr: true }];
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Марина, добрый день! Решение по деньгам принимает Андрей?' }], plan).some((x) => x.fixes.some((f) => /ЛДПР/.test(f))));
+  assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Марина, а если бы выбирали вы — как вам наш вариант?' }], plan).some((x) => x.fixes.some((f) => /ЛДПР/.test(f))));
+});
 console.log(`live1911: ${n} проверок пройдено`);

@@ -728,7 +728,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // в первом касании контактному лицу выяснить его влияние (ЛДПР, файл 28).
   if (scores && criteriaToMove(scores).includes('ЛПР')) {
     const first = steps.find((x) => !x.conditional && !x.lastChance && !KRUG_RE.test(x.channel || ''));
-    if (first) addHow(first, LDPR_NOTE);
+    if (first) { addHow(first, LDPR_NOTE); first.ldpr = true; }
   }
 
   // Кружок — одному человеку (владелец, живой «Зерно 10»): «Андрей + Марина» → тот, с кем уже
