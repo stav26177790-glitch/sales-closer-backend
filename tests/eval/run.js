@@ -183,8 +183,38 @@ async function criticalScan(sit, label, today, conversation, x) {
   calls.push({ situation: sit.id, agent: 'judge_critical', model, usage: r.usage, ms: Date.now() - startedAt, cost: costOf(model, r.usage) });
   try { return (JSON.parse((text.match(/\{[\s\S]*\}/) || [text])[0]).critical || []).map((c) => ({ ...c, set: label })); } catch { return []; }
 }
+// Шаг 2б дорожной карты (20.11): перепроверка тех же текстов шага 2 дала совпадение лишь 75% оценок, «как есть»
+// 65% → 58% без смены текстов — шумит судья. Тройной судья: каждое касание оценивается JUDGE_VOTES раз, итог —
+// медиана (= большинство): «нет» — только если так решили минимум двое из трёх. То же для ожиданий и грубых ошибок.
+const JUDGE_VOTES = Math.max(1, Number(process.env.JUDGE_VOTES || 3));
+const SEND_RANK = { 'как есть': 0, 'с мелкой правкой': 1, 'нет': 2 };
+const MET_RANK = { 'да': 0, 'частично': 1, 'нет': 2 };
+const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2) + (xs.length % 2 ? 0 : 1)];
+function mergeVerdicts(vs) {
+  const ok = vs.filter((v) => v && !v.parse_error);
+  if (ok.length <= 1) return ok[0] || vs[0];
+  const base = JSON.parse(JSON.stringify(ok[0]));
+  const byKey = new Map();
+  for (const v of ok) for (const t of v.touches || []) { const k = `${t.set}|${t.n}`; byKey.set(k, [...(byKey.get(k) || []), t]); }
+  base.touches = [...byKey.values()].map((ts) => {
+    const m = median(ts.map((t) => SEND_RANK[t.send] ?? 1));
+    return { ...(ts.find((t) => (SEND_RANK[t.send] ?? 1) === m) || ts[0]), votes: ts.map((t) => t.send) };
+  });
+  base.expectations = (base.expectations || []).map((e, i) => {
+    const ms = ok.map((v) => (v.expectations || [])[i]).filter(Boolean);
+    const m = median(ms.map((x) => MET_RANK[String(x.met || '').toLowerCase()] ?? 1));
+    return ms.find((x) => (MET_RANK[String(x.met || '').toLowerCase()] ?? 1) === m) || e;
+  });
+  const ck = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
+  const count = new Map();
+  for (const v of ok) for (const k of new Set((v.critical || []).map(ck))) count.set(k, (count.get(k) || 0) + 1);
+  const seen = new Set();
+  base.critical = ok.flatMap((v) => v.critical || []).filter((c) => { const k = ck(c); if (count.get(k) * 2 <= ok.length || seen.has(k)) return false; seen.add(k); return true; });
+  base.judge_votes = ok.length;
+  return base;
+}
 async function judgeWithCritical(sit, sets, diagnosticSummary) {
-  const v = await judge(sit, sets, diagnosticSummary);
+  const v = mergeVerdicts(await Promise.all(Array.from({ length: JUDGE_VOTES }, () => judge(sit, sets, diagnosticSummary))));
   if (!v || v.parse_error) return v;
   const steps = sit.steps || [];
   const conv = (k) => [sit.first, ...steps.slice(0, k).map((x) => `--- ${x.label} (сегодня ${x.today}) ---\n${x.text}`)].join('\n\n');
