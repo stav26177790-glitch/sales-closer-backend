@@ -56,4 +56,13 @@ check('деньги письменно: каждое предложение, а 
   for (const b of ['Цена: 118 000 ₽ с монтажом, без доплат по ходу.', 'По стоимости удобнее голосом: созвонимся сегодня на 5 минут?'])
     assert.ok(!moneySentences(b).length, b);
 });
+check('письмо для пересылки ЛПР: «что входит в 290 000 ₽», цена, 70/30 — можно; торг там — нет (владелец 20.11)', () => {
+  const { moneySentences } = require('../engine/planChecks');
+  const page = 'Что входит в 290 000 ₽: буквы, монтаж, согласование. Оплата 70/30.';
+  assert.ok(moneySentences(page).length && !moneySentences(page, { forLpr: true }).length);
+  assert.ok(moneySentences('Если дорого — подберём вариант под ваш бюджет.', { forLpr: true }).length);
+  const r = findPlanIssues([{ touchpoint_number: 1, channel: 'Email', body: 'Сергей, это текст для пересылки владельцу. ' + page }], [{ touchpoint_number: 1, channel: 'Email' }]);
+  assert.ok(!r.some((x) => x.fixes.some((f) => /голосом \(правило/.test(f))));
+  for (const b of ['По деньгам она как раз в ваши 30 тысяч.', 'Оплату разобьём на части — 70% сейчас, 30% перед отгрузкой.']) assert.ok(moneySentences(b).length, b);
+});
 console.log(`live1911: ${n} проверок пройдено`);
