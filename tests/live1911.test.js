@@ -127,4 +127,11 @@ check('живой тест 20.11: ответ клиента со «?» внут�
   assert.ok(!isNewFacts('что ответить на дорого?'));
   assert.ok(!isNewFacts('касание 2 короче'));
 });
+check('аудит 20.11: [Имя менеджера] — подставляется кодом из «Я — Дмитрий»', () => {
+  const { fillManagerName } = require('../engine/autoCompose');
+  const o = { messages: [{ body: 'Андрей, добрый день! Это [Имя менеджера] из «Яркой Рекламы».' }] };
+  assert.equal(fillManagerName(o, 'Барбершоп. Я — Дмитрий, менеджер.').messages[0].body, 'Андрей, добрый день! Это Дмитрий из «Яркой Рекламы».');
+  const k = { messages: [{ body: 'Это [Имя менеджера].' }] };
+  assert.equal(fillManagerName(k, 'без имени').messages[0].body, 'Это [Имя менеджера].');
+});
 console.log(`live1911: ${n} проверок пройдено`);

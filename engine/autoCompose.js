@@ -64,6 +64,16 @@ function spokenPart(m) {
     .replace(/\*\*Сообщение сразу[^\n]*\n?(?:[^\n]+\n?)*?(?=\n\s*\n|$)/i, '')
     .trim();
 }
+// Аудит «глупых ошибок» 20.11: «Это [Имя менеджера] из «Яркой Рекламы»» — в 258 из 1096 касаний прогонов.
+// Имя менеджера есть в материалах («Я — Дмитрий, менеджер») — подставляем кодом, без круга правок.
+const MANAGER_NAME_RE = /(?:^|[\s.(])я\s*[—–-]\s*([А-ЯЁ][а-яё]{2,15})(?=[\s,.)])|меня зовут\s+([А-ЯЁ][а-яё]{2,15})|менеджер[а]?\s*[—:–-]\s*([А-ЯЁ][а-яё]{2,15})/i;
+function fillManagerName(out, sourceText) {
+  const m = String(sourceText || '').match(MANAGER_NAME_RE);
+  const name = m && (m[1] || m[2] || m[3]);
+  if (!name) return out;
+  for (const x of messagesOf(out)) if (x && typeof x.body === 'string') x.body = x.body.replace(/\[(имя менеджера|имя|ваше имя|Имя менеджера|Имя)\]/g, name);
+  return out;
+}
 function codeChecks(composerOutput, timeline, plan, sourceText, sentHistory = []) {
   const msgs = messagesOf(composerOutput);
   const r = {
@@ -291,6 +301,7 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
   let reviewOnly = null;
   // Владелец 17.11 (п. 3 «как сделать 10»): касание, которое редактор не исправил дважды, — переписать заново.
   const failCount = {};
+  let prevSig = null;
   if (startWith) composerOutput = startWith;
   while (rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
     // Доработка по замечаниям проверки — сначала точечно редактором.
@@ -332,6 +343,7 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
         : fresh;
     }
     skipCompose = false;
+    fillManagerName(composerOutput, sourceTextOf(baseInput));
     if (sentHistory.length && composerOutput && typeof composerOutput === 'object') composerOutput._sent_history = sentHistory;
     cur = { ...cur, last_composer_output: composerOutput };
 
@@ -342,7 +354,14 @@ async function composeCore(baseInput, deal, { feedback, channelHistory, startWit
 
     const code = codeChecks(composerOutput, timeline, deal.last_strategy_output?.touch_plan, sourceTextOf(baseInput), sentHistory);
     if (code.verdict !== 'ОДОБРЕНО') { trace.push(`код вернул ${bad(code)}`); for (const m of code.messages_reviewed) if (m.verdict !== 'ОДОБРЕНО') failCount[m.touchpoint_number] = (failCount[m.touchpoint_number] || 0) + 1; }
-    if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS) {
+    // Оптимизация 20.11 (разбор 112 наборов касаний): в 83 код дважды подряд возвращал те же касания с теми же
+    // замечаниями — дальше переписывание почти не помогало (исправилось 11 из 83), а стоило ещё 99 кругов
+    // писателя (≈ 30–40 с и деньги на круг). Нет прогресса — дальше не крутим: остаток уходит критику и в разбор.
+    const sig = code.verdict === 'ОДОБРЕНО' ? '' : code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => `${m.touchpoint_number}:${String(m.fix_instructions || (m.failed_criteria || []).join(',')).split(/\n|(?<=\.)\s/).map((x) => x.slice(0, 40)).sort().join('|')}`).sort().join(';');
+    const noProgress = sig && sig === prevSig;
+    prevSig = sig;
+    if (noProgress) trace.push('без прогресса — дальше не переписываю');
+    if (code.verdict !== 'ОДОБРЕНО' && rounds < CONFIG.AUTO_COMPOSER_ROUNDS && !noProgress) {
       console.log(`[autoCompose] круг ${rounds}: проверки кода вернули касания ${code.messages_reviewed.filter((m) => m.verdict !== 'ОДОБРЕНО').map((m) => m.touchpoint_number).join(', ')}`);
       reviewerOutput = code;
       fb = code;
@@ -543,4 +562,4 @@ function done(composerOutput, reviewerOutput, approved, rounds, reviews, extra =
   return { composer_output: out, reviewer_output: reviewerOutput, approved, rounds, reviews };
 }
 
-module.exports = { runCritic, criticVerdict, composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, applyCodeOwnership, isForwardMaterial };
+module.exports = { fillManagerName, runCritic, criticVerdict, composeUntilReady, codeChecks, channelKey, messagesOf, applySeverity, applyCodeOwnership, isForwardMaterial };
