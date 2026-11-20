@@ -371,6 +371,42 @@ function projectedSize(regularSteps) {
 
 // Непокрытые критерии: сначала — шагам без критерия, потом новыми шагами (до 7 касаний),
 // а если план уже полный — дополнительной целью к подходящему шагу.
+// ── Деньги — в голос на уровне ПЛАНА (корень «деньги письменно», разбор 20.11) ──
+// Разбор 31 «нет» за деньги (прогоны 19–20.11): в 17 случаях деньги в письменное касание ставил сам план —
+// код добавлял касание ФВ каналом WhatsApp, приклеивал «Заодно (ФВ…)» к письменному касанию, стратег писал в цель
+// мессенджера «бюджет, варианты по цене, уступка». Писатель честно выполнял цель — проверка потом ругала текст.
+// Здесь, пока голос доступен: касание ФВ — звонком; «Заодно (ФВ)» — переносится в ближайший голосовой шаг;
+// денежные части цели письменного касания — убираются, вместо них — приглашение на звонок / презентацию решения.
+// Страница / письмо для пересылки ЛПР — исключение (владелец 20.11): цена, состав и условия КП там можно, торг — нет.
+const MONEY_GOAL_RE = /бюджет|цен[аыуеой](?![а-яё])|цены|стоимост|уступк|скидк|оплат|70\s*\/\s*30|дорог|торг|сумм|₽|финансов/i;
+const LPR_PAGE_RE = /страниц|документ|для пересылки|пересла|материал для|пакет для|для передачи|инструмент для передачи/i;
+const MONEY_WRITTEN_HOW = 'О деньгах в этом касании не писать (голос доступен): ни бюджета, ни «дорого», ни вариантов по цене, ни условий оплаты, ни «по цене обсудим». Если тема денег назрела — пригласить на презентацию решения в Zoom или звонок с днём и временем. Цена из КП как факт — можно.';
+const LPR_PAGE_HOW = 'Страница для пересылки ЛПР: цена, состав и условия из КП — можно (это КП); торга, скидки, вариантов под бюджет и вопросов о бюджете — нет.';
+function moneyToVoice(steps, noVoice) {
+  if (noVoice) return steps;
+  const written = (x) => !VOICE_STEP_RE.test(String(x.channel || ''));
+  for (const x of steps) {
+    if (!written(x)) continue;
+    if (LPR_PAGE_RE.test(String(x.goal || ''))) { addHow(x, LPR_PAGE_HOW); continue; }
+    if (x.criterion === 'ФВ') { x.channel = 'Звонок'; x.kind = 'экспертное'; continue; }
+    let moved = false;
+    if ((x.also || []).includes('ФВ')) {
+      const host = steps.find((y) => y !== x && !written(y) && !y.conditional);
+      x.goal = String(x.goal || '').replace(/\s*Заодно \(ФВ[^)]*\):[\s\S]*?(?=\s*Заодно \(|$)/, '').trim();
+      x.also = x.also.filter((c) => c !== 'ФВ');
+      if (host && !String(host.goal || '').includes('Заодно (ФВ')) { host.also = [...(host.also || []), 'ФВ']; host.goal = [host.goal, `Заодно (${CRITERIA.ФВ.label}): ${CRITERIA.ФВ.goal}`].filter(Boolean).join(' '); }
+      moved = true;
+    }
+    if (MONEY_GOAL_RE.test(String(x.goal || ''))) {
+      const parts = String(x.goal).split(/(?<=[.;:])\s+|,\s+(?=[а-яё])/);
+      const keep = parts.filter((p) => !MONEY_GOAL_RE.test(p));
+      x.goal = (keep.join(' ').trim() || 'Пригласить на презентацию решения в Zoom или звонок — день и время').replace(/[,:;]\s*$/, '');
+      moved = true;
+    }
+    if (moved) addHow(x, MONEY_WRITTEN_HOW);
+  }
+  return steps;
+}
 function coverCriteria(steps, scores) {
   const need = criteriaToMove(scores);
   // Условные касания (звонок ЛПР «если даст контакт», текст «если не организовала») тоже
@@ -709,6 +745,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   noteKrugIdea(steps, context.source, scores);
   // Сценарии владельца для критичных ситуаций (торг, «дорого», «просто цену», «подумает → тишина», «хочет
   // посмотреть») — карточка в how касания-ответа, ход фиксирован (владелец 17.11, п. 2 «как сделать 10»).
+  moneyToVoice(steps, require('./voice').voiceBlocked(context?.source));
   require('./scenarios').attachScenarios(steps, context.source, addHow, { step: stepMode, voiceOk: !require('./voice').voiceBlocked(context?.source), trustOk: /подтвержд/i.test(String(scores?.trust?.status || '')) });
   const allGreen = ['financial', 'need', 'authority', 'trust', 'urgency'].every((k) => /подтвержд/i.test(String(scores?.[k]?.status || '')));
   noteSoprano(steps, context.soprano, context.source, { closing: allGreen || steps.some((x) => (x.scenarios || []).includes('torg')) });
@@ -831,4 +868,4 @@ function pinToPlan(composerOutput, plan) {
   return { ...composerOutput, messages };
 }
 
-module.exports = { JUST_PRICE_RE, contextHints, NOT_MOSCOW_RE, buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };
+module.exports = { moneyToVoice, JUST_PRICE_RE, contextHints, NOT_MOSCOW_RE, buildTouchPlan, formatTouchPlan, pinToPlan, factsFor, criteriaToMove, criterionOf, CRITERIA };

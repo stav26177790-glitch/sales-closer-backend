@@ -283,8 +283,11 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
     // Шаг 5 (20.11): цена / состав / условия из КП в письме для пересылки ЛПР — можно (владелец 20.11); судья не слушал.
     const body = String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.body || '');
     const { moneySentences } = require(path.join(ROOT, 'engine', 'planChecks.js'));
-    const lprOk = /пересыл|переслать|перешл|передайте|для (руководител|собственник|владельц|директор)/i.test(body) && !moneySentences(body, { forLpr: true }).length;
-    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)) || lprOk)) continue;
+    const lprOk = /пересыл|переслать|перешл|передайте|для передачи|для (руководител|собственник|владельц|директор)/i.test(body) && !moneySentences(body, { forLpr: true }).length;
+    // Разбор 20.11: приглашение обсудить цену голосом («в Zoom … и по цене сразу всё обсудим») — это и есть «деньги
+    // голосом» (владелец 20.11: «там всё в Zoom или звонке проговаривается»); сроки и гарантия — не деньги.
+    const inviteOk = !moneySentences(body).length && t.issues.filter(money).every((i) => /обсуд|проговор|zoom|звон|созвон|срок|рабочих дн|гаранти|отк/i.test(String(i.comment || '')));
+    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)) || lprOk || inviteOk)) continue;
     const rest = t.issues.filter((i) => !money(i));
     t.filtered = (t.filtered || []).concat(t.issues.filter(money));
     t.issues = rest;
@@ -296,7 +299,7 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   // Шаг 5 (20.11): «деньги письменно» на письме для пересылки ЛПР с ценой / составом КП — можно (владелец 20.11).
   { const { moneySentences } = require(path.join(ROOT, 'engine', 'planChecks.js'));
     const lprOk = (c) => { const b = String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '');
-      return /пересыл|переслать|перешл|передайте|для (руководител|собственник|владельц|директор)/i.test(b) && !moneySentences(b, { forLpr: true }).length; };
+      return /пересыл|переслать|перешл|передайте|для передачи|для (руководител|собственник|владельц|директор)/i.test(b) && !moneySentences(b, { forLpr: true }).length; };
     v.critical = v.critical.filter((c) => !(isErr6(c) && lprOk(c))); }
   for (const c of v.critical) {
     const t = (v.touches || []).find((x) => x.set === c.set && Number(x.n) === Number(c.n));

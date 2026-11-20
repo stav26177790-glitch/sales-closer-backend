@@ -96,4 +96,19 @@ check('шаг 5а: образцы — подсказка писателю; до�
   assert.equal(copiedSample('Ольга, добрый день! Решила финально набрать — скажите как есть: проект актуален? Можете сказать в открытую, что я сделала не так? Мне правда важно — может, мы что-то упустили.'), null);
   assert.equal(copiedSample('Вечером клиенты будут видеть вас с дороги и находить въезд — вывеска работает на вас каждый день.'), 5);
 });
+check('корень «деньги письменно» (разбор 20.11): план не ставит деньги в письменное касание при доступном голосе', () => {
+  const { moneyToVoice } = require('../engine/touchPlan');
+  const steps = [
+    { channel: 'WhatsApp', criterion: 'ФВ', goal: 'Снять вопрос денег' },
+    { channel: 'Мессенджер', goal: 'Закрыть пробелы СОПРАНО: сроки, бюджет, критерии выбора', also: [] },
+    { channel: 'Email', goal: 'Дать Алине готовую страницу для владельца: результат, варианты, цена, сроки' },
+    { channel: 'Звонок', goal: 'Договориться о замере' }];
+  moneyToVoice(steps, false);
+  assert.equal(steps[0].channel, 'Звонок');
+  assert.ok(!/бюджет/.test(steps[1].goal) && steps[1].how.some((h) => /О деньгах в этом касании не писать/.test(h)));
+  assert.ok(/цена/.test(steps[2].goal) && steps[2].how.some((h) => /Страница для пересылки ЛПР/.test(h)));
+  const blocked = [{ channel: 'WhatsApp', criterion: 'ФВ', goal: 'Снять вопрос денег' }];
+  moneyToVoice(blocked, true);
+  assert.equal(blocked[0].channel, 'WhatsApp');
+});
 console.log(`live1911: ${n} проверок пройдено`);
