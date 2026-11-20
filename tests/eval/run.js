@@ -218,9 +218,19 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   if (!v || v.parse_error) return v;
   const steps = sit.steps || [];
   const conv = (k) => [sit.first, ...steps.slice(0, k).map((x) => `--- ${x.label} (сегодня ${x.today}) ---\n${x.text}`)].join('\n\n');
-  const jobs = [criticalScan(sit, 'before_reply', process.env.KLOUZER_TODAY, conv(0), sets.before)];
-  (sets.stages || []).forEach((x, i) => jobs.push(criticalScan(sit, `intermediate_stages[${i}]`, x.today, conv(i + 1), x)));
-  if (sets.after && steps.length) jobs.push(criticalScan(sit, 'after_reply', steps.at(-1).today, conv(steps.length), sets.after));
+  // Шаг 5 (20.11): судья грубых ошибок звучал один раз, а любая его находка ставит касанию «нет» — тройной основной
+  // судья не спасал от его шума. Тоже JUDGE_VOTES раз: находка остаётся, если её дали больше половины прогонов.
+  const voteScan = async (...a) => {
+    const runs = await Promise.all(Array.from({ length: JUDGE_VOTES }, () => criticalScan(...a)));
+    const k = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
+    const cnt = new Map();
+    for (const r of runs) for (const kk of new Set((r || []).map(k))) cnt.set(kk, (cnt.get(kk) || 0) + 1);
+    const seen = new Set();
+    return runs.flat().filter((c) => c && cnt.get(k(c)) * 2 > runs.length && !seen.has(k(c)) && seen.add(k(c)));
+  };
+  const jobs = [voteScan(sit, 'before_reply', process.env.KLOUZER_TODAY, conv(0), sets.before)];
+  (sets.stages || []).forEach((x, i) => jobs.push(voteScan(sit, `intermediate_stages[${i}]`, x.today, conv(i + 1), x)));
+  if (sets.after && steps.length) jobs.push(voteScan(sit, 'after_reply', steps.at(-1).today, conv(steps.length), sets.after));
   // Ошибка 2 — только обещание к открытию / к дате; честная дата готовности без «к открытию» — не ошибка (прогон 4:
   // судья ставил ⛔ на «при старте сегодня — готово 16–17 декабря»). Код отсеивает такие находки.
   const isErr2 = (c) => /^\s*2\b|обещани[ея] срока/i.test(String(c.error || ''));
@@ -241,6 +251,10 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   v.critical = (v.critical || []).filter(keep2).filter(keepAll);
   v.critical = (v.critical || []).filter(keep6);
   v.critical = (v.critical || []).filter(keep);
+  // Шаг 5 (20.11): «Решил записать короткое видео … у меня появилась идея, уверен, она вас точно заинтересует!» — образец
+  // владельца для кружка-интриги (touchPlan), а судья грубых ошибок ставил «неживая речь».
+  const OWNER_KRUG_RE = /появилась идея,? уверен[а]?,? (она )?вас точно заинтересует|решил[а]? записать (короткое )?видео/i;
+  v.critical = (v.critical || []).filter((c) => !(/неживая речь|^\s*10\b/i.test(String(c.error || '')) && OWNER_KRUG_RE.test(String(c.quote || ''))));
   // Полный прогон 19.11 (ситуация 19): основной судья ставил «нет» по «честности сроков» на «готова 7–8 декабря»
   // при «с запасом» и на «готова 15–16 декабря» при «не успеваем» — это и есть расчётная дата (рубрика: не ошибка).
   // Снимаем такие «нет», только если в тексте касания нет обещания к открытию / к дате клиента.
@@ -266,7 +280,11 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
     if (t.send !== 'нет' || !(t.issues || []).length) continue;
     const money = (i) => /деньги письменно/i.test(String(i.rule || ''));
     const ch = String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.channel || '');
-    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)))) continue;
+    // Шаг 5 (20.11): цена / состав / условия из КП в письме для пересылки ЛПР — можно (владелец 20.11); судья не слушал.
+    const body = String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.body || '');
+    const { moneySentences } = require(path.join(ROOT, 'engine', 'planChecks.js'));
+    const lprOk = /пересыл|переслать|перешл|передайте|для (руководител|собственник|владельц|директор)/i.test(body) && !moneySentences(body, { forLpr: true }).length;
+    if (!t.issues.some(money) || !(/звон|zoom|зум|встреч/i.test(ch) || voiceBlocked(convOf(t.set)) || lprOk)) continue;
     const rest = t.issues.filter((i) => !money(i));
     t.filtered = (t.filtered || []).concat(t.issues.filter(money));
     t.issues = rest;
@@ -275,6 +293,11 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
   const key = (c) => `${c.set}|${c.n}|${String(c.error || '').match(/\d+/)?.[0] || c.error}`;
   const have = new Set((v.critical || []).map(key));
   v.critical = [...(v.critical || []), ...extra.filter((c) => !have.has(key(c)))];
+  // Шаг 5 (20.11): «деньги письменно» на письме для пересылки ЛПР с ценой / составом КП — можно (владелец 20.11).
+  { const { moneySentences } = require(path.join(ROOT, 'engine', 'planChecks.js'));
+    const lprOk = (c) => { const b = String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '');
+      return /пересыл|переслать|перешл|передайте|для (руководител|собственник|владельц|директор)/i.test(b) && !moneySentences(b, { forLpr: true }).length; };
+    v.critical = v.critical.filter((c) => !(isErr6(c) && lprOk(c))); }
   for (const c of v.critical) {
     const t = (v.touches || []).find((x) => x.set === c.set && Number(x.n) === Number(c.n));
     if (t && t.send !== 'нет') { t.send = 'нет'; t.issues = [...(t.issues || []), { rule: `Грубая ошибка: ${c.error}`, comment: c.quote || '' }]; }

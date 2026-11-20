@@ -83,4 +83,10 @@ check('шаг 4: упрёк «так и не пришло / не добрали�
   assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Марина, добрый день! Решение по деньгам принимает Андрей?' }], plan).some((x) => x.fixes.some((f) => /ЛДПР/.test(f))));
   assert.ok(!findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Марина, а если бы выбирали вы — как вам наш вариант?' }], plan).some((x) => x.fixes.some((f) => /ЛДПР/.test(f))));
 });
+check('шаг 5: догадки о составе чужого КП, «делали короб для барбершопа», «я покажу производство»', () => {
+  for (const b of ['В КП за 105 000 ₽, судя по составу, пластиковый борт.', 'Диоды там, скорее всего, бюджетные.', 'Делали световой короб для барбершопа — пришлю фото.'])
+    assert.ok(findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: b }]).length, b);
+  assert.ok(!findBannedPhrases([{ touchpoint_number: 1, channel: 'WhatsApp', body: 'Делали вывеску для «Капи» — это кафе, тоже в ТЦ.' }]).length);
+  assert.ok(findPlanIssues([{ touchpoint_number: 1, channel: 'Звонок', body: 'Приезжайте во вторник — я сама покажу производство.' }], [{ touchpoint_number: 1, channel: 'Звонок' }]).some((x) => x.fixes.some((f) => /заведующ/.test(f))));
+});
 console.log(`live1911: ${n} проверок пройдено`);
