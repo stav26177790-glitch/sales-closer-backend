@@ -199,6 +199,7 @@ function noteProductionMeetings(steps, dealSize) {
     // Живой «Сулико» 17.11: в «последнем шансе» звали на производство, а кто проводит — не сказано → и там тоже.
     if (!PRODUCTION_RE.test(t) || !INVITE_RE.test(t)) continue;
     if (!/заведующ/i.test(x.goal || '')) addHow(x, PRODUCTION_WHO_NOTE);
+    { const n = require('./samples').sampleNote('production'); if (n) addHow(x, n); }
     if (big) addHow(x, PRODUCTION_BIG_NOTE);
   }
   return steps;
@@ -259,7 +260,7 @@ function diversifyTrust(steps, source) {
     const i = free[k++ % free.length]; const tool = TRUST_TOOLS[i];
     x.goal = `${x.goal ? `${x.goal}. ` : ''}Инструмент доверия: ${TRUST_SHORT[i]}`;
     addHow(x, `Инструмент доверия этого касания: ${tool}. Доводы других касаний не повторять.`);
-    if (i === TRUST_TOOLS.length - 1 && caseNote) addHow(x, caseNote);
+    if (i === TRUST_TOOLS.length - 1 && caseNote) { addHow(x, caseNote); const n = require('./samples').sampleNote('case'); if (n) addHow(x, n); }
     x.trust_tool = tool;
     x.trust_idx = i;
   }
@@ -701,6 +702,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
     lastChance.also = [];
     lastChance.goal = LAST_CHANCE_SHORT;
     addHow(lastChance, LAST_CHANCE_GOAL);
+    { const n = require('./samples').sampleNote('last_chance', { voice: /звон|zoom|зум/i.test(String(lastChance.channel || '')) }); if (n) addHow(lastChance, n); }
   }
 
   steps = noteFollowUp(noteZoom(noteProductionMeetings(diversifyTrust(adjustCaseGoals(steps, context.source), context.source), context.dealSize), context.source), context.source);
@@ -728,7 +730,7 @@ function buildTouchPlan(strategyOutput, timeline, today, scores, context = {}) {
   // в первом касании контактному лицу выяснить его влияние (ЛДПР, файл 28).
   if (scores && criteriaToMove(scores).includes('ЛПР')) {
     const first = steps.find((x) => !x.conditional && !x.lastChance && !KRUG_RE.test(x.channel || ''));
-    if (first) { addHow(first, LDPR_NOTE); first.ldpr = true; }
+    if (first) { addHow(first, LDPR_NOTE); first.ldpr = true; const n = require('./samples').sampleNote('ldpr'); if (n) addHow(first, n); }
   }
 
   // Кружок — одному человеку (владелец, живой «Зерно 10»): «Андрей + Марина» → тот, с кем уже

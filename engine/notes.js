@@ -33,6 +33,8 @@ const KINDS = [
   { key: 'trust_tool', re: /^Инструмент доверия этого касания/, prio: 4 },
   { key: 'argument', re: /^ДОВОД ЭТОГО КАСАНИЯ/, prio: 7, keep: true },
   { key: 'ldpr', re: /^ЛДПР/, prio: 3 },
+  // Шаг 5а (20.11): образцы одобренных касаний — ориентир; при перегрузе уступают обязательным подсказкам.
+  { key: 'sample', re: /^ОБРАЗЕЦ одобренного/, prio: 2 },
   { key: 'soprano', re: /^СОПРАНО/, prio: 2 },
   { key: 'pre', re: /^ПРЕДВОСХИЩЕНИЕ/, prio: 1 }
 ];
@@ -54,7 +56,7 @@ function stripProvenance(text) {
 // Дубли и противоречия: подсказку убираем, если в касании уже есть то, что её перекрывает.
 const DROP_IF = {
   // Кто проводит встречу на производстве — уже сказано в карточке / цели / идее кружка.
-  production_who: (others) => others.some((o) => /заведующ/i.test(o.text)),
+  production_who: (others) => others.some((o) => o.key !== 'sample' && /заведующ/i.test(o.text)), // образец не заменяет правило
   // Инструмент доверия в касании-отстройке или приглашении на производство — второй довод, спорит с «показать делом».
   trust_tool: (others, step) => others.some((o) => o.key === 'production_goal' || o.key === 'krug_idea')
     || (step.scenarios || []).some((s) => s === 'why_us' || s === 'negative' || s === 'want_see')
