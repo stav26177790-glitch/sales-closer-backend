@@ -309,6 +309,21 @@ async function judgeWithCritical(sit, sets, diagnosticSummary) {
     const bodyOf = (c) => String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '');
     // Шаг 7: цена в сценарии звонка — это голос; итог после договорённости голосом — финальная сумма письменно можно.
     v.critical = v.critical.filter((c) => !(isErr6(c) && (lprOk(c) || /звон|zoom|зум|встреч/i.test(chOf(c)) || summaryOk(bodyOf(c))))); }
+  // Шаг 7, контроль 2 (21.11): «цена клиента ниже КП подана как согласованная» / «уступка без сопротивления» на приёме
+  // владельца «полномочий нет, попробую согласовать — если получится, заключаемся?» (ситуация 18) и на доводе
+  // «за 70 обычно экономят» (25) — 4 ложных «нет». Снимаем, если в тексте нет согласия на цифру клиента.
+  { const ACCEPT_NUM_RE = /по цене (мы )?(договорились|сошлись)|договорились на \d|(принима|соглас(ен|на|ны))[а-яё]* (на |ваш[а-яё]* )?\d|попробую (выбить|согласовать|сделать) \d|сделаем за \d|наши \d{2,3}[^.!?\n]{0,15}уже уступк|готов[аы]? (его |это |ваше )?(условие |цену )?приня|принимаем (ваш|услови|цен)/i;
+    const priceRule = (i) => /ниже КП|уступка без сопротивления|^\s*Грубая ошибка: 1\b/i.test(String(i.rule || ''));
+    const bodyOfT = (t) => String(setTouches(t.set).find((x) => Number(x.touchpoint_number) === Number(t.n))?.body || '');
+    for (const t of v.touches || []) {
+      if (t.send === 'как есть' || !(t.issues || []).some(priceRule) || ACCEPT_NUM_RE.test(bodyOfT(t))) continue;
+      const rest = t.issues.filter((i) => !priceRule(i));
+      t.filtered = (t.filtered || []).concat(t.issues.filter(priceRule));
+      t.issues = rest;
+      if (!rest.length) t.send = 'как есть';
+      else if (t.send === 'нет' && !rest.some((i) => /грубая/i.test(String(i.rule || '')))) t.send = 'с мелкой правкой';
+    }
+    v.critical = (v.critical || []).filter((c) => !(/^\s*1\b|ниже КП/i.test(String(c.error || '')) && !ACCEPT_NUM_RE.test(String(setTouches(c.set).find((x) => Number(x.touchpoint_number) === Number(c.n))?.body || '')))); }
   // Шаг 7 (20.11): «Что я сделал(а) не так?» — шаблон владельца для последнего шанса / проигранной сделки (рубрика п.3),
   // судья снимал его как «самобичевание» (ситуация 15). Замечания, которые цепляются только за этот шаблон, снимаем.
   { const OWNER_TPL_RE = /что я сделал[а]? не так|в открытую/i;
